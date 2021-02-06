@@ -67,6 +67,3 @@ jobs:
     # Perform the build.
     - name: Build
       run: cmake --build build
-    # Run the unit test(s).
-    - name: Test
-      run: cmake --build build --target test -- ARGS="--output-on-failure"
