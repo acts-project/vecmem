@@ -30,16 +30,19 @@ namespace vecmem { namespace cuda {
    direct_memory_manager::~direct_memory_manager() {
 
       // Free all the (still available) allocated memory.
+      // Ignore the errors from these calls. The destruction of this object
+      // may happen after the CUDA runtime has already "shut down". Leading
+      // to a (silent) failure from these calls.
       if( m_type == memory_type::host ) {
          for( device_memory& dev : m_memory ) {
             for( void* ptr : dev.m_ptrs ) {
-               VECMEM_CUDA_ERROR_CHECK( cudaFree( ptr ) );
+               VECMEM_CUDA_ERROR_IGNORE( cudaFree( ptr ) );
             }
          }
       } else {
          for( device_memory& dev : m_memory ) {
             for( void* ptr : dev.m_ptrs ) {
-               VECMEM_CUDA_ERROR_CHECK( cudaFreeHost( ptr ) );
+               VECMEM_CUDA_ERROR_IGNORE( cudaFreeHost( ptr ) );
             }
          }
       }
@@ -148,6 +151,11 @@ namespace vecmem { namespace cuda {
       }
       mem.m_ptrs.clear();
       return;
+   }
+
+   bool direct_memory_manager::is_host_accessible() const {
+
+      return ( m_type != memory_type::device );
    }
 
    void direct_memory_manager::get_device( int& device ) {

@@ -32,10 +32,13 @@ namespace vecmem { namespace cuda {
          if( mem.m_ptr == nullptr ) {
             continue;
          }
+         // Ignore the errors from these calls. The destruction of this object
+         // may happen after the CUDA runtime has already "shut down". Leading
+         // to a (silent) failure from these calls.
          if( m_type == memory_type::host ) {
-            VECMEM_CUDA_ERROR_CHECK( cudaFreeHost( mem.m_ptr ) );
+            VECMEM_CUDA_ERROR_IGNORE( cudaFreeHost( mem.m_ptr ) );
          } else {
-            VECMEM_CUDA_ERROR_CHECK( cudaFree( mem.m_ptr ) );
+            VECMEM_CUDA_ERROR_IGNORE( cudaFree( mem.m_ptr ) );
          }
       }
    }
