@@ -1,4 +1,4 @@
-# VecMem, part of the ACTS project (R&D line)
+# VecMem project, part of the ACTS project (R&D line)
 #
 # (c) 2021 CERN for the benefit of the ACTS project
 #
@@ -27,11 +27,15 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}" CACHE PATH
    "Directory for the built static libraries" )
 
-# Include the VecMem helper CMake functions.
+# Include the VecMem CMake code.
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-functions.cmake" )
+include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-options.cmake" )
 
 # Add the library sub-directories.
 add_subdirectory( core )
+if( VECMEM_BUILD_CUDA_LIBRARY )
+   add_subdirectory( cuda )
+endif()
 
 # Set up the test(s).
 include( CTest )
