@@ -13,10 +13,10 @@ on: [ push ]
 # All the different build/test jobs.
 jobs:
 
-  # Native build job on an Ubuntu system
+  # Native build job on an Ubuntu system.
   ubuntu-native:
 
-    # The name/type of the system to run on.
+    # The system to run on.
     runs-on: ubuntu-latest
 
     # The different build modes to test.
@@ -32,17 +32,41 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{github.workspace}}/build
     # Run the CMake configuration.
-    - name: Configure CMake
-      shell: bash
+    - name: Configure
       working-directory: ${{github.workspace}}/build
       run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} $GITHUB_WORKSPACE
     # Perform the build.
     - name: Build
       working-directory: ${{github.workspace}}/build
-      shell: bash
       run: cmake --build .
     # Run the unit test(s).
     - name: Test
       working-directory: ${{github.workspace}}/build
-      shell: bash
       run: ctest --output-on-failure
+
+  # Build inside of a CUDA Docker image.
+  cuda:
+
+    # The system to run on.
+    runs-on: ubuntu-latest
+    container: ghcr.io/acts-project/ubuntu1804_cuda:v9
+
+    # The different build modes to test.
+    strategy:
+      matrix:
+        BUILD_TYPE: [ "Release", "Debug" ]
+
+    # The build/test steps to execute.
+    steps:
+    # Use a standard checkout of the code.
+    - uses: actions/checkout@v2
+    # Run the CMake configuration.
+    - name: Configure
+      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }}
+                 -S $GITHUB_WORKSPACE -B build
+    # Perform the build.
+    - name: Build
+      run: cmake --build build
+    # Run the unit test(s).
+    - name: Test
+      run: cmake --build build --target test -- ARGS="--output-on-failure"
