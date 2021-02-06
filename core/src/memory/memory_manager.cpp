@@ -8,6 +8,7 @@
 // Local include(s).
 #include "vecmem/memory/memory_manager.hpp"
 #include "vecmem/memory/memory_manager_interface.hpp"
+#include "vecmem/memory/host_memory_manager.hpp"
 
 namespace vecmem {
 
@@ -36,7 +37,7 @@ namespace vecmem {
    }
 
    memory_manager::memory_manager()
-   : m_mgr() {
+   : m_mgr( new host_memory_manager() ) {
 
    }
 
