@@ -60,7 +60,7 @@ function( vecmem_add_test name )
    endif()
    foreach( _config "" "_DEBUG" "_RELEASE" "_MINSIZEREL" "_RELWITHDEBINFO" )
       set_property( TARGET ${test_exe_name} PROPERTY
-         RUNTIME_OUTPUT_DIRECTORY_${_config} "${CMAKE_BINARY_DIR}/test-bin" )
+         RUNTIME_OUTPUT_DIRECTORY${_config} "${CMAKE_BINARY_DIR}/test-bin" )
    endforeach()
 
    # Run the executable as the test.

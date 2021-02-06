@@ -34,6 +34,9 @@ namespace vecmem {
       /// Reset all allocations on a given device
       virtual void reset( int device = -1 ) = 0;
 
+      /// Check whether the memory allocated is accessible from the host
+      virtual bool is_host_accessible() const = 0;
+
    }; // class memory_manager_interface
 
 } // namespace vecmem
