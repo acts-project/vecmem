@@ -13,7 +13,7 @@
 #include <list>
 #include <vector>
 
-namespace vecmem::cuda {
+namespace vecmem { namespace cuda {
 
    /// A very simple CUDA memory manager using CUDA memory functions directly
    class direct_memory_manager : public memory_manager_interface {
@@ -79,4 +79,4 @@ namespace vecmem::cuda {
 
    }; // class direct_memory_manager
 
-} // namespace vecmem::cuda
+} } // namespace vecmem::cuda

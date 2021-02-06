@@ -33,10 +33,10 @@
 #   define VECMEM_CUDA_ERROR_IGNORE( EXP ) do {} while( false )
 #endif // __CUDACC__
 
-namespace vecmem::cuda::details {
+namespace vecmem { namespace cuda { namespace details {
 
    /// Function used to print and throw a user-readable error if something breaks
    void throw_error( cudaError_t errorCode, const char* expression,
                      const char* file, int line );
 
-} // namespace vecmem::cuda::details
+} } } // namespace vecmem::cuda::details

@@ -12,7 +12,7 @@
 // System include(s).
 #include <vector>
 
-namespace vecmem::cuda {
+namespace vecmem { namespace cuda {
 
    /// A very simple "arena type" CUDA (device) memory manager
    class arena_memory_manager : public memory_manager_interface {
@@ -84,4 +84,4 @@ namespace vecmem::cuda {
 
    }; // class arena_memory_manager
 
-} // namespace vecmem::cuda
+} } // namespace vecmem::cuda

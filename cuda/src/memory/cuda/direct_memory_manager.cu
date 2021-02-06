@@ -17,7 +17,7 @@
 #include <cassert>
 #include <stdexcept>
 
-namespace vecmem::cuda {
+namespace vecmem { namespace cuda {
 
    direct_memory_manager::direct_memory_manager( memory_type type,
                                                  std::size_t sizeInBytes )
@@ -175,4 +175,4 @@ namespace vecmem::cuda {
       return m_memory[ device ];
    }
 
-} // namespace vecmem::cuda
+} } // namespace vecmem::cuda

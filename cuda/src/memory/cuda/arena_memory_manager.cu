@@ -15,7 +15,7 @@
 // System include(s).
 #include <cassert>
 
-namespace vecmem::cuda {
+namespace vecmem { namespace cuda {
 
    arena_memory_manager::arena_memory_manager( memory_type type,
                                                std::size_t sizeInBytes )
@@ -170,4 +170,4 @@ namespace vecmem::cuda {
       return m_memory[ device ];
    }
 
-} // namespace vecmem::cuda
+} } // namespace vecmem::cuda

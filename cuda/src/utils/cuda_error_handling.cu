@@ -16,7 +16,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace vecmem::cuda::details {
+namespace vecmem { namespace cuda { namespace details {
 
    void throw_error( cudaError_t errorCode, const char* expression,
                      const char* file, int line ) {
@@ -30,4 +30,4 @@ namespace vecmem::cuda::details {
       throw std::runtime_error( errorMsg.str() );
    }
 
-} // namespace vecmem::cuda::details
+} } } // namespace vecmem::cuda::details
