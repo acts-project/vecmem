@@ -6,3 +6,6 @@
 
 # Include the library specific tests.
 add_subdirectory( core )
+if( VECMEM_BUILD_CUDA_LIBRARY )
+   add_subdirectory( cuda )
+endif()
