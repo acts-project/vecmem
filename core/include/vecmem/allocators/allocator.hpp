@@ -17,7 +17,7 @@
 namespace vecmem {
 
    /// STL allocator using the "currently active" memory manager
-   template< typename TYPE >
+   template< typename TYPE, typename MemMgr = memory_manager >
    class allocator {
 
    public:
@@ -40,21 +40,21 @@ namespace vecmem {
 
       /// Allocate a requested amount of memory
       pointer allocate( size_type n, const void* = nullptr ) {
-         memory_manager_interface& mmgr = memory_manager::instance().get();
+         memory_manager_interface& mmgr = MemMgr::instance().get();
          return static_cast< pointer >(
             mmgr.allocate( n * sizeof( value_type ) ) );
       }
 
       /// Deallocate a previously allocated block of memory
       void deallocate( pointer ptr, size_type ) {
-         memory_manager_interface& mmgr = memory_manager::instance().get();
+         memory_manager_interface& mmgr = MemMgr::instance().get();
          mmgr.deallocate( ptr );
       }
 
       /// Only initialise the memory if it is host-accessible.
       template< typename U, typename... Args >
       void construct( U* ptr, Args&&... args ) {
-         memory_manager_interface& mmgr = memory_manager::instance().get();
+         memory_manager_interface& mmgr = MemMgr::instance().get();
          if( mmgr.is_host_accessible() ) {
             new( ptr ) U( std::forward< Args >( args )... );
          }
@@ -64,7 +64,7 @@ namespace vecmem {
       /// Only destroy objects in host-accessible memory.
       template< typename U >
       void destroy( U* ptr ) {
-         memory_manager_interface& mmgr = memory_manager::instance().get();
+         memory_manager_interface& mmgr = MemMgr::instance().get();
          if( mmgr.is_host_accessible() ) {
             ptr->~U();
          }
