@@ -26,5 +26,4 @@ if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
    # More rigorous tests for the Debug builds.
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-Werror" )
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-pedantic" )
-   vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-fsanitize=undefined" )
 endif()

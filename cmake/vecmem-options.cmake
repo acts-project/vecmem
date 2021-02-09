@@ -10,6 +10,9 @@ check_language( CUDA )
 
 # Set up the project's options.
 include( CMakeDependentOption )
+
 cmake_dependent_option( VECMEM_BUILD_CUDA_LIBRARY
    "Build the vecmem::cuda library" ON
    "CMAKE_CUDA_COMPILER" OFF )
+
+option( VECMEM_BUILD_SYCL_LIBRARY "Build the vecmem::sycl library" OFF )
