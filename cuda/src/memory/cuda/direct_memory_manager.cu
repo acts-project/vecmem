@@ -19,7 +19,7 @@
 
 namespace vecmem { namespace cuda {
 
-   direct_memory_manager::direct_memory_manager( memory_type type,
+   direct_memory_manager::direct_memory_manager( vecmem::memory::memory_type type,
                                                  std::size_t sizeInBytes )
    : m_type( type ) {
 
@@ -33,7 +33,7 @@ namespace vecmem { namespace cuda {
       // Ignore the errors from these calls. The destruction of this object
       // may happen after the CUDA runtime has already "shut down". Leading
       // to a (silent) failure from these calls.
-      if( m_type == memory_type::host ) {
+      if( m_type == vecmem::memory::memory_type::HOST ) {
          for( device_memory& dev : m_memory ) {
             for( void* ptr : dev.m_ptrs ) {
                VECMEM_CUDA_ERROR_IGNORE( cudaFree( ptr ) );
@@ -84,13 +84,13 @@ namespace vecmem { namespace cuda {
       void* result = nullptr;
       VECMEM_CUDA_ERROR_CHECK( cudaSetDevice( device ) );
       switch( m_type ) {
-      case memory_type::device:
+      case vecmem::memory::memory_type::DEVICE:
          VECMEM_CUDA_ERROR_CHECK( cudaMalloc( &result, sizeInBytes ) );
          break;
-      case memory_type::host:
+      case vecmem::memory::memory_type::HOST:
          VECMEM_CUDA_ERROR_CHECK( cudaMallocHost( &result, sizeInBytes ) );
          break;
-      case memory_type::managed:
+      case vecmem::memory::memory_type::MANAGED:
          VECMEM_CUDA_ERROR_CHECK( cudaMallocManaged( &result, sizeInBytes ) );
          break;
       default:
@@ -119,7 +119,7 @@ namespace vecmem { namespace cuda {
       }
 
       // De-allocate the memory.
-      if( m_type == memory_type::host ) {
+      if( m_type == vecmem::memory::memory_type::HOST ) {
          VECMEM_CUDA_ERROR_CHECK( cudaFreeHost( ptr ) );
       } else {
          VECMEM_CUDA_ERROR_CHECK( cudaFree( ptr ) );
@@ -140,7 +140,7 @@ namespace vecmem { namespace cuda {
       device_memory& mem = get_device_memory( device );
 
       // Deallocate all memory associated with the device.
-      if( m_type == memory_type::host ) {
+      if( m_type == vecmem::memory::memory_type::HOST ) {
          for( void* ptr : mem.m_ptrs ) {
             VECMEM_CUDA_ERROR_CHECK( cudaFreeHost( ptr ) );
          }
@@ -155,7 +155,7 @@ namespace vecmem { namespace cuda {
 
    bool direct_memory_manager::is_host_accessible() const {
 
-      return ( m_type != memory_type::device );
+      return ( m_type != vecmem::memory::memory_type::DEVICE );
    }
 
    void direct_memory_manager::get_device( int& device ) {

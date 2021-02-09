@@ -17,7 +17,7 @@
 
 namespace vecmem { namespace cuda {
 
-   arena_memory_manager::arena_memory_manager( memory_type type,
+   arena_memory_manager::arena_memory_manager( vecmem::memory::memory_type type,
                                                std::size_t sizeInBytes )
    : m_type( type ) {
 
@@ -35,7 +35,7 @@ namespace vecmem { namespace cuda {
          // Ignore the errors from these calls. The destruction of this object
          // may happen after the CUDA runtime has already "shut down". Leading
          // to a (silent) failure from these calls.
-         if( m_type == memory_type::host ) {
+         if( m_type == vecmem::memory::memory_type::HOST ) {
             VECMEM_CUDA_ERROR_IGNORE( cudaFreeHost( mem.m_ptr ) );
          } else {
             VECMEM_CUDA_ERROR_IGNORE( cudaFree( mem.m_ptr ) );
@@ -51,7 +51,7 @@ namespace vecmem { namespace cuda {
 
       // De-allocate any previously allocated memory.
       if( mem.m_ptr ) {
-         if( m_type == memory_type::host ) {
+         if( m_type == vecmem::memory::memory_type::HOST ) {
             VECMEM_CUDA_ERROR_CHECK( cudaFreeHost( mem.m_ptr ) );
          } else {
             VECMEM_CUDA_ERROR_CHECK( cudaFree( mem.m_ptr ) );
@@ -61,14 +61,14 @@ namespace vecmem { namespace cuda {
       // Allocate the newly requested amount.
       VECMEM_CUDA_ERROR_CHECK( cudaSetDevice( device ) );
       switch( m_type ) {
-      case memory_type::device:
+      case vecmem::memory::memory_type::DEVICE:
          VECMEM_CUDA_ERROR_CHECK( cudaMalloc( &( mem.m_ptr ), sizeInBytes ) );
          break;
-      case memory_type::host:
+      case vecmem::memory::memory_type::HOST:
          VECMEM_CUDA_ERROR_CHECK( cudaMallocHost( &( mem.m_ptr ),
                                                   sizeInBytes ) );
          break;
-      case memory_type::managed:
+      case vecmem::memory::memory_type::MANAGED:
          VECMEM_CUDA_ERROR_CHECK( cudaMallocManaged( &( mem.m_ptr ),
                                                      sizeInBytes ) );
          break;
@@ -145,7 +145,7 @@ namespace vecmem { namespace cuda {
 
    bool arena_memory_manager::is_host_accessible() const {
 
-      return ( m_type != memory_type::device );
+      return ( m_type != vecmem::memory::memory_type::DEVICE );
    }
 
    void arena_memory_manager::get_device( int& device ) {

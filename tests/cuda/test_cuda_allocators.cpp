@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "vecmem/allocators/allocator.hpp"
+#include "vecmem/memory/memory_types.hpp"
 #include "vecmem/memory/memory_manager.hpp"
 #include "vecmem/memory/cuda/arena_memory_manager.hpp"
 #include "vecmem/memory/cuda/direct_memory_manager.hpp"
@@ -60,32 +61,32 @@ int main() {
    // the memory from the host.
    vecmem::memory_manager::instance().set(
       std::make_unique< vecmem::cuda::arena_memory_manager >(
-         vecmem::cuda::arena_memory_manager::memory_type::host ) );
+         vecmem::memory::memory_type::HOST ) );
    run_host_tests();
    vecmem::memory_manager::instance().set(
       std::make_unique< vecmem::cuda::arena_memory_manager >(
-         vecmem::cuda::arena_memory_manager::memory_type::managed ) );
+         vecmem::memory::memory_type::MANAGED ) );
    run_host_tests();
 
    vecmem::memory_manager::instance().set(
       std::make_unique< vecmem::cuda::direct_memory_manager >(
-         vecmem::cuda::direct_memory_manager::memory_type::host ) );
+         vecmem::memory::memory_type::HOST ) );
    run_host_tests();
    vecmem::memory_manager::instance().set(
       std::make_unique< vecmem::cuda::direct_memory_manager >(
-         vecmem::cuda::direct_memory_manager::memory_type::managed ) );
+         vecmem::memory::memory_type::MANAGED ) );
    run_host_tests();
 
    // Run much simpler tests with the memory managers that only allocate memory
    // on the device(s).
    vecmem::memory_manager::instance().set(
       std::make_unique< vecmem::cuda::arena_memory_manager >(
-         vecmem::cuda::arena_memory_manager::memory_type::device ) );
+         vecmem::memory::memory_type::DEVICE ) );
    run_device_tests();
 
    vecmem::memory_manager::instance().set(
       std::make_unique< vecmem::cuda::direct_memory_manager >(
-         vecmem::cuda::direct_memory_manager::memory_type::device ) );
+         vecmem::memory::memory_type::DEVICE ) );
    run_device_tests();
 
    // Return gracefully.

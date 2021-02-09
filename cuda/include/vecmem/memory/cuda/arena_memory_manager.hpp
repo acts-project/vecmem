@@ -7,6 +7,7 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/memory/memory_types.hpp"
 #include "vecmem/memory/memory_manager_interface.hpp"
 
 // System include(s).
@@ -18,15 +19,8 @@ namespace vecmem { namespace cuda {
    class arena_memory_manager : public memory_manager_interface {
 
    public:
-      /// Memory type managed by the object
-      enum class memory_type {
-         device  = 1, ///< Memory allocated in device memory
-         host    = 2, ///< Pinned memory allocated on the host
-         managed = 3  ///< CUDA managed memory allocated on the device and host
-      };
-
       /// Constructor, allocating the default amount of memory
-      arena_memory_manager( memory_type type = memory_type::managed,
+      arena_memory_manager(vecmem::memory::memory_type type = vecmem::memory::memory_type::MANAGED,
                             std::size_t sizeInBytes = 200 * 1024l * 1024l );
       /// Destructor, freeing up all allocations
       ~arena_memory_manager();
@@ -78,7 +72,7 @@ namespace vecmem { namespace cuda {
       device_memory& get_device_memory( int& device );
 
       /// The memory type managed by the object
-      memory_type m_type;
+      vecmem::memory::memory_type m_type;
       /// Object holding information about memory allocations on all devices
       std::vector< device_memory > m_memory;
 
