@@ -7,10 +7,9 @@
 # Enable CUDA as a language.
 enable_language( CUDA )
 
-# Set up the CUDA build options.
-set( CMAKE_CUDA_STANDARD 14 CACHE STRING "The (CUDA) C++ standard to use" )
-set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
-   "CUDA architectures to build device code for" )
+# Project include(s).
+include(
+   "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/vecmem-compiler-options-cuda.cmake" )
 
 # Set up the build of the VecMem CUDA library.
 vecmem_add_library( vecmem_cuda cuda SHARED

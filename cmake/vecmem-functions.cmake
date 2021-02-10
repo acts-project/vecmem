@@ -4,6 +4,9 @@
 #
 # Mozilla Public License Version 2.0
 
+# Guard against multiple includes.
+include_guard( GLOBAL )
+
 # CMake include(s).
 include( CMakeParseArguments )
 
@@ -67,3 +70,26 @@ function( vecmem_add_test name )
    add_test( NAME ${test_exe_name} COMMAND ${test_exe_name} )
 
 endfunction( vecmem_add_test )
+
+# Helper function for adding individual flags to "flag variables".
+#
+# Usage: vecmem_add_flag( CMAKE_CXX_FLAGS "-Wall" )
+#
+function( vecmem_add_flag name value )
+
+   # Escape special characters in the value:
+   set( matchedValue "${value}" )
+   foreach( c "*" "." "^" "$" "+" "?" )
+      string( REPLACE "${c}" "\\${c}" matchedValue "${matchedValue}" )
+   endforeach()
+
+   # Check if the variable already has this value in it:
+   if( "${${name}}" MATCHES "${matchedValue}" )
+      return()
+   endif()
+
+   # If not, then let's add it now:
+   set( ${name} "${${name}} ${value}" CACHE STRING
+      "Compiler setting" FORCE )
+
+endfunction( vecmem_add_flag )
