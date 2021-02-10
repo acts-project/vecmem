@@ -11,9 +11,6 @@ project( vecmem VERSION 0.0.1 LANGUAGES CXX )
 # Standard CMake include(s).
 include( GNUInstallDirs )
 
-# Set up the used C++ standard(s).
-set( CMAKE_CXX_STANDARD 17 CACHE STRING "The (host) C++ standard to use" )
-
 # Explicitly set the output directory for the binaries. Such that if this
 # project is included by another project, the main project's configuration would
 # win out.
@@ -28,6 +25,7 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    "Directory for the built static libraries" )
 
 # Include the VecMem CMake code.
+include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-compiler-options-cpp.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-functions.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-options.cmake" )
 
