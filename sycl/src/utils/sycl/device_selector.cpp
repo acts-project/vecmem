@@ -27,8 +27,8 @@ namespace vecmem::sycl {
          return -1;
       }
 
-      // If the user provided a substring of the device name, look for that
-      // device. And give it a very high score.
+      // If the user provided a device name, look for that device.
+      // And give it a very high score.
       using info = cl::sycl::info::device;
       if( ( ! m_deviceName.empty() ) &&
           ( device.get_info< info::name >() == m_deviceName ) ) {
