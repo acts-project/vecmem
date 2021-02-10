@@ -34,6 +34,9 @@ add_subdirectory( core )
 if( VECMEM_BUILD_CUDA_LIBRARY )
    add_subdirectory( cuda )
 endif()
+if( VECMEM_BUILD_SYCL_LIBRARY )
+   add_subdirectory( sycl )
+endif()
 
 # Set up the test(s).
 include( CTest )

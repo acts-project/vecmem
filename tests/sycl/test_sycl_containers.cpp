@@ -1,0 +1,104 @@
+/** VecMem project, part of the ACTS project (R&D line)
+ *
+ * (c) 2021 CERN for the benefit of the ACTS project
+ *
+ * Mozilla Public License Version 2.0
+ */
+
+// Local include(s).
+#include "vecmem/allocators/allocator.hpp"
+#include "vecmem/containers/const_device_vector.hpp"
+#include "vecmem/containers/device_vector.hpp"
+#include "vecmem/memory/memory_manager.hpp"
+#include "vecmem/memory/sycl/direct_memory_manager.hpp"
+#include "vecmem/utils/sycl/device_selector.hpp"
+
+// SYCL include(s).
+#include <CL/sycl.hpp>
+
+// System include(s).
+#include <cassert>
+#include <iostream>
+#include <vector>
+
+/// Custom vector type used on the host in the tests
+template< typename T >
+using managed_vector = std::vector< T, vecmem::allocator< T > >;
+
+/// Helper function for creating an "input vector".
+managed_vector< int > make_input_vector() {
+   return { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+}
+
+/// Helper function for creating an "output vector".
+managed_vector< int > make_output_vector() {
+   return managed_vector< int >( 10 );
+}
+
+int main() {
+
+   // Create the SYCL queue that we'll be using in the test.
+   cl::sycl::queue queue{ vecmem::sycl::device_selector() };
+   std::cout << "Using device:" << std::endl;
+   std::cout << "    name: "
+             << queue.get_device().get_info< cl::sycl::info::device::name >()
+             << std::endl;
+   std::cout << "  vendor: "
+             << queue.get_device().get_info< cl::sycl::info::device::vendor >()
+             << std::endl;
+   std::cout << " version: "
+             << queue.get_device().get_info< cl::sycl::info::device::version >()
+             << std::endl;
+
+   // Set up the memory manager for the test.
+   vecmem::memory_manager::instance().set(
+      std::make_unique< vecmem::sycl::direct_memory_manager >(
+         vecmem::sycl::direct_memory_manager::memory_type::shared ) );
+   vecmem::sycl::direct_memory_manager& mem_mgr =
+      dynamic_cast< vecmem::sycl::direct_memory_manager& >(
+         vecmem::memory_manager::instance().get() );
+   mem_mgr.set_queue( vecmem::sycl::direct_memory_manager::DEFAULT_DEVICE,
+                      queue );
+
+   // Create an input and an output vector.
+   auto inputvec = make_input_vector();
+   auto outputvec = make_output_vector();
+   assert( inputvec.size() == outputvec.size() );
+
+   // Perform a linear transformation using the vecmem vector helper types.
+   queue.submit( [ &inputvec, &outputvec ]( cl::sycl::handler& h ) {
+
+      // Translate the STL vectors to primitive types.
+      const std::size_t size = inputvec.size();
+      const int* input = inputvec.data();
+      int* output = outputvec.data();
+
+      // Run the kernel.
+      h.parallel_for< class LinearTransform >(
+         cl::sycl::range< 1 >( inputvec.size() ),
+         [ size, input, output ]( cl::sycl::id< 1 > id ) {
+
+            // Skip invalid indices.
+            if( id >= size ) {
+               return;
+            }
+
+            // Create the helper vectors.
+            const vecmem::const_device_vector< int > inputvec( size, input );
+            vecmem::device_vector< int > outputvec( size, output );
+
+            // Perform the linear transformation.
+            outputvec.at( id ) = 3 + inputvec.at( id ) * 2;
+            return;
+         } );
+   } );
+   queue.wait();
+
+   // Check the output.
+   for( std::size_t i = 0; i < outputvec.size(); ++i ) {
+      assert( outputvec.at( i ) == inputvec.at( i ) * 2 + 3 );
+   }
+
+   // Return gracefully.
+   return 0;
+}
