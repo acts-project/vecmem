@@ -7,8 +7,8 @@
 # Name for this "action".
 name: Build Tests
 
-# Perform the build tests on every push. Since the project is just that small.
-on: [ push ]
+# Perform the builds on every push and pull request.
+on: [ push, pull_request ]
 
 # All the different build/test jobs.
 jobs:
