@@ -55,7 +55,7 @@ set( CMAKE_HIP_COMPILER_ENV_VAR "HIPCXX" )
 # Set how the compiler should pass include directories to the HIP compiler.
 set( CMAKE_INCLUDE_FLAG_HIP "${CMAKE_INCLUDE_FLAG_CXX}" )
 set( CMAKE_INCLUDE_SYSTEM_FLAG_HIP "${CMAKE_INCLUDE_SYSTEM_FLAG_CXX}" )
-set( CMAKE_INCLUDE_FLAG_SEP_HIP "${CMAKE_INCLUDE_FLAG_SEP_CXX}" )
+set( CMAKE_INCLUDE_FLAG_SEP_HIP " ${CMAKE_INCLUDE_FLAG_HIP}" )
 
 # Set up the linker used for components holding HIP source code.
 set( CMAKE_HIP_HOST_LINKER "${CMAKE_CXX_COMPILER}" )
