@@ -55,7 +55,6 @@ set( CMAKE_HIP_COMPILER_ENV_VAR "HIPCXX" )
 # Set how the compiler should pass include directories to the HIP compiler.
 set( CMAKE_INCLUDE_FLAG_HIP "${CMAKE_INCLUDE_FLAG_CXX}" )
 set( CMAKE_INCLUDE_SYSTEM_FLAG_HIP "${CMAKE_INCLUDE_SYSTEM_FLAG_CXX}" )
-set( CMAKE_INCLUDE_FLAG_SEP_HIP " ${CMAKE_INCLUDE_FLAG_HIP}" )
 
 # Set up the linker used for components holding HIP source code.
 set( CMAKE_HIP_HOST_LINKER "${CMAKE_CXX_COMPILER}" )
@@ -105,8 +104,6 @@ set( CMAKE_HIP17_EXTENSION_COMPILE_OPTION "-std=c++17" )
 # get a clear-enough error message if they chose the wrong setting anyway.
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "C++ standard to use with HIP" )
 set_property( CACHE CMAKE_HIP_STANDARD PROPERTY STRINGS 11 14 17 )
-string( APPEND CMAKE_HIP_FLAGS
-   "${CMAKE_HIP${CMAKE_HIP_STANDARD}_STANDARD_COMPILE_OPTION}" )
 
 # Configure variables set in this file for fast reload later on.
 configure_file( ${CMAKE_CURRENT_LIST_DIR}/CMakeHIPCompiler.cmake.in
