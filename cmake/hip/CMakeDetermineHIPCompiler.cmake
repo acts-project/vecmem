@@ -56,6 +56,13 @@ set( CMAKE_HIP_COMPILER_ENV_VAR "HIPCXX" )
 set( CMAKE_INCLUDE_FLAG_HIP "${CMAKE_INCLUDE_FLAG_CXX}" )
 set( CMAKE_INCLUDE_SYSTEM_FLAG_HIP "${CMAKE_INCLUDE_SYSTEM_FLAG_CXX}" )
 
+# Set how RPATH should be handled in the linking of HIP shared libraries and
+# executables.
+set( CMAKE_SHARED_LIBRARY_RPATH_LINK_HIP_FLAG
+   ${CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG} )
+set( CMAKE_EXECUTABLE_RPATH_LINK_HIP_FLAG
+   ${CMAKE_SHARED_LIBRARY_RPATH_LINK_HIP_FLAG} )
+
 # Set up the linker used for components holding HIP source code.
 set( CMAKE_HIP_HOST_LINKER "${CMAKE_CXX_COMPILER}" )
 
