@@ -1,0 +1,18 @@
+{
+   "configurations": [
+      {
+         "name": "VecMem",
+         "includePath": [
+            "${workspaceFolder}/**",
+            "${CUDA_INCLUDE_PATH}/**",
+            "${ROCM_INCLUDE_PATH}/**",
+            "${SYCL_INCLUDE_PATH}/**"
+         ],
+         "compilerPath": "${VSCODE_CXX}",
+         "defines": [],
+         "cStandard": "c11",
+         "cppStandard": "c++17"
+      }
+   ],
+   "version": 4
+}
