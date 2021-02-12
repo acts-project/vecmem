@@ -4,17 +4,18 @@
 #
 # Mozilla Public License Version 2.0
 
-# Require CMake 3.13 for target_link_options(...).
-cmake_minimum_required( VERSION 3.13 )
+# Enable SYCL as a language.
+enable_language( SYCL )
+
+# Project include(s).
+include( vecmem-compiler-options-sycl )
 
 # Set up the build of the VecMem SYCL library.
 vecmem_add_library( vecmem_sycl sycl SHARED
    # Memory management.
    "include/vecmem/memory/sycl/direct_memory_manager.hpp"
-   "src/memory/sycl/direct_memory_manager.cpp"
+   "src/memory/sycl/direct_memory_manager.sycl"
    # Utilities.
    "include/vecmem/utils/sycl/device_selector.hpp"
-   "src/utils/sycl/device_selector.cpp" )
+   "src/utils/sycl/device_selector.sycl" )
 target_link_libraries( vecmem_sycl PUBLIC vecmem::core )
-target_compile_options( vecmem_sycl PUBLIC "-fsycl" )
-target_link_options( vecmem_sycl PUBLIC "-fsycl" )

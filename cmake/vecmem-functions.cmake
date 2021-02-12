@@ -67,7 +67,10 @@ function( vecmem_add_test name )
    endforeach()
 
    # Run the executable as the test.
-   add_test( NAME ${test_exe_name} COMMAND ${test_exe_name} )
+   add_test( NAME ${test_exe_name}
+      COMMAND ${CMAKE_COMMAND} -E env
+      LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}:$ENV{LD_LIBRARY_PATH}
+      $<TARGET_FILE:${test_exe_name}> )
 
 endfunction( vecmem_add_test )
 

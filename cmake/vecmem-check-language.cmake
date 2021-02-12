@@ -11,7 +11,8 @@ include_guard( GLOBAL )
 include( CheckLanguage )
 
 # Teach CMake about VecMem's custom language files.
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/hip" )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/hip"
+                               "${CMAKE_CURRENT_LIST_DIR}/sycl" )
 
 # Code mimicking CMake's CheckLanguage.cmake module. But making sure that the
 # VecMem specific code is used while looking for the non-standard languages.
@@ -21,8 +22,8 @@ macro( vecmem_check_language lang )
    # don't look for it again. Also ignore anything but the HIP "language".
    if( NOT DEFINED CMAKE_${lang}_COMPILER )
 
-      # Handle the HIP case.
-      if( "${lang}" STREQUAL "HIP" )
+      # Handle the HIP and SYCL cases.
+      if( ( "${lang}" STREQUAL "HIP" ) OR ( "${lang}" STREQUAL "SYCL" ) )
 
          # Greet the user.
          set( _desc "Looking for a ${lang} compiler" )
@@ -39,8 +40,9 @@ macro( vecmem_check_language lang )
             "cmake_minimum_required( VERSION ${CMAKE_VERSION} )\n"
             "project( Check${lang} LANGUAGES CXX )\n"
             "list( INSERT CMAKE_MODULE_PATH 0 "
-            "      \"${CMAKE_CURRENT_LIST_DIR}/hip\" )\n"
-            "enable_language( HIP )\n"
+            "      \"${CMAKE_CURRENT_LIST_DIR}/hip\" "
+            "      \"${CMAKE_CURRENT_LIST_DIR}/sycl\" )\n"
+            "enable_language( ${lang} )\n"
             "file( WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"\n"
             "   \"set( CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\" )\" )" )
          execute_process(

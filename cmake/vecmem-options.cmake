@@ -8,6 +8,7 @@
 include( vecmem-check-language )
 vecmem_check_language( CUDA )
 vecmem_check_language( HIP )
+vecmem_check_language( SYCL )
 
 # Set up the project's options.
 include( CMakeDependentOption )
@@ -23,4 +24,6 @@ cmake_dependent_option( VECMEM_BUILD_HIP_LIBRARY
    "CMAKE_HIP_COMPILER" OFF )
 
 # Flag specifying whether SYCL support should be built.
-option( VECMEM_BUILD_SYCL_LIBRARY "Build the vecmem::sycl library" OFF )
+cmake_dependent_option( VECMEM_BUILD_SYCL_LIBRARY
+   "Build the vecmem::sycl library" ON
+   "CMAKE_SYCL_COMPILER" OFF )
