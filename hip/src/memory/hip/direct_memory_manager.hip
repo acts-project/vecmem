@@ -51,8 +51,8 @@ namespace vecmem { namespace hip {
    void direct_memory_manager::set_maximum_capacity( std::size_t sizeInBytes,
                                                      int device ) {
 
-      // Get the object responsible for this device.
-      device_memory& mem = get_device_memory( device );
+      // Get a valid device.
+      get_device( device );
 
       // Make sure that this is possible.
       hipDeviceProp_t prop;
