@@ -27,7 +27,11 @@ macro( vecmem_check_language lang )
 
          # Greet the user.
          set( _desc "Looking for a ${lang} compiler" )
-         message( CHECK_START "${_desc}" )
+         if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+            message( STATUS "${_desc}" )
+         else()
+            message( CHECK_START "${_desc}" )
+         endif()
 
          # Clean up.
          file( REMOVE_RECURSE
@@ -65,7 +69,11 @@ macro( vecmem_check_language lang )
          endif()
 
          # Let the user know what happened.
-         message( ${_CHECK_COMPILER_STATUS} "${CMAKE_${lang}_COMPILER}" )
+         if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+            message( STATUS "${_desc} - ${CMAKE_${lang}_COMPILER}" )
+         else()
+            message( ${_CHECK_COMPILER_STATUS} "${CMAKE_${lang}_COMPILER}" )
+         endif()
          set( CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER}" CACHE FILEPATH
             "${lang} compiler" )
          mark_as_advanced( CMAKE_${lang}_COMPILER )

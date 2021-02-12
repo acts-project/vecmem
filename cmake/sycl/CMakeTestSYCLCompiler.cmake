@@ -4,8 +4,15 @@
 #
 # Mozilla Public License Version 2.0
 
+# CMake include(s).
+include( CMakeTestCompilerCommon )
+
 # Start with the correct status message.
-PrintTestCompilerStatus( "SYCL" )
+if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+   PrintTestCompilerStatus( "SYCL" "" )
+else()
+   PrintTestCompilerStatus( "SYCL" )
+endif()
 
 # Try to use the HIP compiler.
 file( WRITE
@@ -22,7 +29,11 @@ unset( CMAKE_SYCL_COMPILER_WORKS CACHE )
 
 # Check the results of the test.
 if( NOT CMAKE_SYCL_COMPILER_WORKS )
-   PrintTestCompilerResult( CHECK_FAIL "broken" )
+   if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+      PrintTestCompilerStatus( "SYCL" " -- broken" )
+   else()
+      PrintTestCompilerResult( CHECK_FAIL "broken" )
+   endif()
    message( FATAL_ERROR "The SYCL compiler\n"
       "  \"${CMAKE_SYCL_COMPILER}\"\n"
       "is not able to compile a simple test program.\n"
@@ -30,4 +41,8 @@ if( NOT CMAKE_SYCL_COMPILER_WORKS )
       "  ${__CMAKE_SYCL_COMPILER_OUTPUT}\n\n"
       "CMake will not be able to correctly generate this project." )
 endif()
-PrintTestCompilerResult( CHECK_PASS "works" )
+if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+   PrintTestCompilerStatus( "SYCL" " -- works" )
+else()
+   PrintTestCompilerResult( CHECK_PASS "works" )
+endif()

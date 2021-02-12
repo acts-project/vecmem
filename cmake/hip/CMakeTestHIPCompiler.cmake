@@ -4,8 +4,15 @@
 #
 # Mozilla Public License Version 2.0
 
+# CMake include(s).
+include( CMakeTestCompilerCommon )
+
 # Start with the correct status message.
-PrintTestCompilerStatus( "HIP" )
+if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+   PrintTestCompilerStatus( "HIP" "" )
+else()
+   PrintTestCompilerStatus( "HIP" )
+endif()
 
 # Try to use the HIP compiler.
 file( WRITE
@@ -22,7 +29,11 @@ unset( CMAKE_HIP_COMPILER_WORKS CACHE )
 
 # Check the results of the test.
 if( NOT CMAKE_HIP_COMPILER_WORKS )
-   PrintTestCompilerResult( CHECK_FAIL "broken" )
+   if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+      PrintTestCompilerStatus( "HIP" " -- broken" )
+   else()
+      PrintTestCompilerResult( CHECK_FAIL "broken" )
+   endif()
    message( FATAL_ERROR "The HIP compiler\n"
       "  \"${CMAKE_HIP_COMPILER}\"\n"
       "is not able to compile a simple test program.\n"
@@ -30,4 +41,8 @@ if( NOT CMAKE_HIP_COMPILER_WORKS )
       "  ${__CMAKE_HIP_COMPILER_OUTPUT}\n\n"
       "CMake will not be able to correctly generate this project." )
 endif()
-PrintTestCompilerResult( CHECK_PASS "works" )
+if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+   PrintTestCompilerStatus( "HIP" " -- works" )
+else()
+   PrintTestCompilerResult( CHECK_PASS "works" )
+endif()
