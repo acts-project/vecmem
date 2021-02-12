@@ -8,7 +8,7 @@
 include_guard( GLOBAL )
 
 # Include the helper function(s).
-include( "${CMAKE_CURRENT_LIST_DIR}/vecmem-functions.cmake" )
+include( vecmem-functions )
 
 # Set up the used C++ standard(s).
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "The (HIP) C++ standard to use" )

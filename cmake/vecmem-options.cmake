@@ -5,7 +5,7 @@
 # Mozilla Public License Version 2.0
 
 # Look for the supported GPU languages.
-include( "${CMAKE_CURRENT_LIST_DIR}/vecmem-check-language.cmake" )
+include( vecmem-check-language )
 vecmem_check_language( CUDA )
 vecmem_check_language( HIP )
 

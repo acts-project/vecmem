@@ -8,8 +8,7 @@
 enable_language( HIP )
 
 # Project include(s).
-include(
-   "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/vecmem-compiler-options-hip.cmake" )
+include( vecmem-compiler-options-hip )
 
 # Tests for the HIP library's custom memory management.
 vecmem_add_test( hip_allocators test_hip_allocators.cpp

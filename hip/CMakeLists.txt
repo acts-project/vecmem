@@ -8,8 +8,7 @@
 enable_language( HIP )
 
 # Project include(s).
-include(
-   "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/vecmem-compiler-options-hip.cmake" )
+include( vecmem-compiler-options-hip )
 
 # Set up the build of the VecMem HIP library.
 vecmem_add_library( vecmem_hip hip SHARED

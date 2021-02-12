@@ -8,8 +8,7 @@
 enable_language( CUDA )
 
 # Project include(s).
-include(
-   "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/vecmem-compiler-options-cuda.cmake" )
+include( vecmem-compiler-options-cuda )
 
 # Set up the build of the VecMem CUDA library.
 vecmem_add_library( vecmem_cuda cuda SHARED
