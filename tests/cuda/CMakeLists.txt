@@ -8,8 +8,7 @@
 enable_language( CUDA )
 
 # Project include(s).
-include(
-   "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/vecmem-compiler-options-cuda.cmake" )
+include( vecmem-compiler-options-cuda )
 
 # Tests for the CUDA library's custom memory management.
 vecmem_add_test( cuda_allocators test_cuda_allocators.cpp

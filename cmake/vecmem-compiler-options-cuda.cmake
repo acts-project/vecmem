@@ -8,7 +8,7 @@
 include_guard( GLOBAL )
 
 # Include the helper function(s).
-include( "${CMAKE_CURRENT_LIST_DIR}/vecmem-functions.cmake" )
+include( vecmem-functions )
 
 # Set up the used C++ standard(s).
 set( CMAKE_CUDA_STANDARD 14 CACHE STRING "The (CUDA) C++ standard to use" )

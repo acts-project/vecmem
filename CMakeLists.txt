@@ -25,14 +25,18 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    "Directory for the built static libraries" )
 
 # Include the VecMem CMake code.
-include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-compiler-options-cpp.cmake" )
-include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-functions.cmake" )
-include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-options.cmake" )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+include( vecmem-compiler-options-cpp )
+include( vecmem-functions )
+include( vecmem-options )
 
 # Add the library sub-directories.
 add_subdirectory( core )
 if( VECMEM_BUILD_CUDA_LIBRARY )
    add_subdirectory( cuda )
+endif()
+if( VECMEM_BUILD_HIP_LIBRARY )
+   add_subdirectory( hip )
 endif()
 if( VECMEM_BUILD_SYCL_LIBRARY )
    add_subdirectory( sycl )
@@ -45,4 +49,4 @@ if( BUILD_TESTING )
 endif()
 
 # Set up the packaging of the project.
-include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-packaging.cmake" )
+include( vecmem-packaging )
