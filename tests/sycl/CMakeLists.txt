@@ -8,7 +8,7 @@
 enable_language( SYCL )
 
 # Project include(s).
-include( vecmem-compiler-options-hip )
+include( vecmem-compiler-options-sycl )
 
 # Tests for the SYCL library's custom memory management.
 vecmem_add_test( sycl_allocators test_sycl_allocators.cpp
