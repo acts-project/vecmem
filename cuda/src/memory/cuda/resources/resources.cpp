@@ -1,5 +1,4 @@
-#include <memory_resource>
-
+#include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/memory/resources/base_resource.hpp"
 #include "vecmem/memory/cuda/resources/terminal/device_resource.hpp"
 #include "vecmem/memory/cuda/resources/terminal/host_resource.hpp"

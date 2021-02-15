@@ -1,6 +1,6 @@
 #include <memory>
-#include <memory_resource>
 
+#include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/memory/resources/base_resource.hpp"
 
 namespace vecmem::memory::resources::terminal {
@@ -21,7 +21,7 @@ namespace vecmem::memory::resources::terminal {
         ) override;
 
         virtual bool do_is_equal(
-            const std::pmr::memory_resource &
+            const memory_resource &
         ) const noexcept override;
     };
 }

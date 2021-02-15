@@ -1,8 +1,8 @@
 #include <memory>
-#include <memory_resource>
 
 #include <cuda_runtime.h>
 
+#include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/memory/cuda/resources/terminal/device_resource.hpp"
 
 namespace vecmem::memory::resources::terminal {
@@ -24,7 +24,7 @@ namespace vecmem::memory::resources::terminal {
     }
 
     bool cuda_device_resource::do_is_equal(
-        const std::pmr::memory_resource & other
+        const memory_resource & other
     ) const noexcept {
         return false;
     }

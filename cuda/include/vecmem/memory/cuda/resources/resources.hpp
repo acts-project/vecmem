@@ -1,5 +1,4 @@
-#include <memory_resource>
-
+#include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/memory/resources/base_resource.hpp"
 
 namespace vecmem::memory::resources {

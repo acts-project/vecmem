@@ -21,7 +21,7 @@
 
 /// Custom vector type used on the host in the tests
 template<typename T>
-using managed_vector = std::vector<T, std::pmr::polymorphic_allocator<T>>;
+using managed_vector = std::vector<T, vecmem::memory::resources::polymorphic_allocator<T>>;
 
 /// Helper function for creating an "input vector".
 managed_vector< int > make_input_vector() {
