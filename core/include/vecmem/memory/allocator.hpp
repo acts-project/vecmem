@@ -15,7 +15,7 @@ namespace vecmem::memory {
 
         polymorphic_allocator(
             resources::base_resource * res
-        ) : res(res), alloc(res) {};
+        ) : alloc(res) {};
 
         T * allocate(std::size_t size) {
             return alloc.allocate(size);
@@ -27,19 +27,24 @@ namespace vecmem::memory {
 
         template<typename U, typename... Args>
         void construct(U* ptr, Args&&... args) {
-            if (res->is_host_accessible()) {
+            if (is_host_accessible()) {
                 alloc.construct(ptr, std::forward<Args>(args)...);
             }
         };
 
         template<typename U>
         void destroy(U* ptr) {
-            if (res->is_host_accessible()) {
+            if (is_host_accessible()) {
                 alloc.destroy(ptr);
             }
         };
+
+        bool is_host_accessible(void) {
+            resources::base_resource * br = dynamic_cast<resources::base_resource *>(alloc.resource());
+
+            return br == nullptr || br->is_host_accessible();
+        }
     private:
-        resources::base_resource * res;
         std::pmr::polymorphic_allocator<T> alloc;
     };
 }

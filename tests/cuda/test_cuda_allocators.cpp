@@ -7,24 +7,28 @@
 
 // Local include(s).
 #include "vecmem/allocators/allocator.hpp"
+#include "vecmem/memory/allocator.hpp"
 #include "vecmem/memory/memory_manager.hpp"
+#include "vecmem/memory/resources/base_resource.hpp"
 #include "vecmem/memory/cuda/arena_memory_manager.hpp"
 #include "vecmem/memory/cuda/direct_memory_manager.hpp"
+#include "vecmem/memory/cuda/resources/resources.hpp"
 
 // System include(s).
 #undef NDEBUG
 #include <cassert>
 #include <vector>
+#include <memory_resource>
 
 /// Custom vector type used in the tests
 template< typename T >
-using test_vector = std::vector< T, vecmem::allocator< T > >;
+using test_vector = std::vector<T, vecmem::memory::polymorphic_allocator<T>>;
 
 /// Function running tests with the active memory manager.
-void run_host_tests() {
+void run_host_tests(vecmem::memory::resources::base_resource & res) {
 
    // Create the test vector.
-   test_vector< int > testv;
+   test_vector<int> testv(&res);
 
    // Manipulate it in some simple ways.
    for( int i = 0; i < 100; ++i ) {
@@ -42,10 +46,10 @@ void run_host_tests() {
 }
 
 /// Function running simple tests with the active memory manager.
-void run_device_tests() {
+void run_device_tests(vecmem::memory::resources::base_resource & res) {
 
    // Create the test vector.
-   test_vector< int > testv;
+   test_vector<int> testv(&res);
 
    // Resize it in a few different ways.
    testv.resize( 100 );
@@ -58,35 +62,16 @@ int main() {
 
    // Run the tests with all available memory managers, that allow for access to
    // the memory from the host.
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::cuda::arena_memory_manager >(
-         vecmem::cuda::arena_memory_manager::memory_type::host ) );
-   run_host_tests();
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::cuda::arena_memory_manager >(
-         vecmem::cuda::arena_memory_manager::memory_type::managed ) );
-   run_host_tests();
+   run_host_tests(*vecmem::memory::resources::get_terminal_cuda_host_resource());
+   run_host_tests(*vecmem::memory::resources::get_terminal_cuda_managed_resource());
 
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::cuda::direct_memory_manager >(
-         vecmem::cuda::direct_memory_manager::memory_type::host ) );
-   run_host_tests();
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::cuda::direct_memory_manager >(
-         vecmem::cuda::direct_memory_manager::memory_type::managed ) );
-   run_host_tests();
+   run_host_tests(*vecmem::memory::resources::get_terminal_cuda_host_resource());
+   run_host_tests(*vecmem::memory::resources::get_terminal_cuda_managed_resource());
 
-   // Run much simpler tests with the memory managers that only allocate memory
-   // on the device(s).
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::cuda::arena_memory_manager >(
-         vecmem::cuda::arena_memory_manager::memory_type::device ) );
-   run_device_tests();
-
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::cuda::direct_memory_manager >(
-         vecmem::cuda::direct_memory_manager::memory_type::device ) );
-   run_device_tests();
+   // // Run much simpler tests with the memory managers that only allocate memory
+   // // on the device(s).
+   run_device_tests(*vecmem::memory::resources::get_terminal_cuda_managed_resource());
+   // run_device_tests(*vecmem::memory::resources::get_terminal_cuda_device_resource());
 
    // Return gracefully.
    return 0;

@@ -10,7 +10,9 @@
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/memory/memory_manager.hpp"
+#include "vecmem/memory/allocator.hpp"
 #include "vecmem/memory/cuda/direct_memory_manager.hpp"
+#include "vecmem/memory/cuda/resources/resources.hpp"
 #include "vecmem/utils/cuda_error_handling.hpp"
 
 // System include(s).
@@ -19,17 +21,25 @@
 #include <vector>
 
 /// Custom vector type used on the host in the tests
-template< typename T >
-using managed_vector = std::vector< T, vecmem::allocator< T > >;
+template<typename T>
+using managed_vector = std::vector<T, vecmem::memory::polymorphic_allocator<T>>;
 
 /// Helper function for creating an "input vector".
 managed_vector< int > make_input_vector() {
-   return { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+   managed_vector<int> vec(vecmem::memory::resources::get_terminal_cuda_managed_resource());
+
+   vec = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+   return vec;
 }
 
 /// Helper function for creating an "output vector".
 managed_vector< int > make_output_vector() {
-   return managed_vector< int >( 10 );
+   managed_vector<int> vec(vecmem::memory::resources::get_terminal_cuda_managed_resource());
+
+   vec.resize(10);
+
+   return vec;
 }
 
 /// Kernel performing a linear transformation using the vector helper types
@@ -52,12 +62,6 @@ void testLinearTransform( std::size_t size, const int* input, int* output ) {
 }
 
 int main() {
-
-   // Set up the memory manager for the test.
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::cuda::direct_memory_manager >(
-         vecmem::cuda::direct_memory_manager::memory_type::managed ) );
-
    // Create an input and an output vector.
    auto inputvec = make_input_vector();
    auto outputvec = make_output_vector();
