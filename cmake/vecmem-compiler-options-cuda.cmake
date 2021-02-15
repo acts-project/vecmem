@@ -11,7 +11,7 @@ include_guard( GLOBAL )
 include( vecmem-functions )
 
 # Set up the used C++ standard(s).
-set( CMAKE_CUDA_STANDARD 14 CACHE STRING "The (CUDA) C++ standard to use" )
+set( CMAKE_CUDA_STANDARD 17 CACHE STRING "The (CUDA) C++ standard to use" )
 
 # Set the architecture to build code for.
 set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
