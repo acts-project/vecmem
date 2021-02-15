@@ -1,5 +1,6 @@
 {
    "files.associations": {
-      "*.hip": "cpp"
+      "*.hip": "cpp",
+      "*.sycl": "cpp"
    }
 }

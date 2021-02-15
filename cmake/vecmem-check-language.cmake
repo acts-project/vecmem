@@ -11,7 +11,8 @@ include_guard( GLOBAL )
 include( CheckLanguage )
 
 # Teach CMake about VecMem's custom language files.
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/hip" )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/hip"
+                               "${CMAKE_CURRENT_LIST_DIR}/sycl" )
 
 # Code mimicking CMake's CheckLanguage.cmake module. But making sure that the
 # VecMem specific code is used while looking for the non-standard languages.
@@ -21,12 +22,16 @@ macro( vecmem_check_language lang )
    # don't look for it again. Also ignore anything but the HIP "language".
    if( NOT DEFINED CMAKE_${lang}_COMPILER )
 
-      # Handle the HIP case.
-      if( "${lang}" STREQUAL "HIP" )
+      # Handle the HIP and SYCL cases.
+      if( ( "${lang}" STREQUAL "HIP" ) OR ( "${lang}" STREQUAL "SYCL" ) )
 
          # Greet the user.
          set( _desc "Looking for a ${lang} compiler" )
-         message( CHECK_START "${_desc}" )
+         if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+            message( STATUS "${_desc}" )
+         else()
+            message( CHECK_START "${_desc}" )
+         endif()
 
          # Clean up.
          file( REMOVE_RECURSE
@@ -39,8 +44,9 @@ macro( vecmem_check_language lang )
             "cmake_minimum_required( VERSION ${CMAKE_VERSION} )\n"
             "project( Check${lang} LANGUAGES CXX )\n"
             "list( INSERT CMAKE_MODULE_PATH 0 "
-            "      \"${CMAKE_CURRENT_LIST_DIR}/hip\" )\n"
-            "enable_language( HIP )\n"
+            "      \"${CMAKE_CURRENT_LIST_DIR}/hip\" "
+            "      \"${CMAKE_CURRENT_LIST_DIR}/sycl\" )\n"
+            "enable_language( ${lang} )\n"
             "file( WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"\n"
             "   \"set( CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\" )\" )" )
          execute_process(
@@ -63,7 +69,11 @@ macro( vecmem_check_language lang )
          endif()
 
          # Let the user know what happened.
-         message( ${_CHECK_COMPILER_STATUS} "${CMAKE_${lang}_COMPILER}" )
+         if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
+            message( STATUS "${_desc} - ${CMAKE_${lang}_COMPILER}" )
+         else()
+            message( ${_CHECK_COMPILER_STATUS} "${CMAKE_${lang}_COMPILER}" )
+         endif()
          set( CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER}" CACHE FILEPATH
             "${lang} compiler" )
          mark_as_advanced( CMAKE_${lang}_COMPILER )

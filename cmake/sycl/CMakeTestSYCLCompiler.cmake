@@ -9,40 +9,40 @@ include( CMakeTestCompilerCommon )
 
 # Start with the correct status message.
 if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
-   PrintTestCompilerStatus( "HIP" "" )
+   PrintTestCompilerStatus( "SYCL" "" )
 else()
-   PrintTestCompilerStatus( "HIP" )
+   PrintTestCompilerStatus( "SYCL" )
 endif()
 
 # Try to use the HIP compiler.
 file( WRITE
-   "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.hip"
-   "#include <hip/hip_runtime.h>\n"
+   "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.sycl"
+   "#include <CL/sycl.hpp>\n"
    "int main() { return 0; }\n" )
-try_compile( CMAKE_HIP_COMPILER_WORKS "${CMAKE_BINARY_DIR}"
-   "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.hip"
-   OUTPUT_VARIABLE __CMAKE_HIP_COMPILER_OUTPUT )
+try_compile( CMAKE_SYCL_COMPILER_WORKS "${CMAKE_BINARY_DIR}"
+   "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.sycl"
+   OUTPUT_VARIABLE __CMAKE_SYCL_COMPILER_OUTPUT )
 
 # Move the results of the test into a regular variable.
-set( CMAKE_HIP_COMPILER_WORKS ${CMAKE_HIP_COMPILER_WORKS} )
-unset( CMAKE_HIP_COMPILER_WORKS CACHE )
+set( CMAKE_SYCL_COMPILER_WORKS ${CMAKE_SYCL_COMPILER_WORKS} )
+unset( CMAKE_SYCL_COMPILER_WORKS CACHE )
 
 # Check the results of the test.
-if( NOT CMAKE_HIP_COMPILER_WORKS )
+if( NOT CMAKE_SYCL_COMPILER_WORKS )
    if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
-      PrintTestCompilerStatus( "HIP" " -- broken" )
+      PrintTestCompilerStatus( "SYCL" " -- broken" )
    else()
       PrintTestCompilerResult( CHECK_FAIL "broken" )
    endif()
-   message( FATAL_ERROR "The HIP compiler\n"
-      "  \"${CMAKE_HIP_COMPILER}\"\n"
+   message( FATAL_ERROR "The SYCL compiler\n"
+      "  \"${CMAKE_SYCL_COMPILER}\"\n"
       "is not able to compile a simple test program.\n"
       "It fails with the following output:\n"
-      "  ${__CMAKE_HIP_COMPILER_OUTPUT}\n\n"
+      "  ${__CMAKE_SYCL_COMPILER_OUTPUT}\n\n"
       "CMake will not be able to correctly generate this project." )
 endif()
 if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
-   PrintTestCompilerStatus( "HIP" " -- works" )
+   PrintTestCompilerStatus( "SYCL" " -- works" )
 else()
    PrintTestCompilerResult( CHECK_PASS "works" )
 endif()

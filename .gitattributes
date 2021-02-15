@@ -4,5 +4,6 @@
 #
 # Mozilla Public License Version 2.0
 
-# Consider .hip files as C++.
+# Consider .hip and .sycl files as C++.
 *.hip linguist-language=C++
+*.sycl linguist-language=C++
