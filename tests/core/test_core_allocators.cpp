@@ -8,7 +8,6 @@
 // Local include(s).
 #include "vecmem/allocators/allocator.hpp"
 #include "vecmem/memory/resources/resources.hpp"
-#include "vecmem/memory/allocator.hpp"
 
 // System include(s).
 #include <algorithm>
@@ -18,7 +17,7 @@
 #include <memory_resource>
 
 template<typename T>
-using test_vector = std::vector<T, vecmem::memory::polymorphic_allocator<T>>;
+using test_vector = std::vector<T, std::pmr::polymorphic_allocator<T>>;
 
 int main() {
 

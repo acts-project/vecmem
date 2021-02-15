@@ -10,7 +10,6 @@
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/memory/memory_manager.hpp"
-#include "vecmem/memory/allocator.hpp"
 #include "vecmem/memory/cuda/direct_memory_manager.hpp"
 #include "vecmem/memory/cuda/resources/resources.hpp"
 #include "vecmem/utils/cuda_error_handling.hpp"
@@ -22,7 +21,7 @@
 
 /// Custom vector type used on the host in the tests
 template<typename T>
-using managed_vector = std::vector<T, vecmem::memory::polymorphic_allocator<T>>;
+using managed_vector = std::vector<T, std::pmr::polymorphic_allocator<T>>;
 
 /// Helper function for creating an "input vector".
 managed_vector< int > make_input_vector() {
