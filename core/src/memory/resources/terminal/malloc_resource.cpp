@@ -20,7 +20,7 @@ namespace vecmem::memory::resources::terminal {
     }
 
     bool malloc_resource::do_is_equal(
-        const memory_resource & other
+        const memory_resource &
     ) const noexcept {
         return false;
     }
