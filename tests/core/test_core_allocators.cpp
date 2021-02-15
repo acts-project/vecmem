@@ -7,16 +7,18 @@
 
 // Local include(s).
 #include "vecmem/allocators/allocator.hpp"
+#include "vecmem/memory/resources/resources.hpp"
+#include "vecmem/memory/allocator.hpp"
 
 // System include(s).
 #include <algorithm>
 #undef NDEBUG
 #include <cassert>
 #include <vector>
+#include <memory_resource>
 
-// Vector type using the generic vecmem allocator.
-template< typename T >
-using custom_vector = std::vector< T, vecmem::allocator< T > >;
+template<typename T>
+using test_vector = std::vector<T, vecmem::memory::polymorphic_allocator<T>>;
 
 int main() {
 
@@ -24,7 +26,7 @@ int main() {
    // them.
    std::vector< int > reference_vector;
    reference_vector.reserve( 100 );
-   custom_vector< int > test_vector;
+   test_vector< int > test_vector(vecmem::memory::resources::get_terminal_malloc_resource());
    test_vector.reserve( 100 );
 
    for( int i = 0; i < 20; ++i ) {

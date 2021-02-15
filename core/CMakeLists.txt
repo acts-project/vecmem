@@ -21,5 +21,7 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/host_memory_manager.cpp"
    "include/vecmem/memory/allocator.hpp"
    "include/vecmem/memory/resources/base_resource.hpp"
+   "src/memory/resources/resources.cpp"
+   "src/memory/resources/terminal/malloc_resource.cpp"
    # Utilities.
    "include/vecmem/utils/types.hpp" )
