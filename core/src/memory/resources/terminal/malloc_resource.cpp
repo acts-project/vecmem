@@ -1,6 +1,6 @@
 #include <memory>
-#include <memory_resource>
 
+#include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/memory/resources/terminal/malloc_resource.hpp"
 
 namespace vecmem::memory::resources::terminal {
@@ -20,7 +20,7 @@ namespace vecmem::memory::resources::terminal {
     }
 
     bool malloc_resource::do_is_equal(
-        const std::pmr::memory_resource & other
+        const memory_resource & other
     ) const noexcept {
         return false;
     }

@@ -14,10 +14,11 @@
 #undef NDEBUG
 #include <cassert>
 #include <vector>
-#include <memory_resource>
+
+#include "vecmem/memory/resources/memory_resource.hpp"
 
 template<typename T>
-using test_vector = std::vector<T, std::pmr::polymorphic_allocator<T>>;
+using test_vector = std::vector<T, vecmem::memory::resources::polymorphic_allocator<T>>;
 
 int main() {
 
