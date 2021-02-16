@@ -15,5 +15,6 @@ vecmem_add_test( cuda_allocators test_cuda_allocators.cpp
    LINK_LIBRARIES vecmem::core vecmem::cuda )
 
 # Tests for the core library's device vector types, using the CUDA backend.
-vecmem_add_test( cuda_containers test_cuda_containers.cu
+vecmem_add_test( cuda_containers test_cuda_containers.cpp
+   test_cuda_containers_kernels.cu
    LINK_LIBRARIES vecmem::core vecmem::cuda )
