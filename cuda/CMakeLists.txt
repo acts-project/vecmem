@@ -32,6 +32,6 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    "include/vecmem/utils/cuda_error_handling.hpp"
    "src/utils/cuda_error_handling.cu" )
 
-target_link_libraries( vecmem_cuda PRIVATE CUDA::cudart )
+target_link_libraries( vecmem_cuda PUBLIC CUDA::cudart )
 
 target_link_libraries( vecmem_cuda PUBLIC vecmem::core )
