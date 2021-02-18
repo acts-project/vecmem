@@ -6,12 +6,11 @@
  */
 
 // Local include(s).
+#include "test_cuda_containers_kernels.cuh"
+
 #include "vecmem/allocators/allocator.hpp"
-#include "vecmem/containers/const_device_vector.hpp"
-#include "vecmem/containers/device_vector.hpp"
 #include "vecmem/memory/memory_manager.hpp"
 #include "vecmem/memory/cuda/direct_memory_manager.hpp"
-#include "vecmem/utils/cuda_error_handling.hpp"
 
 // System include(s).
 #undef NDEBUG
@@ -32,25 +31,6 @@ managed_vector< int > make_output_vector() {
    return managed_vector< int >( 10 );
 }
 
-/// Kernel performing a linear transformation using the vector helper types
-__global__
-void testLinearTransform( std::size_t size, const int* input, int* output ) {
-
-   // Find the current index.
-   const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
-   if( i >= size ) {
-      return;
-   }
-
-   // Create the helper vectors.
-   const vecmem::const_device_vector< int > inputvec( size, input );
-   vecmem::device_vector< int > outputvec( size, output );
-
-   // Perform the linear transformation.
-   outputvec.at( i ) = 3 + inputvec.at( i ) * 2;
-   return;
-}
-
 int main() {
 
    // Set up the memory manager for the test.
@@ -64,11 +44,7 @@ int main() {
    assert( inputvec.size() == outputvec.size() );
 
    // Perform a linear transformation using the vecmem vector helper types.
-   testLinearTransform<<< 1, inputvec.size() >>>( inputvec.size(),
-                                                  inputvec.data(),
-                                                  outputvec.data() );
-   VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
-   VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );
+   linearTransform(inputvec.size(), inputvec.data(), outputvec.data());
 
    // Check the output.
    for( std::size_t i = 0; i < outputvec.size(); ++i ) {
