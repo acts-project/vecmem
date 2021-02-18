@@ -6,13 +6,6 @@
  */
 #pragma once
 
-// CUDA include(s).
-#ifdef __CUDACC__
-#   include <cuda_runtime.h>
-#else
-typedef int cudaError_t; ///< Dummy type for @c cudaError_t in C++ code
-#endif // __CUDACC__
-
 // HIP include(s).
 #ifdef __HIP__
 #   include <hip/hip_runtime.h>
