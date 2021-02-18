@@ -7,7 +7,7 @@
 
 // Local include(s).
 #include "vecmem/memory/cuda/direct_memory_manager.hpp"
-#include "vecmem/utils/cuda_error_handling.hpp"
+#include "../../utils/cuda_error_handling.hpp"
 
 // CUDA include(s).
 #include <cuda_runtime.h>

@@ -6,12 +6,13 @@
  */
 #pragma once
 
+#include <cuda_runtime_api.h>
+
 // Detray Data Model include(s).
 #include "vecmem/utils/types.hpp"
 
 /// Helper macro used for checking @c cudaError_t type return values.
-#ifdef __CUDACC__
-#   define VECMEM_CUDA_ERROR_CHECK( EXP )                                      \
+#define VECMEM_CUDA_ERROR_CHECK( EXP )                                         \
    do {                                                                        \
       cudaError_t errorCode = EXP;                                             \
       if( errorCode != cudaSuccess ) {                                         \
@@ -19,19 +20,12 @@
                                             __LINE__ );                        \
       }                                                                        \
    } while( false )
-#else
-#   define VECMEM_CUDA_ERROR_CHECK( EXP ) do {} while( false )
-#endif // __CUDACC__
 
 /// Helper macro used for running a CUDA function when not caring about its results
-#ifdef __CUDACC__
-#   define VECMEM_CUDA_ERROR_IGNORE( EXP )                                     \
+#define VECMEM_CUDA_ERROR_IGNORE( EXP )                                        \
    do {                                                                        \
       EXP;                                                                     \
    } while( false )
-#else
-#   define VECMEM_CUDA_ERROR_IGNORE( EXP ) do {} while( false )
-#endif // __CUDACC__
 
 namespace vecmem { namespace cuda { namespace details {
 

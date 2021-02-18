@@ -20,8 +20,8 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    "include/vecmem/memory/cuda/direct_memory_manager.hpp"
    "src/memory/cuda/direct_memory_manager.cu"
    # Utilities.
-   "include/vecmem/utils/cuda_error_handling.hpp"
-   "src/utils/cuda_error_handling.cu" )
+   "src/utils/cuda_error_handling.cpp"
+   "src/utils/cuda_error_handling.hpp" )
 
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core

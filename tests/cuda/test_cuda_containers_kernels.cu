@@ -7,9 +7,10 @@
 
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
-#include "vecmem/utils/cuda_error_handling.hpp"
+#include "../../cuda/src/utils/cuda_error_handling.hpp"
 
 #include <cstddef>
+#include <stdexcept>
 
 /// Kernel performing a linear transformation using the vector helper types
 __global__
@@ -33,6 +34,6 @@ void linearTransformKernel( std::size_t size, const int* input, int* output ) {
 void linearTransform( std::size_t size, const int* input, int* output ) {
    linearTransformKernel<<< 1, size >>>( size, input, output );
 
-   VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
-   VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );
+   VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+   VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
 }
