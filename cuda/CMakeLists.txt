@@ -10,6 +10,8 @@ enable_language( CUDA )
 # Project include(s).
 include( vecmem-compiler-options-cuda )
 
+find_package( CUDAToolkit REQUIRED )
+
 # Set up the build of the VecMem CUDA library.
 vecmem_add_library( vecmem_cuda cuda SHARED
    # Memory management.
@@ -20,4 +22,8 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    # Utilities.
    "include/vecmem/utils/cuda_error_handling.hpp"
    "src/utils/cuda_error_handling.cu" )
-target_link_libraries( vecmem_cuda PUBLIC vecmem::core )
+
+target_link_libraries( vecmem_cuda
+   PUBLIC vecmem::core
+   PRIVATE CUDA::cudart
+)
