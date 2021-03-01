@@ -7,7 +7,7 @@
 
 // Local include(s).
 #include "vecmem/memory/cuda/direct_memory_manager.hpp"
-#include "vecmem/utils/cuda_error_handling.hpp"
+#include "../../utils/cuda_error_handling.hpp"
 
 // CUDA include(s).
 #include <cuda_runtime.h>
@@ -51,8 +51,8 @@ namespace vecmem { namespace cuda {
    void direct_memory_manager::set_maximum_capacity( std::size_t sizeInBytes,
                                                      int device ) {
 
-      // Get the object responsible for this device.
-      device_memory& mem = get_device_memory( device );
+      // Get a valid device.
+      get_device( device );
 
       // Make sure that this is possible.
       cudaDeviceProp prop;

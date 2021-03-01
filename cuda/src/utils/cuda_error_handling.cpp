@@ -6,10 +6,7 @@
  */
 
 // Local include(s).
-#include "vecmem/utils/cuda_error_handling.hpp"
-
-// CUDA include(s).
-#include <cuda_runtime.h>
+#include "cuda_error_handling.hpp"
 
 // System include(s).
 #include <iostream>
