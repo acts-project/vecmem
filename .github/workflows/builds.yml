@@ -28,21 +28,17 @@ jobs:
     steps:
     # Use a standard checkout of the code.
     - uses: actions/checkout@v2
-    # Set up the build directory.
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
     # Run the CMake configuration.
     - name: Configure
-      working-directory: ${{github.workspace}}/build
-      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} $GITHUB_WORKSPACE
+      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -S $GITHUB_WORKSPACE -B build
     # Perform the build.
     - name: Build
-      working-directory: ${{github.workspace}}/build
-      run: cmake --build .
+      run: cmake --build build
     # Run the unit test(s).
     - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest --output-on-failure
+      run: |
+        cd build
+        ctest --output-on-failure
 
   # Builds inside of a CUDA or ROCm/HIP Docker image.
   cuda_hip:
@@ -104,7 +100,7 @@ jobs:
         cmake --build build
     # Run the unit test(s).
     - name: Test
-      working-directory: ${{github.workspace}}/build
       run: |
+        cd build
         source /opt/intel/oneapi/setvars.sh
         ctest --output-on-failure
