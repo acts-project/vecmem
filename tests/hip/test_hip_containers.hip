@@ -5,13 +5,17 @@
  * Mozilla Public License Version 2.0
  */
 
+// HIP include(s). Note that this needs to come first, as it affects how
+// other headers later on include/see system headers like <cassert>.
+#include <hip/hip_runtime.h>
+
 // Local include(s).
 #include "vecmem/allocators/allocator.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/memory/memory_manager.hpp"
 #include "vecmem/memory/hip/direct_memory_manager.hpp"
-#include "vecmem/utils/hip_error_handling.hpp"
+#include "../../hip/src/utils/hip_error_handling.hpp"
 
 // System include(s).
 #undef NDEBUG

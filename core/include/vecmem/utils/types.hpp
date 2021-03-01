@@ -6,13 +6,6 @@
  */
 #pragma once
 
-// HIP include(s).
-#ifdef __HIP__
-#   include <hip/hip_runtime.h>
-#else
-typedef int hipError_t; ///< Dummy type for @c hipError_t in C++ code
-#endif // __HIP__
-
 /// Macro for declaring a device function
 #if defined(__CUDACC__) || defined(__HIP__)
 #   define VECMEM_DEVICE __device__
