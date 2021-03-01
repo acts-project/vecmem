@@ -8,7 +8,8 @@
 // Local include(s).
 #include "vecmem/memory/memory_manager.hpp"
 #include "vecmem/memory/memory_manager_interface.hpp"
-#include "vecmem/memory/host_memory_manager.hpp"
+
+#include <stdexcept>
 
 namespace vecmem {
 
@@ -32,13 +33,15 @@ namespace vecmem {
    }
 
    memory_manager_interface& memory_manager::get() const {
+      if (m_mgr == nullptr) {
+         throw std::runtime_error("No memory manager has been set!");
+      }
 
       return *m_mgr;
    }
 
    memory_manager::memory_manager()
-   : m_mgr( new host_memory_manager() ) {
-
+   : m_mgr( nullptr ) {
    }
 
 } // namespace vecmem
