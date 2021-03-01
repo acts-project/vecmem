@@ -115,7 +115,8 @@ namespace vecmem { namespace cuda {
       // Increment the internal pointer.
       mem.m_nextAllocation += sizeInBytes + padding;
       // And make sure that we didn't run out of memory.
-      if( mem.m_nextAllocation - mem.m_ptr >= mem.m_size ) {
+      if( static_cast< std::size_t >( mem.m_nextAllocation - mem.m_ptr ) >=
+          mem.m_size ) {
          throw std::bad_alloc();
       }
 

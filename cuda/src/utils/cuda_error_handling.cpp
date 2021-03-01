@@ -8,9 +8,6 @@
 // Local include(s).
 #include "cuda_error_handling.hpp"
 
-// CUDA include(s).
-#include <cuda_runtime.h>
-
 // System include(s).
 #include <iostream>
 #include <sstream>
