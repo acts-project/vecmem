@@ -76,6 +76,11 @@ set( CMAKE_HIP_PLATFORM "${CMAKE_HIP_PLATFORM_DEFAULT}" CACHE STRING
 set_property( CACHE CMAKE_HIP_PLATFORM
    PROPERTY STRINGS "hcc" "nvcc" )
 
+# Turn on CUDA support if we use nvcc.
+if( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" )
+   enable_language( CUDA )
+endif()
+
 # Decide how to do the build for the AMD (hcc) and NVidia (nvcc) backends.
 if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
    if( CMAKE_HIP_VERSION VERSION_LESS "3.7" )

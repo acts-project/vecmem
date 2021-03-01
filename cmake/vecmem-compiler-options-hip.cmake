@@ -14,11 +14,17 @@ include( vecmem-functions )
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "The (HIP) C++ standard to use" )
 
 # Basic flags for all build modes.
-foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
-   vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wall" )
-   vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wextra" )
-endforeach()
+if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
+   foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
+      vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wall" )
+      vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wextra" )
+   endforeach()
+endif()
 
 # More rigorous tests for the Debug builds.
-vecmem_add_flag( CMAKE_HIP_FLAGS_DEBUG "-Werror" )
-vecmem_add_flag( CMAKE_HIP_FLAGS_DEBUG "-pedantic" )
+if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
+   vecmem_add_flag( CMAKE_HIP_FLAGS_DEBUG "-Werror" )
+   vecmem_add_flag( CMAKE_HIP_FLAGS_DEBUG "-pedantic" )
+elseif( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" )
+   vecmem_add_flag( CMAKE_HIP_FLAGS_DEBUG "-Werror all-warnings" )
+endif()
