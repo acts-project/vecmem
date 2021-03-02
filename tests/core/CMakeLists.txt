@@ -13,3 +13,7 @@ vecmem_add_test( core_arrays test_core_arrays.cpp
    LINK_LIBRARIES vecmem::core )
 vecmem_add_test( core_containers test_core_containers.cpp
    LINK_LIBRARIES vecmem::core )
+
+# Tests for the core library's binary page manager.
+vecmem_add_test( core_binary_page test_core_binary_page.cpp
+   LINK_LIBRARIES vecmem::core )
