@@ -16,6 +16,6 @@ vecmem_add_library( vecmem_hip hip SHARED
    "include/vecmem/memory/hip/direct_memory_manager.hpp"
    "src/memory/hip/direct_memory_manager.hip"
    # Utilities.
-   "include/vecmem/utils/hip_error_handling.hpp"
+   "src/utils/hip_error_handling.hpp"
    "src/utils/hip_error_handling.hip" )
 target_link_libraries( vecmem_hip PUBLIC vecmem::core )

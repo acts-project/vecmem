@@ -7,7 +7,7 @@
 
 // Local include(s).
 #include "vecmem/memory/hip/direct_memory_manager.hpp"
-#include "vecmem/utils/hip_error_handling.hpp"
+#include "../../utils/hip_error_handling.hpp"
 
 // HIP include(s).
 #include <hip/hip_runtime.h>

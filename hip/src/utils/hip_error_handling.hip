@@ -6,10 +6,7 @@
  */
 
 // Local include(s).
-#include "vecmem/utils/hip_error_handling.hpp"
-
-// CUDA include(s).
-#include <hip/hip_runtime.h>
+#include "hip_error_handling.hpp"
 
 // System include(s).
 #include <iostream>

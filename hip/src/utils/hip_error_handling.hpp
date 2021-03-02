@@ -6,12 +6,11 @@
  */
 #pragma once
 
-// Detray Data Model include(s).
-#include "vecmem/utils/types.hpp"
+// HIP include(s).
+#include <hip/hip_runtime.h>
 
 /// Helper macro used for checking @c hipError_t type return values.
-#ifdef __HIP__
-#   define VECMEM_HIP_ERROR_CHECK( EXP )                                       \
+#define VECMEM_HIP_ERROR_CHECK( EXP )                                          \
    do {                                                                        \
       hipError_t errorCode = EXP;                                              \
       if( errorCode != hipSuccess ) {                                          \
@@ -19,19 +18,12 @@
                                             __LINE__ );                        \
       }                                                                        \
    } while( false )
-#else
-#   define VECMEM_HIP_ERROR_CHECK( EXP ) do {} while( false )
-#endif // __CUDACC__
 
 /// Helper macro used for running a HIP function when not caring about its results
-#ifdef __HIP__
-#   define VECMEM_HIP_ERROR_IGNORE( EXP )                                      \
+#define VECMEM_HIP_ERROR_IGNORE( EXP )                                         \
    do {                                                                        \
       EXP;                                                                     \
    } while( false )
-#else
-#   define VECMEM_HIP_ERROR_IGNORE( EXP ) do {} while( false )
-#endif // __CUDACC__
 
 namespace vecmem { namespace hip { namespace details {
 

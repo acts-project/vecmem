@@ -20,3 +20,6 @@ set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
 # Make CUDA generate debug symbols for the device code as well in a debug
 # build.
 vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-G" )
+
+# More rigorous tests for the Debug builds.
+vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-Werror all-warnings" )
