@@ -20,9 +20,18 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    "src/memory/cuda/arena_memory_manager.cpp"
    "include/vecmem/memory/cuda/direct_memory_manager.hpp"
    "src/memory/cuda/direct_memory_manager.cpp"
+   # Memory resources.
+   "include/vecmem/memory/cuda/device_memory_resource.hpp"
+   "src/memory/cuda/device_memory_resource.cpp"
+   "include/vecmem/memory/cuda/host_memory_resource.hpp"
+   "src/memory/cuda/host_memory_resource.cpp"
+   "include/vecmem/memory/cuda/managed_memory_resource.hpp"
+   "src/memory/cuda/managed_memory_resource.cpp"
    # Utilities.
    "src/utils/cuda_error_handling.hpp"
-   "src/utils/cuda_error_handling.cpp" )
+   "src/utils/cuda_error_handling.cpp"
+   "src/utils/cuda_wrappers.hpp"
+   "src/utils/cuda_wrappers.cpp" )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )
