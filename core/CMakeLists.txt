@@ -9,6 +9,8 @@ vecmem_add_library( vecmem_core core SHARED
    # STL allocators.
    "include/vecmem/allocators/allocator.hpp"
    # STL mimicking containers.
+   "include/vecmem/containers/array.hpp"
+   "include/vecmem/containers/array.ipp"
    "include/vecmem/containers/const_device_vector.hpp"
    "include/vecmem/containers/device_vector.hpp"
    "include/vecmem/containers/host_vector.hpp"
