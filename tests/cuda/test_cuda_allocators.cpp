@@ -8,9 +8,6 @@
 // Local include(s).
 #include "vecmem/allocators/allocator.hpp"
 #include "vecmem/containers/vector.hpp"
-#include "vecmem/memory/memory_manager.hpp"
-#include "vecmem/memory/cuda/arena_memory_manager.hpp"
-#include "vecmem/memory/cuda/direct_memory_manager.hpp"
 #include "vecmem/memory/cuda/host_memory_resource.hpp"
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
 

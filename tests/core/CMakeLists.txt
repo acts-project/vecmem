@@ -9,5 +9,7 @@ vecmem_add_test( core_allocators test_core_allocators.cpp
    LINK_LIBRARIES vecmem::core )
 
 # Tests for the core library's container types.
+vecmem_add_test( core_arrays test_core_arrays.cpp
+   LINK_LIBRARIES vecmem::core )
 vecmem_add_test( core_containers test_core_containers.cpp
    LINK_LIBRARIES vecmem::core )
