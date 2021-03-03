@@ -25,5 +25,7 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/memory/host_memory_resource.hpp"
    "src/memory/binary_page_memory_resource.cpp"
    "include/vecmem/memory/binary_page_memory_resource.hpp"
+   "src/memory/contiguous_memory_resource.cpp"
+   "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
    "include/vecmem/utils/types.hpp" )
