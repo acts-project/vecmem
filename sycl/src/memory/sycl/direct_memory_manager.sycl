@@ -7,7 +7,7 @@
 
 // Local include(s).
 #include "vecmem/memory/sycl/direct_memory_manager.hpp"
-#include "vecmem/utils/sycl/device_selector.hpp"
+#include "../../utils/sycl/device_selector.hpp"
 
 // SYCL include(s).
 #include <CL/sycl.hpp>

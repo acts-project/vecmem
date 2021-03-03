@@ -15,7 +15,12 @@ vecmem_add_library( vecmem_sycl sycl SHARED
    # Memory management.
    "include/vecmem/memory/sycl/direct_memory_manager.hpp"
    "src/memory/sycl/direct_memory_manager.sycl"
+   "include/vecmem/memory/sycl/device_memory_resource.hpp"
+   "src/memory/sycl/device_memory_resource.sycl"
    # Utilities.
-   "include/vecmem/utils/sycl/device_selector.hpp"
-   "src/utils/sycl/device_selector.sycl" )
+   "include/vecmem/utils/sycl/queue_wrapper.hpp"
+   "src/utils/sycl/queue_wrapper.sycl"
+   "src/utils/sycl/device_selector.hpp"
+   "src/utils/sycl/device_selector.sycl"
+   "src/utils/sycl/opaque_queue.hpp" )
 target_link_libraries( vecmem_sycl PUBLIC vecmem::core )

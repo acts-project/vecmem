@@ -1,0 +1,69 @@
+/** VecMem project, part of the ACTS project (R&D line)
+ *
+ * (c) 2021 CERN for the benefit of the ACTS project
+ *
+ * Mozilla Public License Version 2.0
+ */
+
+// Local include(s).
+#include "vecmem/memory/sycl/device_memory_resource.hpp"
+
+// SYCL include(s).
+#include <CL/sycl.hpp>
+
+// System include(s).
+#include <cassert>
+
+namespace {
+
+   /// Helper function for getting a @c cl::sycl::queue out of
+   /// @c vecmem::sycl::queue_wrapper
+   cl::sycl::queue& get_queue( vecmem::sycl::queue_wrapper& queue ) {
+
+      assert( queue.queue() != nullptr );
+      return *( reinterpret_cast< cl::sycl::queue* >( queue.queue() ) );
+   }
+
+   /// Helper function for getting a @c cl::sycl::queue out of
+   /// @c vecmem::sycl::queue_wrapper
+   const cl::sycl::queue&
+   get_queue( const vecmem::sycl::queue_wrapper& queue ) {
+
+      assert( queue.queue() != nullptr );
+      return *( reinterpret_cast< const cl::sycl::queue* >( queue.queue() ) );
+   }
+
+} // private namespace
+
+namespace vecmem::sycl {
+
+   device_memory_resource::device_memory_resource( const queue_wrapper& queue )
+   : m_queue( queue ) {
+
+   }
+
+   void* device_memory_resource::do_allocate( std::size_t nbytes,
+                                              std::size_t ) {
+
+      return cl::sycl::malloc_device( nbytes, ::get_queue( m_queue ) );
+   }
+
+   void device_memory_resource::do_deallocate( void* ptr, std::size_t,
+                                               std::size_t ) {
+
+      cl::sycl::free( ptr, ::get_queue( m_queue ) );
+   }
+
+   bool device_memory_resource::do_is_equal(
+      const memory_resource& other ) const noexcept {
+
+      // Try to cast the other object to this exact type.
+      const device_memory_resource* p =
+         dynamic_cast< const device_memory_resource* >( &other );
+
+      // The two are equal if they have equal queues.
+      return ( ( p != nullptr ) &&
+               ( ::get_queue( p->m_queue ) == ::get_queue( m_queue ) ) );
+   }
+
+} // namespace vecmem::sycl

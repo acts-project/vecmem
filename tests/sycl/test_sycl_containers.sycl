@@ -11,7 +11,7 @@
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/memory/memory_manager.hpp"
 #include "vecmem/memory/sycl/direct_memory_manager.hpp"
-#include "vecmem/utils/sycl/device_selector.hpp"
+#include "../../sycl/src/utils/sycl/device_selector.hpp"
 
 // SYCL include(s).
 #include <CL/sycl.hpp>
