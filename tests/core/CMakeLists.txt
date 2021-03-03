@@ -17,3 +17,7 @@ vecmem_add_test( core_containers test_core_containers.cpp
 # Tests for the core library's binary page manager.
 vecmem_add_test( core_binary_page test_core_binary_page.cpp
    LINK_LIBRARIES vecmem::core )
+
+# Tests for the contiguous memory resource
+vecmem_add_test( core_contiguous_memory_resource test_core_contiguous_memory_resource.cpp
+   LINK_LIBRARIES vecmem::core )
