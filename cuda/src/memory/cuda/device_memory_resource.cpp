@@ -8,6 +8,7 @@
 
 #include "../../utils/cuda_error_handling.hpp"
 #include "../../utils/cuda_wrappers.hpp"
+#include "../../utils/select_device.hpp"
 
 #include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
@@ -26,16 +27,10 @@ namespace vecmem::cuda {
         std::size_t bytes,
         std::size_t
     ) {
-        int current_device = 0;
-
-        VECMEM_CUDA_ERROR_CHECK(cudaGetDevice(&current_device));
-        VECMEM_CUDA_ERROR_CHECK(cudaSetDevice(m_device));
+        details::select_device dev(m_device);
 
         void * res;
         VECMEM_CUDA_ERROR_CHECK(cudaMalloc(&res, bytes));
-
-        VECMEM_CUDA_ERROR_CHECK(cudaSetDevice(current_device));
-
         return res;
     }
 
@@ -44,14 +39,9 @@ namespace vecmem::cuda {
         std::size_t,
         std::size_t
     ) {
-        int current_device = 0;
-
-        VECMEM_CUDA_ERROR_CHECK(cudaGetDevice(&current_device));
-        VECMEM_CUDA_ERROR_CHECK(cudaSetDevice(m_device));
+        details::select_device dev(m_device);
 
         VECMEM_CUDA_ERROR_CHECK(cudaFree(p));
-
-        VECMEM_CUDA_ERROR_CHECK(cudaSetDevice(current_device));
     }
 
     bool device_memory_resource::do_is_equal(

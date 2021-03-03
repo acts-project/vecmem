@@ -15,11 +15,6 @@ find_package( CUDAToolkit REQUIRED )
 
 # Set up the build of the VecMem CUDA library.
 vecmem_add_library( vecmem_cuda cuda SHARED
-   # Memory management.
-   "include/vecmem/memory/cuda/arena_memory_manager.hpp"
-   "src/memory/cuda/arena_memory_manager.cpp"
-   "include/vecmem/memory/cuda/direct_memory_manager.hpp"
-   "src/memory/cuda/direct_memory_manager.cpp"
    # Memory resources.
    "include/vecmem/memory/cuda/device_memory_resource.hpp"
    "src/memory/cuda/device_memory_resource.cpp"
@@ -31,7 +26,9 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    "src/utils/cuda_error_handling.hpp"
    "src/utils/cuda_error_handling.cpp"
    "src/utils/cuda_wrappers.hpp"
-   "src/utils/cuda_wrappers.cpp" )
+   "src/utils/cuda_wrappers.cpp"
+   "src/utils/select_device.hpp"
+   "src/utils/select_device.cpp" )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )
