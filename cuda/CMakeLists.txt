@@ -31,7 +31,9 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    "src/utils/cuda_error_handling.hpp"
    "src/utils/cuda_error_handling.cpp"
    "src/utils/cuda_wrappers.hpp"
-   "src/utils/cuda_wrappers.cpp" )
+   "src/utils/cuda_wrappers.cpp"
+   "src/utils/select_device.hpp"
+   "src/utils/select_device.cpp" )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )
