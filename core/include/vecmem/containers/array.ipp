@@ -8,10 +8,30 @@
 
 // System include(s).
 #include <algorithm>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
 namespace vecmem {
+
+   namespace details {
+
+      /// Helper function used in the @c vecmem::array constructors
+      template< typename T, std::size_t N >
+      std::unique_ptr< typename vecmem::array< T, N >::value_type,
+                       typename vecmem::array< T, N >::deleter >
+      allocate_array_memory( vecmem::memory_resource& resource,
+                             typename vecmem::array< T, N >::size_type size ) {
+
+         const std::size_t nbytes =
+            size * sizeof( typename vecmem::array< T, N >::value_type );
+         return { size == 0 ? nullptr :
+                  static_cast< typename vecmem::array< T, N >::pointer_type >(
+                     resource.allocate( nbytes ) ),
+                  typename vecmem::array< T, N >::deleter( nbytes, resource ) };
+      }
+
+   } // namespace details
 
    template< typename T, std::size_t N >
    array< T, N >::deleter::deleter( std::size_t bytes,
@@ -31,10 +51,7 @@ namespace vecmem {
    template< typename T, std::size_t N >
    array< T, N >::array( memory_resource& resource )
    : m_size( N ),
-     m_memory( m_size == 0 ? nullptr :
-               static_cast< pointer_type >(
-                  resource.allocate( m_size * sizeof( value_type ) ) ),
-               deleter( m_size * sizeof( value_type ), resource ) ) {
+     m_memory( details::allocate_array_memory< T, N >( resource, m_size ) ) {
 
       static_assert( N != details::array_invalid_size,
                      "Can only use the 'compile time constructor' if a size "
@@ -44,10 +61,7 @@ namespace vecmem {
    template< typename T, std::size_t N >
    array< T, N >::array( memory_resource& resource, size_type size )
    : m_size( size ),
-     m_memory( m_size == 0 ? nullptr :
-               static_cast< pointer_type >(
-                  resource.allocate( m_size * sizeof( value_type ) ) ),
-               deleter( m_size * sizeof( value_type ), resource ) ) {
+     m_memory( details::allocate_array_memory< T, N >( resource, m_size ) ) {
 
       static_assert( N == details::array_invalid_size,
                      "Can only use the 'runtime constructor' if a size was not "
