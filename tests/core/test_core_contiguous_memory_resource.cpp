@@ -30,10 +30,10 @@ int main() {
    vec4.reserve(100);
    vec5.reserve(100);
 
-   assert(static_cast<void *>(vec2.data()) == static_cast<void *>(static_cast<int *>(vec1.data()) + 100));
-   assert(static_cast<void *>(vec3.data()) == static_cast<void *>(static_cast<char *>(vec2.data()) + 100));
-   assert(static_cast<void *>(vec4.data()) == static_cast<void *>(static_cast<double *>(vec3.data()) + 100));
-   assert(static_cast<void *>(vec5.data()) == static_cast<void *>(static_cast<float *>(vec4.data()) + 100));
+   assert(static_cast<void *>(vec2.data()) == static_cast<void *>(vec1.data() + 100));
+   assert(static_cast<void *>(vec3.data()) == static_cast<void *>(vec2.data() + 100));
+   assert(static_cast<void *>(vec4.data()) == static_cast<void *>(vec3.data() + 100));
+   assert(static_cast<void *>(vec5.data()) == static_cast<void *>(vec4.data() + 100));
 
    return 0;
 }
