@@ -11,8 +11,8 @@
 
 namespace vecmem::sycl {
 
-   /// Memory resource for a specific SYCL device
-   class device_memory_resource final : public details::memory_resource_base {
+   /// Memory resource shared between the host and a specific SYCL device
+   class shared_memory_resource final : public details::memory_resource_base {
 
    public:
       // Inherit the base class's constructor(s).
@@ -23,6 +23,6 @@ namespace vecmem::sycl {
       void* do_allocate( std::size_t nbytes,
                          std::size_t alignment ) override final;
 
-   }; // device_memory_resource
+   }; // class shared_memory_resource
 
 } // namespace vecmem::sycl

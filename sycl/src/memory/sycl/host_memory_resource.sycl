@@ -6,7 +6,7 @@
  */
 
 // Local include(s).
-#include "vecmem/memory/sycl/device_memory_resource.hpp"
+#include "vecmem/memory/sycl/host_memory_resource.hpp"
 #include "../../utils/sycl/get_queue.hpp"
 
 // SYCL include(s).
@@ -14,10 +14,9 @@
 
 namespace vecmem::sycl {
 
-   void* device_memory_resource::do_allocate( std::size_t nbytes,
-                                              std::size_t ) {
+   void* host_memory_resource::do_allocate( std::size_t nbytes, std::size_t ) {
 
-      return cl::sycl::malloc_device( nbytes, details::get_queue( m_queue ) );
+      return cl::sycl::malloc_host( nbytes, details::get_queue( m_queue ) );
    }
 
 } // namespace vecmem::sycl
