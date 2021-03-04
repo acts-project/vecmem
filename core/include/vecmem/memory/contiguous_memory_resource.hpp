@@ -66,7 +66,6 @@ namespace vecmem {
         memory_resource & m_upstream;
         const std::size_t m_size;
         void * const m_begin;
-        void * const m_end;
         void * m_next;
     };
 }

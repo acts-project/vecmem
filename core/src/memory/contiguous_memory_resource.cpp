@@ -21,7 +21,6 @@ namespace vecmem {
         m_upstream(upstream),
         m_size(size),
         m_begin(m_upstream.allocate(m_size)),
-        m_end(static_cast<void *>(static_cast<char *>(m_begin) + size)),
         m_next(m_begin)
     {
     }
@@ -52,7 +51,7 @@ namespace vecmem {
          * If the end of this allocation is past the end of our memory space,
          * we can't allocate, and should throw an error.
          */
-        if (next > m_end) {
+        if (next >= (static_cast<char*>(m_begin) + m_size)) {
             throw std::bad_alloc();
         }
 
