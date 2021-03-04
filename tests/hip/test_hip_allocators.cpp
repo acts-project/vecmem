@@ -6,24 +6,19 @@
  */
 
 // Local include(s).
-#include "vecmem/allocators/allocator.hpp"
-#include "vecmem/memory/memory_manager.hpp"
-#include "vecmem/memory/hip/direct_memory_manager.hpp"
+#include "vecmem/containers/vector.hpp"
+#include "vecmem/memory/hip/device_memory_resource.hpp"
+#include "vecmem/memory/hip/host_memory_resource.hpp"
 
 // System include(s).
 #undef NDEBUG
 #include <cassert>
-#include <vector>
 
-/// Custom vector type used in the tests
-template< typename T >
-using test_vector = std::vector< T, vecmem::allocator< T > >;
-
-/// Function running tests with the active memory manager.
-void run_host_tests() {
+/// Function running tests using the specified memory resource
+void run_host_tests( vecmem::memory_resource& resource ) {
 
    // Create the test vector.
-   test_vector< int > testv;
+   vecmem::vector< int > testv( &resource );
 
    // Manipulate it in some simple ways.
    for( int i = 0; i < 100; ++i ) {
@@ -40,34 +35,32 @@ void run_host_tests() {
    return;
 }
 
-/// Function running simple tests with the active memory manager.
-void run_device_tests() {
+/// Function running simple tests with the specified memory resource.
+void run_device_tests( vecmem::memory_resource& resource ) {
 
-   // Create the test vector.
-   test_vector< int > testv;
+   void* p = resource.allocate( 100 );
+   assert( p != nullptr );
+   resource.deallocate( p, 100 );
 
-   // Resize it in a few different ways.
-   testv.resize( 100 );
-   testv.reserve( 1000 );
-   testv.resize( 10 );
+   p = resource.allocate( 4096 );
+   assert( p != nullptr );
+   resource.deallocate( p, 4096 );
    return;
 }
 
 int main() {
 
-   // Run the tests with all available memory managers, that allow for access to
-   // the memory from the host.
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::hip::direct_memory_manager >(
-         vecmem::hip::direct_memory_manager::memory_type::host ) );
-   run_host_tests();
+   // Create all the available HIP memory resources.
+   vecmem::hip::device_memory_resource device_resource;
+   vecmem::hip::host_memory_resource   host_resource;
 
-   // Run much simpler tests with the memory managers that only allocate memory
-   // on the device(s).
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::hip::direct_memory_manager >(
-         vecmem::hip::direct_memory_manager::memory_type::device ) );
-   run_device_tests();
+   // Run the tests with all available memory resources, that allow for access
+   // to the memory from the host.
+   run_host_tests( host_resource );
+
+   // Run much simpler tests with all of the resources.
+   run_device_tests( device_resource );
+   run_device_tests( host_resource );
 
    // Return gracefully.
    return 0;
