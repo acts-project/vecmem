@@ -13,8 +13,6 @@ include( vecmem-compiler-options-sycl )
 # Set up the build of the VecMem SYCL library.
 vecmem_add_library( vecmem_sycl sycl SHARED
    # Memory management.
-   "include/vecmem/memory/sycl/direct_memory_manager.hpp"
-   "src/memory/sycl/direct_memory_manager.sycl"
    "include/vecmem/memory/sycl/details/memory_resource_base.hpp"
    "src/memory/sycl/details/memory_resource_base.sycl"
    "include/vecmem/memory/sycl/device_memory_resource.hpp"
