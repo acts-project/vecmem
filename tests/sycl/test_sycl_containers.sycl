@@ -6,11 +6,10 @@
  */
 
 // Local include(s).
-#include "vecmem/allocators/allocator.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
-#include "vecmem/memory/memory_manager.hpp"
-#include "vecmem/memory/sycl/direct_memory_manager.hpp"
+#include "vecmem/containers/vector.hpp"
+#include "vecmem/memory/sycl/shared_memory_resource.hpp"
 #include "../../sycl/src/utils/sycl/device_selector.hpp"
 
 // SYCL include(s).
@@ -19,20 +18,17 @@
 // System include(s).
 #include <cassert>
 #include <iostream>
-#include <vector>
-
-/// Custom vector type used on the host in the tests
-template< typename T >
-using managed_vector = std::vector< T, vecmem::allocator< T > >;
 
 /// Helper function for creating an "input vector".
-managed_vector< int > make_input_vector() {
-   return { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+vecmem::vector< int > make_input_vector( vecmem::memory_resource& resource ) {
+
+   return { { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, &resource };
 }
 
 /// Helper function for creating an "output vector".
-managed_vector< int > make_output_vector() {
-   return managed_vector< int >( 10 );
+vecmem::vector< int > make_output_vector( vecmem::memory_resource& resource ) {
+
+   return vecmem::vector< int >( 10, &resource );
 }
 
 int main() {
@@ -50,19 +46,12 @@ int main() {
              << queue.get_device().get_info< cl::sycl::info::device::version >()
              << std::endl;
 
-   // Set up the memory manager for the test.
-   vecmem::memory_manager::instance().set(
-      std::make_unique< vecmem::sycl::direct_memory_manager >(
-         vecmem::sycl::direct_memory_manager::memory_type::shared ) );
-   vecmem::sycl::direct_memory_manager& mem_mgr =
-      dynamic_cast< vecmem::sycl::direct_memory_manager& >(
-         vecmem::memory_manager::instance().get() );
-   mem_mgr.set_queue( vecmem::sycl::direct_memory_manager::DEFAULT_DEVICE,
-                      queue );
+   // Set up the memory resource for the test.
+   vecmem::sycl::shared_memory_resource resource( &queue );
 
    // Create an input and an output vector.
-   auto inputvec = make_input_vector();
-   auto outputvec = make_output_vector();
+   auto inputvec = make_input_vector( resource );
+   auto outputvec = make_output_vector( resource );
    assert( inputvec.size() == outputvec.size() );
 
    // Perform a linear transformation using the vecmem vector helper types.
