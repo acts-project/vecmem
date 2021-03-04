@@ -9,83 +9,102 @@
 #include "vecmem/containers/array.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 
+// GoogleTest include(s).
+#include <gtest/gtest.h>
+
 // System include(s).
-#undef NDEBUG
-#include <cassert>
 #include <cstring>
 #include <type_traits>
 #include <vector>
 
-/// Function testing a particular array object.
-template< typename T, std::size_t N >
-void test_array( vecmem::array< T, N >& a ) {
+/// Test case for @c vecmem::array
+///
+/// It provides a reusable @c vecmem::host_memory_resource for the tests, and
+/// provides a templated test function doing the heavy lifting for the test(s).
+///
+class core_array_test : public testing::Test {
 
-   // Make sure that we use integer types for the test, as it really only works
-   // for that...
-   static_assert( std::is_integral< T >::value,
-                  "Can only use integer types with this test" );
+protected:
+   /// Function testing a particular array object.
+   template< typename T, std::size_t N >
+   void test_array( vecmem::array< T, N >& a ) {
 
-   // Fill the array with some simple values.
-   for( std::size_t i = 0; i < a.size(); ++i ) {
-      a.at( i ) = i;
-   }
+      // Make sure that we use integer types for the test, as it really only
+      // works for that...
+      static_assert( std::is_integral< T >::value,
+                     "Can only use integer types with this test" );
 
-   // Check the contents using iterator based loops.
-   {
-      auto itr = a.begin();
-      for( std::size_t i = 0; itr != a.end(); ++itr, ++i ) {
-         assert( static_cast< std::size_t >( *itr ) == i );
+      // Fill the array with some simple values.
+      for( std::size_t i = 0; i < a.size(); ++i ) {
+         a.at( i ) = i;
       }
-      auto ritr = a.rbegin();
-      for( std::size_t i = a.size() - 1; ritr != a.rend(); ++ritr, --i ) {
-         assert( static_cast< std::size_t >( *ritr ) == i );
-      }
-   }
 
-   // Check its contents using a range based loop.
-   {
-      std::size_t i = 0;
+      // Check the contents using iterator based loops.
+      {
+         auto itr = a.begin();
+         for( std::size_t i = 0; itr != a.end(); ++itr, ++i ) {
+            EXPECT_TRUE( static_cast< std::size_t >( *itr ) == i );
+         }
+         auto ritr = a.rbegin();
+         for( std::size_t i = a.size() - 1; ritr != a.rend(); ++ritr, --i ) {
+            EXPECT_TRUE( static_cast< std::size_t >( *ritr ) == i );
+         }
+      }
+
+      // Check its contents using a range based loop.
+      {
+         std::size_t i = 0;
+         for( T value : a ) {
+            EXPECT_TRUE( static_cast< std::size_t >( value ) == i++ );
+         }
+      }
+
+      // Fill the array with a constant value.
+      static constexpr std::size_t VALUE = 123;
+      a.fill( VALUE );
       for( T value : a ) {
-         assert( static_cast< std::size_t >( value ) == i++ );
+         EXPECT_TRUE( value == VALUE );
       }
+
+      // Make sure that it succeeded.
+      if( ! a.empty() ) {
+         EXPECT_TRUE( a.front() == VALUE );
+         EXPECT_TRUE( a.back() == VALUE );
+      }
+      const std::vector< T > reference( a.size(), VALUE );
+      EXPECT_TRUE( memcmp( a.data(), reference.data(), a.size() * sizeof( T ) )
+                   == 0 );
    }
 
-   // Fill the array with a constant value.
-   static constexpr std::size_t VALUE = 123;
-   a.fill( VALUE );
-   for( T value : a ) {
-      assert( value == VALUE );
-   }
+   /// The resource used throughout the test.
+   vecmem::host_memory_resource m_resource;
 
-   // Make sure that it succeeded.
-   if( ! a.empty() ) {
-      assert( a.front() == VALUE );
-      assert( a.back() == VALUE );
-   }
-   const std::vector< T > reference( a.size(), VALUE );
-   assert( memcmp( a.data(), reference.data(), a.size() * sizeof( T ) ) == 0 );
+}; // class core_array_test
+
+/// Test with a non-zero sized array whose size is fixed at compile time.
+TEST_F( core_array_test, non_zero_compile_time ) {
+
+   vecmem::array< int, 10 > a( m_resource );
+   test_array( a );
 }
 
-int main() {
+/// Test with a non-zero sized array whose size is specified at runtime
+TEST_F( core_array_test, non_zero_runtime ) {
 
-   // The resource used throughout the test.
-   vecmem::host_memory_resource resource;
+   vecmem::array< int > a( m_resource, 20 );
+   test_array( a );
+}
 
-   // Create an array whose size is decided at compile time.
-   vecmem::array< int, 10 > a1( resource );
-   test_array( a1 );
+/// Test with a zero sized array whose size is fixed at compile time.
+TEST_F( core_array_test, zero_compile_time ) {
 
-   // Create an array whose size is decided at runtime.
-   vecmem::array< int > a2( resource, 20 );
-   test_array( a2 );
+   vecmem::array< unsigned int, 0 > a( m_resource );
+   test_array( a );
+}
 
-   // Test zero sized arrays.
-   vecmem::array< unsigned int, 0 > a3( resource );
-   test_array( a3 );
+/// Test with a zero sized array whose size is specified at runtime
+TEST_F( core_array_test, zero_runtime ) {
 
-   vecmem::array< unsigned int > a4( resource, 0 );
-   test_array( a4 );
-
-   // Return gracefully.
-   return 0;
+   vecmem::array< unsigned int > a( m_resource, 0 );
+   test_array( a );
 }
