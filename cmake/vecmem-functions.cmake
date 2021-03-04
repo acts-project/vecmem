@@ -66,6 +66,14 @@ function( vecmem_add_test name )
          RUNTIME_OUTPUT_DIRECTORY${_config} "${CMAKE_BINARY_DIR}/test-bin" )
    endforeach()
 
+   # Make it depend on GTest.
+   target_link_libraries( ${test_exe_name} PRIVATE GTest::gtest )
+   add_dependencies( ${test_exe_name} GoogleTest )
+
+   # Make it link against the system's thread library.
+   find_package( Threads REQUIRED )
+   target_link_libraries( ${test_exe_name} PRIVATE Threads::Threads )
+
    # Run the executable as the test.
    add_test( NAME ${test_exe_name}
       COMMAND ${CMAKE_COMMAND} -E env
