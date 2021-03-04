@@ -7,7 +7,7 @@
 #pragma once
 
 // HIP include(s).
-#include <hip/hip_runtime.h>
+#include <hip/hip_runtime_api.h>
 
 /// Helper macro used for checking @c hipError_t type return values.
 #define VECMEM_HIP_ERROR_CHECK( EXP )                                          \
