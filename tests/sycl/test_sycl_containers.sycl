@@ -57,24 +57,23 @@ int main() {
    // Perform a linear transformation using the vecmem vector helper types.
    queue.submit( [ &inputvec, &outputvec ]( cl::sycl::handler& h ) {
 
-      // Translate the STL vectors to primitive types.
-      const std::size_t size = inputvec.size();
-      const int* input = inputvec.data();
-      int* output = outputvec.data();
+      // Translate the STL vectors to simple types.
+      vecmem::const_device_vector_data< int > input( inputvec );
+      vecmem::device_vector_data< int > output( outputvec );
 
       // Run the kernel.
       h.parallel_for< class LinearTransform >(
          cl::sycl::range< 1 >( inputvec.size() ),
-         [ size, input, output ]( cl::sycl::id< 1 > id ) {
+         [ input, output ]( cl::sycl::id< 1 > id ) {
 
             // Skip invalid indices.
-            if( id >= size ) {
+            if( id >= input.m_size ) {
                return;
             }
 
             // Create the helper vectors.
-            const vecmem::const_device_vector< int > inputvec( size, input );
-            vecmem::device_vector< int > outputvec( size, output );
+            const vecmem::const_device_vector< int > inputvec( input );
+            vecmem::device_vector< int > outputvec( output );
 
             // Perform the linear transformation.
             outputvec.at( id ) = 3 + inputvec.at( id ) * 2;

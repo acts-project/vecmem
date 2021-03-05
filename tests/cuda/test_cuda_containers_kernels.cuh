@@ -7,6 +7,10 @@
 
 #pragma once
 
-#include <cstddef>
+// Local include(s).
+#include "vecmem/containers/const_device_vector_data.hpp"
+#include "vecmem/containers/device_vector_data.hpp"
 
-void linearTransform(std::size_t size, const int* input, int* output);
+/// Perform a linear transformation using the received vectors
+void linearTransform( vecmem::const_device_vector_data< int > input,
+                      vecmem::device_vector_data< int > output );

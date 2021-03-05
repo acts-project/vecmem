@@ -6,8 +6,10 @@
  */
 #pragma once
 
-// System include(s).
-#include <cstddef>
+// Local include(s).
+#include "vecmem/containers/const_device_vector_data.hpp"
+#include "vecmem/containers/device_vector_data.hpp"
 
 /// Function executing a simple HIP kernel on the input/output arrays
-void linearTransform( std::size_t size, const int* input, int* output );
+void linearTransform( vecmem::const_device_vector_data< int > input,
+                      vecmem::device_vector_data< int > output );

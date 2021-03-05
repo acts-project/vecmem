@@ -34,7 +34,7 @@ protected:
 TEST_F( core_container_test, const_device_vector ) {
 
    const vecmem::const_device_vector< int >
-      test_vector( m_reference_vector.size(), m_reference_vector.data() );
+      test_vector( m_reference_vector );
    EXPECT_TRUE( test_vector.size() == m_reference_vector.size() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
                             m_reference_vector.end(),
@@ -44,8 +44,8 @@ TEST_F( core_container_test, const_device_vector ) {
 /// Test(s) for @c vecmem::device_vector
 TEST_F( core_container_test, device_vector ) {
 
-   const vecmem::const_device_vector< int >
-      test_vector( m_reference_vector.size(), m_reference_vector.data() );
+   const vecmem::device_vector< int >
+      test_vector( m_reference_vector );
    EXPECT_TRUE( test_vector.size() == m_reference_vector.size() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
                             m_reference_vector.end(),
