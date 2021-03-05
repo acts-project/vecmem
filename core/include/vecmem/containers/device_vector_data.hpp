@@ -11,6 +11,7 @@
 
 // System include(s).
 #include <cstddef>
+#include <type_traits>
 #include <vector>
 
 namespace vecmem {
@@ -24,20 +25,25 @@ namespace vecmem {
    template< typename TYPE >
    struct device_vector_data {
 
-      /// Type of the objects in the vector/array
-      typedef TYPE value_type;
-      /// Constant pointer type to the array
-      typedef value_type* pointer;
+      /// Non-constant value type used in the host vector
+      typedef typename std::remove_cv< TYPE >::type value_type;
+      /// Pointer type to the array
+      typedef TYPE* pointer;
 
       /// Default constructor
       device_vector_data() = default;
-      /// Constructor from any vector type
-      template< typename ALLOC >
-      VECMEM_HOST
-      device_vector_data( std::vector< TYPE, ALLOC >& vec );
       /// Constructor from "raw data"
       VECMEM_HOST_AND_DEVICE
       device_vector_data( std::size_t size, pointer ptr );
+
+      /// Constructor from a non-const vector
+      template< typename ALLOC >
+      VECMEM_HOST
+      device_vector_data( std::vector< value_type, ALLOC >& vec );
+      /// Constructor from a const vector
+      template< typename ALLOC >
+      VECMEM_HOST
+      device_vector_data( const std::vector< value_type, ALLOC >& vec );
 
       /// Size of the array in memory
       std::size_t m_size;

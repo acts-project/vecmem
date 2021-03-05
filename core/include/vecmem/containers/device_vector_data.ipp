@@ -9,19 +9,28 @@
 namespace vecmem {
 
    template< typename TYPE >
+   VECMEM_HOST_AND_DEVICE
+   device_vector_data< TYPE >::
+   device_vector_data( std::size_t size, pointer ptr )
+   : m_size( size ), m_ptr( ptr ) {
+
+   }
+
+   template< typename TYPE >
    template< typename ALLOC >
    VECMEM_HOST
    device_vector_data< TYPE >::
-   device_vector_data( std::vector< TYPE, ALLOC >& vec )
+   device_vector_data( std::vector< value_type, ALLOC >& vec )
    : m_size( vec.size() ), m_ptr( vec.data() ) {
 
    }
 
    template< typename TYPE >
-   VECMEM_HOST_AND_DEVICE
+   template< typename ALLOC >
+   VECMEM_HOST
    device_vector_data< TYPE >::
-   device_vector_data( std::size_t size, pointer ptr )
-   : m_size( size ), m_ptr( ptr ) {
+   device_vector_data( const std::vector< value_type, ALLOC >& vec )
+   : m_size( vec.size() ), m_ptr( vec.data() ) {
 
    }
 
