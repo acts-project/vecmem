@@ -1,0 +1,56 @@
+# VecMem project, part of the ACTS project (R&D line)
+#
+# (c) 2021 CERN for the benefit of the ACTS project
+#
+# Mozilla Public License Version 2.0
+
+# Guard against multiple includes.
+include_guard( GLOBAL )
+
+# CMake include(s).
+include( ExternalProject )
+
+# Helper variable.
+set( GOOGLETEST_DEBUG_POSTFIX "" )
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+   set( GOOGLETEST_DEBUG_POSTFIX "d" )
+endif()
+
+# Locations of the (eventual) build results.
+set( GOOGLETEST_PREFIX
+   "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/GoogleTest" )
+set( GOOGLETEST_INCLUDE_DIR "${GOOGLETEST_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}" )
+set( GOOGLETEST_gtest_LIBRARY
+   "${GOOGLETEST_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${GOOGLETEST_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}" )
+set( GOOGLETEST_gtest_main_LIBRARY
+   "${GOOGLETEST_PREFIX}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}gtest_main${GOOGLETEST_DEBUG_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}" )
+set( GOOGLETEST_LIBRARIES "${GOOGLETEST_gtest_LIBRARY}" )
+
+# Build GoogleTest.
+file( MAKE_DIRECTORY "${GOOGLETEST_INCLUDE_DIR}" )
+ExternalProject_Add( GoogleTest
+   PREFIX "${GOOGLETEST_PREFIX}"
+   URL "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
+   URL_MD5 "ecd1fa65e7de707cd5c00bdac56022cd"
+   CMAKE_CACHE_ARGS
+      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+      -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+      -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD}
+      -DBUILD_GTEST:BOOL=TRUE -DBUILD_GMOCK:BOOL=FALSE
+      -DCMAKE_INSTALL_INCLUDEDIR:STRING=${CMAKE_INSTALL_INCLUDEDIR}
+      -DCMAKE_INSTALL_LIBDIR:STRING=${CMAKE_INSTALL_LIBDIR}
+   BUILD_BYPRODUCTS "${GOOGLETEST_gtest_LIBRARY}"
+                    "${GOOGLETEST_gtest_main_LIBRARY}" )
+
+# Set up the helper imported libraries.
+add_library( GTest::gtest STATIC IMPORTED )
+set_target_properties( GTest::gtest PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${GOOGLETEST_INCLUDE_DIR}"
+   IMPORTED_LOCATION "${GOOGLETEST_gtest_LIBRARY}"
+   INTERFACE_LINK_LIBRARIES "${GOOGLETEST_LIBRARIES}" )
+
+add_library( GTest::gtest_main STATIC IMPORTED )
+set_target_properties( GTest::gtest_main PROPERTIES
+   INTERFACE_INCLUDE_DIRECTORIES "${GOOGLETEST_INCLUDE_DIR}"
+   IMPORTED_LOCATION "${GOOGLETEST_gtest_main_LIBRARY}"
+   INTERFACE_LINK_LIBRARIES "${GOOGLETEST_LIBRARIES}" )
