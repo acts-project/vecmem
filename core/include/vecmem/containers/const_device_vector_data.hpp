@@ -30,6 +30,8 @@ namespace vecmem {
       /// Constant pointer type to the array
       typedef const value_type* const_pointer;
 
+      /// Default constructor
+      const_device_vector_data() = default;
       /// Constructor from any vector type
       template< typename ALLOC >
       VECMEM_HOST
@@ -40,14 +42,6 @@ namespace vecmem {
       /// Constructor from non-const data
       VECMEM_HOST_AND_DEVICE
       const_device_vector_data( const device_vector_data< value_type >& data );
-
-      /// Copy constructor
-      VECMEM_HOST_AND_DEVICE
-      const_device_vector_data( const const_device_vector_data& parent );
-      /// Assignment operator
-      VECMEM_HOST_AND_DEVICE
-      const_device_vector_data&
-      operator=( const const_device_vector_data& rhs );
 
       /// Size of the array in memory
       std::size_t m_size;

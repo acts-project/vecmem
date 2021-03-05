@@ -25,31 +25,4 @@ namespace vecmem {
 
    }
 
-   template< typename TYPE >
-   VECMEM_HOST_AND_DEVICE
-   device_vector_data< TYPE >::
-   device_vector_data( const device_vector_data& parent )
-   : m_size( parent.m_size ), m_ptr( parent.m_ptr ) {
-
-   }
-
-   template< typename TYPE >
-   VECMEM_HOST_AND_DEVICE
-   device_vector_data< TYPE >&
-   device_vector_data< TYPE >::
-   operator=( const device_vector_data& rhs ) {
-
-      // Prevent self-assignment.
-      if( this == &rhs ) {
-         return *this;
-      }
-
-      // Copy the other object's payload.
-      m_size = rhs.m_size;
-      m_ptr = rhs.m_ptr;
-
-      // Return a reference to this object.
-      return *this;
-   }
-
 } // namespace vecmem
