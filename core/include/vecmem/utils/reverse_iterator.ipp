@@ -180,4 +180,18 @@ namespace vecmem {
       return itr.operator->();
    }
 
+   template< typename T >
+   bool operator==( const reverse_iterator< T >& itr1,
+                    const reverse_iterator< T >& itr2 ) {
+
+      return ( itr1.base() == itr2.base() );
+   }
+
+   template< typename T >
+   bool operator!=( const reverse_iterator< T >& itr1,
+                    const reverse_iterator< T >& itr2 ) {
+
+      return !( itr1 == itr2 );
+   }
+
 } // namespace vecmem

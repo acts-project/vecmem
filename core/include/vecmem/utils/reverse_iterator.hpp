@@ -129,6 +129,15 @@ namespace vecmem {
 
    }; // class reverse_iterator
 
+   /// Comparison operator for reverse iterators
+   template< typename T >
+   bool operator==( const reverse_iterator< T >& itr1,
+                    const reverse_iterator< T >& itr2 );
+   /// Comparison operator for reverse iterators
+   template< typename T >
+   bool operator!=( const reverse_iterator< T >& itr1,
+                    const reverse_iterator< T >& itr2 );
+
 } // namespace vecmem
 
 // Include the implementation.

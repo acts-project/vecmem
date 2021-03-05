@@ -18,6 +18,7 @@
 
 // System include(s).
 #include <algorithm>
+#include <numeric>
 
 /// Test case for the custom container types
 class core_container_test : public testing::Test {
@@ -36,9 +37,16 @@ TEST_F( core_container_test, const_device_vector ) {
    const vecmem::const_device_vector< int >
       test_vector( m_reference_vector );
    EXPECT_TRUE( test_vector.size() == m_reference_vector.size() );
+   EXPECT_TRUE( test_vector.empty() == m_reference_vector.empty() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
                             m_reference_vector.end(),
                             test_vector.begin() ) );
+   EXPECT_TRUE( std::accumulate( test_vector.begin(), test_vector.end(), 0 ) ==
+                std::accumulate( test_vector.rbegin(), test_vector.rend(), 0 ) );
+   for( std::size_t i = 0; i < m_reference_vector.size(); ++i ) {
+      EXPECT_TRUE( test_vector.at( i ) == m_reference_vector.at( i ) );
+      EXPECT_TRUE( test_vector[ i ] == m_reference_vector[ i ] );
+   }
 }
 
 /// Test(s) for @c vecmem::device_vector
@@ -47,9 +55,16 @@ TEST_F( core_container_test, device_vector ) {
    const vecmem::device_vector< int >
       test_vector( m_reference_vector );
    EXPECT_TRUE( test_vector.size() == m_reference_vector.size() );
+   EXPECT_TRUE( test_vector.empty() == m_reference_vector.empty() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
                             m_reference_vector.end(),
                             test_vector.begin() ) );
+   EXPECT_TRUE( std::accumulate( test_vector.begin(), test_vector.end(), 0 ) ==
+                std::accumulate( test_vector.rbegin(), test_vector.rend(), 0 ) );
+   for( std::size_t i = 0; i < m_reference_vector.size(); ++i ) {
+      EXPECT_TRUE( test_vector.at( i ) == m_reference_vector.at( i ) );
+      EXPECT_TRUE( test_vector[ i ] == m_reference_vector[ i ] );
+   }
 }
 
 /// Test(s) for @c vecmem::static_vector
