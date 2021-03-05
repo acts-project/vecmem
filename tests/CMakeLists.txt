@@ -4,6 +4,9 @@
 #
 # Mozilla Public License Version 2.0
 
+# Build GoogleTest.
+include( vecmem-googletest )
+
 # Include the library specific tests.
 add_subdirectory( core )
 if( VECMEM_BUILD_CUDA_LIBRARY )

@@ -6,7 +6,7 @@
  */
 
 // Local include(s).
-#include "vecmem/utils/sycl/device_selector.hpp"
+#include "device_selector.hpp"
 
 namespace vecmem::sycl {
 
