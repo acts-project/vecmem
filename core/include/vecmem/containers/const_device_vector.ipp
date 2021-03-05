@@ -14,7 +14,7 @@ namespace vecmem {
    template< typename TYPE >
    VECMEM_HOST_AND_DEVICE
    const_device_vector< TYPE >::
-   const_device_vector( const const_device_vector_data< value_type >& data )
+   const_device_vector( const_device_vector_data< value_type > data )
    : m_size( data.m_size ), m_ptr( data.m_ptr ) {
 
    }

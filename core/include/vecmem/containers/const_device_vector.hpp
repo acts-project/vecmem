@@ -48,7 +48,7 @@ namespace vecmem {
 
       /// Constructor, on top of a previously allocated/filled block of memory
       VECMEM_HOST_AND_DEVICE
-      const_device_vector( const const_device_vector_data< value_type >& data );
+      const_device_vector( const_device_vector_data< value_type > data );
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
       const_device_vector( const const_device_vector& parent );
@@ -66,7 +66,7 @@ namespace vecmem {
       /// Return a specific element of the vector
       VECMEM_HOST_AND_DEVICE
       const_reference operator[]( size_type pos ) const;
-      /// Return the first element of the vector.
+      /// Return the first element of the vector
       VECMEM_HOST_AND_DEVICE
       const_reference front() const;
       /// Return the last element of the vector

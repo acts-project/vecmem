@@ -11,41 +11,33 @@ namespace vecmem {
    template< typename TYPE >
    template< typename ALLOC >
    VECMEM_HOST
-   const_device_vector_data< TYPE >::
-   const_device_vector_data( const std::vector< TYPE, ALLOC >& vec )
+   device_vector_data< TYPE >::
+   device_vector_data( std::vector< TYPE, ALLOC >& vec )
    : m_size( vec.size() ), m_ptr( vec.data() ) {
 
    }
 
    template< typename TYPE >
    VECMEM_HOST_AND_DEVICE
-   const_device_vector_data< TYPE >::
-   const_device_vector_data( std::size_t size, const_pointer ptr )
+   device_vector_data< TYPE >::
+   device_vector_data( std::size_t size, pointer ptr )
    : m_size( size ), m_ptr( ptr ) {
 
    }
 
    template< typename TYPE >
    VECMEM_HOST_AND_DEVICE
-   const_device_vector_data< TYPE >::
-   const_device_vector_data( const device_vector_data< value_type >& data )
-   : m_size( data.m_size ), m_ptr( data.m_ptr ) {
-
-   }
-
-   template< typename TYPE >
-   VECMEM_HOST_AND_DEVICE
-   const_device_vector_data< TYPE >::
-   const_device_vector_data( const const_device_vector_data& parent )
+   device_vector_data< TYPE >::
+   device_vector_data( const device_vector_data& parent )
    : m_size( parent.m_size ), m_ptr( parent.m_ptr ) {
 
    }
 
    template< typename TYPE >
    VECMEM_HOST_AND_DEVICE
-   const_device_vector_data< TYPE >&
-   const_device_vector_data< TYPE >::
-   operator=( const const_device_vector_data& rhs ) {
+   device_vector_data< TYPE >&
+   device_vector_data< TYPE >::
+   operator=( const device_vector_data& rhs ) {
 
       // Prevent self-assignment.
       if( this == &rhs ) {
