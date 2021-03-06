@@ -8,8 +8,6 @@
 // Local include(s).
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
-#include "vecmem/containers/const_device_vector_data.hpp"
-#include "vecmem/containers/device_vector_data.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/sycl/shared_memory_resource.hpp"
 #include "../../sycl/src/utils/sycl/device_selector.hpp"
@@ -60,8 +58,8 @@ int main() {
    queue.submit( [ &inputvec, &outputvec ]( cl::sycl::handler& h ) {
 
       // Translate the STL vectors to simple types.
-      vecmem::const_device_vector_data< int > input( inputvec );
-      vecmem::device_vector_data< int > output( outputvec );
+      auto input = vecmem::get_data( inputvec );
+      auto output = vecmem::get_data( outputvec );
 
       // Run the kernel.
       h.parallel_for< class LinearTransform >(
