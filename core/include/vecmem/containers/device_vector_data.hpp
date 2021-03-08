@@ -47,15 +47,17 @@ namespace vecmem {
 
       /// Constructor from another type of @c device_vector_data object
       ///
-      /// Only enabled if the wrapped type is different, but convertible to this
-      /// object's wrapped type. This complication is necessary to avoid
-      /// problems from SYCL. Which is very particular about having default
-      /// copy constructors for the types that it sends to kernels.
+      /// Only enabled if the wrapped type is different, but only by const-ness.
+      /// This complication is necessary to avoid problems from SYCL. Which is
+      /// very particular about having default copy constructors for the types
+      /// that it sends to kernels.
       ///
       template< typename OTHERTYPE,
-                std::enable_if_t< ( ! std::is_same< TYPE, OTHERTYPE >::value ) &&
-                                  std::is_convertible< OTHERTYPE*, TYPE* >::value,
-                                  bool > = true >
+                std::enable_if_t<
+                   ( ! std::is_same< TYPE, OTHERTYPE >::value ) &&
+                   std::is_same< TYPE,
+                                 typename std::add_const< OTHERTYPE >::type >::value,
+                   bool > = true >
       VECMEM_HOST_AND_DEVICE
       device_vector_data( const device_vector_data< OTHERTYPE >& parent );
 
