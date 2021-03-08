@@ -30,6 +30,8 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
+   "include/vecmem/utils/deleter.hpp"
+   "src/utils/deleter.cpp"
    "include/vecmem/utils/reverse_iterator.hpp"
    "include/vecmem/utils/reverse_iterator.ipp"
    "include/vecmem/utils/types.hpp" )
