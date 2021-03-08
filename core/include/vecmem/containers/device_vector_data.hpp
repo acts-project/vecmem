@@ -12,7 +12,6 @@
 // System include(s).
 #include <cstddef>
 #include <type_traits>
-#include <vector>
 
 namespace vecmem {
 
@@ -36,15 +35,6 @@ namespace vecmem {
       VECMEM_HOST_AND_DEVICE
       device_vector_data( std::size_t size, pointer ptr );
 
-      /// Constructor from a non-const vector
-      template< typename ALLOC >
-      VECMEM_HOST
-      device_vector_data( std::vector< value_type, ALLOC >& vec );
-      /// Constructor from a const vector
-      template< typename ALLOC >
-      VECMEM_HOST
-      device_vector_data( const std::vector< value_type, ALLOC >& vec );
-
       /// Constructor from another type of @c device_vector_data object
       ///
       /// Only enabled if the wrapped type is different, but only by const-ness.
@@ -67,17 +57,6 @@ namespace vecmem {
       pointer m_ptr;
 
    }; // struct device_vector_data
-
-   /// Helper function creating a @c vecmem::device_vector_data object
-   template< typename TYPE, typename ALLOC >
-   VECMEM_HOST
-   device_vector_data< TYPE >
-   get_data( std::vector< TYPE, ALLOC >& vec );
-   /// Helper function creating a @c vecmem::device_vector_data object
-   template< typename TYPE, typename ALLOC >
-   VECMEM_HOST
-   device_vector_data< const TYPE >
-   get_data( const std::vector< TYPE, ALLOC >& vec );
 
 } // namespace vecmem
 

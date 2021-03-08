@@ -35,7 +35,7 @@ protected:
 TEST_F( core_container_test, const_device_vector ) {
 
    const vecmem::const_device_vector< int >
-      test_vector( m_reference_vector );
+      test_vector( vecmem::get_data( m_reference_vector ) );
    EXPECT_TRUE( test_vector.size() == m_reference_vector.size() );
    EXPECT_TRUE( test_vector.empty() == m_reference_vector.empty() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
@@ -53,7 +53,7 @@ TEST_F( core_container_test, const_device_vector ) {
 TEST_F( core_container_test, device_vector ) {
 
    const vecmem::device_vector< int >
-      test_vector( m_reference_vector );
+      test_vector( vecmem::get_data( m_reference_vector ) );
    EXPECT_TRUE( test_vector.size() == m_reference_vector.size() );
    EXPECT_TRUE( test_vector.empty() == m_reference_vector.empty() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
@@ -80,7 +80,7 @@ TEST_F( core_container_test, static_vector ) {
                             test_vector.begin() ) );
 }
 
-/// Test(s) for @c vecmem::static_vector
+/// Test(s) for @c vecmem::array
 TEST_F( core_container_test, array ) {
 
    vecmem::array< int, 20 > test_array( m_resource );
