@@ -9,4 +9,5 @@ vecmem_add_test( core
    "test_core_allocators.cpp" "test_core_arrays.cpp"
    "test_core_containers.cpp" "test_core_contiguous_memory_resource.cpp"
    "test_core_device_containers.cpp"
+   "test_core_allocator.cpp"
    LINK_LIBRARIES vecmem::core GTest::gtest_main )
