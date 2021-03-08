@@ -91,7 +91,7 @@ namespace vecmem {
    device_array< T, N >::front() {
 
       // Make sure that there is at least one element in the vector.
-      static_assert( N > 0 );
+      static_assert( N > 0, "Cannot return first element of empty array" );
 
       // Return a reference to the first element of the vector.
       return m_ptr[ 0 ];
@@ -103,7 +103,7 @@ namespace vecmem {
    device_array< T, N >::front() const {
 
       // Make sure that there is at least one element in the vector.
-      static_assert( N > 0 );
+      static_assert( N > 0, "Cannot return first element of empty array" );
 
       // Return a reference to the first element of the vector.
       return m_ptr[ 0 ];
@@ -115,7 +115,7 @@ namespace vecmem {
    device_array< T, N >::back() {
 
       // Make sure that there is at least one element in the vector.
-      static_assert( N > 0 );
+      static_assert( N > 0, "Cannot return last element of empty array" );
 
       // Return a reference to the last element of the vector.
       return m_ptr[ N - 1 ];
@@ -127,7 +127,7 @@ namespace vecmem {
    device_array< T, N >::back() const {
 
       // Make sure that there is at least one element in the vector.
-      static_assert( N > 0 );
+      static_assert( N > 0, "Cannot return last element of empty array" );
 
       // Return a reference to the last element of the vector.
       return m_ptr[ N - 1 ];
