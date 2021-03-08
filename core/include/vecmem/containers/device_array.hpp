@@ -16,22 +16,21 @@
 
 namespace vecmem {
 
-   /// Class mimicking an @c std::vector in "device code"
+   /// Class mimicking a host-filled @c std::array in "device code"
    ///
-   /// This type can be used in "generic device code" as an @c std::vector that
-   /// allows modification of its elements. It does not allow the vector to be
-   /// resized, it just allows client code to access the data wrapped by the
-   /// vector with the same interface that @c std::vector provides.
+   /// Unlike @c vecmem::array, its size must be defined at compile time. Since
+   /// for arrays whose size is defined at runtime, one can use
+   /// @c vecmem::device_vector instead.
    ///
-   template< typename TYPE >
-   class device_vector {
+   template< typename T, std::size_t N >
+   class device_array {
 
    public:
-      /// @name Type definitions, mimicking @c std::vector
+      /// @name Type definitions, mimicking @c std::array
       /// @{
 
       /// Type of the array elements
-      typedef TYPE              value_type;
+      typedef T                 value_type;
       /// Size type for the array
       typedef std::size_t       size_type;
       /// Pointer difference type
@@ -59,43 +58,43 @@ namespace vecmem {
 
       /// Constructor, on top of a previously allocated/filled block of memory
       VECMEM_HOST_AND_DEVICE
-      device_vector( device_vector_data< value_type > data );
+      device_array( device_vector_data< value_type > data );
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
-      device_vector( const device_vector& parent );
+      device_array( const device_array& parent );
 
       /// Copy assignment operator
       VECMEM_HOST_AND_DEVICE
-      device_vector& operator=( const device_vector& rhs );
+      device_array& operator=( const device_array& rhs );
 
-      /// @name Vector element access functions
+      /// @name Array element access functions
       /// @{
 
-      /// Return a specific element of the vector in a "safe way" (non-const)
+      /// Return a specific element of the array in a "safe way" (non-const)
       VECMEM_HOST_AND_DEVICE
       reference at( size_type pos );
-      /// Return a specific element of the vector in a "safe way" (const)
+      /// Return a specific element of the array in a "safe way" (const)
       VECMEM_HOST_AND_DEVICE
       const_reference at( size_type pos ) const;
 
-      /// Return a specific element of the vector (non-const)
+      /// Return a specific element of the array (non-const)
       VECMEM_HOST_AND_DEVICE
       reference operator[]( size_type pos );
-      /// Return a specific element of the vector (const)
+      /// Return a specific element of the array (const)
       VECMEM_HOST_AND_DEVICE
       const_reference operator[]( size_type pos ) const;
 
-      /// Return the first element of the vector (non-const)
+      /// Return the first element of the array (non-const)
       VECMEM_HOST_AND_DEVICE
       reference front();
-      /// Return the first element of the vector (const)
+      /// Return the first element of the array (const)
       VECMEM_HOST_AND_DEVICE
       const_reference front() const;
 
-      /// Return the last element of the vector (non-const)
+      /// Return the last element of the array (non-const)
       VECMEM_HOST_AND_DEVICE
       reference back();
-      /// Return the last element of the vector (const)
+      /// Return the last element of the array (const)
       VECMEM_HOST_AND_DEVICE
       const_reference back() const;
 
@@ -111,43 +110,43 @@ namespace vecmem {
       /// @name Iterator providing functions
       /// @{
 
-      /// Return a forward iterator pointing at the beginning of the vector
+      /// Return a forward iterator pointing at the beginning of the array
       VECMEM_HOST_AND_DEVICE
       iterator begin();
-      /// Return a constant forward iterator pointing at the beginning of the vector
+      /// Return a constant forward iterator pointing at the beginning of the array
       VECMEM_HOST_AND_DEVICE
       const_iterator begin() const;
-      /// Return a constant forward iterator pointing at the beginning of the vector
+      /// Return a constant forward iterator pointing at the beginning of the array
       VECMEM_HOST_AND_DEVICE
       const_iterator cbegin() const;
 
-      /// Return a forward iterator pointing at the end of the vector
+      /// Return a forward iterator pointing at the end of the array
       VECMEM_HOST_AND_DEVICE
       iterator end();
-      /// Return a constant forward iterator pointing at the end of the vector
+      /// Return a constant forward iterator pointing at the end of the array
       VECMEM_HOST_AND_DEVICE
       const_iterator end() const;
-      /// Return a constant forward iterator pointing at the end of the vector
+      /// Return a constant forward iterator pointing at the end of the array
       VECMEM_HOST_AND_DEVICE
       const_iterator cend() const;
 
-      /// Return a reverse iterator pointing at the end of the vector
+      /// Return a reverse iterator pointing at the end of the array
       VECMEM_HOST_AND_DEVICE
       reverse_iterator rbegin();
-      /// Return a constant reverse iterator pointing at the end of the vector
+      /// Return a constant reverse iterator pointing at the end of the array
       VECMEM_HOST_AND_DEVICE
       const_reverse_iterator rbegin() const;
-      /// Return a constant reverse iterator pointing at the end of the vector
+      /// Return a constant reverse iterator pointing at the end of the array
       VECMEM_HOST_AND_DEVICE
       const_reverse_iterator crbegin() const;
 
-      /// Return a reverse iterator pointing at the beginning of the vector
+      /// Return a reverse iterator pointing at the beginning of the array
       VECMEM_HOST_AND_DEVICE
       reverse_iterator rend();
-      /// Return a constant reverse iterator pointing at the beginning of the vector
+      /// Return a constant reverse iterator pointing at the beginning of the array
       VECMEM_HOST_AND_DEVICE
       const_reverse_iterator rend() const;
-      /// Return a constant reverse iterator pointing at the beginning of the vector
+      /// Return a constant reverse iterator pointing at the beginning of the array
       VECMEM_HOST_AND_DEVICE
       const_reverse_iterator crend() const;
 
@@ -156,30 +155,25 @@ namespace vecmem {
       /// @name Capacity checking functions
       /// @{
 
-      /// Check whether the vector is empty
+      /// Check whether the array is empty
       VECMEM_HOST_AND_DEVICE
-      bool empty() const;
-      /// Return the number of elements in the vector
+      constexpr bool empty() const;
+      /// Return the number of elements in the array
       VECMEM_HOST_AND_DEVICE
-      size_type size() const;
-      /// Return the maximum (fixed) number of elements in the vector
+      constexpr size_type size() const;
+      /// Return the maximum (fixed) number of elements in the array
       VECMEM_HOST_AND_DEVICE
-      size_type max_size() const;
-      /// Return the current (fixed) capacity of the vector
-      VECMEM_HOST_AND_DEVICE
-      size_type capacity() const;
+      constexpr size_type max_size() const;
 
       /// @}
 
    private:
-      /// Size of the array that this object looks at
-      size_type m_size;
       /// Pointer to the start of the array
       pointer m_ptr;
 
-   }; // class device_vector
+   }; // class device_array
 
 } // namespace vecmem
 
 // Include the implementation.
-#include "vecmem/containers/device_vector.ipp"
+#include "vecmem/containers/device_array.ipp"
