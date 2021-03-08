@@ -6,8 +6,7 @@
  */
 
 // Local include(s).
-#include "vecmem/containers/const_device_vector_data.hpp"
-#include "vecmem/containers/device_vector_data.hpp"
+#include "vecmem/containers/details/vector_data.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
@@ -24,16 +23,16 @@ class core_device_container_test : public testing::Test {
 TEST_F( core_device_container_test, trivial_construct ) {
 
    EXPECT_TRUE( std::is_trivially_default_constructible<
-                   vecmem::const_device_vector_data< int > >() );
+                   vecmem::details::vector_data< const int > >() );
    EXPECT_TRUE( std::is_trivially_constructible<
-                   vecmem::const_device_vector_data< int > >() );
+                   vecmem::details::vector_data< const int > >() );
    EXPECT_TRUE( std::is_trivially_copy_constructible<
-                   vecmem::const_device_vector_data< int > >() );
+                   vecmem::details::vector_data< const int > >() );
 
    EXPECT_TRUE( std::is_trivially_default_constructible<
-                   vecmem::device_vector_data< int > >() );
+                   vecmem::details::vector_data< int > >() );
    EXPECT_TRUE( std::is_trivially_constructible<
-                   vecmem::device_vector_data< int > >() );
+                   vecmem::details::vector_data< int > >() );
    EXPECT_TRUE( std::is_trivially_copy_constructible<
-                   vecmem::device_vector_data< int > >() );
+                   vecmem::details::vector_data< int > >() );
 }

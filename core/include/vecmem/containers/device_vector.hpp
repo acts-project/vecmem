@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/device_vector_data.hpp"
+#include "vecmem/containers/details/vector_data.hpp"
 #include "vecmem/utils/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -59,7 +59,7 @@ namespace vecmem {
 
       /// Constructor, on top of a previously allocated/filled block of memory
       VECMEM_HOST_AND_DEVICE
-      device_vector( device_vector_data< value_type > data );
+      device_vector( details::vector_data< value_type > data );
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
       device_vector( const device_vector& parent );

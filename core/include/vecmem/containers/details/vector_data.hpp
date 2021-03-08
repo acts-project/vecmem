@@ -13,29 +13,28 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace vecmem {
+namespace vecmem { namespace details {
 
-   /// Simple struct holding data for @c vecmem::const_device_vector
+   /// Simple struct holding data for a 1 dimensional vector/array
    ///
    /// This type is meant to "formalise" the communication of data between
-   /// @c vecmem::vector (a "host type") and @c vecmem::device_vector
-   /// (a "device types").
+   /// @c vecmem::vector, @c vecmem::array ("host types") and
+   /// @c vecmem::(const_)device_vector, @c vecmem::(const_)device_array
+   /// ("device types").
    ///
    template< typename TYPE >
-   struct device_vector_data {
+   struct vector_data {
 
-      /// Non-constant value type used in the host vector
-      typedef typename std::remove_cv< TYPE >::type value_type;
       /// Pointer type to the array
       typedef TYPE* pointer;
 
       /// Default constructor
-      device_vector_data() = default;
+      vector_data() = default;
       /// Constructor from "raw data"
       VECMEM_HOST_AND_DEVICE
-      device_vector_data( std::size_t size, pointer ptr );
+      vector_data( std::size_t size, pointer ptr );
 
-      /// Constructor from another type of @c device_vector_data object
+      /// Constructor from a "slightly different" @c vecmem::details::vector_data object
       ///
       /// Only enabled if the wrapped type is different, but only by const-ness.
       /// This complication is necessary to avoid problems from SYCL. Which is
@@ -49,16 +48,16 @@ namespace vecmem {
                                  typename std::add_const< OTHERTYPE >::type >::value,
                    bool > = true >
       VECMEM_HOST_AND_DEVICE
-      device_vector_data( const device_vector_data< OTHERTYPE >& parent );
+      vector_data( const vector_data< OTHERTYPE >& parent );
 
       /// Size of the array in memory
       std::size_t m_size;
       /// Pointer to the start of the memory block/array
       pointer m_ptr;
 
-   }; // struct device_vector_data
+   }; // struct vector_data
 
-} // namespace vecmem
+} } // namespace vecmem::details
 
 // Include the implementation.
-#include "vecmem/containers/device_vector_data.ipp"
+#include "vecmem/containers/details/vector_data.ipp"

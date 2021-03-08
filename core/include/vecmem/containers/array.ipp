@@ -269,18 +269,18 @@ namespace vecmem {
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   device_vector_data< T >
+   details::vector_data< T >
    get_data( array< T, N >& a ) {
 
-      return device_vector_data< T >( a.size(), a.data() );
+      return details::vector_data< T >( a.size(), a.data() );
    }
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   device_vector_data< const T >
+   details::vector_data< const T >
    get_data( const array< T, N >& a ) {
 
-      return device_vector_data< const T >( a.size(), a.data() );
+      return details::vector_data< const T >( a.size(), a.data() );
    }
 
 } // namespace vecmem

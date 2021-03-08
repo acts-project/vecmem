@@ -14,9 +14,9 @@
 
 /// Kernel performing a linear transformation using the vector helper types
 __global__
-void linearTransformKernel( vecmem::const_device_vector_data< int > constants,
-                            vecmem::const_device_vector_data< int > input,
-                            vecmem::device_vector_data< int > output ) {
+void linearTransformKernel( vecmem::details::vector_data< const int > constants,
+                            vecmem::details::vector_data< const int > input,
+                            vecmem::details::vector_data< int > output ) {
 
    // Find the current index.
    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -35,9 +35,9 @@ void linearTransformKernel( vecmem::const_device_vector_data< int > constants,
    return;
 }
 
-void linearTransform( vecmem::const_device_vector_data< int > constants,
-                      vecmem::const_device_vector_data< int > input,
-                      vecmem::device_vector_data< int > output ) {
+void linearTransform( vecmem::details::vector_data< const int > constants,
+                      vecmem::details::vector_data< const int > input,
+                      vecmem::details::vector_data< int > output ) {
 
    // Launch the kernel.
    linearTransformKernel<<< 1, input.m_size >>>( constants, input, output );
