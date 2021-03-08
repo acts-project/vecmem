@@ -11,5 +11,6 @@
 #include "vecmem/containers/device_vector_data.hpp"
 
 /// Function executing a simple HIP kernel on the input/output arrays
-void linearTransform( vecmem::const_device_vector_data< int > input,
+void linearTransform( vecmem::const_device_vector_data< int > constants,
+                      vecmem::const_device_vector_data< int > input,
                       vecmem::device_vector_data< int > output );

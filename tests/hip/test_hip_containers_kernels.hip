@@ -11,13 +11,15 @@
 
 // Local include(s).
 #include "test_hip_containers_kernels.hpp"
+#include "vecmem/containers/const_device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "../../hip/src/utils/hip_error_handling.hpp"
 
 /// Kernel performing a linear transformation using the vector helper types
 __global__
-void linearTransformKernel( vecmem::const_device_vector_data< int > input,
+void linearTransformKernel( vecmem::const_device_vector_data< int > constants,
+                            vecmem::const_device_vector_data< int > input,
                             vecmem::device_vector_data< int > output ) {
 
    // Find the current index.
@@ -26,21 +28,24 @@ void linearTransformKernel( vecmem::const_device_vector_data< int > input,
       return;
    }
 
-   // Create the helper vectors.
+   // Create the helper containers.
+   const vecmem::const_device_array< int, 2 > constantarray( constants );
    const vecmem::const_device_vector< int > inputvec( input );
    vecmem::device_vector< int > outputvec( output );
 
    // Perform the linear transformation.
-   outputvec.at( i ) = 3 + inputvec.at( i ) * 2;
+   outputvec.at( i ) = inputvec.at( i ) * constantarray.at( 0 ) +
+                       constantarray.at( 1 );
    return;
 }
 
-void linearTransform( vecmem::const_device_vector_data< int > input,
+void linearTransform( vecmem::const_device_vector_data< int > constants,
+                      vecmem::const_device_vector_data< int > input,
                       vecmem::device_vector_data< int > output ) {
 
    // Launch the kernel.
    hipLaunchKernelGGL( linearTransformKernel, 1, input.m_size, 0, nullptr,
-                       input, output );
+                       constants, input, output );
    // Check whether it succeeded to run.
    VECMEM_HIP_ERROR_CHECK( hipGetLastError() );
    VECMEM_HIP_ERROR_CHECK( hipDeviceSynchronize() );

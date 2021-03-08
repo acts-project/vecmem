@@ -6,6 +6,8 @@
  */
 
 // Local include(s).
+#include "vecmem/containers/array.hpp"
+#include "vecmem/containers/const_device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/vector.hpp"
@@ -54,29 +56,39 @@ int main() {
    auto outputvec = make_output_vector( resource );
    assert( inputvec.size() == outputvec.size() );
 
-   // Perform a linear transformation using the vecmem vector helper types.
-   queue.submit( [ &inputvec, &outputvec ]( cl::sycl::handler& h ) {
+   // Create the array that is used in the linear transformation.
+   vecmem::array< int, 2 > constantsarray( resource );
+   constantsarray[ 0 ] = 2;
+   constantsarray[ 1 ] = 3;
 
-      // Translate the STL vectors to simple types.
+   // Perform a linear transformation using the vecmem vector helper types.
+   queue.submit( [ &constantsarray, &inputvec,
+                   &outputvec ]( cl::sycl::handler& h ) {
+
+      // Translate the host containers to simple types.
+      auto constants = vecmem::get_data( constantsarray );
       auto input = vecmem::get_data( inputvec );
       auto output = vecmem::get_data( outputvec );
 
       // Run the kernel.
       h.parallel_for< class LinearTransform >(
          cl::sycl::range< 1 >( inputvec.size() ),
-         [ input, output ]( cl::sycl::id< 1 > id ) {
+         [ constants, input, output ]( cl::sycl::id< 1 > id ) {
 
             // Skip invalid indices.
             if( id >= input.m_size ) {
                return;
             }
 
-            // Create the helper vectors.
+            // Create the helper containers.
+            const vecmem::const_device_array< int, 2 >
+               constantarray( constants );
             const vecmem::const_device_vector< int > inputvec( input );
             vecmem::device_vector< int > outputvec( output );
 
             // Perform the linear transformation.
-            outputvec.at( id ) = 3 + inputvec.at( id ) * 2;
+            outputvec.at( id ) = inputvec.at( id ) * constantarray.at( 0 ) +
+                                 constantarray.at( 1 );
             return;
          } );
    } );
@@ -84,7 +96,8 @@ int main() {
 
    // Check the output.
    for( std::size_t i = 0; i < outputvec.size(); ++i ) {
-      assert( outputvec.at( i ) == inputvec.at( i ) * 2 + 3 );
+      assert( outputvec.at( i ) == inputvec.at( i ) * constantsarray.at( 0 ) +
+                                   constantsarray.at( 1 ) );
    }
 
    // Return gracefully.

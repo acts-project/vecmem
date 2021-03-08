@@ -7,6 +7,8 @@
 
 // Local include(s).
 #include "vecmem/containers/array.hpp"
+#include "vecmem/containers/const_device_array.hpp"
+#include "vecmem/containers/device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/static_vector.hpp"
@@ -89,4 +91,40 @@ TEST_F( core_container_test, array ) {
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
                             m_reference_vector.end(),
                             test_array.begin() ) );
+}
+
+/// Test(s) for @c vecmem::const_device_array
+TEST_F( core_container_test, const_device_array ) {
+
+   const vecmem::const_device_array< int, 9 >
+      test_array( vecmem::get_data( m_reference_vector ) );
+   EXPECT_TRUE( test_array.size() == m_reference_vector.size() );
+   EXPECT_TRUE( test_array.empty() == m_reference_vector.empty() );
+   EXPECT_TRUE( std::equal( m_reference_vector.begin(),
+                            m_reference_vector.end(),
+                            test_array.begin() ) );
+   EXPECT_TRUE( std::accumulate( test_array.begin(), test_array.end(), 0 ) ==
+                std::accumulate( test_array.rbegin(), test_array.rend(), 0 ) );
+   for( std::size_t i = 0; i < m_reference_vector.size(); ++i ) {
+      EXPECT_TRUE( test_array.at( i ) == m_reference_vector.at( i ) );
+      EXPECT_TRUE( test_array[ i ] == m_reference_vector[ i ] );
+   }
+}
+
+/// Test(s) for @c vecmem::device_array
+TEST_F( core_container_test, device_array ) {
+
+   const vecmem::device_array< int, 9 >
+      test_array( vecmem::get_data( m_reference_vector ) );
+   EXPECT_TRUE( test_array.size() == m_reference_vector.size() );
+   EXPECT_TRUE( test_array.empty() == m_reference_vector.empty() );
+   EXPECT_TRUE( std::equal( m_reference_vector.begin(),
+                            m_reference_vector.end(),
+                            test_array.begin() ) );
+   EXPECT_TRUE( std::accumulate( test_array.begin(), test_array.end(), 0 ) ==
+                std::accumulate( test_array.rbegin(), test_array.rend(), 0 ) );
+   for( std::size_t i = 0; i < m_reference_vector.size(); ++i ) {
+      EXPECT_TRUE( test_array.at( i ) == m_reference_vector.at( i ) );
+      EXPECT_TRUE( test_array[ i ] == m_reference_vector[ i ] );
+   }
 }
