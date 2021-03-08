@@ -8,7 +8,6 @@
 // Local include(s).
 #include "test_cuda_containers_kernels.cuh"
 
-#include "vecmem/allocators/allocator.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
 

@@ -6,8 +6,6 @@
 
 # Set up the build of the VecMem core library.
 vecmem_add_library( vecmem_core core SHARED
-   # STL allocators.
-   "include/vecmem/allocators/allocator.hpp"
    # STL mimicking containers.
    "include/vecmem/containers/array.hpp"
    "include/vecmem/containers/array.ipp"
@@ -17,13 +15,9 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/device_vector_data.ipp"
    "include/vecmem/containers/device_vector.hpp"
    "include/vecmem/containers/device_vector.ipp"
-   "include/vecmem/containers/host_vector.hpp"
    "include/vecmem/containers/static_vector.hpp"
    "include/vecmem/containers/vector.hpp"
    # Memory management.
-   "include/vecmem/memory/memory_manager_interface.hpp"
-   "include/vecmem/memory/memory_manager.hpp"
-   "src/memory/memory_manager.cpp"
    "include/vecmem/memory/resources/memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/host_memory_resource.hpp"
