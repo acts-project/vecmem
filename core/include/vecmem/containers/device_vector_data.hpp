@@ -12,7 +12,6 @@
 // System include(s).
 #include <cstddef>
 #include <type_traits>
-#include <vector>
 
 namespace vecmem {
 
@@ -36,26 +35,19 @@ namespace vecmem {
       VECMEM_HOST_AND_DEVICE
       device_vector_data( std::size_t size, pointer ptr );
 
-      /// Constructor from a non-const vector
-      template< typename ALLOC >
-      VECMEM_HOST
-      device_vector_data( std::vector< value_type, ALLOC >& vec );
-      /// Constructor from a const vector
-      template< typename ALLOC >
-      VECMEM_HOST
-      device_vector_data( const std::vector< value_type, ALLOC >& vec );
-
       /// Constructor from another type of @c device_vector_data object
       ///
-      /// Only enabled if the wrapped type is different, but convertible to this
-      /// object's wrapped type. This complication is necessary to avoid
-      /// problems from SYCL. Which is very particular about having default
-      /// copy constructors for the types that it sends to kernels.
+      /// Only enabled if the wrapped type is different, but only by const-ness.
+      /// This complication is necessary to avoid problems from SYCL. Which is
+      /// very particular about having default copy constructors for the types
+      /// that it sends to kernels.
       ///
       template< typename OTHERTYPE,
-                std::enable_if_t< ( ! std::is_same< TYPE, OTHERTYPE >::value ) &&
-                                  std::is_convertible< OTHERTYPE*, TYPE* >::value,
-                                  bool > = true >
+                std::enable_if_t<
+                   ( ! std::is_same< TYPE, OTHERTYPE >::value ) &&
+                   std::is_same< TYPE,
+                                 typename std::add_const< OTHERTYPE >::type >::value,
+                   bool > = true >
       VECMEM_HOST_AND_DEVICE
       device_vector_data( const device_vector_data< OTHERTYPE >& parent );
 
@@ -65,17 +57,6 @@ namespace vecmem {
       pointer m_ptr;
 
    }; // struct device_vector_data
-
-   /// Helper function creating a @c vecmem::device_vector_data object
-   template< typename TYPE, typename ALLOC >
-   VECMEM_HOST
-   device_vector_data< TYPE >
-   get_data( std::vector< TYPE, ALLOC >& vec );
-   /// Helper function creating a @c vecmem::device_vector_data object
-   template< typename TYPE, typename ALLOC >
-   VECMEM_HOST
-   device_vector_data< const TYPE >
-   get_data( const std::vector< TYPE, ALLOC >& vec );
 
 } // namespace vecmem
 

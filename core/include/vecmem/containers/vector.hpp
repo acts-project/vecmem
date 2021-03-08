@@ -6,8 +6,11 @@
  */
 #pragma once
 
+// Local include(s).
+#include "vecmem/containers/device_vector_data.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
 
+// System include(s).
 #include <vector>
 
 namespace vecmem {
@@ -23,4 +26,20 @@ namespace vecmem {
     */
    template<typename T>
    using vector = std::vector<T, vecmem::polymorphic_allocator<T>>;
-}
+
+   /// Helper function creating a @c vecmem::device_vector_data object
+   template< typename TYPE, typename ALLOC >
+   VECMEM_HOST
+   device_vector_data< TYPE >
+   get_data( std::vector< TYPE, ALLOC >& vec );
+
+   /// Helper function creating a @c vecmem::device_vector_data object
+   template< typename TYPE, typename ALLOC >
+   VECMEM_HOST
+   device_vector_data< const TYPE >
+   get_data( const std::vector< TYPE, ALLOC >& vec );
+
+} // namespace vecmem
+
+// Include the implementation.
+#include "vecmem/containers/vector.ipp"

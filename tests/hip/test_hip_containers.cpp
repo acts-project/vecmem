@@ -6,6 +6,7 @@
  */
 
 // Local include(s).
+#include "vecmem/containers/array.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/hip/host_memory_resource.hpp"
 #include "test_hip_containers_kernels.hpp"
@@ -36,12 +37,19 @@ int main() {
    auto outputvec = make_output_vector( resource );
    assert( inputvec.size() == outputvec.size() );
 
+   // Create the array that is used in the linear transformation.
+   vecmem::array< int, 2 > constants( resource );
+   constants[ 0 ] = 2;
+   constants[ 1 ] = 3;
+
    // Perform a linear transformation using the vecmem vector helper types.
-   linearTransform( inputvec, outputvec );
+   linearTransform( vecmem::get_data( constants ), vecmem::get_data( inputvec ),
+                    vecmem::get_data( outputvec ) );
 
    // Check the output.
    for( std::size_t i = 0; i < outputvec.size(); ++i ) {
-      assert( outputvec.at( i ) == inputvec.at( i ) * 2 + 3 );
+      assert( outputvec.at( i ) ==
+              inputvec.at( i ) * constants.at( 0 ) + constants.at( 1 ) );
    }
 
    // Return gracefully.

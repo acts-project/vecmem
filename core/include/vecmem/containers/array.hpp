@@ -7,7 +7,9 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/containers/device_vector_data.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
+#include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
@@ -208,6 +210,18 @@ namespace vecmem {
       std::unique_ptr< value_type, deleter > m_memory;
 
    }; // class array
+
+   /// Helper function creating a @c vecmem::device_vector_data object
+   template< typename T, std::size_t N >
+   VECMEM_HOST
+   device_vector_data< T >
+   get_data( array< T, N >& a );
+
+   /// Helper function creating a @c vecmem::device_vector_data object
+   template< typename T, std::size_t N >
+   VECMEM_HOST
+   device_vector_data< const T >
+   get_data( const array< T, N >& a );
 
 } // namespace vecmem
 

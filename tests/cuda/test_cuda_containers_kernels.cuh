@@ -12,5 +12,6 @@
 #include "vecmem/containers/device_vector_data.hpp"
 
 /// Perform a linear transformation using the received vectors
-void linearTransform( vecmem::const_device_vector_data< int > input,
+void linearTransform( vecmem::const_device_vector_data< int > constants,
+                      vecmem::const_device_vector_data< int > input,
                       vecmem::device_vector_data< int > output );
