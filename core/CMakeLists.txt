@@ -19,6 +19,8 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/vector.hpp"
    "include/vecmem/containers/vector.ipp"
    # Implementation details for the containers.
+   "include/vecmem/containers/details/owning_vector_data.hpp"
+   "include/vecmem/containers/details/owning_vector_data.ipp"
    "include/vecmem/containers/details/vector_data.hpp"
    "include/vecmem/containers/details/vector_data.ipp"
    # Memory management.
