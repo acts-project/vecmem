@@ -11,8 +11,12 @@ vecmem_add_library( vecmem_core core SHARED
    # STL mimicking containers.
    "include/vecmem/containers/array.hpp"
    "include/vecmem/containers/array.ipp"
+   "include/vecmem/containers/const_device_vector_data.hpp"
    "include/vecmem/containers/const_device_vector.hpp"
+   "include/vecmem/containers/device_vector_data.hpp"
+   "include/vecmem/containers/device_vector_data.ipp"
    "include/vecmem/containers/device_vector.hpp"
+   "include/vecmem/containers/device_vector.ipp"
    "include/vecmem/containers/host_vector.hpp"
    "include/vecmem/containers/static_vector.hpp"
    "include/vecmem/containers/vector.hpp"
@@ -28,4 +32,6 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
+   "include/vecmem/utils/reverse_iterator.hpp"
+   "include/vecmem/utils/reverse_iterator.ipp"
    "include/vecmem/utils/types.hpp" )

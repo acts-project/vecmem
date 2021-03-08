@@ -7,12 +7,12 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/device_vector.hpp"
+#include "vecmem/containers/device_vector_data.hpp"
 
 namespace vecmem {
 
-   /// Class mimicking a constant @c std::vector in "device code"
+   /// Simple struct holding data for @c vecmem::const_device_vector
    template< typename T >
-   using const_device_vector = device_vector< const T >;
+   using const_device_vector_data = device_vector_data< const T >;
 
 } // namespace vecmem

@@ -37,7 +37,7 @@ int main() {
    assert( inputvec.size() == outputvec.size() );
 
    // Perform a linear transformation using the vecmem vector helper types.
-   linearTransform( inputvec.size(), inputvec.data(), outputvec.data() );
+   linearTransform( inputvec, outputvec );
 
    // Check the output.
    for( std::size_t i = 0; i < outputvec.size(); ++i ) {
