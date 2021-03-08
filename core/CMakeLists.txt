@@ -21,6 +21,10 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/static_vector.hpp"
    "include/vecmem/containers/vector.hpp"
    "include/vecmem/containers/vector.ipp"
+   # Allocator
+   "include/vecmem/memory/allocator.hpp"
+   "include/vecmem/memory/allocator.ipp"
+   "src/memory/allocator.cpp"
    # Memory management.
    "include/vecmem/memory/resources/memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
