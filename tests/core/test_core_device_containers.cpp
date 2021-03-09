@@ -6,8 +6,8 @@
  */
 
 // Local include(s).
-#include "vecmem/containers/details/owning_vector_data.hpp"
-#include "vecmem/containers/details/vector_data.hpp"
+#include "vecmem/containers/details/vector_buffer.hpp"
+#include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 
@@ -27,22 +27,22 @@ class core_device_container_test : public testing::Test {
 TEST_F( core_device_container_test, trivial_construct ) {
 
    EXPECT_TRUE( std::is_trivially_default_constructible<
-                   vecmem::details::vector_data< const int > >() );
+                   vecmem::details::vector_view< const int > >() );
    EXPECT_TRUE( std::is_trivially_constructible<
-                   vecmem::details::vector_data< const int > >() );
+                   vecmem::details::vector_view< const int > >() );
    EXPECT_TRUE( std::is_trivially_copy_constructible<
-                   vecmem::details::vector_data< const int > >() );
+                   vecmem::details::vector_view< const int > >() );
 
    EXPECT_TRUE( std::is_trivially_default_constructible<
-                   vecmem::details::vector_data< int > >() );
+                   vecmem::details::vector_view< int > >() );
    EXPECT_TRUE( std::is_trivially_constructible<
-                   vecmem::details::vector_data< int > >() );
+                   vecmem::details::vector_view< int > >() );
    EXPECT_TRUE( std::is_trivially_copy_constructible<
-                   vecmem::details::vector_data< int > >() );
+                   vecmem::details::vector_view< int > >() );
 }
 
-/// Test(s) for @c vecmem::details::owning_vector_data
-TEST_F( core_device_container_test, owning_vector_data ) {
+/// Test(s) for @c vecmem::details::vector_buffer
+TEST_F( core_device_container_test, vector_buffer ) {
 
    // Create a dummy vector in regular host memory.
    std::vector< int > host_vector { 1, 2, 3, 4, 5 };
@@ -50,7 +50,7 @@ TEST_F( core_device_container_test, owning_vector_data ) {
 
    // Create an "owning copy" of the host vector's memory.
    vecmem::host_memory_resource resource;
-   vecmem::details::owning_vector_data< int >
+   vecmem::details::vector_buffer< int >
       device_data( host_data.m_size, resource );
    memcpy( device_data.m_ptr, host_data.m_ptr,
            host_data.m_size * sizeof( int ) );

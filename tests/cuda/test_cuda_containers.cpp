@@ -11,8 +11,7 @@
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
 #include "vecmem/memory/cuda/host_memory_resource.hpp"
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
-#include "vecmem/utils/cuda/copy_to_device.hpp"
-#include "vecmem/utils/cuda/copy_to_host.hpp"
+#include "vecmem/utils/cuda/copy.hpp"
 #include "test_cuda_containers_kernels.cuh"
 
 // System include(s).
@@ -58,7 +57,7 @@ int main() {
 
    // Allocate a device memory block for the output container.
    auto outputvec2host = vecmem::get_data( outputvec2 );
-   vecmem::details::owning_vector_data< int >
+   vecmem::details::vector_buffer< int >
       outputvec2device( outputvec2.size(), device_resource );
 
    // Perform a linear transformation with explicit memory copies.
@@ -66,7 +65,7 @@ int main() {
                     vecmem::cuda::copy_to_device(
                        vecmem::get_data( inputvec2 ), device_resource ),
                     outputvec2device );
-   vecmem::cuda::copy_to_host( outputvec2device, outputvec2host );
+   vecmem::cuda::copy( outputvec2device, outputvec2host );
 
    // Check the output.
    for( std::size_t i = 0; i < outputvec2.size(); ++i ) {

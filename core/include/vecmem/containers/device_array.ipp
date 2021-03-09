@@ -13,7 +13,7 @@ namespace vecmem {
 
    template< typename T, std::size_t N >
    VECMEM_HOST_AND_DEVICE
-   device_array< T, N >::device_array( details::vector_data< value_type > data )
+   device_array< T, N >::device_array( details::vector_view< value_type > data )
    : m_ptr( data.m_ptr ) {
 
       assert( data.m_size >= N );

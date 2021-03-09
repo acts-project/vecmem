@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_data.hpp"
+#include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/utils/deleter.hpp"
 #include "vecmem/utils/types.hpp"
@@ -185,16 +185,16 @@ namespace vecmem {
 
    }; // class array
 
-   /// Helper function creating a @c vecmem::details::vector_data object
+   /// Helper function creating a @c vecmem::details::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_data< T >
+   details::vector_view< T >
    get_data( array< T, N >& a );
 
-   /// Helper function creating a @c vecmem::details::vector_data object
+   /// Helper function creating a @c vecmem::details::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_data< const T >
+   details::vector_view< const T >
    get_data( const array< T, N >& a );
 
 } // namespace vecmem

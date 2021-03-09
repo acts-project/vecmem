@@ -254,18 +254,18 @@ namespace vecmem {
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_data< T >
+   details::vector_view< T >
    get_data( array< T, N >& a ) {
 
-      return details::vector_data< T >( a.size(), a.data() );
+      return { a.size(), a.data() };
    }
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_data< const T >
+   details::vector_view< const T >
    get_data( const array< T, N >& a ) {
 
-      return details::vector_data< const T >( a.size(), a.data() );
+      return { a.size(), a.data() };
    }
 
 } // namespace vecmem
