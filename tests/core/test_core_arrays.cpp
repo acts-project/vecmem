@@ -26,8 +26,8 @@ class core_array_test : public testing::Test {
 
 protected:
    /// Function testing a particular array object.
-   template< typename T, std::size_t N >
-   void test_array( vecmem::array< T, N >& a ) {
+   template< typename T, std::size_t N, typename A >
+   void test_array( vecmem::array< T, N, A >& a ) {
 
       // Make sure that we use integer types for the test, as it really only
       // works for that...
@@ -84,27 +84,27 @@ protected:
 /// Test with a non-zero sized array whose size is fixed at compile time.
 TEST_F( core_array_test, non_zero_compile_time ) {
 
-   vecmem::array< int, 10 > a( m_resource );
+   vecmem::array< int, 10 > a( &m_resource );
    test_array( a );
 }
 
 /// Test with a non-zero sized array whose size is specified at runtime
 TEST_F( core_array_test, non_zero_runtime ) {
 
-   vecmem::array< int > a( m_resource, 20 );
+   vecmem::array< int > a( &m_resource, 20 );
    test_array( a );
 }
 
 /// Test with a zero sized array whose size is fixed at compile time.
 TEST_F( core_array_test, zero_compile_time ) {
 
-   vecmem::array< unsigned int, 0 > a( m_resource );
+   vecmem::array< unsigned int, 0 > a( &m_resource );
    test_array( a );
 }
 
 /// Test with a zero sized array whose size is specified at runtime
 TEST_F( core_array_test, zero_runtime ) {
 
-   vecmem::array< unsigned int > a( m_resource, 0 );
+   vecmem::array< unsigned int > a( &m_resource, 0 );
    test_array( a );
 }

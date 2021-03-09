@@ -85,7 +85,7 @@ TEST_F( core_container_test, static_vector ) {
 /// Test(s) for @c vecmem::array
 TEST_F( core_container_test, array ) {
 
-   vecmem::array< int, 20 > test_array( m_resource );
+   vecmem::array< int, 20 > test_array( &m_resource );
    std::copy( m_reference_vector.begin(), m_reference_vector.end(),
               test_array.begin() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),

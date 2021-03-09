@@ -38,7 +38,7 @@ int main() {
    assert( inputvec.size() == outputvec.size() );
 
    // Create the array that is used in the linear transformation.
-   vecmem::array< int, 2 > constants( resource );
+   vecmem::array< int, 2 > constants( &resource );
    constants[ 0 ] = 2;
    constants[ 1 ] = 3;
 
