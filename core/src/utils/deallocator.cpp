@@ -6,16 +6,16 @@
  */
 
 // Local include(s).
-#include "vecmem/utils/deleter.hpp"
+#include "vecmem/utils/deallocator.hpp"
 
 namespace vecmem::details {
 
-   deleter::deleter( std::size_t bytes, memory_resource& resource )
+   deallocator::deallocator( std::size_t bytes, memory_resource& resource )
    : m_bytes( bytes ), m_resource( &resource ) {
 
    }
 
-   void deleter::operator()( void* ptr ) {
+   void deallocator::operator()( void* ptr ) {
 
       if( ptr != nullptr ) {
          m_resource->deallocate( ptr, m_bytes );

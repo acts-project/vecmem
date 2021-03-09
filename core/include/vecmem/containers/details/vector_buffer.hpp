@@ -9,7 +9,7 @@
 // Local include(s).
 #include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
-#include "vecmem/utils/deleter.hpp"
+#include "vecmem/utils/deallocator.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
@@ -39,7 +39,7 @@ namespace vecmem::details {
 
    private:
       /// Data object owning the allocated memory
-      std::unique_ptr< TYPE, deleter > m_memory;
+      std::unique_ptr< TYPE, deallocator > m_memory;
 
    }; // class vector_buffer
 

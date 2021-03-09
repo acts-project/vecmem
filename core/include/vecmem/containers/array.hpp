@@ -10,12 +10,11 @@
 #include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
 #include "vecmem/utils/deleter.hpp"
+#include "vecmem/utils/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
-#include <iterator>
-#include <memory>
 
 namespace vecmem {
 
@@ -37,7 +36,8 @@ namespace vecmem {
    /// it does provide an optional second template argument, which can be used
    /// to set the fixed size of the array at compile time.
    ///
-   template< typename T, std::size_t N = details::array_invalid_size >
+   template< typename T, std::size_t N = details::array_invalid_size,
+             typename Allocator = vecmem::polymorphic_allocator< T > >
    class array {
 
    public:
@@ -46,6 +46,8 @@ namespace vecmem {
 
       /// Type of the array elements
       typedef T                  value_type;
+      /// Type of the allocator to use
+      typedef Allocator          allocator_type;
       /// Size type for the array
       typedef std::size_t        size_type;
       /// Pointer difference type
@@ -67,9 +69,14 @@ namespace vecmem {
       typedef const_pointer_type const_iterator;
 
       /// Reverse iterator type
-      typedef std::reverse_iterator< iterator > reverse_iterator;
+      typedef vecmem::reverse_iterator< iterator > reverse_iterator;
       /// Constant reverse iterator type
-      typedef std::reverse_iterator< const_iterator > const_reverse_iterator;
+      typedef vecmem::reverse_iterator< const_iterator > const_reverse_iterator;
+
+      /// Type of the object holding on to the allocated memory
+      typedef std::unique_ptr< value_type,
+                               details::deleter< value_type, allocator_type > >
+         memory_type;
 
       /// @}
 
@@ -78,14 +85,14 @@ namespace vecmem {
       /// Can only be used if the user chose a non-default value for the size
       /// template parameter.
       ///
-      array( memory_resource& resource );
+      array( allocator_type alloc );
 
       /// Constructor with a size and a memory resource to use
       ///
       /// Can only be used if the user uses the default (invalid) value for the
       /// size template parameter.
       ///
-      array( memory_resource& resource, size_type size );
+      array( allocator_type alloc, size_type size );
 
       /// Destructor
       ~array() = default;
@@ -181,21 +188,21 @@ namespace vecmem {
       /// The size of the allocated array
       size_type m_size;
       /// The allocated array
-      std::unique_ptr< value_type, details::deleter > m_memory;
+      memory_type m_memory;
 
    }; // class array
 
    /// Helper function creating a @c vecmem::details::vector_view object
-   template< typename T, std::size_t N >
+   template< typename T, std::size_t N, typename Allocator >
    VECMEM_HOST
    details::vector_view< T >
-   get_data( array< T, N >& a );
+   get_data( array< T, N, Allocator >& a );
 
    /// Helper function creating a @c vecmem::details::vector_view object
-   template< typename T, std::size_t N >
+   template< typename T, std::size_t N, typename Allocator >
    VECMEM_HOST
    details::vector_view< const T >
-   get_data( const array< T, N >& a );
+   get_data( const array< T, N, Allocator >& a );
 
 } // namespace vecmem
 

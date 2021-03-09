@@ -14,16 +14,23 @@
 
 namespace vecmem::details {
 
-   /// Struct used for deleting an allocated memory block
+   /// Struct used for deleting an allocated, host-accessible memory block
    ///
    /// It can be used to make things like @c std::unique_ptr talk to
    /// @c vecmem::memory_resource.
    ///
+   template< typename T,
+             typename Allocator = polymorphic_allocator< T > >
    class deleter {
 
    public:
+      /// Size type for the number of elements to delete
+      typedef std::size_t size_type;
+      /// The allocator type to use
+      typedef Allocator   allocator_type;
+
       /// Constructor
-      deleter( std::size_t bytes, memory_resource& resource );
+      deleter( size_type elements, const allocator_type& allocator );
 
       /// Copy constructor
       deleter( const deleter& ) = default;
@@ -38,11 +45,14 @@ namespace vecmem::details {
       void operator()( void* ptr );
 
    private:
-      /// The number of bytes allocated for the memory block
-      std::size_t m_bytes;
-      /// The memory resource used for deleting the memory block
-      memory_resource* m_resource;
+      /// The number of elements allocated for the memory block
+      size_type m_elements;
+      /// The allocator used to delete the elements
+      allocator_type m_allocator;
 
-   }; // struct deleter
+   }; // class deleter
 
 } // namespace vecmem::details
+
+// Include the implementation.
+#include "vecmem/utils/deleter.ipp"

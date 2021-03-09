@@ -17,45 +17,44 @@ namespace vecmem {
    namespace details {
 
       /// Helper function used in the @c vecmem::array constructors
-      template< typename T, std::size_t N >
-      std::unique_ptr< typename vecmem::array< T, N >::value_type,
-                       vecmem::details::deleter >
-      allocate_array_memory( vecmem::memory_resource& resource,
-                             typename vecmem::array< T, N >::size_type size ) {
+      template< typename T, std::size_t N, typename A >
+      typename vecmem::array< T, N, A >::memory_type
+      allocate_array_memory(
+         typename vecmem::array< T, N, A >::allocator_type& alloc,
+         typename vecmem::array< T, N, A >::size_type size ) {
 
-         const std::size_t nbytes =
-            size * sizeof( typename vecmem::array< T, N >::value_type );
-         return { size == 0 ? nullptr :
-                  static_cast< typename vecmem::array< T, N >::pointer_type >(
-                     resource.allocate( nbytes ) ),
-                  vecmem::details::deleter( nbytes, resource ) };
+         return { size == 0 ? nullptr : alloc.allocate( size ),
+                  { size, alloc } };
       }
 
    } // namespace details
 
-   template< typename T, std::size_t N >
-   array< T, N >::array( memory_resource& resource )
+   template< typename T, std::size_t N, typename Allocator >
+   array< T, N, Allocator >::array( allocator_type alloc )
    : m_size( N ),
-     m_memory( details::allocate_array_memory< T, N >( resource, m_size ) ) {
+     m_memory( details::allocate_array_memory< T, N, Allocator >( alloc,
+                                                                  m_size ) ) {
 
       static_assert( N != details::array_invalid_size,
                      "Can only use the 'compile time constructor' if a size "
                      "was provided as a template argument" );
    }
 
-   template< typename T, std::size_t N >
-   array< T, N >::array( memory_resource& resource, size_type size )
+   template< typename T, std::size_t N, typename Allocator >
+   array< T, N, Allocator >::array( allocator_type alloc,
+                                    size_type size )
    : m_size( size ),
-     m_memory( details::allocate_array_memory< T, N >( resource, m_size ) ) {
+     m_memory( details::allocate_array_memory< T, N, Allocator >( alloc,
+                                                                  m_size ) ) {
 
       static_assert( N == details::array_invalid_size,
                      "Can only use the 'runtime constructor' if a size was not "
                      "provided as a template argument" );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
-   array< T, N >::at( size_type pos ) {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::reference_type
+   array< T, N, Allocator >::at( size_type pos ) {
 
       if( pos >= m_size ) {
          throw std::out_of_range( "Requested element " + std::to_string( pos ) +
@@ -65,9 +64,9 @@ namespace vecmem {
       return m_memory.get()[ pos ];
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
-   array< T, N >::at( size_type pos ) const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reference_type
+   array< T, N, Allocator >::at( size_type pos ) const {
 
       if( pos >= m_size ) {
          throw std::out_of_range( "Requested element " + std::to_string( pos ) +
@@ -77,23 +76,23 @@ namespace vecmem {
       return m_memory.get()[ pos ];
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
-   array< T, N >::operator[]( size_type pos ) {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::reference_type
+   array< T, N, Allocator >::operator[]( size_type pos ) {
 
       return m_memory.get()[ pos ];
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
-   array< T, N >::operator[]( size_type pos ) const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reference_type
+   array< T, N, Allocator >::operator[]( size_type pos ) const {
 
       return m_memory.get()[ pos ];
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
-   array< T, N >::front() {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::reference_type
+   array< T, N, Allocator >::front() {
 
       if( m_size == 0 ) {
          throw std::out_of_range( "Called vecmem::array::front() on an empty "
@@ -102,9 +101,9 @@ namespace vecmem {
       return ( *m_memory );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
-   array< T, N >::front() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reference_type
+   array< T, N, Allocator >::front() const {
 
       if( m_size == 0 ) {
          throw std::out_of_range( "Called vecmem::array::front() on an empty "
@@ -113,9 +112,9 @@ namespace vecmem {
       return ( *m_memory );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
-   array< T, N >::back() {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::reference_type
+   array< T, N, Allocator >::back() {
 
       if( m_size == 0 ) {
          throw std::out_of_range( "Called vecmem::array::back() on an empty "
@@ -124,9 +123,9 @@ namespace vecmem {
       return m_memory.get()[ m_size - 1 ];
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
-   array< T, N >::back() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reference_type
+   array< T, N, Allocator >::back() const {
 
       if( m_size == 0 ) {
          throw std::out_of_range( "Called vecmem::array::back() on an empty "
@@ -135,135 +134,135 @@ namespace vecmem {
       return m_memory.get()[ m_size - 1 ];
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::pointer_type
-   array< T, N >::data() {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::pointer_type
+   array< T, N, Allocator >::data() {
 
       return m_memory.get();
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_pointer_type
-   array< T, N >::data() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_pointer_type
+   array< T, N, Allocator >::data() const {
 
       return m_memory.get();
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::iterator
-   array< T, N >::begin() {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::iterator
+   array< T, N, Allocator >::begin() {
 
       return m_memory.get();
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_iterator
-   array< T, N >::begin() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_iterator
+   array< T, N, Allocator >::begin() const {
 
       return m_memory.get();
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_iterator
-   array< T, N >::cbegin() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_iterator
+   array< T, N, Allocator >::cbegin() const {
 
       return m_memory.get();
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::iterator
-   array< T, N >::end() {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::iterator
+   array< T, N, Allocator >::end() {
 
       return ( m_memory.get() + m_size );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_iterator
-   array< T, N >::end() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_iterator
+   array< T, N, Allocator >::end() const {
 
       return ( m_memory.get() + m_size );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_iterator
-   array< T, N >::cend() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_iterator
+   array< T, N, Allocator >::cend() const {
 
       return ( m_memory.get() + m_size );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::reverse_iterator
-   array< T, N >::rbegin() {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::reverse_iterator
+   array< T, N, Allocator >::rbegin() {
 
       return reverse_iterator( end() );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reverse_iterator
-   array< T, N >::rbegin() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reverse_iterator
+   array< T, N, Allocator >::rbegin() const {
 
       return const_reverse_iterator( end() );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reverse_iterator
-   array< T, N >::crbegin() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reverse_iterator
+   array< T, N, Allocator >::crbegin() const {
 
       return const_reverse_iterator( end() );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::reverse_iterator
-   array< T, N >::rend() {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::reverse_iterator
+   array< T, N, Allocator >::rend() {
 
       return reverse_iterator( begin() );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reverse_iterator
-   array< T, N >::rend() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reverse_iterator
+   array< T, N, Allocator >::rend() const {
 
       return const_reverse_iterator( begin() );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::const_reverse_iterator
-   array< T, N >::crend() const {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::const_reverse_iterator
+   array< T, N, Allocator >::crend() const {
 
       return const_reverse_iterator( begin() );
    }
 
-   template< typename T, std::size_t N >
-   bool array< T, N >::empty() const noexcept {
+   template< typename T, std::size_t N, typename Allocator >
+   bool array< T, N, Allocator >::empty() const noexcept {
 
       return ( m_size == 0 );
    }
 
-   template< typename T, std::size_t N >
-   typename array< T, N >::size_type
-   array< T, N >::size() const noexcept {
+   template< typename T, std::size_t N, typename Allocator >
+   typename array< T, N, Allocator >::size_type
+   array< T, N, Allocator >::size() const noexcept {
 
       return m_size;
    }
 
-   template< typename T, std::size_t N >
-   void array< T, N >::fill( const_reference_type value ) {
+   template< typename T, std::size_t N, typename Allocator >
+   void array< T, N, Allocator >::fill( const_reference_type value ) {
 
       std::fill( begin(), end(), value );
    }
 
-   template< typename T, std::size_t N >
+   template< typename T, std::size_t N, typename Allocator >
    VECMEM_HOST
    details::vector_view< T >
-   get_data( array< T, N >& a ) {
+   get_data( array< T, N, Allocator >& a ) {
 
       return { a.size(), a.data() };
    }
 
-   template< typename T, std::size_t N >
+   template< typename T, std::size_t N, typename Allocator >
    VECMEM_HOST
    details::vector_view< const T >
-   get_data( const array< T, N >& a ) {
+   get_data( const array< T, N, Allocator >& a ) {
 
       return { a.size(), a.data() };
    }
