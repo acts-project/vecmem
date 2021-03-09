@@ -13,7 +13,8 @@ namespace vecmem {
 
    template< typename TYPE >
    VECMEM_HOST_AND_DEVICE
-   device_vector< TYPE >::device_vector( device_vector_data< value_type > data )
+   device_vector< TYPE >::
+   device_vector( details::vector_view< value_type > data )
    : m_size( data.m_size ), m_ptr( data.m_ptr ) {
 
    }

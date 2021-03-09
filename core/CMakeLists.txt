@@ -10,17 +10,19 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/array.hpp"
    "include/vecmem/containers/array.ipp"
    "include/vecmem/containers/const_device_array.hpp"
-   "include/vecmem/containers/const_device_vector_data.hpp"
    "include/vecmem/containers/const_device_vector.hpp"
    "include/vecmem/containers/device_array.hpp"
    "include/vecmem/containers/device_array.ipp"
-   "include/vecmem/containers/device_vector_data.hpp"
-   "include/vecmem/containers/device_vector_data.ipp"
    "include/vecmem/containers/device_vector.hpp"
    "include/vecmem/containers/device_vector.ipp"
    "include/vecmem/containers/static_vector.hpp"
    "include/vecmem/containers/vector.hpp"
    "include/vecmem/containers/vector.ipp"
+   # Implementation details for the containers.
+   "include/vecmem/containers/details/vector_buffer.hpp"
+   "include/vecmem/containers/details/vector_buffer.ipp"
+   "include/vecmem/containers/details/vector_view.hpp"
+   "include/vecmem/containers/details/vector_view.ipp"
    # Allocator
    "include/vecmem/memory/allocator.hpp"
    "include/vecmem/memory/allocator.ipp"
@@ -34,6 +36,8 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
+   "include/vecmem/utils/deleter.hpp"
+   "src/utils/deleter.cpp"
    "include/vecmem/utils/reverse_iterator.hpp"
    "include/vecmem/utils/reverse_iterator.ipp"
    "include/vecmem/utils/types.hpp" )

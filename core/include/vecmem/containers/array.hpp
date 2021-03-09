@@ -7,8 +7,9 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/device_vector_data.hpp"
+#include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
+#include "vecmem/utils/deleter.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
@@ -71,33 +72,6 @@ namespace vecmem {
       typedef std::reverse_iterator< const_iterator > const_reverse_iterator;
 
       /// @}
-
-      /// Struct used for deleting the allocated memory block
-      class deleter {
-
-      public:
-         /// Constructor
-         deleter( std::size_t bytes, memory_resource& resource );
-
-         /// Copy constructor
-         deleter( const deleter& ) = default;
-         /// Move constructor
-         deleter( deleter&& ) = default;
-         /// Copy assignment operator
-         deleter& operator=( const deleter& ) = default;
-         /// Move assignment operator
-         deleter& operator=( deleter&& ) = default;
-
-         /// Operator performing the deletion of the object.
-         void operator()( void* ptr );
-
-      private:
-         /// The number of bytes allocated for the memory block
-         std::size_t m_bytes;
-         /// The memory resource used for deleting the memory block
-         memory_resource* m_resource;
-
-      }; // struct deleter
 
       /// Constructor with a memory resource to use
       ///
@@ -207,20 +181,20 @@ namespace vecmem {
       /// The size of the allocated array
       size_type m_size;
       /// The allocated array
-      std::unique_ptr< value_type, deleter > m_memory;
+      std::unique_ptr< value_type, details::deleter > m_memory;
 
    }; // class array
 
-   /// Helper function creating a @c vecmem::device_vector_data object
+   /// Helper function creating a @c vecmem::details::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   device_vector_data< T >
+   details::vector_view< T >
    get_data( array< T, N >& a );
 
-   /// Helper function creating a @c vecmem::device_vector_data object
+   /// Helper function creating a @c vecmem::details::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   device_vector_data< const T >
+   details::vector_view< const T >
    get_data( const array< T, N >& a );
 
 } // namespace vecmem

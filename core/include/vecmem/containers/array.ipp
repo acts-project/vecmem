@@ -19,7 +19,7 @@ namespace vecmem {
       /// Helper function used in the @c vecmem::array constructors
       template< typename T, std::size_t N >
       std::unique_ptr< typename vecmem::array< T, N >::value_type,
-                       typename vecmem::array< T, N >::deleter >
+                       vecmem::details::deleter >
       allocate_array_memory( vecmem::memory_resource& resource,
                              typename vecmem::array< T, N >::size_type size ) {
 
@@ -28,25 +28,10 @@ namespace vecmem {
          return { size == 0 ? nullptr :
                   static_cast< typename vecmem::array< T, N >::pointer_type >(
                      resource.allocate( nbytes ) ),
-                  typename vecmem::array< T, N >::deleter( nbytes, resource ) };
+                  vecmem::details::deleter( nbytes, resource ) };
       }
 
    } // namespace details
-
-   template< typename T, std::size_t N >
-   array< T, N >::deleter::deleter( std::size_t bytes,
-                                    memory_resource& resource )
-   : m_bytes( bytes ), m_resource( &resource ) {
-
-   }
-
-   template< typename T, std::size_t N >
-   void array< T, N >::deleter::operator()( void* ptr ) {
-
-      if( ptr != nullptr ) {
-         m_resource->deallocate( ptr, m_bytes );
-      }
-   }
 
    template< typename T, std::size_t N >
    array< T, N >::array( memory_resource& resource )
@@ -269,18 +254,18 @@ namespace vecmem {
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   device_vector_data< T >
+   details::vector_view< T >
    get_data( array< T, N >& a ) {
 
-      return device_vector_data< T >( a.size(), a.data() );
+      return { a.size(), a.data() };
    }
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   device_vector_data< const T >
+   details::vector_view< const T >
    get_data( const array< T, N >& a ) {
 
-      return device_vector_data< const T >( a.size(), a.data() );
+      return { a.size(), a.data() };
    }
 
 } // namespace vecmem
