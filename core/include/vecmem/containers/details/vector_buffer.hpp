@@ -9,12 +9,13 @@
 // Local include(s).
 #include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
-#include "vecmem/utils/deleter.hpp"
+#include "vecmem/memory/deallocator.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
 #include <memory>
+#include <type_traits>
 
 namespace vecmem::details {
 
@@ -30,6 +31,16 @@ namespace vecmem::details {
       /// The base type used by this class
       typedef vector_view< TYPE > base_type;
 
+      /// @name Checks on the type of the array element
+      /// @{
+
+      /// Make sure that the template type does not have a custom destructor
+      static_assert( std::is_trivially_destructible< TYPE >::value,
+                     "vecmem::details::vector_buffer can not handle types with "
+                     "custom destructors" );
+
+      /// @}
+
       /// Constructor with a size
       ///
       /// It is left up to external code to copy data into the allocated memory.
@@ -39,7 +50,7 @@ namespace vecmem::details {
 
    private:
       /// Data object owning the allocated memory
-      std::unique_ptr< TYPE, deleter > m_memory;
+      std::unique_ptr< TYPE, deallocator > m_memory;
 
    }; // class vector_buffer
 

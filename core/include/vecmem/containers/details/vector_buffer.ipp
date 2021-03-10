@@ -10,16 +10,16 @@ namespace {
 
    /// Function creating the smart pointer for @c vecmem::details::vector_buffer
    template< typename TYPE >
-   std::unique_ptr< TYPE, vecmem::details::deleter >
+   std::unique_ptr< TYPE, vecmem::details::deallocator >
    allocate_buffer_memory(
       typename vecmem::details::vector_buffer< TYPE >::size_type size,
       vecmem::memory_resource& resource ) {
 
       const typename vecmem::details::vector_buffer< TYPE >::size_type
          byteSize = size * sizeof( TYPE );
-      return std::unique_ptr< TYPE, vecmem::details::deleter >(
-                static_cast< TYPE* >( resource.allocate( byteSize ) ),
-                vecmem::details::deleter( byteSize, resource ) );
+      return { size == 0 ? nullptr :
+               static_cast< TYPE* >( resource.allocate( byteSize ) ),
+               { byteSize, resource } };
    }
 
 } // private namespace

@@ -27,6 +27,8 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/memory/allocator.hpp"
    "include/vecmem/memory/allocator.ipp"
    "src/memory/allocator.cpp"
+   "include/vecmem/memory/deallocator.hpp"
+   "src/memory/deallocator.cpp"
    # Memory management.
    "include/vecmem/memory/resources/memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
@@ -36,8 +38,6 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
-   "include/vecmem/utils/deleter.hpp"
-   "src/utils/deleter.cpp"
    "include/vecmem/utils/reverse_iterator.hpp"
    "include/vecmem/utils/reverse_iterator.ipp"
    "include/vecmem/utils/types.hpp" )
