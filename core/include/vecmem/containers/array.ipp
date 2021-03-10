@@ -26,9 +26,26 @@ namespace vecmem {
          const std::size_t nbytes =
             size * sizeof( typename vecmem::array< T, N >::value_type );
          return { size == 0 ? nullptr :
-                  static_cast< typename vecmem::array< T, N >::pointer_type >(
+                  static_cast< typename vecmem::array< T, N >::pointer >(
                      resource.allocate( nbytes ) ),
-                  vecmem::details::deleter( nbytes, resource ) };
+                  { nbytes, resource } };
+      }
+
+      /// Helper function used in the @c vecmem::array constructors
+      template< typename T, std::size_t N >
+      std::unique_ptr< typename vecmem::array< T, N >::value_type,
+                       vecmem::details::deleter >
+      initialize_array_memory(
+         std::unique_ptr< typename vecmem::array< T, N >::value_type,
+                          vecmem::details::deleter > memory,
+         typename vecmem::array< T, N >::size_type size ) {
+
+         typename vecmem::array< T, N >::size_type i = 0;
+         for( typename vecmem::array< T, N >::pointer ptr = memory.get();
+              i < size; ++i, ++ptr ) {
+            new( ptr ) typename vecmem::array< T, N >::value_type();
+         }
+         return memory;
       }
 
    } // namespace details
@@ -36,7 +53,8 @@ namespace vecmem {
    template< typename T, std::size_t N >
    array< T, N >::array( memory_resource& resource )
    : m_size( N ),
-     m_memory( details::allocate_array_memory< T, N >( resource, m_size ) ) {
+     m_memory( details::initialize_array_memory< T, N >(
+        details::allocate_array_memory< T, N >( resource, m_size ), m_size ) ) {
 
       static_assert( N != details::array_invalid_size,
                      "Can only use the 'compile time constructor' if a size "
@@ -46,7 +64,8 @@ namespace vecmem {
    template< typename T, std::size_t N >
    array< T, N >::array( memory_resource& resource, size_type size )
    : m_size( size ),
-     m_memory( details::allocate_array_memory< T, N >( resource, m_size ) ) {
+     m_memory( details::initialize_array_memory< T, N >(
+        details::allocate_array_memory< T, N >( resource, m_size ), m_size ) ) {
 
       static_assert( N == details::array_invalid_size,
                      "Can only use the 'runtime constructor' if a size was not "
@@ -54,7 +73,7 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
+   typename array< T, N >::reference
    array< T, N >::at( size_type pos ) {
 
       if( pos >= m_size ) {
@@ -66,7 +85,7 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
+   typename array< T, N >::const_reference
    array< T, N >::at( size_type pos ) const {
 
       if( pos >= m_size ) {
@@ -78,21 +97,21 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
+   typename array< T, N >::reference
    array< T, N >::operator[]( size_type pos ) {
 
       return m_memory.get()[ pos ];
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
+   typename array< T, N >::const_reference
    array< T, N >::operator[]( size_type pos ) const {
 
       return m_memory.get()[ pos ];
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
+   typename array< T, N >::reference
    array< T, N >::front() {
 
       if( m_size == 0 ) {
@@ -103,7 +122,7 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
+   typename array< T, N >::const_reference
    array< T, N >::front() const {
 
       if( m_size == 0 ) {
@@ -114,7 +133,7 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::reference_type
+   typename array< T, N >::reference
    array< T, N >::back() {
 
       if( m_size == 0 ) {
@@ -125,7 +144,7 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::const_reference_type
+   typename array< T, N >::const_reference
    array< T, N >::back() const {
 
       if( m_size == 0 ) {
@@ -136,14 +155,14 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::pointer_type
+   typename array< T, N >::pointer
    array< T, N >::data() {
 
       return m_memory.get();
    }
 
    template< typename T, std::size_t N >
-   typename array< T, N >::const_pointer_type
+   typename array< T, N >::const_pointer
    array< T, N >::data() const {
 
       return m_memory.get();
@@ -247,7 +266,7 @@ namespace vecmem {
    }
 
    template< typename T, std::size_t N >
-   void array< T, N >::fill( const_reference_type value ) {
+   void array< T, N >::fill( const_reference value ) {
 
       std::fill( begin(), end(), value );
    }
