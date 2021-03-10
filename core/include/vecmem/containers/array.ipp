@@ -19,25 +19,25 @@ namespace vecmem {
       /// Helper function used in the @c vecmem::array constructors
       template< typename T, std::size_t N >
       std::unique_ptr< typename vecmem::array< T, N >::value_type,
-                       vecmem::details::deleter >
+                       typename vecmem::array< T, N >::deleter >
       allocate_array_memory( vecmem::memory_resource& resource,
                              typename vecmem::array< T, N >::size_type size ) {
 
-         const std::size_t nbytes =
-            size * sizeof( typename vecmem::array< T, N >::value_type );
          return { size == 0 ? nullptr :
                   static_cast< typename vecmem::array< T, N >::pointer >(
-                     resource.allocate( nbytes ) ),
-                  { nbytes, resource } };
+                     resource.allocate(
+                        size * sizeof( typename
+                                       vecmem::array< T, N >::value_type ) ) ),
+                  { size, resource } };
       }
 
       /// Helper function used in the @c vecmem::array constructors
       template< typename T, std::size_t N >
       std::unique_ptr< typename vecmem::array< T, N >::value_type,
-                       vecmem::details::deleter >
+                       typename vecmem::array< T, N >::deleter >
       initialize_array_memory(
          std::unique_ptr< typename vecmem::array< T, N >::value_type,
-                          vecmem::details::deleter > memory,
+                          typename vecmem::array< T, N >::deleter > memory,
          typename vecmem::array< T, N >::size_type size ) {
 
          typename vecmem::array< T, N >::size_type i = 0;
@@ -49,6 +49,28 @@ namespace vecmem {
       }
 
    } // namespace details
+
+   template< typename T, std::size_t N >
+   array< T, N >::deleter::deleter( size_type size,
+                                    memory_resource& resource )
+   : m_size( size ), m_resource( &resource ) {
+
+   }
+
+   template< typename T, std::size_t N >
+   void array< T, N >::deleter::operator()( void* ptr ) {
+
+      // Call the destructor on all objects.
+      size_type i = 0;
+      for( pointer p = reinterpret_cast< pointer >( ptr ); i < m_size;
+           ++i, ++p ) {
+         p->~value_type();
+      }
+      // De-allocate the array's memory.
+      if( ( m_size != 0 ) && ( ptr != nullptr ) ) {
+         m_resource->deallocate( ptr, m_size * sizeof( value_type ) );
+      }
+   }
 
    template< typename T, std::size_t N >
    array< T, N >::array( memory_resource& resource )

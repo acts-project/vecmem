@@ -9,7 +9,6 @@
 // Local include(s).
 #include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
-#include "vecmem/utils/deleter.hpp"
 #include "vecmem/utils/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -83,6 +82,33 @@ namespace vecmem {
                      "types" );
 
       /// @}
+
+      /// Struct used for deleting the allocated memory block
+      class deleter {
+
+      public:
+         /// Constructor
+         deleter( size_type size, memory_resource& resource );
+
+         /// Copy constructor
+         deleter( const deleter& ) = default;
+         /// Move constructor
+         deleter( deleter&& ) = default;
+         /// Copy assignment operator
+         deleter& operator=( const deleter& ) = default;
+         /// Move assignment operator
+         deleter& operator=( deleter&& ) = default;
+
+         /// Operator performing the deletion of the object.
+         void operator()( void* ptr );
+
+      private:
+         /// The number of elements in the array
+         size_type m_size;
+         /// The memory resource used for deleting the memory block
+         memory_resource* m_resource;
+
+      }; // struct deleter
 
       /// Constructor with a memory resource to use
       ///
@@ -192,7 +218,7 @@ namespace vecmem {
       /// The size of the allocated array
       size_type m_size;
       /// The allocated array
-      std::unique_ptr< value_type, details::deleter > m_memory;
+      std::unique_ptr< value_type, deleter > m_memory;
 
    }; // class array
 
