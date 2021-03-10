@@ -108,3 +108,35 @@ TEST_F( core_array_test, zero_runtime ) {
    vecmem::array< unsigned int > a( m_resource, 0 );
    test_array( a );
 }
+
+namespace {
+
+   /// Simple test type
+   struct TestType1 {
+      /// Constructor
+      TestType1( int a = 10 ) : m_value( a + 1 ), m_pointer( nullptr ) {}
+      /// Destructor
+      ~TestType1() {
+         if( m_pointer != nullptr ) {
+            *m_pointer -= 1;
+         }
+      }
+      /// Simple member variable
+      int m_value;
+      /// Pointer member variable
+      int* m_pointer;
+   }; // struct TestType1
+
+} // private namespace
+
+/// Make sure that a non-trivial constructor and destructor is executed properly
+TEST_F( core_array_test, constructor_destructor ) {
+
+   int dummy = 5;
+   {
+      vecmem::array< TestType1, 10 > a( m_resource );
+      EXPECT_EQ( a.front().m_value, 11 );
+      a.back().m_pointer = &dummy;
+   }
+   EXPECT_EQ( dummy, 4 );
+}
