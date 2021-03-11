@@ -72,11 +72,10 @@ TEST_F( core_container_test, device_vector ) {
 /// Test(s) for @c vecmem::static_vector
 TEST_F( core_container_test, static_vector ) {
 
-   vecmem::static_vector< int, 20 > test_vector;
-   test_vector.resize( m_reference_vector.size() );
+   vecmem::static_vector< int, 20 > test_vector( m_reference_vector.size() );
    std::copy( m_reference_vector.begin(), m_reference_vector.end(),
               test_vector.begin() );
-   EXPECT_TRUE( test_vector.size() == m_reference_vector.size() );
+   EXPECT_EQ( test_vector.size(), m_reference_vector.size() );
    EXPECT_TRUE( std::equal( m_reference_vector.begin(),
                             m_reference_vector.end(),
                             test_vector.begin() ) );
