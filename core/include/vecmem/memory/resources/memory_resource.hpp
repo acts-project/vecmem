@@ -14,7 +14,14 @@
  * std::experimental::pmr namespace depending on the GCC version used, so we try
  * to unify them by aliassing depending on the compiler feature flags.
  */
-#if __has_include(<memory_resource>)
+#ifdef __CUDACC__
+namespace vecmem {
+    class memory_resource;
+
+    template<typename T>
+    class polymorphic_allocator;
+}
+#elif __has_include(<memory_resource>)
 #include <memory_resource>
 
 namespace vecmem {
