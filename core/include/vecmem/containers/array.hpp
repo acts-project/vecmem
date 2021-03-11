@@ -9,13 +9,13 @@
 // Local include(s).
 #include "vecmem/containers/details/vector_view.hpp"
 #include "vecmem/memory/resources/memory_resource.hpp"
-#include "vecmem/utils/deleter.hpp"
+#include "vecmem/utils/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
-#include <iterator>
 #include <memory>
+#include <type_traits>
 
 namespace vecmem {
 
@@ -52,26 +52,63 @@ namespace vecmem {
       typedef std::ptrdiff_t     difference_type;
 
       /// Value reference type
-      typedef value_type&        reference_type;
+      typedef value_type&        reference;
       /// Constant value reference type
-      typedef const value_type&  const_reference_type;
+      typedef const value_type&  const_reference;
 
       /// Value pointer type
-      typedef value_type*        pointer_type;
+      typedef value_type*        pointer;
       /// Constant value pointer type
-      typedef const value_type*  const_pointer_type;
+      typedef const value_type*  const_pointer;
 
       /// Forward iterator type
-      typedef pointer_type       iterator;
+      typedef pointer            iterator;
       /// Constant forward iterator type
-      typedef const_pointer_type const_iterator;
+      typedef const_pointer      const_iterator;
 
       /// Reverse iterator type
-      typedef std::reverse_iterator< iterator > reverse_iterator;
+      typedef vecmem::reverse_iterator< iterator > reverse_iterator;
       /// Constant reverse iterator type
-      typedef std::reverse_iterator< const_iterator > const_reverse_iterator;
+      typedef vecmem::reverse_iterator< const_iterator > const_reverse_iterator;
 
       /// @}
+
+      /// @name Check(s) on the type of the array element
+      /// @{
+
+      /// Make sure that the template type is default constructible
+      static_assert( std::is_default_constructible< value_type >::value,
+                     "vecmem::array can only handle default-constructible "
+                     "types" );
+
+      /// @}
+
+      /// Struct used for deleting the allocated memory block
+      class deleter {
+
+      public:
+         /// Constructor
+         deleter( size_type size, memory_resource& resource );
+
+         /// Copy constructor
+         deleter( const deleter& ) = default;
+         /// Move constructor
+         deleter( deleter&& ) = default;
+         /// Copy assignment operator
+         deleter& operator=( const deleter& ) = default;
+         /// Move assignment operator
+         deleter& operator=( deleter&& ) = default;
+
+         /// Operator performing the deletion of the object.
+         void operator()( void* ptr );
+
+      private:
+         /// The number of elements in the array
+         size_type m_size;
+         /// The memory resource used for deleting the memory block
+         memory_resource* m_resource;
+
+      }; // struct deleter
 
       /// Constructor with a memory resource to use
       ///
@@ -94,29 +131,29 @@ namespace vecmem {
       /// @{
 
       /// Access one element of the array (non-const)
-      reference_type at( size_type pos );
+      reference at( size_type pos );
       /// Access one element of the array (const)
-      const_reference_type at( size_type pos ) const;
+      const_reference at( size_type pos ) const;
 
       /// Access one element in the array (non-const)
-      reference_type operator[]( size_type pos );
+      reference operator[]( size_type pos );
       /// Access one element in the array (const)
-      const_reference_type operator[]( size_type pos ) const;
+      const_reference operator[]( size_type pos ) const;
 
       /// Access the first element in the array (non-const)
-      reference_type front();
+      reference front();
       /// Access the first element in the array (const)
-      const_reference_type front() const;
+      const_reference front() const;
 
       /// Access the last element of the array (non-const)
-      reference_type back();
+      reference back();
       /// Access the last element of the array (const)
-      const_reference_type back() const;
+      const_reference back() const;
 
       /// Access a pointer to the underlying memory block (non-const)
-      pointer_type data();
+      pointer data();
       /// Access a pointer to the underlying memory block (const)
-      const_pointer_type data() const;
+      const_pointer data() const;
 
       /// @}
 
@@ -173,7 +210,7 @@ namespace vecmem {
       /// @{
 
       /// Assign the specified value to all elements of the array
-      void fill( const_reference_type value );
+      void fill( const_reference value );
 
       /// @}
 
@@ -181,7 +218,7 @@ namespace vecmem {
       /// The size of the allocated array
       size_type m_size;
       /// The allocated array
-      std::unique_ptr< value_type, details::deleter > m_memory;
+      std::unique_ptr< value_type, deleter > m_memory;
 
    }; // class array
 
