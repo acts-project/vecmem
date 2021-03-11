@@ -16,6 +16,7 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/device_vector.hpp"
    "include/vecmem/containers/device_vector.ipp"
    "include/vecmem/containers/static_vector.hpp"
+   "include/vecmem/containers/static_vector.ipp"
    "include/vecmem/containers/vector.hpp"
    "include/vecmem/containers/vector.ipp"
    # Implementation details for the containers.
