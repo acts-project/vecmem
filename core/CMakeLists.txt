@@ -30,7 +30,7 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/memory/deallocator.hpp"
    "src/memory/deallocator.cpp"
    # Memory management.
-   "include/vecmem/memory/resources/memory_resource.hpp"
+   "include/vecmem/memory/memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/host_memory_resource.hpp"
    "src/memory/binary_page_memory_resource.cpp"

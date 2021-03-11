@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/resources/memory_resource.hpp"
+#include "vecmem/memory/memory_resource.hpp"
 
 namespace vecmem::hip {
 

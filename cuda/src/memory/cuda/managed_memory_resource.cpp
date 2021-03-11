@@ -8,7 +8,7 @@
 
 #include "../../utils/cuda_error_handling.hpp"
 
-#include "vecmem/memory/resources/memory_resource.hpp"
+#include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
 
 #include <cuda_runtime_api.h>
