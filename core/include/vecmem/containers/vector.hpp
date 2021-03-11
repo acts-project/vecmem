@@ -8,7 +8,7 @@
 
 // Local include(s).
 #include "vecmem/containers/details/vector_view.hpp"
-#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/polymorphic_allocator.hpp"
 
 // System include(s).
 #include <vector>
