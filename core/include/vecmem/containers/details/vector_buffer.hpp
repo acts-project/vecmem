@@ -8,7 +8,7 @@
 
 // Local include(s).
 #include "vecmem/containers/details/vector_view.hpp"
-#include "vecmem/memory/resources/memory_resource.hpp"
+#include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/memory/deallocator.hpp"
 #include "vecmem/utils/types.hpp"
 

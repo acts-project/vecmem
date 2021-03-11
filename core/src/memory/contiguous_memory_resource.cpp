@@ -6,7 +6,7 @@
  * Mozilla Public License Version 2.0
  */
 
-#include "vecmem/memory/resources/memory_resource.hpp"
+#include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/memory/contiguous_memory_resource.hpp"
 
 #include <cstddef>
