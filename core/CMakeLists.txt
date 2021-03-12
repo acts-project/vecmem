@@ -42,4 +42,5 @@ vecmem_add_library( vecmem_core core SHARED
    # Utilities.
    "include/vecmem/utils/reverse_iterator.hpp"
    "include/vecmem/utils/reverse_iterator.ipp"
+   "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )

@@ -8,10 +8,12 @@
 
 // Local include(s).
 #include "vecmem/utils/reverse_iterator.hpp"
+#include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
+#include <type_traits>
 
 namespace vecmem {
 
@@ -74,11 +76,12 @@ namespace vecmem {
       VECMEM_HOST_AND_DEVICE
       static_vector( size_type size, const_reference value = value_type() );
       /// Construct a vector with values coming from a pair of iterators
-      /*
-      template< typename InputIt >
+      template< typename InputIt,
+                std::enable_if_t<
+                   details::is_iterator_of< InputIt, value_type >::value,
+                   bool > = true >
       VECMEM_HOST_AND_DEVICE
       static_vector( InputIt other_begin, InputIt other_end );
-      */
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
       static_vector( const static_vector& parent );
@@ -136,11 +139,12 @@ namespace vecmem {
       VECMEM_HOST_AND_DEVICE
       void assign( size_type count, const_reference value );
       /// Assign new values to the vector
-      /*
-      template< typename InputIt >
+      template< typename InputIt,
+                std::enable_if_t<
+                   details::is_iterator_of< InputIt, value_type >::value,
+                   bool > = true >
       VECMEM_HOST_AND_DEVICE
       void assign( InputIt other_begin, InputIt other_end );
-      */
 
       /// Insert a new element into the vector
       VECMEM_HOST_AND_DEVICE
@@ -150,7 +154,10 @@ namespace vecmem {
       iterator insert( const_iterator pos, size_type count,
                        const_reference value );
       /// Insert a list of elements into the vector
-      template< typename InputIt >
+      template< typename InputIt,
+                std::enable_if_t<
+                   details::is_iterator_of< InputIt, value_type >::value,
+                   bool > = true >
       iterator insert( const_iterator pos, InputIt other_begin,
                        InputIt other_end );
 

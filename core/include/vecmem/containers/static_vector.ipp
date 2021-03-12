@@ -9,6 +9,7 @@
 // System include(s).
 #include <cassert>
 #include <cstring>
+#include <utility>
 
 namespace vecmem {
 
@@ -28,9 +29,13 @@ namespace vecmem {
       assign( size, value );
    }
 
-   /*
    template< typename TYPE, std::size_t MAX_SIZE >
-   template< typename InputIt >
+   template< typename InputIt,
+             std::enable_if_t<
+                details::is_iterator_of<
+                   InputIt,
+                   typename static_vector< TYPE, MAX_SIZE >::value_type >::value,
+                bool > >
    VECMEM_HOST_AND_DEVICE
    static_vector< TYPE, MAX_SIZE >::
    static_vector( InputIt other_begin, InputIt other_end )
@@ -38,7 +43,6 @@ namespace vecmem {
 
       assign( other_begin, other_end );
    }
-   */
 
    template< typename TYPE, std::size_t MAX_SIZE >
    VECMEM_HOST_AND_DEVICE
@@ -185,9 +189,13 @@ namespace vecmem {
       m_size = count;
    }
 
-   /*
    template< typename TYPE, std::size_t MAX_SIZE >
-   template< typename InputIt >
+   template< typename InputIt,
+             std::enable_if_t<
+                details::is_iterator_of<
+                   InputIt,
+                   typename static_vector< TYPE, MAX_SIZE >::value_type >::value,
+                bool > >
    VECMEM_HOST_AND_DEVICE
    void static_vector< TYPE, MAX_SIZE >::
    assign( InputIt other_begin, InputIt other_end ) {
@@ -202,7 +210,6 @@ namespace vecmem {
          construct( m_size++, *itr );
       }
    }
-   */
 
    template< typename TYPE, std::size_t MAX_SIZE >
    VECMEM_HOST_AND_DEVICE
@@ -261,7 +268,12 @@ namespace vecmem {
    }
 
    template< typename TYPE, std::size_t MAX_SIZE >
-   template< typename InputIt >
+   template< typename InputIt,
+             std::enable_if_t<
+                details::is_iterator_of<
+                   InputIt,
+                   typename static_vector< TYPE, MAX_SIZE >::value_type >::value,
+                bool > >
    typename static_vector< TYPE, MAX_SIZE >::iterator
    static_vector< TYPE, MAX_SIZE >::insert( const_iterator pos,
                                             InputIt other_begin,
@@ -302,7 +314,7 @@ namespace vecmem {
                ( m_size - id.m_index ) * value_size );
 
       // Instantiate the new value.
-      new( id.m_ptr ) value_type( std::forward( args )... );
+      new( id.m_ptr ) value_type( std::forward< Args >( args )... );
 
       // Increment the size.
       ++m_size;
@@ -317,7 +329,7 @@ namespace vecmem {
    typename static_vector< TYPE, MAX_SIZE >::reference
    static_vector< TYPE, MAX_SIZE >::emplace_back( Args&&... args ) {
 
-      return *( emplace( end(), std::forward( args )... ) );
+      return *( emplace( end(), std::forward< Args >( args )... ) );
    }
 
    template< typename TYPE, std::size_t MAX_SIZE >
