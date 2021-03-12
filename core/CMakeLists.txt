@@ -19,6 +19,14 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/static_vector.ipp"
    "include/vecmem/containers/vector.hpp"
    "include/vecmem/containers/vector.ipp"
+   # Jagged vectors.
+   "include/vecmem/containers/jagged_vector.hpp"
+   "include/vecmem/containers/jagged_vector_data.hpp"
+   "include/vecmem/containers/jagged_vector_data.ipp"
+   "include/vecmem/containers/jagged_device_vector.hpp"
+   "include/vecmem/containers/jagged_device_vector.ipp"
+   "include/vecmem/containers/details/jagged_vector_view.hpp"
+   "include/vecmem/containers/details/jagged_vector_view.ipp"
    # Implementation details for the containers.
    "include/vecmem/containers/details/vector_buffer.hpp"
    "include/vecmem/containers/details/vector_buffer.ipp"
