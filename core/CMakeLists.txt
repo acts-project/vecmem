@@ -16,6 +16,7 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/device_vector.hpp"
    "include/vecmem/containers/device_vector.ipp"
    "include/vecmem/containers/static_vector.hpp"
+   "include/vecmem/containers/static_vector.ipp"
    "include/vecmem/containers/vector.hpp"
    "include/vecmem/containers/vector.ipp"
    # Implementation details for the containers.
@@ -41,4 +42,5 @@ vecmem_add_library( vecmem_core core SHARED
    # Utilities.
    "include/vecmem/utils/reverse_iterator.hpp"
    "include/vecmem/utils/reverse_iterator.ipp"
+   "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )
