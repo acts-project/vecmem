@@ -21,15 +21,36 @@
 template< typename T >
 class core_static_vector_test : public testing::Test {};
 
+namespace {
+
+   /// "Complex" type used in the bulk of the tests
+   struct TestType1 {
+      TestType1( int a = 0, long b = 123 ) : m_a( a ), m_b( b ) {}
+      int m_a;
+      int m_b;
+   }; // struct TestType1
+
+   /// Helper operator for comparing two @c TestType1 objects
+   bool operator==( const TestType1& v1, const TestType1& v2 ) {
+      return ( ( v1.m_a == v2.m_a ) && ( v1.m_b == v2.m_b ) );
+   }
+
+} // private namespace
+
 /// Test suite for primitive types.
-typedef testing::Types< int, long, float, double > primitive_types;
-TYPED_TEST_SUITE( core_static_vector_test, primitive_types );
+typedef testing::Types< int, long, float, double, TestType1 > tested_types;
+TYPED_TEST_SUITE( core_static_vector_test, tested_types );
 
 namespace {
    /// Helper function for comparing the value of primitive types
    template< typename T >
    bool almost_equal( const T& v1, const T& v2 ) {
       return ( std::abs( v1 - v2 ) < 0.001 );
+   }
+   /// Specialisation for comparing @c TestType1 objects
+   template<>
+   bool almost_equal< TestType1 >( const TestType1& v1, const TestType1& v2 ) {
+      return ( v1 == v2 );
    }
 } // private namespace
 
@@ -222,4 +243,45 @@ TYPED_TEST( core_static_vector_test, capacity ) {
 
    // Make sure that the (no-op) reserve function can be called.
    v.reserve( 70 );
+}
+
+namespace {
+
+   /// Complex type used in one of the tests.
+   struct TestType2 {
+      TestType2( int a ) : m_a( a + 1 ), m_b( nullptr ) {}
+      ~TestType2() {
+         if( m_b != nullptr ) {
+            --( *m_b );
+         }
+      }
+      int m_a;
+      int* m_b;
+   }; // struct TestType2
+
+} // private namespace
+
+/// Simple test fixture for the non-typed-tests
+class core_static_vector_test_complex : public testing::Test {};
+
+/// Test a value type with a non-trivial constructor and destructor
+TEST_F( core_static_vector_test_complex, non_trivial_value ) {
+
+   // Create the test vector.
+   vecmem::static_vector< TestType2, 100 > v;
+
+   // Fill it with some custom values.
+   v.insert( v.begin(), 20, TestType2( 10 ) );
+   EXPECT_EQ( v.size(), 20 );
+   for( const TestType2& value : v ) {
+      EXPECT_EQ( value.m_a, 11 );
+      EXPECT_EQ( value.m_b, nullptr );
+   }
+
+   // Make sure that the destructor is called on the vector elements.
+   int dummy = 10;
+   v[ 0 ].m_b = &dummy;
+   v[ 5 ].m_b = &dummy;
+   v.clear();
+   EXPECT_EQ( dummy, 8 );
 }
