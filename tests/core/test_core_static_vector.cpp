@@ -85,11 +85,8 @@ TYPED_TEST( core_static_vector_test, default_constructor ) {
    EXPECT_EQ( test1.size(), 0 );
 
    // Create a default vector with zero capacity.
-   // This is not allowed at the moment!
-   /*
    const vecmem::static_vector< TypeParam, 0 > test2;
    EXPECT_EQ( test2.size(), 0 );
-   */
 }
 
 /// Test the copy constructor

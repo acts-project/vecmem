@@ -44,7 +44,9 @@ namespace vecmem {
       /// The size of the vector elements
       static constexpr size_type value_size = sizeof( value_type );
       /// Type of the array holding the payload of the vector elements
-      typedef char               array_type[ array_max_size * value_size ];
+      typedef typename
+      details::array_type< char, array_max_size * value_size >::type
+         array_type;
 
       /// Value reference type
       typedef value_type&        reference;
