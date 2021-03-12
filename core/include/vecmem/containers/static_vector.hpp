@@ -81,7 +81,11 @@ namespace vecmem {
                    details::is_iterator_of< InputIt, value_type >::value,
                    bool > = true >
       VECMEM_HOST_AND_DEVICE
-      static_vector( InputIt other_begin, InputIt other_end );
+      static_vector( InputIt other_begin, InputIt other_end )
+      : m_size( 0 ), m_elements() {
+
+         assign< InputIt >( other_begin, other_end );
+      }
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
       static_vector( const static_vector& parent );
@@ -144,7 +148,18 @@ namespace vecmem {
                    details::is_iterator_of< InputIt, value_type >::value,
                    bool > = true >
       VECMEM_HOST_AND_DEVICE
-      void assign( InputIt other_begin, InputIt other_end );
+      void assign( InputIt other_begin, InputIt other_end ) {
+
+         // Remove all previous elements.
+         clear();
+
+         // Create copies of all of the elements one-by-one. It's very
+         // inefficient, but we can't make any assumptions about the type of the
+         /// input iterator eceived by this function.
+         for( InputIt itr = other_begin; itr != other_end; ++itr ) {
+            construct( m_size++, *itr );
+         }
+      }
 
       /// Insert a new element into the vector
       VECMEM_HOST_AND_DEVICE
@@ -159,7 +174,23 @@ namespace vecmem {
                    details::is_iterator_of< InputIt, value_type >::value,
                    bool > = true >
       iterator insert( const_iterator pos, InputIt other_begin,
-                       InputIt other_end );
+                       InputIt other_end ) {
+
+         // Find the index of this iterator inside of the vector.
+         auto id = element_id( pos );
+
+         // Insert the elements one by one. It's very inefficient, but we can't
+         // make any assumptions about the type of the input iterator received
+         // by this function.
+         const_iterator self_itr = pos;
+         for( InputIt other_itr = other_begin; other_itr != other_end;
+              ++other_itr, ++self_itr ) {
+            insert( self_itr, *other_itr );
+         }
+
+         // Return an iterator to the first inserted element.
+         return id.m_ptr;
+      }
 
       /// Insert a new element into the vector
       template< typename... Args >
