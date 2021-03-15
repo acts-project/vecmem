@@ -7,6 +7,13 @@
 # Build GoogleTest.
 include( vecmem-googletest )
 
+# Build a common, helper library.
+add_library( vecmem_testing_common STATIC
+   "common/memory_resource_name_gen.hpp" "common/memory_resource_name_gen.cpp" )
+target_link_libraries( vecmem_testing_common
+   PUBLIC vecmem::core GTest::gtest )
+add_dependencies( vecmem_testing_common GoogleTest )
+
 # Include the library specific tests.
 add_subdirectory( core )
 if( VECMEM_BUILD_CUDA_LIBRARY )

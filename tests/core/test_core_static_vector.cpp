@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <string>
 #include <vector>
 
 /// Test case for @c vecmem::static_vector
@@ -35,11 +36,37 @@ namespace {
       return ( ( v1.m_a == v2.m_a ) && ( v1.m_b == v2.m_b ) );
    }
 
+   /// Helper struct/function for printing nice names for the tested types
+   struct tested_names {
+      template< typename T >
+      static std::string GetName( int i ) {
+         switch( i ) {
+         case 0:
+            return "int";
+            break;
+         case 1:
+            return "long";
+            break;
+         case 2:
+            return "float";
+            break;
+         case 3:
+            return "double";
+            break;
+         case 4:
+            return "TestType1";
+            break;
+         default:
+            return "Unknown";
+         }
+      }
+   };
+
 } // private namespace
 
 /// Test suite for primitive types.
 typedef testing::Types< int, long, float, double, TestType1 > tested_types;
-TYPED_TEST_SUITE( core_static_vector_test, tested_types );
+TYPED_TEST_SUITE( core_static_vector_test, tested_types, tested_names );
 
 namespace {
    /// Helper function for comparing the value of primitive types
