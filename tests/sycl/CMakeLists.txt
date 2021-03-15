@@ -4,16 +4,15 @@
 #
 # Mozilla Public License Version 2.0
 
-# Enable HIP as a language.
+# Enable SYCL as a language.
 enable_language( SYCL )
 
 # Project include(s).
 include( vecmem-compiler-options-sycl )
 
-# Tests for the SYCL library's custom memory management.
-vecmem_add_test( sycl_allocators test_sycl_allocators.cpp
-   LINK_LIBRARIES vecmem::core vecmem::sycl )
-
-# Tests for the core library's device vector types, using the SYCL backend.
-vecmem_add_test( sycl_containers test_sycl_containers.sycl
-   LINK_LIBRARIES vecmem::core vecmem::sycl )
+# Test all of the SYCL library's features.
+vecmem_add_test( sycl
+   "test_sycl_memory_resources.cpp"
+   "test_sycl_containers.sycl"
+   LINK_LIBRARIES vecmem::core vecmem::sycl GTest::gtest_main
+                  vecmem_testing_common )
