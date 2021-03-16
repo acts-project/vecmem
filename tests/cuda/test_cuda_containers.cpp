@@ -14,20 +14,23 @@
 #include "vecmem/utils/cuda/copy.hpp"
 #include "test_cuda_containers_kernels.cuh"
 
-// System include(s).
-#undef NDEBUG
-#include <cassert>
+// GoogleTest include(s).
+#include <gtest/gtest.h>
 
-int main() {
+/// Test fixture for the on-device vecmem container tests
+class cuda_containers_test : public testing::Test {};
+
+/// Test a linear transformation using the managed memory resource
+TEST_F( cuda_containers_test, managed_memory ) {
 
    // The managed memory resource.
    vecmem::cuda::managed_memory_resource managed_resource;
 
    // Create an input and an output vector in managed memory.
-   vecmem::vector< int > inputvec1( &managed_resource );
-   inputvec1 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-   vecmem::vector< int > outputvec1( inputvec1.size(), &managed_resource );
-   assert( inputvec1.size() == outputvec1.size() );
+   vecmem::vector< int > inputvec( { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+                                   &managed_resource );
+   vecmem::vector< int > outputvec( inputvec.size(), &managed_resource );
+   EXPECT_EQ( inputvec.size(), outputvec.size() );
 
    // Create the array that is used in the linear transformation.
    vecmem::array< int, 2 > constants( managed_resource );
@@ -36,43 +39,52 @@ int main() {
 
    // Perform a linear transformation using the vecmem vector helper types.
    linearTransform( vecmem::get_data( constants ),
-                    vecmem::get_data( inputvec1 ),
-                    vecmem::get_data( outputvec1 ) );
+                    vecmem::get_data( inputvec ),
+                    vecmem::get_data( outputvec ) );
 
    // Check the output.
-   for( std::size_t i = 0; i < outputvec1.size(); ++i ) {
-      assert( outputvec1.at( i ) ==
-              inputvec1.at( i ) * constants[ 0 ] + constants[ 1 ] );
+   EXPECT_EQ( inputvec.size(), outputvec.size() );
+   for( std::size_t i = 0; i < outputvec.size(); ++i ) {
+      EXPECT_EQ( outputvec.at( i ),
+                 inputvec.at( i ) * constants[ 0 ] + constants[ 1 ] );
    }
+}
+
+/// Test a linear transformation while hand-managing the memory copies
+TEST_F( cuda_containers_test, explicit_memory ) {
 
    // The host/device memory resources.
    vecmem::cuda::device_memory_resource device_resource;
    vecmem::cuda::host_memory_resource host_resource;
 
    // Create input/output vectors on the host.
-   vecmem::vector< int > inputvec2( &host_resource );
-   inputvec2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-   vecmem::vector< int > outputvec2( inputvec2.size(), &host_resource );
-   assert( inputvec2.size() == outputvec2.size() );
+   vecmem::vector< int > inputvec( { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+                                   &host_resource );
+   vecmem::vector< int > outputvec( inputvec.size(), &host_resource );
+   EXPECT_EQ( inputvec.size(), outputvec.size() );
 
    // Allocate a device memory block for the output container.
-   auto outputvec2host = vecmem::get_data( outputvec2 );
+   auto outputvechost = vecmem::get_data( outputvec );
    vecmem::details::vector_buffer< int >
-      outputvec2device( outputvec2.size(), device_resource );
+      outputvecdevice( outputvec.size(), device_resource );
+
+   // Create the array that is used in the linear transformation.
+   vecmem::array< int, 2 > constants( host_resource );
+   constants[ 0 ] = 2;
+   constants[ 1 ] = 3;
 
    // Perform a linear transformation with explicit memory copies.
-   linearTransform( vecmem::get_data( constants ),
+   linearTransform( vecmem::cuda::copy_to_device(
+                       vecmem::get_data( constants ), device_resource ),
                     vecmem::cuda::copy_to_device(
-                       vecmem::get_data( inputvec2 ), device_resource ),
-                    outputvec2device );
-   vecmem::cuda::copy( outputvec2device, outputvec2host );
+                       vecmem::get_data( inputvec ), device_resource ),
+                    outputvecdevice );
+   vecmem::cuda::copy( outputvecdevice, outputvechost );
 
    // Check the output.
-   for( std::size_t i = 0; i < outputvec2.size(); ++i ) {
-      assert( outputvec2.at( i ) ==
-              inputvec2.at( i ) * constants[ 0 ] + constants[ 1 ] );
+   EXPECT_EQ( inputvec.size(), outputvec.size() );
+   for( std::size_t i = 0; i < outputvec.size(); ++i ) {
+      EXPECT_EQ( outputvec.at( i ),
+                 inputvec.at( i ) * constants[ 0 ] + constants[ 1 ] );
    }
-
-   // Return gracefully.
-   return 0;
 }
