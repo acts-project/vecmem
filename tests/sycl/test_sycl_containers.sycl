@@ -14,66 +14,44 @@
 #include "vecmem/memory/sycl/shared_memory_resource.hpp"
 #include "../../sycl/src/utils/sycl/device_selector.hpp"
 
+// GoogleTest include(s).
+#include <gtest/gtest.h>
+
 // SYCL include(s).
 #include <CL/sycl.hpp>
 
-// System include(s).
-#include <cassert>
-#include <iostream>
+/// Test fixture for the on-device vecmem container tests
+class sycl_containers_test : public testing::Test {};
 
-/// Helper function for creating an "input vector".
-vecmem::vector< int > make_input_vector( vecmem::memory_resource& resource ) {
-
-   return { { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, &resource };
-}
-
-/// Helper function for creating an "output vector".
-vecmem::vector< int > make_output_vector( vecmem::memory_resource& resource ) {
-
-   return vecmem::vector< int >( 10, &resource );
-}
-
-int main() {
+/// Test a linear transformation using the shared memory resource
+TEST_F( sycl_containers_test, shared_memory ) {
 
    // Create the SYCL queue that we'll be using in the test.
    cl::sycl::queue queue{ vecmem::sycl::device_selector() };
-   std::cout << "Using device:" << std::endl;
-   std::cout << "    name: "
-             << queue.get_device().get_info< cl::sycl::info::device::name >()
-             << std::endl;
-   std::cout << "  vendor: "
-             << queue.get_device().get_info< cl::sycl::info::device::vendor >()
-             << std::endl;
-   std::cout << " version: "
-             << queue.get_device().get_info< cl::sycl::info::device::version >()
-             << std::endl;
 
-   // Set up the memory resource for the test.
+   // The shared memory resource.
    vecmem::sycl::shared_memory_resource resource( &queue );
 
-   // Create an input and an output vector.
-   auto inputvec = make_input_vector( resource );
-   auto outputvec = make_output_vector( resource );
-   assert( inputvec.size() == outputvec.size() );
+   // Create an input and an output vector in host (managed) memory.
+   vecmem::vector< int > inputvec( { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+                                   &resource );
+   vecmem::vector< int > outputvec( inputvec.size(), &resource );
+   EXPECT_EQ( inputvec.size(), outputvec.size() );
 
    // Create the array that is used in the linear transformation.
-   vecmem::array< int, 2 > constantsarray( resource );
-   constantsarray[ 0 ] = 2;
-   constantsarray[ 1 ] = 3;
+   vecmem::array< int, 2 > constants( resource );
+   constants[ 0 ] = 2;
+   constants[ 1 ] = 3;
 
    // Perform a linear transformation using the vecmem vector helper types.
-   queue.submit( [ &constantsarray, &inputvec,
-                   &outputvec ]( cl::sycl::handler& h ) {
-
-      // Translate the host containers to simple types.
-      auto constants = vecmem::get_data( constantsarray );
-      auto input = vecmem::get_data( inputvec );
-      auto output = vecmem::get_data( outputvec );
+   queue.submit( [ &constants, &inputvec, &outputvec ]( cl::sycl::handler& h ) {
 
       // Run the kernel.
       h.parallel_for< class LinearTransform >(
          cl::sycl::range< 1 >( inputvec.size() ),
-         [ constants, input, output ]( cl::sycl::id< 1 > id ) {
+         [ constants = vecmem::get_data( constants ),
+           input = vecmem::get_data( inputvec ),
+           output = vecmem::get_data( outputvec ) ]( cl::sycl::id< 1 > id ) {
 
             // Skip invalid indices.
             if( id >= input.m_size ) {
@@ -95,11 +73,9 @@ int main() {
    queue.wait();
 
    // Check the output.
+   EXPECT_EQ( inputvec.size(), outputvec.size() );
    for( std::size_t i = 0; i < outputvec.size(); ++i ) {
-      assert( outputvec.at( i ) == inputvec.at( i ) * constantsarray.at( 0 ) +
-                                   constantsarray.at( 1 ) );
+      EXPECT_EQ( outputvec.at( i ),
+                 inputvec.at( i ) * constants[ 0 ] + constants[ 1 ] );
    }
-
-   // Return gracefully.
-   return 0;
 }
