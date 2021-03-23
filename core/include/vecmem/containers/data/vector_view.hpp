@@ -65,4 +65,4 @@ namespace vecmem { namespace details {
 } } // namespace vecmem::details
 
 // Include the implementation.
-#include "vecmem/containers/details/vector_view.ipp"
+#include "vecmem/containers/impl/vector_view.ipp"

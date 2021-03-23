@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 
 /// Function executing a simple HIP kernel on the input/output arrays
 void linearTransform( vecmem::details::vector_view< const int > constants,

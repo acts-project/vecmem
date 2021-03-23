@@ -9,7 +9,7 @@
 #pragma once
 
 #include "vecmem/memory/memory_resource.hpp"
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/vector.hpp"
 

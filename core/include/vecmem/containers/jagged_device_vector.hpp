@@ -9,7 +9,7 @@
 #pragma once
 
 #include "vecmem/containers/device_vector.hpp"
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 
 #include <cstddef>
 
@@ -168,4 +168,5 @@ namespace vecmem {
     };
 }
 
-#include "jagged_device_vector.ipp"
+// Include the implementation.
+#include "vecmem/containers/impl/jagged_device_vector.ipp"

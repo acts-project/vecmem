@@ -8,7 +8,7 @@
 
 #include "test_cuda_jagged_vector_view_kernels.cuh"
 #include "vecmem/containers/jagged_device_vector.hpp"
-#include "vecmem/containers/details/jagged_vector_view.hpp"
+#include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "../../cuda/src/utils/cuda_error_handling.hpp"
 
 __global__

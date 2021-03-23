@@ -9,9 +9,9 @@
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
-#include "vecmem/containers/jagged_vector_data.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
-#include "vecmem/containers/details/jagged_vector_view.hpp"
+#include "vecmem/containers/data/jagged_vector_data.hpp"
+#include "vecmem/containers/data/jagged_vector_view.hpp"
 
 #include <gtest/gtest.h>
 

@@ -8,10 +8,6 @@
 
 #pragma once
 
-#include "vecmem/containers/details/vector_view.hpp"
-
-#include <cstddef>
-
 namespace vecmem { namespace details {
     template<typename T>
     jagged_vector_view<T>::jagged_vector_view(

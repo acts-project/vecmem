@@ -6,8 +6,8 @@
  */
 
 // Local include(s).
-#include "vecmem/containers/details/vector_buffer.hpp"
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_buffer.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 

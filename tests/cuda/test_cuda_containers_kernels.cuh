@@ -8,7 +8,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 
 /// Perform a linear transformation using the received vectors
 void linearTransform( vecmem::details::vector_view< const int > constants,

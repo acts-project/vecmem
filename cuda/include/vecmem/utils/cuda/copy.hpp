@@ -8,8 +8,8 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_buffer.hpp"
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_buffer.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 
 namespace vecmem::cuda {

@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/utils/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -176,4 +176,4 @@ namespace vecmem {
 } // namespace vecmem
 
 // Include the implementation.
-#include "vecmem/containers/device_array.ipp"
+#include "vecmem/containers/impl/device_array.ipp"

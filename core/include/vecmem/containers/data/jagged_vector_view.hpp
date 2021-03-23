@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 
 #include <cstddef>
 
@@ -54,4 +54,5 @@ namespace vecmem { namespace details {
     };
 }}
 
-#include "jagged_vector_view.ipp"
+// Include the implementation.
+#include "vecmem/containers/impl/jagged_vector_view.ipp"

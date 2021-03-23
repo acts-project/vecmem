@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/memory/polymorphic_allocator.hpp"
 
 // System include(s).
@@ -42,4 +42,4 @@ namespace vecmem {
 } // namespace vecmem
 
 // Include the implementation.
-#include "vecmem/containers/vector.ipp"
+#include "vecmem/containers/impl/vector.ipp"
