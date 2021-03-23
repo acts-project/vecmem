@@ -14,7 +14,7 @@
 #include <cstddef>
 
 namespace vecmem {
-    namespace details {
+    namespace data {
         template<typename T>
         struct jagged_vector_view;
     }
@@ -49,7 +49,7 @@ namespace vecmem {
          */
         VECMEM_HOST_AND_DEVICE
         jagged_device_vector(
-            const details::jagged_vector_view<T> & data
+            const data::jagged_vector_view<T> & data
         );
 
         /**
@@ -164,7 +164,7 @@ namespace vecmem {
          * The internal state of this jagged vector, which is heap-allocated by
          * the given memory manager.
          */
-        details::vector_view<T> * const m_ptr;
+        data::vector_view<T> * const m_ptr;
     };
 }
 

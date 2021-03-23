@@ -222,16 +222,16 @@ namespace vecmem {
 
    }; // class array
 
-   /// Helper function creating a @c vecmem::details::vector_view object
+   /// Helper function creating a @c vecmem::data::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_view< T >
+   data::vector_view< T >
    get_data( array< T, N >& a );
 
-   /// Helper function creating a @c vecmem::details::vector_view object
+   /// Helper function creating a @c vecmem::data::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_view< const T >
+   data::vector_view< const T >
    get_data( const array< T, N >& a );
 
 } // namespace vecmem

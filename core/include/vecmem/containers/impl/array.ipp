@@ -295,7 +295,7 @@ namespace vecmem {
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_view< T >
+   data::vector_view< T >
    get_data( array< T, N >& a ) {
 
       return { a.size(), a.data() };
@@ -303,7 +303,7 @@ namespace vecmem {
 
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_view< const T >
+   data::vector_view< const T >
    get_data( const array< T, N >& a ) {
 
       return { a.size(), a.data() };

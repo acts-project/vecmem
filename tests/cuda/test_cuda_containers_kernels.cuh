@@ -11,6 +11,6 @@
 #include "vecmem/containers/data/vector_view.hpp"
 
 /// Perform a linear transformation using the received vectors
-void linearTransform( vecmem::details::vector_view< const int > constants,
-                      vecmem::details::vector_view< const int > input,
-                      vecmem::details::vector_view< int > output );
+void linearTransform( vecmem::data::vector_view< const int > constants,
+                      vecmem::data::vector_view< const int > input,
+                      vecmem::data::vector_view< int > output );

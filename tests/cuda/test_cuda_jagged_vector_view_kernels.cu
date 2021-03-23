@@ -13,7 +13,7 @@
 
 __global__
 void doubleJaggedKernel(
-    vecmem::details::jagged_vector_view<int> _jag
+    vecmem::data::jagged_vector_view<int> _jag
 ) {
     const std::size_t t = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -29,7 +29,7 @@ void doubleJaggedKernel(
 }
 
 void doubleJagged(
-    vecmem::details::jagged_vector_view<int> & jag
+    vecmem::data::jagged_vector_view<int> & jag
 ) {
     doubleJaggedKernel<<<1, jag.m_size>>>(jag);
 

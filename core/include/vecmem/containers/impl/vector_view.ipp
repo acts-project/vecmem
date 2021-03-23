@@ -6,7 +6,7 @@
  */
 #pragma once
 
-namespace vecmem { namespace details {
+namespace vecmem { namespace data {
 
    template< typename TYPE >
    VECMEM_HOST_AND_DEVICE
@@ -28,4 +28,4 @@ namespace vecmem { namespace details {
 
    }
 
-} } // namespace vecmem::details
+} } // namespace vecmem::data

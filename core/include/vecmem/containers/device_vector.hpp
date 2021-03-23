@@ -59,7 +59,7 @@ namespace vecmem {
 
       /// Constructor, on top of a previously allocated/filled block of memory
       VECMEM_HOST_AND_DEVICE
-      device_vector( details::vector_view< value_type > data );
+      device_vector( data::vector_view< value_type > data );
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
       device_vector( const device_vector& parent );

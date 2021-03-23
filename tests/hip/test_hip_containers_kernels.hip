@@ -18,9 +18,9 @@
 
 /// Kernel performing a linear transformation using the vector helper types
 __global__
-void linearTransformKernel( vecmem::details::vector_view< const int > constants,
-                            vecmem::details::vector_view< const int > input,
-                            vecmem::details::vector_view< int > output ) {
+void linearTransformKernel( vecmem::data::vector_view< const int > constants,
+                            vecmem::data::vector_view< const int > input,
+                            vecmem::data::vector_view< int > output ) {
 
    // Find the current index.
    const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
@@ -39,9 +39,9 @@ void linearTransformKernel( vecmem::details::vector_view< const int > constants,
    return;
 }
 
-void linearTransform( vecmem::details::vector_view< const int > constants,
-                      vecmem::details::vector_view< const int > input,
-                      vecmem::details::vector_view< int > output ) {
+void linearTransform( vecmem::data::vector_view< const int > constants,
+                      vecmem::data::vector_view< const int > input,
+                      vecmem::data::vector_view< int > output ) {
 
    // Launch the kernel.
    hipLaunchKernelGGL( linearTransformKernel, 1, input.m_size, 0, nullptr,

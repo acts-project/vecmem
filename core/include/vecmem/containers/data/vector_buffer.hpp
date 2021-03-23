@@ -17,7 +17,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace vecmem::details {
+namespace vecmem::data {
 
    /// Object owning the data held by it
    ///
@@ -50,11 +50,11 @@ namespace vecmem::details {
 
    private:
       /// Data object owning the allocated memory
-      std::unique_ptr< TYPE, deallocator > m_memory;
+      std::unique_ptr< TYPE, details::deallocator > m_memory;
 
    }; // class vector_buffer
 
-} // namespace vecmem::details
+} // namespace vecmem::data
 
 // Include the implementation.
 #include "vecmem/containers/impl/vector_buffer.ipp"

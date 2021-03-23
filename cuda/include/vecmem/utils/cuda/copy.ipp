@@ -26,30 +26,30 @@ namespace vecmem::cuda {
    } // namespace details
 
    template< typename TYPE >
-   vecmem::details::vector_buffer< TYPE >
-   copy_to_device( const vecmem::details::vector_view< TYPE >& host,
+   vecmem::data::vector_buffer< TYPE >
+   copy_to_device( const vecmem::data::vector_view< TYPE >& host,
                    memory_resource& resource ) {
 
-      vecmem::details::vector_buffer< TYPE > device( host.m_size, resource );
+      vecmem::data::vector_buffer< TYPE > device( host.m_size, resource );
       details::copy_to_device( host.m_size * sizeof( TYPE ), host.m_ptr,
                                device.m_ptr );
       return device;
    }
 
    template< typename TYPE >
-   vecmem::details::vector_buffer< TYPE >
-   copy_to_host( const vecmem::details::vector_view< TYPE >& device,
+   vecmem::data::vector_buffer< TYPE >
+   copy_to_host( const vecmem::data::vector_view< TYPE >& device,
                  memory_resource& resource ) {
 
-      vecmem::details::vector_buffer< TYPE > host( device.m_size, resource );
+      vecmem::data::vector_buffer< TYPE > host( device.m_size, resource );
       details::copy_to_host( device.m_size * sizeof( TYPE ), device.m_ptr,
                              host.m_ptr );
       return host;
    }
 
    template< typename TYPE >
-   void copy( const vecmem::details::vector_view< TYPE >& from,
-              vecmem::details::vector_view< TYPE >& to ) {
+   void copy( const vecmem::data::vector_view< TYPE >& from,
+              vecmem::data::vector_view< TYPE >& to ) {
 
       details::copy( from.m_size * sizeof( TYPE ), from.m_ptr, to.m_ptr );
    }

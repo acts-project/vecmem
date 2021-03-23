@@ -15,10 +15,7 @@
 
 #include <cstddef>
 
-namespace vecmem {
-    template<typename T>
-    class jagged_vector_view;
-
+namespace vecmem::data {
     /**
      * @brief A data wrapper for jagged vectors.
      *
@@ -27,9 +24,9 @@ namespace vecmem {
      * object.
      */
     template<typename T>
-    class jagged_vector_data : public details::jagged_vector_view<T> {
+    class jagged_vector_data : public jagged_vector_view<T> {
     public:
-        using base_type = details::jagged_vector_view<T>;
+        using base_type = jagged_vector_view<T>;
 
         /**
          * @brief Construct jagged vector data from a jagged vector.
@@ -63,7 +60,7 @@ namespace vecmem {
          */
         memory_resource * m_mem;
     };
-}
+} // namespace vecmem::data
 
 // Include the implementation.
 #include "vecmem/containers/impl/jagged_vector_data.ipp"
