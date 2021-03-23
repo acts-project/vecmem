@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "vecmem/containers/details/jagged_vector_view.hpp"
+#include "vecmem/containers/data/jagged_vector_view.hpp"
 
 void doubleJagged(
-    vecmem::details::jagged_vector_view<int> & jag
+    vecmem::data::jagged_vector_view<int> & jag
 );

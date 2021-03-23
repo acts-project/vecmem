@@ -11,7 +11,7 @@
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
-#include "vecmem/containers/jagged_vector_data.hpp"
+#include "vecmem/containers/data/jagged_vector_data.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
 
 #include <gtest/gtest.h>
@@ -20,7 +20,7 @@ class cuda_jagged_vector_view_test : public testing::Test {
     protected:
     vecmem::cuda::managed_memory_resource m_mem;
     vecmem::jagged_vector<int> m_vec;
-    vecmem::jagged_vector_data<int> m_data;
+    vecmem::data::jagged_vector_data<int> m_data;
 
     cuda_jagged_vector_view_test(
         void

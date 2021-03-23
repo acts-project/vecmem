@@ -322,4 +322,4 @@ namespace vecmem {
 } // namespace vecmem
 
 // Include the implementation.
-#include "vecmem/containers/static_vector.ipp"
+#include "vecmem/containers/impl/static_vector.ipp"

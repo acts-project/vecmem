@@ -8,14 +8,14 @@
 
 namespace {
 
-   /// Function creating the smart pointer for @c vecmem::details::vector_buffer
+   /// Function creating the smart pointer for @c vecmem::data::vector_buffer
    template< typename TYPE >
    std::unique_ptr< TYPE, vecmem::details::deallocator >
    allocate_buffer_memory(
-      typename vecmem::details::vector_buffer< TYPE >::size_type size,
+      typename vecmem::data::vector_buffer< TYPE >::size_type size,
       vecmem::memory_resource& resource ) {
 
-      const typename vecmem::details::vector_buffer< TYPE >::size_type
+      const typename vecmem::data::vector_buffer< TYPE >::size_type
          byteSize = size * sizeof( TYPE );
       return { size == 0 ? nullptr :
                static_cast< TYPE* >( resource.allocate( byteSize ) ),
@@ -24,7 +24,7 @@ namespace {
 
 } // private namespace
 
-namespace vecmem::details {
+namespace vecmem::data {
 
    template< typename TYPE >
    VECMEM_HOST
@@ -38,4 +38,4 @@ namespace vecmem::details {
       base_type::m_ptr = m_memory.get();
    }
 
-} // namespace vecmem::details
+} // namespace vecmem::data

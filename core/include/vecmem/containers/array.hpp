@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/utils/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
@@ -222,19 +222,19 @@ namespace vecmem {
 
    }; // class array
 
-   /// Helper function creating a @c vecmem::details::vector_view object
+   /// Helper function creating a @c vecmem::data::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_view< T >
+   data::vector_view< T >
    get_data( array< T, N >& a );
 
-   /// Helper function creating a @c vecmem::details::vector_view object
+   /// Helper function creating a @c vecmem::data::vector_view object
    template< typename T, std::size_t N >
    VECMEM_HOST
-   details::vector_view< const T >
+   data::vector_view< const T >
    get_data( const array< T, N >& a );
 
 } // namespace vecmem
 
 // Include the implementation.
-#include "vecmem/containers/array.ipp"
+#include "vecmem/containers/impl/array.ipp"

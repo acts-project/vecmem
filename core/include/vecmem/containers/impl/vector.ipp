@@ -10,7 +10,7 @@ namespace vecmem {
 
    template< typename TYPE, typename ALLOC >
    VECMEM_HOST
-   details::vector_view< TYPE >
+   data::vector_view< TYPE >
    get_data( std::vector< TYPE, ALLOC >& vec ) {
 
       return { vec.size(), vec.data() };
@@ -18,7 +18,7 @@ namespace vecmem {
 
    template< typename TYPE, typename ALLOC >
    VECMEM_HOST
-   details::vector_view< const TYPE >
+   data::vector_view< const TYPE >
    get_data( const std::vector< TYPE, ALLOC >& vec ) {
 
       return { vec.size(), vec.data() };

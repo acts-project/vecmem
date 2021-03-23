@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/containers/details/vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/memory/polymorphic_allocator.hpp"
 
 // System include(s).
@@ -27,19 +27,19 @@ namespace vecmem {
    template<typename T>
    using vector = std::vector<T, vecmem::polymorphic_allocator<T>>;
 
-   /// Helper function creating a @c vecmem::details::vector_view object
+   /// Helper function creating a @c vecmem::data::vector_view object
    template< typename TYPE, typename ALLOC >
    VECMEM_HOST
-   details::vector_view< TYPE >
+   data::vector_view< TYPE >
    get_data( std::vector< TYPE, ALLOC >& vec );
 
-   /// Helper function creating a @c vecmem::details::vector_view object
+   /// Helper function creating a @c vecmem::data::vector_view object
    template< typename TYPE, typename ALLOC >
    VECMEM_HOST
-   details::vector_view< const TYPE >
+   data::vector_view< const TYPE >
    get_data( const std::vector< TYPE, ALLOC >& vec );
 
 } // namespace vecmem
 
 // Include the implementation.
-#include "vecmem/containers/vector.ipp"
+#include "vecmem/containers/impl/vector.ipp"

@@ -13,7 +13,7 @@
 namespace vecmem {
     template<typename T>
     jagged_device_vector<T>::jagged_device_vector(
-        const details::jagged_vector_view<T> & data
+        const data::jagged_vector_view<T> & data
     ) :
         m_size(data.m_size),
         m_ptr(data.m_ptr)

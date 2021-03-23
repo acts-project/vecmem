@@ -9,9 +9,9 @@
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
-#include "vecmem/containers/jagged_vector_data.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
-#include "vecmem/containers/details/jagged_vector_view.hpp"
+#include "vecmem/containers/data/jagged_vector_data.hpp"
+#include "vecmem/containers/data/jagged_vector_view.hpp"
 
 #include <gtest/gtest.h>
 
@@ -19,7 +19,7 @@ class core_jagged_vector_view_test : public testing::Test {
     protected:
     vecmem::host_memory_resource m_mem;
     vecmem::jagged_vector<int> m_vec;
-    vecmem::jagged_vector_data<int> m_data;
+    vecmem::data::jagged_vector_data<int> m_data;
     vecmem::jagged_device_vector<int> m_jag;
 
     core_jagged_vector_view_test(

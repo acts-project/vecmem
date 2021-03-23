@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace vecmem { namespace details {
+namespace vecmem { namespace data {
 
    /// Simple struct holding data about a 1 dimensional vector/array
    ///
@@ -62,7 +62,7 @@ namespace vecmem { namespace details {
 
    }; // struct vector_view
 
-} } // namespace vecmem::details
+} } // namespace vecmem::data
 
 // Include the implementation.
-#include "vecmem/containers/details/vector_view.ipp"
+#include "vecmem/containers/impl/vector_view.ipp"

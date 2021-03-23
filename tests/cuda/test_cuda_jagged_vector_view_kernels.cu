@@ -8,12 +8,12 @@
 
 #include "test_cuda_jagged_vector_view_kernels.cuh"
 #include "vecmem/containers/jagged_device_vector.hpp"
-#include "vecmem/containers/details/jagged_vector_view.hpp"
+#include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "../../cuda/src/utils/cuda_error_handling.hpp"
 
 __global__
 void doubleJaggedKernel(
-    vecmem::details::jagged_vector_view<int> _jag
+    vecmem::data::jagged_vector_view<int> _jag
 ) {
     const std::size_t t = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -29,7 +29,7 @@ void doubleJaggedKernel(
 }
 
 void doubleJagged(
-    vecmem::details::jagged_vector_view<int> & jag
+    vecmem::data::jagged_vector_view<int> & jag
 ) {
     doubleJaggedKernel<<<1, jag.m_size>>>(jag);
 

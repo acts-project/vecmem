@@ -8,11 +8,7 @@
 
 #pragma once
 
-#include "vecmem/containers/details/vector_view.hpp"
-
-#include <cstddef>
-
-namespace vecmem { namespace details {
+namespace vecmem { namespace data {
     template<typename T>
     jagged_vector_view<T>::jagged_vector_view(
         std::size_t size,
@@ -22,4 +18,4 @@ namespace vecmem { namespace details {
         m_ptr(ptr)
     {
     }
-}}
+}} // namespace vemcem::data

@@ -65,7 +65,7 @@ TEST_F( cuda_containers_test, explicit_memory ) {
 
    // Allocate a device memory block for the output container.
    auto outputvechost = vecmem::get_data( outputvec );
-   vecmem::details::vector_buffer< int >
+   vecmem::data::vector_buffer< int >
       outputvecdevice( outputvec.size(), device_resource );
 
    // Create the array that is used in the linear transformation.
