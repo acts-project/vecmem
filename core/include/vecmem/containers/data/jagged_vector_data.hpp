@@ -8,14 +8,16 @@
 
 #pragma once
 
+// Local include(s).
+#include "vecmem/memory/deallocator.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/containers/data/jagged_vector_view.hpp"
-#include "vecmem/containers/device_vector.hpp"
-#include "vecmem/containers/vector.hpp"
 
-#include <cstddef>
+// System include(s).
+#include <memory>
 
 namespace vecmem::data {
+
     /**
      * @brief A data wrapper for jagged vectors.
      *
@@ -25,41 +27,35 @@ namespace vecmem::data {
      */
     template<typename T>
     class jagged_vector_data : public jagged_vector_view<T> {
+
     public:
+        /// Type of the base class
         using base_type = jagged_vector_view<T>;
+        /// Use the base class's @c size_type
+        typedef typename base_type::size_type size_type;
+        /// Use the base class's @c value_type
+        typedef typename base_type::value_type value_type;
 
         /**
-         * @brief Construct jagged vector data from a jagged vector.
+         * @brief Construct jagged vector data from raw information
          *
          * This class converts from std vectors (or rather, vecmem::vectors) to
          * a jagged vector data.
          *
-         * @param[in] vec The jagged vector to make a data view for.
-         * @param[in] mem The memory resource to manage the internal state. If
-         * set to nullptr, uses the same memory resource as the jagged vector.
+         * @param[in] size Size of the "outer vector"
+         * @param[in] mem The memory resource to manage the internal state
          */
         jagged_vector_data(
-            jagged_vector<T> & vec,
-            memory_resource * mem = nullptr
-        );
-
-        /**
-         * @brief Destruct the jagged vector data.
-         *
-         * This destructor does not affect the viewed data in any way. The
-         * internal state is destroyed if and only if this object is not a copy.
-         */
-        ~jagged_vector_data(
-            void
+            size_type size,
+            memory_resource& mem
         );
 
     private:
-        /**
-         * The memory manager used to manage the internal state (row data) of
-         * the jagged data.
-         */
-        memory_resource * m_mem;
-    };
+        /// Data object owning the allocated memory
+        std::unique_ptr< value_type, details::deallocator > m_memory;
+
+    }; // class jagged_vector_data
+
 } // namespace vecmem::data
 
 // Include the implementation.
