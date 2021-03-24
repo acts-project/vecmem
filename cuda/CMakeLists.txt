@@ -4,6 +4,9 @@
 #
 # Mozilla Public License Version 2.0
 
+# CUDAToolkit requires CMake 3.17.
+cmake_minimum_required( VERSION 3.17 )
+
 # Enable CUDA as a language.
 enable_language( CUDA )
 
