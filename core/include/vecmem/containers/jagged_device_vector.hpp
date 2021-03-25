@@ -8,16 +8,16 @@
 
 #pragma once
 
+// Local include(s).
 #include "vecmem/containers/device_vector.hpp"
-#include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/containers/data/jagged_vector_view.hpp"
+#include "vecmem/utils/reverse_iterator.hpp"
+#include "vecmem/utils/types.hpp"
 
+// System include(s).
 #include <cstddef>
 
 namespace vecmem {
-    namespace data {
-        template<typename T>
-        struct jagged_vector_view;
-    }
 
     /**
      * @brief A view for jagged vectors.
@@ -43,14 +43,141 @@ namespace vecmem {
     template<typename T>
     class jagged_device_vector {
     public:
+        /// @name Type definitions, mimicking @c std::vector
+        /// @{
+
+        /// Type of the "outer" array elements
+        typedef device_vector< T > value_type;
+        /// Size type for the array
+        typedef std::size_t        size_type;
+        /// Pointer difference type
+        typedef std::ptrdiff_t     difference_type;
+
+        /// Value reference type
+        typedef value_type&        reference;
+        /// Constant value reference type
+        typedef const value_type&  const_reference;
+        /// Value pointer type
+        typedef value_type*        pointer;
+        /// Constant value pointer type
+        typedef const value_type*  const_pointer;
+
+        /// Forward iterator type
+        typedef pointer            iterator;
+        /// Constant forward iterator type
+        typedef const_pointer      const_iterator;
+        /// Reverse iterator type
+        typedef vecmem::reverse_iterator< iterator > reverse_iterator;
+        /// Constant reverse iterator type
+        typedef vecmem::reverse_iterator< const_iterator >
+            const_reverse_iterator;
+
+        /// @}
+
         /**
-         * @brief Construct a jagged vector view from a jagged vector data
+         * @brief Construct a jagged device vector from a jagged vector view
          * object.
          */
         VECMEM_HOST_AND_DEVICE
         jagged_device_vector(
             const data::jagged_vector_view<T> & data
         );
+
+        /// Copy constructor
+        VECMEM_HOST_AND_DEVICE
+        jagged_device_vector( const jagged_device_vector& parent );
+
+        /// Copy assignment operator
+        VECMEM_HOST_AND_DEVICE
+        jagged_device_vector& operator=( const jagged_device_vector& rhs );
+
+        /// @name Vector element access functions
+        /// @{
+
+        /// Return a specific element of the vector in a "safe way" (non-const)
+        VECMEM_HOST_AND_DEVICE
+        reference at( size_type pos );
+        /// Return a specific element of the vector in a "safe way" (const)
+        VECMEM_HOST_AND_DEVICE
+        const_reference at( size_type pos ) const;
+
+        /// Return a specific element of the vector (non-const)
+        VECMEM_HOST_AND_DEVICE
+        reference operator[]( size_type pos );
+        /// Return a specific element of the vector (const)
+        VECMEM_HOST_AND_DEVICE
+        const_reference operator[]( size_type pos ) const;
+
+        /// Return the first element of the vector (non-const)
+        VECMEM_HOST_AND_DEVICE
+        reference front();
+        /// Return the first element of the vector (const)
+        VECMEM_HOST_AND_DEVICE
+        const_reference front() const;
+
+        /// Return the last element of the vector (non-const)
+        VECMEM_HOST_AND_DEVICE
+        reference back();
+        /// Return the last element of the vector (const)
+        VECMEM_HOST_AND_DEVICE
+        const_reference back() const;
+
+        /// Access the underlying memory array (non-const)
+        VECMEM_HOST_AND_DEVICE
+        pointer data();
+        /// Access the underlying memory array (const)
+        VECMEM_HOST_AND_DEVICE
+        const_pointer data() const;
+
+        /// @}
+
+        /// @name Iterator providing functions
+        /// @{
+
+        /// Return a forward iterator pointing at the beginning of the vector
+        VECMEM_HOST_AND_DEVICE
+        iterator begin();
+        /// Return a constant forward iterator pointing at the beginning of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_iterator begin() const;
+        /// Return a constant forward iterator pointing at the beginning of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_iterator cbegin() const;
+
+        /// Return a forward iterator pointing at the end of the vector
+        VECMEM_HOST_AND_DEVICE
+        iterator end();
+        /// Return a constant forward iterator pointing at the end of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_iterator end() const;
+        /// Return a constant forward iterator pointing at the end of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_iterator cend() const;
+
+        /// Return a reverse iterator pointing at the end of the vector
+        VECMEM_HOST_AND_DEVICE
+        reverse_iterator rbegin();
+        /// Return a constant reverse iterator pointing at the end of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_reverse_iterator rbegin() const;
+        /// Return a constant reverse iterator pointing at the end of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_reverse_iterator crbegin() const;
+
+        /// Return a reverse iterator pointing at the beginning of the vector
+        VECMEM_HOST_AND_DEVICE
+        reverse_iterator rend();
+        /// Return a constant reverse iterator pointing at the beginning of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_reverse_iterator rend() const;
+        /// Return a constant reverse iterator pointing at the beginning of the vector
+        VECMEM_HOST_AND_DEVICE
+        const_reverse_iterator crend() const;
+
+        /// @}
+
+        /// @name Capacity checking functions
+        /// @{
 
         /**
          * @brief Checks whether this view has no rows.
@@ -69,104 +196,33 @@ namespace vecmem {
          * @brief Get the number of rows in this view.
          */
         VECMEM_HOST_AND_DEVICE
-        std::size_t size(
+        size_type size(
             void
         ) const;
 
-        /**
-         * @brief Get the row (vector) at a certain index.
-         *
-         * This method will assert that the element is in range if NDEBUG is
-         * unset.
-         *
-         * @param[in] i The row number to fetch.
-         */
+        /// Return the maximum (fixed) number of elements in the vector
         VECMEM_HOST_AND_DEVICE
-        device_vector<T> at(
-            std::size_t i
-        );
+        size_type max_size() const;
+        /// Return the current (fixed) capacity of the vector
+        VECMEM_HOST_AND_DEVICE
+        size_type capacity() const;
 
-        /**
-         * @brief Get the row (vector) at a certain index in a const way.
-         *
-         * This method will assert that the element is in range if NDEBUG is
-         * unset.
-         *
-         * @param[in] i The row number to fetch.
-         */
-        VECMEM_HOST_AND_DEVICE
-        const device_vector<T> at(
-            std::size_t i
-        ) const;
-
-        /**
-         * @brief Get the row (vector) at a certain index.
-         *
-         * This method does no bounds checking at all.
-         *
-         * @param[in] i The row number to fetch.
-         */
-        VECMEM_HOST_AND_DEVICE
-        device_vector<T> operator[](
-            std::size_t i
-        );
-
-        /**
-         * @brief Get the row (vector) at a certain index in a const way.
-         *
-         * This method does no bounds checking at all.
-         *
-         * @param[in] i The row number to fetch.
-         */
-        VECMEM_HOST_AND_DEVICE
-        const device_vector<T> operator[](
-            std::size_t i
-        ) const;
-
-        /**
-         * @brief Retrieve the element at a given two-dimensional coordinate.
-         *
-         * This method can be used to directly retrieve an object from an inner
-         * vector.
-         *
-         * @param[in] i The row index to fetch from.
-         * @param[in] j The index in row i to use.
-         */
-        VECMEM_HOST_AND_DEVICE
-        T & at(
-            std::size_t i,
-            std::size_t j
-        );
-
-        /**
-         * @brief Retrieve the element at a given two-dimensional coordinate in
-         * a const way.
-         *
-         * This method can be used to directly retrieve an object from an inner
-         * vector.
-         *
-         * @param[in] i The row index to fetch from.
-         * @param[in] j The index in row i to use.
-         */
-        VECMEM_HOST_AND_DEVICE
-        const T & at(
-            std::size_t i,
-            std::size_t j
-        ) const;
+        /// @}
 
     private:
         /**
          * The number of rows in this jagged vector.
          */
-        const std::size_t m_size;
+        size_type m_size;
 
         /**
-         * The internal state of this jagged vector, which is heap-allocated by
-         * the given memory manager.
+         * Objects representing the "inner vectors" towards the user.
          */
-        data::vector_view<T> * const m_ptr;
-    };
-}
+        pointer m_ptr;
+
+    }; // class jagged_device_vector
+
+} // namespace vecmem
 
 // Include the implementation.
 #include "vecmem/containers/impl/jagged_device_vector.ipp"
