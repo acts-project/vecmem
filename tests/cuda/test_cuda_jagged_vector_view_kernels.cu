@@ -24,7 +24,7 @@ void doubleJaggedKernel(
     }
 
     for (std::size_t i = 0; i < jag.at(t).size(); ++i) {
-        jag.at(t, i) *= 2;
+        jag.at(t).at(i) *= 2;
     }
 }
 
