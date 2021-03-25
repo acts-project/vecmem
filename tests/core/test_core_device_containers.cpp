@@ -6,6 +6,7 @@
  */
 
 // Local include(s).
+#include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/containers/vector.hpp"
@@ -25,6 +26,20 @@ class core_device_container_test : public testing::Test {
 
 /// Test that the "simple" data types are trivially constructible.
 TEST_F( core_device_container_test, trivial_construct ) {
+
+   EXPECT_TRUE( std::is_trivially_default_constructible<
+                   vecmem::data::jagged_vector_view< const int > >() );
+   EXPECT_TRUE( std::is_trivially_constructible<
+                   vecmem::data::jagged_vector_view< const int > >() );
+   EXPECT_TRUE( std::is_trivially_copy_constructible<
+                   vecmem::data::jagged_vector_view< const int > >() );
+
+   EXPECT_TRUE( std::is_trivially_default_constructible<
+                   vecmem::data::jagged_vector_view< int > >() );
+   EXPECT_TRUE( std::is_trivially_constructible<
+                   vecmem::data::jagged_vector_view< int > >() );
+   EXPECT_TRUE( std::is_trivially_copy_constructible<
+                   vecmem::data::jagged_vector_view< int > >() );
 
    EXPECT_TRUE( std::is_trivially_default_constructible<
                    vecmem::data::vector_view< const int > >() );

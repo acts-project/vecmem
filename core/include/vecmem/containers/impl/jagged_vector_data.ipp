@@ -8,56 +8,61 @@
 
 #pragma once
 
-#include "vecmem/memory/memory_resource.hpp"
-#include "vecmem/containers/data/vector_view.hpp"
-#include "vecmem/containers/device_vector.hpp"
-#include "vecmem/containers/vector.hpp"
-
+// System include(s).
 #include <cstddef>
 
+namespace {
+
+   /// Function creating the smart pointer for @c vecmem::data::jagged_vector_data
+   template< typename TYPE >
+   std::unique_ptr<
+      typename vecmem::data::jagged_vector_view< TYPE >::value_type,
+      vecmem::details::deallocator >
+   allocate_jagged_memory(
+      typename vecmem::data::jagged_vector_view< TYPE >::size_type size,
+      vecmem::memory_resource& resource ) {
+
+      const std::size_t byteSize =
+         size *
+         sizeof(
+            typename vecmem::data::jagged_vector_view< TYPE >::value_type );
+      return { size == 0 ? nullptr :
+               static_cast<
+                  typename vecmem::data::jagged_vector_view< TYPE >::pointer >(
+                     resource.allocate( byteSize ) ),
+               { byteSize, resource } };
+   }
+
+} // private namespace
+
 namespace vecmem::data {
+
     template<typename T>
     jagged_vector_data<T>::jagged_vector_data(
-        jagged_vector<T> & vec,
-        memory_resource * mem
+        size_type size,
+        memory_resource& mem
     ) :
         base_type(
-            vec.size(),
-            static_cast<vector_view<T> *>(
-                (mem == nullptr ? vec.get_allocator().resource() : mem)->allocate(
-                    vec.size() * sizeof(vector_view<T>)
-                )
-            )
+            size,
+            nullptr
         ),
-        m_mem(mem == nullptr ? vec.get_allocator().resource() : mem)
+        m_memory( ::allocate_jagged_memory< T >( size, mem ) )
     {
+        // Point the base class at the newly allocated memory.
+        base_type::m_ptr = m_memory.get();
+
         /*
-         * To construct a jagged view, we copy the important information (the
-         * size and starting pointer) of the standard vectors to our reduced
-         * complexity format.
+         * Construct vecmem::data::vector_view objects in the allocated area.
+         * Simply with their default constructors, as they will need to be
+         * filled "from the outside".
          */
-        for (std::size_t i = 0; i < base_type::m_size; ++i) {
+        for (std::size_t i = 0; i < size; ++i) {
             /*
              * We use the memory allocated earlier and construct device vector
              * objects there.
              */
-            new (base_type::m_ptr + i) vector_view<T>(
-                vec.at(i).size(),
-                vec.at(i).data()
-            );
+            new (base_type::m_ptr + i) vector_view<T>();
         }
     }
 
-    template<typename T>
-    jagged_vector_data<T>::~jagged_vector_data(
-        void
-    ) {
-        /*
-         * Use the memory manager to deallocate the memory owned by this object.
-         */
-        m_mem->deallocate(
-            base_type::m_ptr,
-            base_type::m_size * sizeof(vector_view<T>)
-        );
-    }
 } // namespace vecmem::data

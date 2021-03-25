@@ -33,7 +33,7 @@ class core_jagged_vector_view_test : public testing::Test {
             vecmem::vector<int>(&m_mem),
             vecmem::vector<int>({12, 13, 14, 15, 16}, &m_mem)
         }, &m_mem),
-        m_data(m_vec, &m_mem),
+        m_data(vecmem::get_data(m_vec)),
         m_jag(m_data)
     {
     }

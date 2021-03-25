@@ -8,9 +8,13 @@
 
 #pragma once
 
+// Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/utils/types.hpp"
 
+// System include(s).
 #include <cstddef>
+#include <type_traits>
 
 namespace vecmem { namespace data {
     /**
@@ -36,22 +40,57 @@ namespace vecmem { namespace data {
      */
     template<typename T>
     struct jagged_vector_view {
+
+        /// Size type used in the class
+        typedef std::size_t size_type;
+        /// Value type of the jagged array
+        typedef vector_view<T> value_type;
+        /// Pointer type to the jagged array
+        typedef value_type* pointer;
+
+        /**
+         * Default constructor
+         */
+        jagged_vector_view() = default;
+        /**
+         * Constructor with all the information held by the object.
+         */
+        VECMEM_HOST_AND_DEVICE
         jagged_vector_view(
-            std::size_t size,
-            vector_view<T> * ptr
+            size_type size,
+            pointer ptr
         );
+
+        /**
+         * Constructor from a "slightly different" @c vecmem::details::jagged_vector_view object
+         *
+         * Only enabled if the wrapped type is different, but only by
+         * const-ness. This complication is necessary to avoid problems from
+         * SYCL. Which is very particular about having default copy
+         * constructors for the types that it sends to kernels.
+         */
+        template< typename OTHERTYPE,
+                  std::enable_if_t<
+                     ( ! std::is_same< T, OTHERTYPE >::value ) &&
+                     std::is_same< T,
+                                   typename std::add_const< OTHERTYPE >::type >::value,
+                     bool > = true >
+        VECMEM_HOST_AND_DEVICE
+        jagged_vector_view( const jagged_vector_view< OTHERTYPE >& parent );
 
         /**
          * The number of rows in this jagged vector.
          */
-        std::size_t m_size;
+        size_type m_size;
 
         /**
          * The internal state of this jagged vector, which is heap-allocated by
          * the given memory manager.
          */
-        vector_view<T> * m_ptr;
-    };
+        pointer m_ptr;
+
+    }; // struct jagged_vector_view
+
 } } // namespace vecmem::data
 
 // Include the implementation.
