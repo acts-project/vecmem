@@ -75,9 +75,6 @@ namespace vecmem {
       /// Use the iterator as a pointer
       VECMEM_HOST_AND_DEVICE
       pointer operator->() const;
-      /// Return the value at a specific offset
-      VECMEM_HOST_AND_DEVICE
-      reference operator[]( difference_type n ) const;
 
       /// @}
 

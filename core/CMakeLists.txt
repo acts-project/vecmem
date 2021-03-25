@@ -48,6 +48,8 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
+   "include/vecmem/containers/details/jagged_device_vector_iterator.hpp"
+   "include/vecmem/containers/impl/jagged_device_vector_iterator.ipp"
    "include/vecmem/utils/reverse_iterator.hpp"
    "include/vecmem/utils/reverse_iterator.ipp"
    "include/vecmem/utils/type_traits.hpp"

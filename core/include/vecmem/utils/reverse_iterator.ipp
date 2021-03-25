@@ -87,14 +87,6 @@ namespace vecmem {
 
    template< typename Iterator >
    VECMEM_HOST_AND_DEVICE
-   typename reverse_iterator< Iterator >::reference
-   reverse_iterator< Iterator >::operator[]( difference_type n ) const {
-
-      return *( *this + n );
-   }
-
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
    reverse_iterator< Iterator >& reverse_iterator< Iterator >::operator++() {
 
       --m_current;

@@ -18,9 +18,7 @@ namespace vecmem {
         const data::jagged_vector_view<T> & data
     ) :
         m_size(data.m_size),
-        // This is fairly evil. But we should have tests in place for making
-        // sure that this is valid.
-        m_ptr( reinterpret_cast< pointer >( data.m_ptr ) )
+        m_ptr(data.m_ptr)
     {
     }
 
@@ -129,20 +127,6 @@ namespace vecmem {
 
         // Return a reference to the last element of the vector.
         return m_ptr[ m_size - 1 ];
-    }
-
-    template< typename T >
-    typename jagged_device_vector< T >::pointer
-    jagged_device_vector< T >::data() {
-
-        return m_ptr;
-    }
-
-    template< typename T >
-    typename jagged_device_vector< T >::const_pointer
-    jagged_device_vector< T >::data() const {
-
-        return m_ptr;
     }
 
     template< typename T >

@@ -11,6 +11,7 @@
 // Local include(s).
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/data/jagged_vector_view.hpp"
+#include "vecmem/containers/details/jagged_device_vector_iterator.hpp"
 #include "vecmem/utils/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -54,18 +55,15 @@ namespace vecmem {
         typedef std::ptrdiff_t     difference_type;
 
         /// Value reference type
-        typedef value_type&        reference;
+        typedef device_vector< T > reference;
         /// Constant value reference type
-        typedef const value_type&  const_reference;
-        /// Value pointer type
-        typedef value_type*        pointer;
-        /// Constant value pointer type
-        typedef const value_type*  const_pointer;
+        typedef device_vector< const T > const_reference;
 
         /// Forward iterator type
-        typedef pointer            iterator;
+        typedef details::jagged_device_vector_iterator< T > iterator;
         /// Constant forward iterator type
-        typedef const_pointer      const_iterator;
+        typedef details::jagged_device_vector_iterator< const T >
+            const_iterator;
         /// Reverse iterator type
         typedef vecmem::reverse_iterator< iterator > reverse_iterator;
         /// Constant reverse iterator type
@@ -121,13 +119,6 @@ namespace vecmem {
         /// Return the last element of the vector (const)
         VECMEM_HOST_AND_DEVICE
         const_reference back() const;
-
-        /// Access the underlying memory array (non-const)
-        VECMEM_HOST_AND_DEVICE
-        pointer data();
-        /// Access the underlying memory array (const)
-        VECMEM_HOST_AND_DEVICE
-        const_pointer data() const;
 
         /// @}
 
@@ -218,7 +209,7 @@ namespace vecmem {
         /**
          * Objects representing the "inner vectors" towards the user.
          */
-        pointer m_ptr;
+        typename data::jagged_vector_view< T >::pointer m_ptr;
 
     }; // class jagged_device_vector
 
