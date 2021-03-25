@@ -9,10 +9,12 @@
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/utils/reverse_iterator.hpp"
+#include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
+#include <type_traits>
 
 namespace vecmem {
 
@@ -59,7 +61,14 @@ namespace vecmem {
 
       /// Constructor, on top of a previously allocated/filled block of memory
       VECMEM_HOST_AND_DEVICE
-      device_vector( data::vector_view< value_type > data );
+      device_vector( const data::vector_view< value_type >& data );
+      /// Construct a const device vector from a non-const data object
+      template< typename OTHERTYPE,
+                std::enable_if_t<
+                   details::is_same_nc< TYPE, OTHERTYPE >::value,
+                   bool > = true >
+      VECMEM_HOST_AND_DEVICE
+      device_vector( const data::vector_view< OTHERTYPE >& data );
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
       device_vector( const device_vector& parent );

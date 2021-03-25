@@ -14,7 +14,19 @@ namespace vecmem {
    template< typename TYPE >
    VECMEM_HOST_AND_DEVICE
    device_vector< TYPE >::
-   device_vector( data::vector_view< value_type > data )
+   device_vector( const data::vector_view< value_type >& data )
+   : m_size( data.m_size ), m_ptr( data.m_ptr ) {
+
+   }
+
+   template< typename TYPE >
+   template< typename OTHERTYPE,
+             std::enable_if_t<
+                details::is_same_nc< TYPE, OTHERTYPE >::value,
+                bool > >
+   VECMEM_HOST_AND_DEVICE
+   device_vector< TYPE >::
+   device_vector( const data::vector_view< OTHERTYPE >& data )
    : m_size( data.m_size ), m_ptr( data.m_ptr ) {
 
    }

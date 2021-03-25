@@ -23,9 +23,7 @@ namespace vecmem { namespace data {
     template< typename T >
     template< typename OTHERTYPE,
               std::enable_if_t<
-                 ( ! std::is_same< T, OTHERTYPE >::value ) &&
-                 std::is_same< T,
-                               typename std::add_const< OTHERTYPE >::type >::value,
+                 details::is_same_nc< T, OTHERTYPE >::value,
                  bool > >
     jagged_vector_view< T >::
     jagged_vector_view( const jagged_vector_view< OTHERTYPE >& parent )
