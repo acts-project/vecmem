@@ -171,7 +171,7 @@ namespace vecmem {
 
       /// @}
 
-   private:
+   protected:
       /// Size of the array that this object looks at
       size_type m_size;
       /// Pointer to the start of the array
