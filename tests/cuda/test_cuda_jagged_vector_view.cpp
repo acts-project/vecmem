@@ -40,18 +40,18 @@ class cuda_jagged_vector_view_test : public testing::Test {
 TEST_F(cuda_jagged_vector_view_test, mutate_in_kernel) {
     doubleJagged(m_data);
 
-    EXPECT_EQ(m_vec.at(0).at(0), 2);
+    EXPECT_EQ(m_vec.at(0).at(0), 4868);
     EXPECT_EQ(m_vec.at(0).at(1), 4);
     EXPECT_EQ(m_vec.at(0).at(2), 6);
     EXPECT_EQ(m_vec.at(0).at(3), 8);
-    EXPECT_EQ(m_vec.at(1).at(0), 10);
+    EXPECT_EQ(m_vec.at(1).at(0), 4876);
     EXPECT_EQ(m_vec.at(1).at(1), 12);
-    EXPECT_EQ(m_vec.at(2).at(0), 14);
+    EXPECT_EQ(m_vec.at(2).at(0), 4880);
     EXPECT_EQ(m_vec.at(2).at(1), 16);
     EXPECT_EQ(m_vec.at(2).at(2), 18);
     EXPECT_EQ(m_vec.at(2).at(3), 20);
-    EXPECT_EQ(m_vec.at(3).at(0), 22);
-    EXPECT_EQ(m_vec.at(5).at(0), 24);
+    EXPECT_EQ(m_vec.at(3).at(0), 4888);
+    EXPECT_EQ(m_vec.at(5).at(0), 4890);
     EXPECT_EQ(m_vec.at(5).at(1), 26);
     EXPECT_EQ(m_vec.at(5).at(2), 28);
     EXPECT_EQ(m_vec.at(5).at(3), 30);

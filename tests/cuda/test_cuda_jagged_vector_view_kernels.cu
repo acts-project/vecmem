@@ -26,6 +26,14 @@ void doubleJaggedKernel(
     for (std::size_t i = 0; i < jag.at(t).size(); ++i) {
         jag.at(t).at(i) *= 2;
     }
+    __syncthreads();
+    for( auto itr = jag.rbegin(); itr != jag.rend(); ++itr ) {
+        if( jag[ t ].size() > 0 ) {
+            for( auto itr2 = itr->rbegin(); itr2 != itr->rend(); ++itr2 ) {
+                jag[ t ].front() += *itr2;
+            }
+        }
+    }
 }
 
 void doubleJagged(
