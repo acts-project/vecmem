@@ -36,7 +36,7 @@ namespace vecmem::data {
 
       /// Make sure that the template type does not have a custom destructor
       static_assert( std::is_trivially_destructible< TYPE >::value,
-                     "vecmem::details::vector_buffer can not handle types with "
+                     "vecmem::data::vector_buffer can not handle types with "
                      "custom destructors" );
 
       /// @}
