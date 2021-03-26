@@ -8,7 +8,7 @@
 
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
-#include "vecmem/utils/reverse_iterator.hpp"
+#include "vecmem/containers/details/reverse_iterator.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
@@ -51,9 +51,10 @@ namespace vecmem {
       /// Constant forward iterator type
       typedef const_pointer     const_iterator;
       /// Reverse iterator type
-      typedef vecmem::reverse_iterator< iterator >       reverse_iterator;
+      typedef vecmem::details::reverse_iterator< iterator > reverse_iterator;
       /// Constant reverse iterator type
-      typedef vecmem::reverse_iterator< const_iterator > const_reverse_iterator;
+      typedef vecmem::details::reverse_iterator< const_iterator >
+         const_reverse_iterator;
 
       /// @}
 
