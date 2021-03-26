@@ -13,10 +13,23 @@ namespace vecmem {
 
    template< typename T, std::size_t N >
    VECMEM_HOST_AND_DEVICE
-   device_array< T, N >::device_array( data::vector_view< value_type > data )
+   device_array< T, N >::
+   device_array( const data::vector_view< value_type >& data )
    : m_ptr( data.m_ptr ) {
 
       assert( data.m_size >= N );
+   }
+
+   template< typename T, std::size_t N >
+   template< typename OTHERTYPE,
+             std::enable_if_t<
+                details::is_same_nc< T, OTHERTYPE >::value,
+                bool > >
+   VECMEM_HOST_AND_DEVICE
+   device_array< T, N >::
+   device_array( const data::vector_view< OTHERTYPE >& data )
+   : m_ptr( data.m_ptr ) {
+
    }
 
    template< typename T, std::size_t N >

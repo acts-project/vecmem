@@ -43,4 +43,19 @@ namespace vecmem { namespace details {
       typedef T* type;
    };
 
+   /// Helper trait for detecting when a type is a non-const version of another
+   ///
+   /// This comes into play multiple times to enable certain constructors
+   /// conditionally through SFINAE.
+   ///
+   template< typename CTYPE, typename NCTYPE >
+   struct is_same_nc {
+      static constexpr bool value = false;
+   };
+
+   template< typename TYPE >
+   struct is_same_nc< const TYPE, TYPE > {
+      static constexpr bool value = true;
+   };
+
 } } // namespace vecmem::details

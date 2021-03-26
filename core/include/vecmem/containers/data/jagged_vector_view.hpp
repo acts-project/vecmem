@@ -10,6 +10,7 @@
 
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
@@ -71,9 +72,7 @@ namespace vecmem { namespace data {
          */
         template< typename OTHERTYPE,
                   std::enable_if_t<
-                     ( ! std::is_same< T, OTHERTYPE >::value ) &&
-                     std::is_same< T,
-                                   typename std::add_const< OTHERTYPE >::type >::value,
+                     details::is_same_nc< T, OTHERTYPE >::value,
                      bool > = true >
         VECMEM_HOST_AND_DEVICE
         jagged_vector_view( const jagged_vector_view< OTHERTYPE >& parent );
