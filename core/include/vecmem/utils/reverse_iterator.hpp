@@ -128,10 +128,12 @@ namespace vecmem {
 
    /// Comparison operator for reverse iterators
    template< typename T >
+   VECMEM_HOST_AND_DEVICE
    bool operator==( const reverse_iterator< T >& itr1,
                     const reverse_iterator< T >& itr2 );
    /// Comparison operator for reverse iterators
    template< typename T >
+   VECMEM_HOST_AND_DEVICE
    bool operator!=( const reverse_iterator< T >& itr1,
                     const reverse_iterator< T >& itr2 );
 
