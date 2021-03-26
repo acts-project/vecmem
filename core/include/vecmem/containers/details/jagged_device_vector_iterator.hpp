@@ -14,7 +14,7 @@
 
 // System include(s).
 #include <cstddef>
-#include <type_traits>
+#include <iterator>
 
 namespace vecmem { namespace details {
 
@@ -49,10 +49,39 @@ namespace vecmem { namespace details {
       typedef device_vector< TYPE > value_type;
       /// (Pointer) Difference type
       typedef std::ptrdiff_t difference_type;
-      /// Pointer type to the underlying (virtual) value
-      typedef value_type* pointer;
-      /// Reference type to the underlying (virtual) value
-      typedef value_type& reference;
+      /// "Reference" type to the underlying (virtual) value
+      typedef value_type reference;
+
+      /// Helper class for returning "pointer-like" objects from the iterator
+      ///
+      /// Since the iterator returned everything by value as temporary objects,
+      /// in order to provide a proper return type for its @c operator->, this
+      /// custom type needs to be used.
+      ///
+      class pointer {
+
+      public:
+         /// Constructor from a data pointer
+         ///
+         /// Used a pointer instead of a reference to make the rest of the code
+         /// in @c vecmem::details::jagged_device_vector_iterator as unaware of
+         /// the existence of this type as possible.
+         ///
+         VECMEM_HOST_AND_DEVICE
+         pointer( const data_pointer data );
+
+         /// Return a pointer to a device vector (non-const)
+         VECMEM_HOST_AND_DEVICE
+         value_type* operator->();
+         /// Return a pointer to a device vector (const)
+         VECMEM_HOST_AND_DEVICE
+         const value_type* operator->() const;
+
+      private:
+         /// Temporary device vector created on the stack
+         value_type m_vec;
+
+      }; // class pointer
 
       /// @}
 
@@ -62,13 +91,6 @@ namespace vecmem { namespace details {
       /// Constructor from an underlying data object
       VECMEM_HOST_AND_DEVICE
       jagged_device_vector_iterator( data_pointer data );
-      /// Construct from a non-const underlying data object
-      template< typename OTHERTYPE,
-                std::enable_if_t<
-                   details::is_same_nc< TYPE, OTHERTYPE >::value,
-                   bool > = true >
-      VECMEM_HOST_AND_DEVICE
-      jagged_device_vector_iterator( data::vector_view< OTHERTYPE >* data );
       /// Copy constructor
       VECMEM_HOST_AND_DEVICE
       jagged_device_vector_iterator(
@@ -133,22 +155,17 @@ namespace vecmem { namespace details {
       /// @{
 
       /// Check for the equality of two iterators
+      VECMEM_HOST_AND_DEVICE
       bool operator==( const jagged_device_vector_iterator& other ) const;
       /// Check for the inequality of two iterators
+      VECMEM_HOST_AND_DEVICE
       bool operator!=( const jagged_device_vector_iterator& other ) const;
 
       /// @}
 
    private:
-      /// Ensure that the internal value object is valid
-      void ensure_valid() const;
-
       /// Pointer to the data (in an array)
       data_pointer m_ptr;
-      /// Flag showing whether the value object is up to date with the pointer
-      mutable bool m_value_is_valid;
-      /// Helper object returned by the iterator
-      mutable value_type m_value;
 
    }; // class jagged_device_vector_iterator
 
@@ -176,6 +193,7 @@ namespace std {
       typedef typename
          vecmem::details::jagged_device_vector_iterator< T >::reference
          reference;
+      typedef std::random_access_iterator_tag iterator_category;
    };
 
 } // namespace std

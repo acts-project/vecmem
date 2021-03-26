@@ -10,33 +10,43 @@
 namespace vecmem { namespace details {
 
    template< typename TYPE >
+   jagged_device_vector_iterator< TYPE >::
+   pointer::pointer( const data_pointer data )
+   : m_vec( *data ) {
+
+   }
+
+   template< typename TYPE >
+   typename jagged_device_vector_iterator< TYPE >::value_type*
+   jagged_device_vector_iterator< TYPE >::pointer::operator->() {
+
+      return &m_vec;
+   }
+
+   template< typename TYPE >
+   const typename jagged_device_vector_iterator< TYPE >::value_type*
+   jagged_device_vector_iterator< TYPE >::pointer::operator->() const {
+
+      return &m_vec;
+   }
+
+   template< typename TYPE >
    jagged_device_vector_iterator< TYPE >::jagged_device_vector_iterator()
-   : m_ptr( nullptr ), m_value_is_valid( false ), m_value( data_type() ) {
+   : m_ptr( nullptr ) {
 
    }
 
    template< typename TYPE >
    jagged_device_vector_iterator< TYPE >::
    jagged_device_vector_iterator( data_pointer data )
-   : m_ptr( data ), m_value_is_valid( false ), m_value( data_type() ) {
-
-   }
-
-   template< typename TYPE >
-   template< typename OTHERTYPE,
-             std::enable_if_t<
-                details::is_same_nc< TYPE, OTHERTYPE >::value,
-                bool > >
-   jagged_device_vector_iterator< TYPE >::
-   jagged_device_vector_iterator( data::vector_view< OTHERTYPE >* data )
-   : m_ptr( data ), m_value_is_valid( false ), m_value( data_type() ) {
+   : m_ptr( data ) {
 
    }
 
    template< typename TYPE >
    jagged_device_vector_iterator< TYPE >::
    jagged_device_vector_iterator( const jagged_device_vector_iterator& parent )
-   : m_ptr( parent.m_ptr ), m_value_is_valid( false ), m_value( data_type() ) {
+   : m_ptr( parent.m_ptr ) {
 
    }
 
@@ -45,7 +55,7 @@ namespace vecmem { namespace details {
    jagged_device_vector_iterator< TYPE >::
    jagged_device_vector_iterator(
       const jagged_device_vector_iterator< T >& parent )
-   : m_ptr( parent.m_ptr ), m_value_is_valid( false ), m_value( data_type() ) {
+   : m_ptr( parent.m_ptr ) {
 
    }
 
@@ -61,7 +71,6 @@ namespace vecmem { namespace details {
 
       // Perform the copy.
       m_ptr = rhs.m_ptr;
-      m_value_is_valid = false;
 
       // Return this object.
       return *this;
@@ -71,16 +80,14 @@ namespace vecmem { namespace details {
    typename jagged_device_vector_iterator< TYPE >::reference
    jagged_device_vector_iterator< TYPE >::operator*() const {
 
-      ensure_valid();
-      return m_value;
+      return *m_ptr;
    }
 
    template< typename TYPE >
    typename jagged_device_vector_iterator< TYPE >::pointer
    jagged_device_vector_iterator< TYPE >::operator->() const {
 
-      ensure_valid();
-      return &m_value;
+      return m_ptr;
    }
 
    template< typename TYPE >
@@ -88,7 +95,6 @@ namespace vecmem { namespace details {
    jagged_device_vector_iterator< TYPE >::operator++() {
 
       ++m_ptr;
-      m_value_is_valid = false;
       return *this;
    }
 
@@ -98,7 +104,6 @@ namespace vecmem { namespace details {
 
       jagged_device_vector_iterator tmp = *this;
       ++m_ptr;
-      m_value_is_valid = false;
       return tmp;
    }
 
@@ -107,7 +112,6 @@ namespace vecmem { namespace details {
    jagged_device_vector_iterator< TYPE >::operator--() {
 
       --m_ptr;
-      m_value_is_valid = false;
       return *this;
    }
 
@@ -117,7 +121,6 @@ namespace vecmem { namespace details {
 
       jagged_device_vector_iterator tmp = *this;
       --m_ptr;
-      m_value_is_valid = false;
       return tmp;
    }
 
@@ -133,7 +136,6 @@ namespace vecmem { namespace details {
    jagged_device_vector_iterator< TYPE >::operator+=( difference_type n ) {
 
       m_ptr += n;
-      m_value_is_valid = false;
       return *this;
    }
 
@@ -149,7 +151,6 @@ namespace vecmem { namespace details {
    jagged_device_vector_iterator< TYPE >::operator-=( difference_type n ) {
 
       m_ptr -= n;
-      m_value_is_valid = false;
       return *this;
    }
 
@@ -165,17 +166,6 @@ namespace vecmem { namespace details {
    operator!=( const jagged_device_vector_iterator& other ) const {
 
       return !( *this == other );
-   }
-
-   template< typename TYPE >
-   void jagged_device_vector_iterator< TYPE >::ensure_valid() const {
-
-      if( m_value_is_valid ) {
-         return;
-      }
-      m_value = value_type( *m_ptr );
-      m_value_is_valid = true;
-      return;
    }
 
 } } // namespace vecmem::details
