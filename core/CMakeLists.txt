@@ -33,6 +33,8 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/data/vector_view.hpp"
    "include/vecmem/containers/impl/vector_view.ipp"
    # Iterator types.
+   "include/vecmem/containers/details/jagged_device_vector_iterator.hpp"
+   "include/vecmem/containers/impl/jagged_device_vector_iterator.ipp"
    "include/vecmem/containers/details/reverse_iterator.hpp"
    "include/vecmem/containers/impl/reverse_iterator.ipp"
    # Allocator
