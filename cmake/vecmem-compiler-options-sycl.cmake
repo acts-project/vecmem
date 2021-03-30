@@ -9,6 +9,7 @@ include_guard( GLOBAL )
 
 # Include the helper function(s).
 include( vecmem-functions )
+include( vecmem-options )
 
 # Set up the used C++ standard(s).
 set( CMAKE_SYCL_STANDARD 17 CACHE STRING "The (SYCL) C++ standard to use" )
@@ -18,6 +19,8 @@ foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wall" )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wextra" )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wno-unknown-cuda-version" )
+   vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode}
+      "-DVECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}" )
 endforeach()
 
 # More rigorous tests for the Debug builds.

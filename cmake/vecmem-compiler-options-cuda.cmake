@@ -9,6 +9,7 @@ include_guard( GLOBAL )
 
 # Include the helper function(s).
 include( vecmem-functions )
+include( vecmem-options )
 
 # Set up the used C++ standard(s).
 set( CMAKE_CUDA_STANDARD 14 CACHE STRING "The (CUDA) C++ standard to use" )
@@ -23,3 +24,7 @@ vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-G" )
 
 # More rigorous tests for the Debug builds.
 vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-Werror all-warnings" )
+
+# Add the VECMEM_DEBUG_MSG_LVL flag.
+vecmem_add_flag( CMAKE_CUDA_FLAGS
+   "-DVECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}" )
