@@ -7,6 +7,7 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
@@ -48,9 +49,7 @@ namespace vecmem { namespace data {
       ///
       template< typename OTHERTYPE,
                 std::enable_if_t<
-                   ( ! std::is_same< TYPE, OTHERTYPE >::value ) &&
-                   std::is_same< TYPE,
-                                 typename std::add_const< OTHERTYPE >::type >::value,
+                   details::is_same_nc< TYPE, OTHERTYPE >::value,
                    bool > = true >
       VECMEM_HOST_AND_DEVICE
       vector_view( const vector_view< OTHERTYPE >& parent );

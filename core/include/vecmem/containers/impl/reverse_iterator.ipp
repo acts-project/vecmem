@@ -9,7 +9,7 @@
 // Local include(s).
 #include "vecmem/utils/types.hpp"
 
-namespace vecmem {
+namespace vecmem { namespace details {
 
    template< typename Iterator >
    VECMEM_HOST_AND_DEVICE
@@ -181,6 +181,7 @@ namespace vecmem {
    }
 
    template< typename T >
+   VECMEM_HOST_AND_DEVICE
    bool operator==( const reverse_iterator< T >& itr1,
                     const reverse_iterator< T >& itr2 ) {
 
@@ -188,10 +189,11 @@ namespace vecmem {
    }
 
    template< typename T >
+   VECMEM_HOST_AND_DEVICE
    bool operator!=( const reverse_iterator< T >& itr1,
                     const reverse_iterator< T >& itr2 ) {
 
       return !( itr1 == itr2 );
    }
 
-} // namespace vecmem
+} } // namespace vecmem::details

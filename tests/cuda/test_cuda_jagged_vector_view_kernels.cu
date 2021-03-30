@@ -24,7 +24,19 @@ void doubleJaggedKernel(
     }
 
     for (std::size_t i = 0; i < jag.at(t).size(); ++i) {
-        jag.at(t, i) *= 2;
+        jag.at(t).at(i) *= 2;
+    }
+    __syncthreads();
+    // Iterate over all outer vectors.
+    for( auto itr1 = jag.rbegin(); itr1 != jag.rend(); ++itr1 ) {
+        if( ( jag[ t ].size() > 0 ) && ( itr1->size() > 1 ) ) {
+            // Iterate over all inner vectors, skipping the first elements.
+            // Since those are being updated at the same time, by other threads.
+            for( auto itr2 = itr1->rbegin(); itr2 != ( itr1->rend() - 1 );
+                 ++itr2 ) {
+                jag[ t ].front() += *itr2;
+            }
+        }
     }
 }
 
