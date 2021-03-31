@@ -6,6 +6,9 @@
  */
 #pragma once
 
+// Local include(s).
+#include "vecmem/utils/debug.hpp"
+
 // System include(s).
 #include <cassert>
 
@@ -17,6 +20,9 @@ namespace vecmem {
    device_vector( const data::vector_view< value_type >& data )
    : m_size( data.m_size ), m_ptr( data.m_ptr ) {
 
+      VECMEM_DEBUG_MSG( 5, "Created vecmem::device_vector with size %i from "
+                        "pointer %p", static_cast< int >( m_size ),
+                        static_cast< const void* >( m_ptr ) );
    }
 
    template< typename TYPE >
@@ -29,6 +35,9 @@ namespace vecmem {
    device_vector( const data::vector_view< OTHERTYPE >& data )
    : m_size( data.m_size ), m_ptr( data.m_ptr ) {
 
+      VECMEM_DEBUG_MSG( 5, "Created vecmem::device_vector with size %i from "
+                        "pointer %p", static_cast< int >( m_size ),
+                        static_cast< const void* >( m_ptr ) );
    }
 
    template< typename TYPE >
@@ -36,6 +45,9 @@ namespace vecmem {
    device_vector< TYPE >::device_vector( const device_vector& parent )
    : m_size( parent.m_size ), m_ptr( parent.m_ptr ) {
 
+      VECMEM_DEBUG_MSG( 5, "Created vecmem::device_vector with size %i from "
+                        "pointer %p", static_cast< int >( m_size ),
+                        static_cast< const void* >( m_ptr ) );
    }
 
    template< typename TYPE >

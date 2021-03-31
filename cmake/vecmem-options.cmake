@@ -27,3 +27,7 @@ cmake_dependent_option( VECMEM_BUILD_HIP_LIBRARY
 cmake_dependent_option( VECMEM_BUILD_SYCL_LIBRARY
    "Build the vecmem::sycl library" ON
    "CMAKE_SYCL_COMPILER" OFF )
+
+# Debug message output level in the code.
+set( VECMEM_DEBUG_MSG_LVL 0 CACHE STRING
+   "Debug message output level" )

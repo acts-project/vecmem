@@ -5,6 +5,9 @@
  * Mozilla Public License Version 2.0
  */
 
+// SYCL include(s).
+#include <CL/sycl.hpp>
+
 // Local include(s).
 #include "vecmem/containers/array.hpp"
 #include "vecmem/containers/const_device_array.hpp"
@@ -16,9 +19,6 @@
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
-
-// SYCL include(s).
-#include <CL/sycl.hpp>
 
 /// Test fixture for the on-device vecmem container tests
 class sycl_containers_test : public testing::Test {};
