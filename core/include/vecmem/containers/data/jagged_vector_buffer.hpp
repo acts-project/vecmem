@@ -60,7 +60,9 @@ namespace vecmem::data {
       ///        be host accessible.
       /// @param host_access_resource An optional host accessible memory
       ///        resource. Needed if @c resource is not host accessible.
-      template< typename OTHERTYPE >
+      template< typename OTHERTYPE,
+                std::enable_if_t< std::is_convertible< TYPE, OTHERTYPE >::value,
+                                  bool > = true >
       jagged_vector_buffer( const jagged_vector_view< OTHERTYPE >& other,
                             memory_resource& resource,
                             memory_resource* host_access_resource = nullptr );

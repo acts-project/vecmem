@@ -66,7 +66,9 @@ namespace {
 namespace vecmem::data {
 
    template< typename TYPE >
-   template< typename OTHERTYPE >
+   template< typename OTHERTYPE,
+             std::enable_if_t< std::is_convertible< TYPE, OTHERTYPE >::value,
+                               bool > >
    jagged_vector_buffer< TYPE >::
    jagged_vector_buffer( const jagged_vector_view< OTHERTYPE >& other,
                          memory_resource& resource,
@@ -74,10 +76,6 @@ namespace vecmem::data {
    : jagged_vector_buffer( ::get_sizes( other ), resource,
                            host_access_resource ) {
 
-      // A sanity check.
-      static_assert( sizeof( TYPE ) == sizeof( OTHERTYPE ),
-                     "Can not create vecmem::data::jagged_vector_buffer from "
-                     "incompatible vecmem::data::jagged_vector_view type" );
    }
 
    template< typename TYPE >
