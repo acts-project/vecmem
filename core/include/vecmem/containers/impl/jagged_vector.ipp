@@ -34,9 +34,9 @@ namespace vecmem {
       return result;
    }
 
-   template< typename TYPE, typename ALLOC >
+   template< typename TYPE, typename ALLOC1, typename ALLOC2 >
    data::jagged_vector_data< TYPE >
-   get_data( std::vector< std::vector< TYPE, ALLOC >, ALLOC >& vec,
+   get_data( std::vector< std::vector< TYPE, ALLOC1 >, ALLOC2 >& vec,
              memory_resource* resource ) {
 
       // This function needs a non-null memory resource pointer.
@@ -80,9 +80,9 @@ namespace vecmem {
       return result;
    }
 
-   template< typename TYPE, typename ALLOC >
+   template< typename TYPE, typename ALLOC1, typename ALLOC2 >
    data::jagged_vector_data< const TYPE >
-   get_data( const std::vector< std::vector< TYPE, ALLOC >, ALLOC >& vec,
+   get_data( const std::vector< std::vector< TYPE, ALLOC1 >, ALLOC2 >& vec,
              memory_resource* resource ) {
 
       // This function needs a non-null memory resource pointer.

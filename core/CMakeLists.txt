@@ -24,6 +24,8 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/vector.hpp"
    "include/vecmem/containers/impl/vector.ipp"
    # Data holding/transporting types.
+   "include/vecmem/containers/data/jagged_vector_buffer.hpp"
+   "include/vecmem/containers/impl/jagged_vector_buffer.ipp"
    "include/vecmem/containers/data/jagged_vector_data.hpp"
    "include/vecmem/containers/impl/jagged_vector_data.ipp"
    "include/vecmem/containers/data/jagged_vector_view.hpp"

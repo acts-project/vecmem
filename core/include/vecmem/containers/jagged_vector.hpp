@@ -36,10 +36,10 @@ namespace vecmem {
     get_data( jagged_vector< TYPE >& vec, memory_resource* resource = nullptr );
 
     /// Helper function creating a @c vecmem::data::jagged_vector_data object
-    template< typename TYPE, typename ALLOC >
+    template< typename TYPE, typename ALLOC1, typename ALLOC2 >
     VECMEM_HOST
     data::jagged_vector_data< TYPE >
-    get_data( std::vector< std::vector< TYPE, ALLOC >, ALLOC >& vec,
+    get_data( std::vector< std::vector< TYPE, ALLOC1 >, ALLOC2 >& vec,
               memory_resource* resource );
 
     /// Helper function creating a @c vecmem::data::jagged_vector_data object
@@ -50,10 +50,10 @@ namespace vecmem {
               memory_resource* resource = nullptr );
 
     /// Helper function creating a @c vecmem::data::jagged_vector_data object
-    template< typename TYPE, typename ALLOC >
+    template< typename TYPE, typename ALLOC1, typename ALLOC2 >
     VECMEM_HOST
     data::jagged_vector_data< const TYPE >
-    get_data( const std::vector< std::vector< TYPE, ALLOC >, ALLOC >& vec,
+    get_data( const std::vector< std::vector< TYPE, ALLOC1 >, ALLOC2 >& vec,
               memory_resource* resource );
 
 } // namespace vecmem
