@@ -27,8 +27,10 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    "src/memory/cuda/managed_memory_resource.cpp"
    # Utilities.
    "include/vecmem/utils/cuda/copy.hpp"
-   "include/vecmem/utils/cuda/copy.ipp"
-   "src/utils/cuda/copy.cpp"
+   "include/vecmem/utils/cuda/impl/copy.ipp"
+   "include/vecmem/utils/cuda/impl/copy_impl.hpp"
+   "include/vecmem/utils/cuda/impl/copy_impl.ipp"
+   "src/utils/cuda/copy_impl.cpp"
    "src/utils/cuda_error_handling.hpp"
    "src/utils/cuda_error_handling.cpp"
    "src/utils/cuda_wrappers.hpp"
