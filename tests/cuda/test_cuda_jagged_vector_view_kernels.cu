@@ -65,7 +65,7 @@ void linearTransform( const vecmem::data::vector_view< int >& constants,
     assert( input.m_size == output.m_size );
 
     // Launch the kernel.
-    linearTransformKernel<<< input.m_size, 1 >>>( constants, input, output );
+    linearTransformKernel<<< 1, input.m_size >>>( constants, input, output );
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());

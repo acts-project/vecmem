@@ -8,11 +8,17 @@
 
 #include "test_cuda_jagged_vector_view_kernels.cuh"
 
+#include "vecmem/memory/contiguous_memory_resource.hpp"
+#include "vecmem/memory/cuda/device_memory_resource.hpp"
+#include "vecmem/memory/cuda/host_memory_resource.hpp"
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
+#include "vecmem/utils/cuda/copy.hpp"
 
 #include "vecmem/containers/array.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
+
+#include "vecmem/containers/data/jagged_vector_buffer.hpp"
 
 #include <gtest/gtest.h>
 
@@ -64,4 +70,93 @@ TEST_F(cuda_jagged_vector_view_test, mutate_in_kernel) {
     EXPECT_EQ(m_vec.at(5).at(2), 29);
     EXPECT_EQ(m_vec.at(5).at(3), 31);
     EXPECT_EQ(m_vec.at(5).at(4), 33);
+}
+
+TEST_F( cuda_jagged_vector_view_test, set_in_kernel ) {
+
+    // Create the output data on the host.
+    vecmem::cuda::host_memory_resource host_resource;
+    vecmem::jagged_vector< int > output( &host_resource );
+    output = m_vec; // Just to have it be set up with the correct sizes...
+    auto output_data_host = vecmem::get_data( output );
+
+    // Create the output data on the device.
+    vecmem::cuda::device_memory_resource device_resource;
+    vecmem::data::jagged_vector_buffer< int >
+        output_data_device( output_data_host, device_resource, &host_resource );
+    vecmem::cuda::prepare_for_device( output_data_device );
+
+    // Run the linear transformation.
+    linearTransform( vecmem::cuda::copy_to_device(
+                         vecmem::get_data( m_constants ), device_resource ),
+                     vecmem::cuda::copy_to_device(
+                         vecmem::get_data( m_vec ), device_resource,
+                         host_resource ),
+                     output_data_device );
+    vecmem::cuda::copy( output_data_device, output_data_host );
+
+    // Check the results.
+    EXPECT_EQ( output[ 0 ][ 0 ], 214 );
+    EXPECT_EQ( output[ 0 ][ 1 ], 5 );
+    EXPECT_EQ( output[ 0 ][ 2 ], 7 );
+    EXPECT_EQ( output[ 0 ][ 3 ], 9 );
+    EXPECT_EQ( output[ 1 ][ 0 ], 222 );
+    EXPECT_EQ( output[ 1 ][ 1 ], 13 );
+    EXPECT_EQ( output[ 2 ][ 0 ], 226 );
+    EXPECT_EQ( output[ 2 ][ 1 ], 17 );
+    EXPECT_EQ( output[ 2 ][ 2 ], 19 );
+    EXPECT_EQ( output[ 2 ][ 3 ], 21 );
+    EXPECT_EQ( output[ 3 ][ 0 ], 234 );
+    EXPECT_EQ( output[ 5 ][ 0 ], 236 );
+    EXPECT_EQ( output[ 5 ][ 1 ], 27 );
+    EXPECT_EQ( output[ 5 ][ 2 ], 29 );
+    EXPECT_EQ( output[ 5 ][ 3 ], 31 );
+    EXPECT_EQ( output[ 5 ][ 4 ], 33 );
+}
+
+TEST_F( cuda_jagged_vector_view_test, set_in_contiguous_kernel ) {
+
+    // Make the input data contiguous in memory.
+    vecmem::cuda::host_memory_resource host_resource;
+    vecmem::contiguous_memory_resource cont_resource( host_resource, 16384 );
+    vecmem::jagged_vector< int > input( &cont_resource );
+    input = m_vec;
+
+    // Create the output data on the host, in contiguous memory.
+    vecmem::jagged_vector< int > output( &cont_resource );
+    output = m_vec; // Just to have it be set up with the correct sizes...
+    auto output_data_host = vecmem::get_data( output );
+
+    // Create the output data on the device.
+    vecmem::cuda::device_memory_resource device_resource;
+    vecmem::data::jagged_vector_buffer< int >
+        output_data_device( output_data_host, device_resource, &host_resource );
+    vecmem::cuda::prepare_for_device( output_data_device );
+
+    // Run the linear transformation.
+    linearTransform( vecmem::cuda::copy_to_device(
+                         vecmem::get_data( m_constants ), device_resource ),
+                     vecmem::cuda::copy_to_device(
+                         vecmem::get_data( input ), device_resource,
+                         host_resource ),
+                     output_data_device );
+    vecmem::cuda::copy( output_data_device, output_data_host );
+
+    // Check the results.
+    EXPECT_EQ( output[ 0 ][ 0 ], 214 );
+    EXPECT_EQ( output[ 0 ][ 1 ], 5 );
+    EXPECT_EQ( output[ 0 ][ 2 ], 7 );
+    EXPECT_EQ( output[ 0 ][ 3 ], 9 );
+    EXPECT_EQ( output[ 1 ][ 0 ], 222 );
+    EXPECT_EQ( output[ 1 ][ 1 ], 13 );
+    EXPECT_EQ( output[ 2 ][ 0 ], 226 );
+    EXPECT_EQ( output[ 2 ][ 1 ], 17 );
+    EXPECT_EQ( output[ 2 ][ 2 ], 19 );
+    EXPECT_EQ( output[ 2 ][ 3 ], 21 );
+    EXPECT_EQ( output[ 3 ][ 0 ], 234 );
+    EXPECT_EQ( output[ 5 ][ 0 ], 236 );
+    EXPECT_EQ( output[ 5 ][ 1 ], 27 );
+    EXPECT_EQ( output[ 5 ][ 2 ], 29 );
+    EXPECT_EQ( output[ 5 ][ 3 ], 31 );
+    EXPECT_EQ( output[ 5 ][ 4 ], 33 );
 }
