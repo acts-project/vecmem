@@ -9,7 +9,6 @@ include_guard( GLOBAL )
 
 # Include the helper function(s).
 include( vecmem-functions )
-include( vecmem-options )
 
 # Set up the used C++ standard(s).
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "The (HIP) C++ standard to use" )
@@ -19,8 +18,6 @@ if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
    foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
       vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wall" )
       vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wextra" )
-      vecmem_add_flag( CMAKE_HIP_FLAGS_${mode}
-         "-DVECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}" )
    endforeach()
 endif()
 

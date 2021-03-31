@@ -57,8 +57,8 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )
 
-# Specify the length of the source directory name for the VECMEM_DEBUG_MSG
-# macro's benefit.
+# Add definitions necessary for the correct functioning of VECMEM_DEBUG_MSG.
 string( LENGTH "${CMAKE_SOURCE_DIR}/" VECMEM_SOURCE_DIR_LENGTH )
 target_compile_definitions( vecmem_core PUBLIC
+   $<BUILD_INTERFACE:VECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}>
    $<BUILD_INTERFACE:VECMEM_SOURCE_DIR_LENGTH=${VECMEM_SOURCE_DIR_LENGTH}> )

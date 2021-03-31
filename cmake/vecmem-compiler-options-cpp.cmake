@@ -9,7 +9,6 @@ include_guard( GLOBAL )
 
 # Include the helper function(s).
 include( vecmem-functions )
-include( vecmem-options )
 
 # Set up the used C++ standard(s).
 set( CMAKE_CXX_STANDARD 17 CACHE STRING "The (host) C++ standard to use" )
@@ -30,7 +29,3 @@ if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-Werror" )
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-pedantic" )
 endif()
-
-# Add the VECMEM_DEBUG_MSG_LVL flag.
-vecmem_add_flag( CMAKE_CXX_FLAGS
-   "-DVECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}" )
