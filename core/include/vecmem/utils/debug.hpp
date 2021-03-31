@@ -29,6 +29,11 @@
 #   define VECMEM_DEBUG_MSG_LVL 0
 #endif // not VECMEM_DEBUG_MSG_LVL
 
+/// Set a default length that should be skipped from the front of the file names
+#ifndef VECMEM_SOURCE_DIR_LENGTH
+#   define VECMEM_SOURCE_DIR_LENGTH 0
+#endif // not VECMEM_SOURCE_DIR_LENGTH
+
 /// Helper macro for using the underlying @c printf function
 ///
 /// This intermediate function is really only necessary for SYCL compatibility.
@@ -44,7 +49,7 @@
 /// Print macro for "level 1" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 1
 #   define __VECMEM_PRINT_1(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__ )
+           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_1(MSG, ...)
 #endif
@@ -52,7 +57,7 @@
 /// Print macro for "level 2" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 2
 #   define __VECMEM_PRINT_2(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__ )
+           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_2(MSG, ...)
 #endif
@@ -60,7 +65,7 @@
 /// Print macro for "level 3" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 3
 #   define __VECMEM_PRINT_3(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__ )
+           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_3(MSG, ...)
 #endif
@@ -68,7 +73,7 @@
 /// Print macro for "level 4" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 4
 #   define __VECMEM_PRINT_4(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__ )
+           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_4(MSG, ...)
 #endif
@@ -76,7 +81,7 @@
 /// Print macro for "level 5" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 5
 #   define __VECMEM_PRINT_5(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__ )
+           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_5(MSG, ...)
 #endif
@@ -91,4 +96,6 @@
 /// @param MSG The text message to use, before the variadic arguments
 ///
 #define VECMEM_DEBUG_MSG(LVL, MSG, ...)                                        \
-   __VECMEM_PRINT_##LVL( "%s:%i " MSG "\n", __FILE__, __LINE__, __VA_ARGS__ )
+   __VECMEM_PRINT_##LVL( "[vecmem] %s:%i " MSG "\n",                           \
+                         ( static_cast< const char* >( __FILE__ ) +            \
+                           VECMEM_SOURCE_DIR_LENGTH ), __LINE__, __VA_ARGS__ )
