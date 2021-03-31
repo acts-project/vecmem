@@ -81,6 +81,12 @@
 #   define __VECMEM_PRINT_5(MSG, ...)
 #endif
 
+/// Macro used for handling the case of printing a pure/simple character string
+#define __VECMEM_DEBUG_MSG(LVL, MSG, ...)                                      \
+   __VECMEM_PRINT_##LVL( "[vecmem] %s:%i " MSG "\n%s",                         \
+                         ( static_cast< const char* >( __FILE__ ) +            \
+                           VECMEM_SOURCE_DIR_LENGTH ), __LINE__, __VA_ARGS__ )
+
 /// Helper macro for printing debug messages from "any" code
 ///
 /// Since CUDA, HIP and SYCL all provide "printf style" functions for this, the
@@ -88,9 +94,7 @@
 ///
 /// @param LVL The integer message level to use. It must have a value in the
 ///            [1-5] range.
-/// @param MSG The text message to use, before the variadic arguments
+/// @param ... The "printf style" arguments.
 ///
-#define VECMEM_DEBUG_MSG(LVL, MSG, ...)                                        \
-   __VECMEM_PRINT_##LVL( "[vecmem] %s:%i " MSG "\n",                           \
-                         ( static_cast< const char* >( __FILE__ ) +            \
-                           VECMEM_SOURCE_DIR_LENGTH ), __LINE__, __VA_ARGS__ )
+#define VECMEM_DEBUG_MSG(LVL, ...)                                             \
+   __VECMEM_DEBUG_MSG(LVL, __VA_ARGS__, "")
