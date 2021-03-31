@@ -12,7 +12,7 @@
 // System include(s).
 #include <iterator>
 
-namespace vecmem {
+namespace vecmem { namespace details {
 
    /// Type mimicking @c std::reverse_iterator
    ///
@@ -131,14 +131,16 @@ namespace vecmem {
 
    /// Comparison operator for reverse iterators
    template< typename T >
+   VECMEM_HOST_AND_DEVICE
    bool operator==( const reverse_iterator< T >& itr1,
                     const reverse_iterator< T >& itr2 );
    /// Comparison operator for reverse iterators
    template< typename T >
+   VECMEM_HOST_AND_DEVICE
    bool operator!=( const reverse_iterator< T >& itr1,
                     const reverse_iterator< T >& itr2 );
 
-} // namespace vecmem
+} } // namespace vecmem::details
 
 // Include the implementation.
-#include "vecmem/utils/reverse_iterator.ipp"
+#include "vecmem/containers/impl/reverse_iterator.ipp"

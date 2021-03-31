@@ -7,7 +7,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/utils/reverse_iterator.hpp"
+#include "vecmem/containers/details/reverse_iterator.hpp"
 #include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -62,9 +62,10 @@ namespace vecmem {
       /// Constant forward iterator type
       typedef const_pointer      const_iterator;
       /// Reverse iterator type
-      typedef vecmem::reverse_iterator< iterator >       reverse_iterator;
+      typedef vecmem::details::reverse_iterator< iterator > reverse_iterator;
       /// Constant reverse iterator type
-      typedef vecmem::reverse_iterator< const_iterator > const_reverse_iterator;
+      typedef vecmem::details::reverse_iterator< const_iterator >
+         const_reverse_iterator;
 
       /// @}
 
@@ -303,7 +304,7 @@ namespace vecmem {
       VECMEM_HOST_AND_DEVICE
       void destruct( size_type pos );
 
-      /// Helper type for identifying an element in the
+      /// Helper type for identifying an element in the array
       struct ElementId {
          size_type m_index;
          pointer m_ptr;

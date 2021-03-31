@@ -34,6 +34,11 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/impl/vector_buffer.ipp"
    "include/vecmem/containers/data/vector_view.hpp"
    "include/vecmem/containers/impl/vector_view.ipp"
+   # Iterator types.
+   "include/vecmem/containers/details/jagged_device_vector_iterator.hpp"
+   "include/vecmem/containers/impl/jagged_device_vector_iterator.ipp"
+   "include/vecmem/containers/details/reverse_iterator.hpp"
+   "include/vecmem/containers/impl/reverse_iterator.ipp"
    # Allocator
    "include/vecmem/memory/allocator.hpp"
    "include/vecmem/memory/allocator.ipp"
@@ -50,7 +55,5 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
-   "include/vecmem/utils/reverse_iterator.hpp"
-   "include/vecmem/utils/reverse_iterator.ipp"
    "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )
