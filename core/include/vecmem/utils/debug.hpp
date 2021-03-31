@@ -48,40 +48,35 @@
 
 /// Print macro for "level 1" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 1
-#   define __VECMEM_PRINT_1(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
+#   define __VECMEM_PRINT_1(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_1(MSG, ...)
 #endif
 
 /// Print macro for "level 2" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 2
-#   define __VECMEM_PRINT_2(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
+#   define __VECMEM_PRINT_2(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_2(MSG, ...)
 #endif
 
 /// Print macro for "level 3" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 3
-#   define __VECMEM_PRINT_3(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
+#   define __VECMEM_PRINT_3(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_3(MSG, ...)
 #endif
 
 /// Print macro for "level 4" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 4
-#   define __VECMEM_PRINT_4(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
+#   define __VECMEM_PRINT_4(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_4(MSG, ...)
 #endif
 
 /// Print macro for "level 5" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 5
-#   define __VECMEM_PRINT_5(MSG, ...)                                          \
-           __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
+#   define __VECMEM_PRINT_5(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
 #   define __VECMEM_PRINT_5(MSG, ...)
 #endif
