@@ -121,7 +121,7 @@ TEST_F(core_jagged_vector_view_test, reverse_iterator) {
 
 TEST_F(core_jagged_vector_view_test, value_iteration) {
     std::size_t i = 0;
-    for( const auto& innerv : m_jag ) {
+    for( auto innerv : m_jag ) {
         i += innerv.size();
     }
     EXPECT_EQ( i, 16 );
