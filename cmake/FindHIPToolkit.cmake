@@ -12,7 +12,7 @@ endif()
 set( CMAKE_HIP_PLATFORM "${CMAKE_HIP_PLATFORM_DEFAULT}" CACHE STRING
    "Platform to build the HIP code for" )
 set_property( CACHE CMAKE_HIP_PLATFORM
-   PROPERTY STRINGS "hcc" "nvcc" )
+   PROPERTY STRINGS "hcc" "nvcc" "amd" "nvidia" )
 
 # Set a helper variable.
 set( _quietFlag )
@@ -22,7 +22,8 @@ endif()
 
 # Look for the CUDA toolkit if we are building NVidia code.
 set( _requiredVars )
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    find_package( CUDAToolkit ${_quietFlag} )
    list( APPEND _requiredVars CUDAToolkit_FOUND )
 endif()
@@ -66,7 +67,8 @@ endif()
 
 # Look for the HIP runtime library.
 set( HIP_LIBRARIES )
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
    find_library( HIP_amdhip64_LIBRARY
       NAMES "amdhip64"
       PATHS "${HIP_ROOT_DIR}"
@@ -80,7 +82,8 @@ if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
    set( HIP_RUNTIME_LIBRARY "${HIP_amdhip64_LIBRARY}" )
    list( APPEND HIP_LIBRARIES "${HIP_amdhip64_LIBRARY}" )
    list( APPEND _requiredVars HIP_RUNTIME_LIBRARY )
-elseif( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" )
+elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+        ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    set( HIP_RUNTIME_LIBRARY "${CUDA_cudart_LIBRARY}" )
    list( APPEND HIP_LIBRARIES CUDA::cudart )
 else()
@@ -88,15 +91,17 @@ else()
 endif()
 
 # Set up the compiler definitions needed to use the HIP headers.
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
    set( HIP_DEFINITIONS "__HIP_PLATFORM_HCC__" )
-elseif( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" )
+elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+        ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    set( HIP_DEFINITIONS "__HIP_PLATFORM_NVCC__" )
 else()
    message( SEND_ERROR "Invalid (CMAKE_)HIP_PLATFORM setting received" )
 endif()
 
-# Handle the standard find_package arguments:
+# Handle the standard find_package arguments.
 include( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( HIPToolkit
    FOUND_VAR HIPToolkit_FOUND
