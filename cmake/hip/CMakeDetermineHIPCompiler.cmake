@@ -74,15 +74,17 @@ endif()
 set( CMAKE_HIP_PLATFORM "${CMAKE_HIP_PLATFORM_DEFAULT}" CACHE STRING
    "Platform to build the HIP code for" )
 set_property( CACHE CMAKE_HIP_PLATFORM
-   PROPERTY STRINGS "hcc" "nvcc" )
+   PROPERTY STRINGS "hcc" "nvcc" "amd" "nvidia" )
 
 # Turn on CUDA support if we use nvcc.
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    enable_language( CUDA )
 endif()
 
 # Decide how to do the build for the AMD (hcc) and NVidia (nvcc) backends.
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
    if( CMAKE_HIP_VERSION VERSION_LESS "3.7" )
       set( CMAKE_HIP_COMPILE_SOURCE_TYPE_FLAG "-x c++" )
    else()
@@ -90,7 +92,8 @@ if( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" )
    endif()
    set( CMAKE_HIP_IMPLICIT_LINK_LIBRARIES "${HIP_amdhip64_LIBRARY}" )
    set( CMAKE_HIP_COMPILE_OPTIONS_PIC "${CMAKE_CXX_COMPILE_OPTIONS_PIC}" )
-elseif( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" )
+elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+        ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    set( CMAKE_HIP_COMPILE_SOURCE_TYPE_FLAG "-x cu" )
    find_package( CUDAToolkit QUIET REQUIRED )
    set( CMAKE_HIP_IMPLICIT_LINK_LIBRARIES "${CUDA_cudart_LIBRARY}" )
