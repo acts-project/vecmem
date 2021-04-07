@@ -29,7 +29,11 @@ namespace vecmem { namespace data {
     VECMEM_HOST_AND_DEVICE
     jagged_vector_view< T >::
     jagged_vector_view( const jagged_vector_view< OTHERTYPE >& parent )
-    : m_size( parent.m_size ), m_ptr( parent.m_ptr ) {
+    : m_size( parent.m_size ),
+      // This looks scarier than it really is. We "just" reinterpret a
+      // vecmem::data::vector_view<T> pointer to be seen as
+      // vecmem::data::vector_view<const T> instead.
+      m_ptr( reinterpret_cast< pointer >( parent.m_ptr ) ) {
 
     }
 

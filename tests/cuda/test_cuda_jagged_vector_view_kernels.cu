@@ -6,45 +6,67 @@
  * Mozilla Public License Version 2.0
  */
 
+// Local include(s).
 #include "test_cuda_jagged_vector_view_kernels.cuh"
+#include "vecmem/containers/device_array.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
-#include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "../../cuda/src/utils/cuda_error_handling.hpp"
 
+// System include(s).
+#include <cassert>
+
+/// Kernel performing a linear transformation using the vector helper types
 __global__
-void doubleJaggedKernel(
-    vecmem::data::jagged_vector_view<int> _jag
-) {
-    const std::size_t t = blockIdx.x * blockDim.x + threadIdx.x;
+void linearTransformKernel( vecmem::data::vector_view< const int > constants,
+                            vecmem::data::jagged_vector_view< const int > input,
+                            vecmem::data::jagged_vector_view< int > output ) {
 
-    vecmem::jagged_device_vector<int> jag(_jag);
-
-    if (t >= jag.size()) {
+    // Find the current index.
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    if( i >= input.m_size ) {
         return;
     }
 
-    for (std::size_t i = 0; i < jag.at(t).size(); ++i) {
-        jag.at(t).at(i) *= 2;
+    // Create the helper containers.
+    const vecmem::device_array< const int, 2 > constantarray( constants );
+    const vecmem::jagged_device_vector< const int > inputvec( input );
+    vecmem::jagged_device_vector< int > outputvec( output );
+
+    // A little sanity check.
+    assert( inputvec.at( i ).size() == outputvec.at( i ).size() );
+
+    // Perform the requested linear transformation on all elements of a given
+    // "internal vector".
+    for( std::size_t j = 0; j < inputvec[ i ].size(); ++j ) {
+        outputvec[ i ][ j ] = inputvec[ i ][ j ] * constantarray[ 0 ] +
+                              constantarray[ 1 ];
     }
     __syncthreads();
-    // Iterate over all outer vectors.
-    for( auto itr1 = jag.rbegin(); itr1 != jag.rend(); ++itr1 ) {
-        if( ( jag[ t ].size() > 0 ) && ( itr1->size() > 1 ) ) {
+
+    // Now exercise the jagged vector iterators in a bit of an elaborate
+    // operation.
+    for( auto itr1 = outputvec.rbegin(); itr1 != outputvec.rend(); ++itr1 ) {
+        if( ( outputvec[ i ].size() > 0 ) && ( itr1->size() > 1 ) ) {
             // Iterate over all inner vectors, skipping the first elements.
             // Since those are being updated at the same time, by other threads.
             for( auto itr2 = itr1->rbegin(); itr2 != ( itr1->rend() - 1 );
                  ++itr2 ) {
-                jag[ t ].front() += *itr2;
+                outputvec[ i ].front() += *itr2;
             }
         }
     }
 }
 
-void doubleJagged(
-    vecmem::data::jagged_vector_view<int> & jag
-) {
-    doubleJaggedKernel<<<1, jag.m_size>>>(jag);
+void linearTransform( const vecmem::data::vector_view< int >& constants,
+                      const vecmem::data::jagged_vector_view< int >& input,
+                      vecmem::data::jagged_vector_view< int >& output ) {
 
+    // A sanity check.
+    assert( input.m_size == output.m_size );
+
+    // Launch the kernel.
+    linearTransformKernel<<< 1, input.m_size >>>( constants, input, output );
+    // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
 }

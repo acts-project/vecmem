@@ -8,8 +8,11 @@
 
 #pragma once
 
+// Local include(s).
 #include "vecmem/containers/data/jagged_vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
 
-void doubleJagged(
-    vecmem::data::jagged_vector_view<int> & jag
-);
+/// Perform a linear transformation using the received vectors
+void linearTransform( const vecmem::data::vector_view< int >& constants,
+                      const vecmem::data::jagged_vector_view< int >& input,
+                      vecmem::data::jagged_vector_view< int >& output );
