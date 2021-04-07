@@ -29,7 +29,8 @@ protected:
    /// Memory resource to use in the tests
    vecmem::host_memory_resource m_resource;
    /// Test vector used for testing all of the custom containers
-   vecmem::vector< int > m_reference_vector = { 1, 2, 5, 6, 3, 6, 1, 7, 9 };
+   vecmem::vector< int > m_reference_vector = { { 1, 2, 5, 6, 3, 6, 1, 7, 9 },
+                                                &m_resource };
 
 }; // class core_container_test
 
