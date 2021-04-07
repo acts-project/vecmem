@@ -21,6 +21,8 @@ vecmem_add_library( vecmem_hip hip SHARED
    "include/vecmem/memory/hip/host_memory_resource.hpp"
    "src/memory/hip/host_memory_resource.cpp"
    # Utilities.
+   "include/vecmem/utils/hip/copy.hpp"
+   "src/utils/hip/copy.cpp"
    "src/utils/get_device.hpp"
    "src/utils/get_device.cpp"
    "src/utils/hip_error_handling.hpp"
