@@ -11,11 +11,11 @@
    "remoteUser": "atlas",
 
    "containerEnv": {
-      "CXX": "/opt/intel-clang/12.0.0/x86_64-centos7/bin/clang++",
+      "CXX": "/opt/intel-clang/13.0.0/x86_64-centos7/bin/clang++",
       "VSCODE_CXX": "/opt/lcg/gcc/8.3.0-eda0e/x86_64-centos7/bin/g++",
       "CUDA_INCLUDE_PATH": "/usr/local/cuda/include",
       "ROCM_INCLUDE_PATH": "/opt/rocm/include",
-      "SYCL_INCLUDE_PATH": "/opt/intel-clang/12.0.0/x86_64-centos7/include"
+      "SYCL_INCLUDE_PATH": "/opt/intel-clang/13.0.0/x86_64-centos7/include"
    },
 
    "extensions": [
