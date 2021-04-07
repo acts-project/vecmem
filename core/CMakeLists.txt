@@ -55,6 +55,9 @@ vecmem_add_library( vecmem_core core SHARED
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Utilities.
+   "include/vecmem/utils/copy.hpp"
+   "include/vecmem/utils/impl/copy.ipp"
+   "src/utils/copy.cpp"
    "include/vecmem/utils/debug.hpp"
    "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )

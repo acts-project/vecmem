@@ -6,25 +6,23 @@
  * Mozilla Public License Version 2.0
  */
 
-// Local include(s).
+// VecMem include(s).
+#include "vecmem/utils/cuda/copy.hpp"
 #include "vecmem/utils/debug.hpp"
-#include "vecmem/utils/cuda/impl/copy_impl.hpp"
 #include "../cuda_error_handling.hpp"
 
 // CUDA include(s).
 #include <cuda_runtime_api.h>
 
 // System include(s).
+#include <cassert>
 #include <string>
 
-namespace vecmem::cuda::details {
-
-   /// The number of "copy types"
-   static constexpr std::size_t n_copy_types = 5;
+namespace vecmem::cuda {
 
    /// Helper array for translating between the vecmem and CUDA copy type
    /// definitions
-   static constexpr cudaMemcpyKind copy_type_translator[ n_copy_types ] = {
+   static constexpr cudaMemcpyKind copy_type_translator[ copy::type::count ] = {
       cudaMemcpyHostToDevice,
       cudaMemcpyDeviceToHost,
       cudaMemcpyHostToHost,
@@ -33,7 +31,7 @@ namespace vecmem::cuda::details {
    };
 
    /// Helper array for providing a printable name for the copy type definitions
-   static const std::string copy_type_printer[ n_copy_types ] = {
+   static const std::string copy_type_printer[ copy::type::count ] = {
       "host to device",
       "device to host",
       "host to host",
@@ -41,29 +39,30 @@ namespace vecmem::cuda::details {
       "unknown"
    };
 
-   void copy_raw( std::size_t size, const void* from, void* to,
-                  memory_copy_type type ) {
+   void copy::do_copy( std::size_t size, const void* from, void* to,
+                       type::copy_type cptype ) const {
 
       // Check if anything needs to be done.
       if( size == 0 ) {
-         VECMEM_DEBUG_MSG( 1, "Skipping unnecessary memory copy" );
+         VECMEM_DEBUG_MSG( 5, "Skipping unnecessary memory copy" );
          return;
       }
 
       // Some sanity checks.
       assert( from != nullptr );
       assert( to != nullptr );
-      assert( static_cast< int >( type ) >= 0 );
-      assert( static_cast< int >( type ) < static_cast< int >( n_copy_types ) );
+      assert( static_cast< int >( cptype ) >= 0 );
+      assert( static_cast< int >( cptype ) <
+              static_cast< int >( copy::type::count ) );
 
       // Perform the copy.
       VECMEM_CUDA_ERROR_CHECK( cudaMemcpy( to, from, size,
-                                           copy_type_translator[ type ] ) );
+                                           copy_type_translator[ cptype ] ) );
 
       // Let the user know what happened.
       VECMEM_DEBUG_MSG( 4, "Performed %s memory copy of %lu bytes from %p to "
-                        "%p", copy_type_printer[ type ].c_str(), size, from,
+                        "%p", copy_type_printer[ cptype ].c_str(), size, from,
                         to );
    }
 
-} // namespace vecmem::cuda::details
+} // namespace vecmem::cuda

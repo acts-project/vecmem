@@ -74,6 +74,9 @@ TEST_F(cuda_jagged_vector_view_test, mutate_in_kernel) {
 
 TEST_F( cuda_jagged_vector_view_test, set_in_kernel ) {
 
+    // Helper object for performing memory copies.
+    vecmem::cuda::copy copy;
+
     // Create the output data on the host.
     vecmem::cuda::host_memory_resource host_resource;
     vecmem::jagged_vector< int > output( &host_resource );
@@ -84,16 +87,17 @@ TEST_F( cuda_jagged_vector_view_test, set_in_kernel ) {
     vecmem::cuda::device_memory_resource device_resource;
     vecmem::data::jagged_vector_buffer< int >
         output_data_device( output_data_host, device_resource, &host_resource );
-    vecmem::cuda::prepare_for_device( output_data_device );
+    copy.setup( output_data_device );
 
     // Run the linear transformation.
-    linearTransform( vecmem::cuda::copy_to_device(
-                         vecmem::get_data( m_constants ), device_resource ),
-                     vecmem::cuda::copy_to_device(
-                         vecmem::get_data( m_vec ), device_resource,
-                         host_resource ),
+    linearTransform( copy.to( vecmem::get_data( m_constants ), device_resource,
+                              vecmem::copy::type::host_to_device ),
+                     copy.to( vecmem::get_data( m_vec ), device_resource,
+                              &host_resource,
+                              vecmem::copy::type::host_to_device ),
                      output_data_device );
-    vecmem::cuda::copy( output_data_device, output_data_host );
+    copy( output_data_device, output_data_host,
+          vecmem::copy::type::device_to_host );
 
     // Check the results.
     EXPECT_EQ( output[ 0 ][ 0 ], 214 );
@@ -116,6 +120,9 @@ TEST_F( cuda_jagged_vector_view_test, set_in_kernel ) {
 
 TEST_F( cuda_jagged_vector_view_test, set_in_contiguous_kernel ) {
 
+    // Helper object for performing memory copies.
+    vecmem::cuda::copy copy;
+
     // Make the input data contiguous in memory.
     vecmem::cuda::host_memory_resource host_resource;
     vecmem::contiguous_memory_resource cont_resource( host_resource, 16384 );
@@ -131,16 +138,15 @@ TEST_F( cuda_jagged_vector_view_test, set_in_contiguous_kernel ) {
     vecmem::cuda::device_memory_resource device_resource;
     vecmem::data::jagged_vector_buffer< int >
         output_data_device( output_data_host, device_resource, &host_resource );
-    vecmem::cuda::prepare_for_device( output_data_device );
+    copy.setup( output_data_device );
 
     // Run the linear transformation.
-    linearTransform( vecmem::cuda::copy_to_device(
-                         vecmem::get_data( m_constants ), device_resource ),
-                     vecmem::cuda::copy_to_device(
-                         vecmem::get_data( input ), device_resource,
-                         host_resource ),
+    linearTransform( copy.to( vecmem::get_data( m_constants ),
+                              device_resource ),
+                     copy.to( vecmem::get_data( input ), device_resource,
+                              &host_resource ),
                      output_data_device );
-    vecmem::cuda::copy( output_data_device, output_data_host );
+    copy( output_data_device, output_data_host );
 
     // Check the results.
     EXPECT_EQ( output[ 0 ][ 0 ], 214 );
