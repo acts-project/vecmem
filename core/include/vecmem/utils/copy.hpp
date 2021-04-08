@@ -64,13 +64,13 @@ namespace vecmem {
       data::vector_buffer< TYPE >
       to( const data::vector_view< TYPE >& data,
           memory_resource& resource,
-          type::copy_type cptype = type::unknown ) const;
+          type::copy_type cptype = type::unknown );
 
       /// Copy a 1-dimensional vector's data between two existing memory blocks
       template< typename TYPE >
       void operator()( const data::vector_view< TYPE >& from,
                        data::vector_view< TYPE >& to,
-                       type::copy_type cptype = type::unknown ) const;
+                       type::copy_type cptype = type::unknown );
 
       /// @}
 
@@ -79,7 +79,7 @@ namespace vecmem {
 
       /// Copy the internal state of a jagged vector buffer to the target device
       template< typename TYPE >
-      void setup( data::jagged_vector_buffer< TYPE >& data ) const;
+      void setup( data::jagged_vector_buffer< TYPE >& data );
 
       /// Copy a jagged vector to the specified memory resource
       template< typename TYPE >
@@ -87,7 +87,7 @@ namespace vecmem {
       to( const data::jagged_vector_view< TYPE >& data,
           memory_resource& resource,
           memory_resource* host_access_resource = nullptr,
-          type::copy_type cptype = type::unknown ) const;
+          type::copy_type cptype = type::unknown );
 
       /// Copy a jagged vector to the specified memory resource
       template< typename TYPE >
@@ -95,45 +95,45 @@ namespace vecmem {
       to( const data::jagged_vector_buffer< TYPE >& data,
           memory_resource& resource,
           memory_resource* host_access_resource = nullptr,
-          type::copy_type cptype = type::unknown ) const;
+          type::copy_type cptype = type::unknown );
 
       /// Copy a jagged vector's data between two existing allocations
       template< typename TYPE >
       void operator()( const data::jagged_vector_view< TYPE >& from,
                        data::jagged_vector_view< TYPE >& to,
-                       type::copy_type cptype = type::unknown ) const;
+                       type::copy_type cptype = type::unknown );
 
       /// Copy a jagged vector's data between two existing allocations
       template< typename TYPE >
       void operator()( const data::jagged_vector_view< TYPE >& from,
                        data::jagged_vector_buffer< TYPE >& to,
-                       type::copy_type cptype = type::unknown ) const;
+                       type::copy_type cptype = type::unknown );
 
       /// Copy a jagged vector's data between two existing allocations
       template< typename TYPE >
       void operator()( const data::jagged_vector_buffer< TYPE >& from,
                        data::jagged_vector_view< TYPE >& to,
-                       type::copy_type cptype = type::unknown ) const;
+                       type::copy_type cptype = type::unknown );
 
       /// Copy a jagged vector's data between two existing allocations
       template< typename TYPE >
       void operator()( const data::jagged_vector_buffer< TYPE >& from,
                        data::jagged_vector_buffer< TYPE >& to,
-                       type::copy_type cptype = type::unknown ) const;
+                       type::copy_type cptype = type::unknown );
 
       /// @}
 
    protected:
       /// Perform a "low level" memory copy
       virtual void do_copy( std::size_t size, const void* from, void* to,
-                            type::copy_type cptype ) const;
+                            type::copy_type cptype );
 
    private:
       /// Helper function performing the copy of a jagged array/vector
       template< typename TYPE >
       void copy_views( std::size_t size, const data::vector_view< TYPE >* from,
                        data::vector_view< TYPE >* to,
-                       type::copy_type cptype ) const;
+                       type::copy_type cptype );
 
    }; // class copy
 

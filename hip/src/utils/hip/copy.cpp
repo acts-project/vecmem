@@ -40,7 +40,7 @@ namespace vecmem::hip {
    };
 
    void copy::do_copy( std::size_t size, const void* from, void* to,
-                       type::copy_type cptype ) const {
+                       type::copy_type cptype ) {
 
       // Check if anything needs to be done.
       if( size == 0 ) {

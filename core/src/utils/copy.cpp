@@ -16,7 +16,7 @@
 namespace vecmem {
 
    void copy::do_copy( std::size_t size, const void* from, void* to,
-                       type::copy_type ) const {
+                       type::copy_type ) {
 
       // Perform a simple POSIX memory copy.
       memcpy( to, from, size );

@@ -18,7 +18,7 @@ namespace vecmem {
    template< typename TYPE >
    data::vector_buffer< TYPE >
    copy::to( const vecmem::data::vector_view< TYPE >& data,
-             memory_resource& resource, type::copy_type cptype ) const {
+             memory_resource& resource, type::copy_type cptype ) {
 
       data::vector_buffer< TYPE > result( data.m_size, resource );
       do_copy( data.m_size * sizeof( TYPE ), data.m_ptr, result.m_ptr, cptype );
@@ -30,14 +30,14 @@ namespace vecmem {
    template< typename TYPE >
    void copy::operator()( const data::vector_view< TYPE >& from,
                           data::vector_view< TYPE >& to,
-                          type::copy_type cptype ) const {
+                          type::copy_type cptype ) {
 
       assert( from.m_size == to.m_size );
       do_copy( from.m_size * sizeof( TYPE ), from.m_ptr, to.m_ptr, cptype );
    }
 
    template< typename TYPE >
-   void copy::setup( data::jagged_vector_buffer< TYPE >& data ) const {
+   void copy::setup( data::jagged_vector_buffer< TYPE >& data ) {
 
       // Check if anything needs to be done.
       if( ( data.m_ptr == data.host_ptr() ) || ( data.m_size == 0 ) ) {
@@ -57,7 +57,7 @@ namespace vecmem {
    data::jagged_vector_buffer< TYPE >
    copy::to( const data::jagged_vector_view< TYPE >& data,
              memory_resource& resource, memory_resource* host_access_resource,
-             type::copy_type cptype ) const {
+             type::copy_type cptype ) {
 
       // Create the result buffer object.
       data::jagged_vector_buffer< TYPE > result( data, resource,
@@ -78,7 +78,7 @@ namespace vecmem {
    data::jagged_vector_buffer< TYPE >
    copy::to( const data::jagged_vector_buffer< TYPE >& data,
              memory_resource& resource, memory_resource* host_access_resource,
-             type::copy_type cptype ) const {
+             type::copy_type cptype ) {
 
       // Create the result buffer object.
       data::jagged_vector_buffer< TYPE > result( data, resource,
@@ -98,7 +98,7 @@ namespace vecmem {
    template< typename TYPE >
    void copy::operator()( const data::jagged_vector_view< TYPE >& from,
                           data::jagged_vector_view< TYPE >& to,
-                          type::copy_type cptype ) const {
+                          type::copy_type cptype ) {
 
       // A sanity check.
       assert( from.m_size == to.m_size );
@@ -110,7 +110,7 @@ namespace vecmem {
    template< typename TYPE >
    void copy::operator()( const data::jagged_vector_view< TYPE >& from,
                           data::jagged_vector_buffer< TYPE >& to,
-                          type::copy_type cptype ) const {
+                          type::copy_type cptype ) {
 
       // A sanity check.
       assert( from.m_size == to.m_size );
@@ -122,7 +122,7 @@ namespace vecmem {
    template< typename TYPE >
    void copy::operator()( const data::jagged_vector_buffer< TYPE >& from,
                           data::jagged_vector_view< TYPE >& to,
-                          type::copy_type cptype ) const {
+                          type::copy_type cptype ) {
 
       // A sanity check.
       assert( from.m_size == to.m_size );
@@ -134,7 +134,7 @@ namespace vecmem {
    template< typename TYPE >
    void copy::operator()( const data::jagged_vector_buffer< TYPE >& from,
                           data::jagged_vector_buffer< TYPE >& to,
-                          type::copy_type cptype ) const {
+                          type::copy_type cptype ) {
 
       // A sanity check.
       assert( from.m_size == to.m_size );
@@ -147,7 +147,7 @@ namespace vecmem {
    void copy::copy_views( std::size_t size,
                           const data::vector_view< TYPE >* from,
                           data::vector_view< TYPE >* to,
-                          type::copy_type cptype ) const {
+                          type::copy_type cptype ) {
 
       // Helper variables used in the copy.
       const TYPE* from_ptr = nullptr;
