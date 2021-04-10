@@ -6,7 +6,7 @@
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
-project( vecmem VERSION 0.0.1 LANGUAGES CXX )
+project( vecmem VERSION 0.2.0 LANGUAGES CXX )
 
 # Standard CMake include(s).
 include( GNUInstallDirs )
@@ -26,7 +26,6 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY
 
 # Include the VecMem CMake code.
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-include( vecmem-compiler-options-cpp )
 include( vecmem-functions )
 include( vecmem-options )
 
