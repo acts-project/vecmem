@@ -8,6 +8,7 @@
 enable_language( CUDA )
 
 # Project include(s).
+include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-cuda )
 
 # Test all of the CUDA library's features.

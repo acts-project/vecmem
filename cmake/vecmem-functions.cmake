@@ -90,7 +90,6 @@ function( vecmem_add_flag name value )
    endif()
 
    # If not, then let's add it now:
-   set( ${name} "${${name}} ${value}" CACHE STRING
-      "Compiler setting" FORCE )
+   set( ${name} "${${name}} ${value}" PARENT_SCOPE )
 
 endfunction( vecmem_add_flag )

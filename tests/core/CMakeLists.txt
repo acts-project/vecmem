@@ -4,6 +4,9 @@
 #
 # Mozilla Public License Version 2.0
 
+# Project include(s).
+include( vecmem-compiler-options-cpp )
+
 # Test all of the core library's features.
 vecmem_add_test( core
    "test_core_allocator.cpp" "test_core_array.cpp" "test_core_containers.cpp"

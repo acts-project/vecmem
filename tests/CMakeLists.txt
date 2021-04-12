@@ -4,8 +4,9 @@
 #
 # Mozilla Public License Version 2.0
 
-# Build GoogleTest.
+# Project include(s).
 include( vecmem-googletest )
+include( vecmem-compiler-options-cpp )
 
 # Build a common, helper library.
 add_library( vecmem_testing_common STATIC

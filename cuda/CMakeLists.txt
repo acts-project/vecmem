@@ -11,6 +11,7 @@ cmake_minimum_required( VERSION 3.17 )
 enable_language( CUDA )
 
 # Project include(s).
+include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-cuda )
 
 # External dependency/dependencies.

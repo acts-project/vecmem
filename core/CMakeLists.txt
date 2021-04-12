@@ -4,6 +4,9 @@
 #
 # Mozilla Public License Version 2.0
 
+# Project include(s).
+include( vecmem-compiler-options-cpp )
+
 # Set up the build of the VecMem core library.
 vecmem_add_library( vecmem_core core SHARED
    # STL mimicking containers.

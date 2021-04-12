@@ -8,6 +8,7 @@
 enable_language( HIP )
 
 # Project include(s).
+include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-hip )
 
 # External dependency/dependencies.
