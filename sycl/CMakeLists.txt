@@ -8,6 +8,7 @@
 enable_language( SYCL )
 
 # Project include(s).
+include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-sycl )
 
 # Set up the build of the VecMem SYCL library.
