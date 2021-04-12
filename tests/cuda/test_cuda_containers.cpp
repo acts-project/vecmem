@@ -57,6 +57,9 @@ TEST_F( cuda_containers_test, explicit_memory ) {
    vecmem::cuda::device_memory_resource device_resource;
    vecmem::cuda::host_memory_resource host_resource;
 
+   // Helper object for performing memory copies.
+   vecmem::cuda::copy copy;
+
    // Create input/output vectors on the host.
    vecmem::vector< int > inputvec( { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
                                    &host_resource );
@@ -74,12 +77,11 @@ TEST_F( cuda_containers_test, explicit_memory ) {
    constants[ 1 ] = 3;
 
    // Perform a linear transformation with explicit memory copies.
-   linearTransform( vecmem::cuda::copy_to_device(
-                       vecmem::get_data( constants ), device_resource ),
-                    vecmem::cuda::copy_to_device(
-                       vecmem::get_data( inputvec ), device_resource ),
+   linearTransform( copy.to( vecmem::get_data( constants ), device_resource,
+                             vecmem::copy::type::host_to_device ),
+                    copy.to( vecmem::get_data( inputvec ), device_resource ),
                     outputvecdevice );
-   vecmem::cuda::copy( outputvecdevice, outputvechost );
+   copy( outputvecdevice, outputvechost, vecmem::copy::type::device_to_host );
 
    // Check the output.
    EXPECT_EQ( inputvec.size(), outputvec.size() );
