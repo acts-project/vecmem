@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "vecmem/memory/sycl/host_memory_resource.hpp"
+#include "vecmem/utils/debug.hpp"
 #include "../../utils/sycl/get_queue.hpp"
 
 // SYCL include(s).
@@ -16,7 +17,16 @@ namespace vecmem::sycl {
 
    void* host_memory_resource::do_allocate( std::size_t nbytes, std::size_t ) {
 
-      return cl::sycl::malloc_host( nbytes, details::get_queue( m_queue ) );
+      // Allocate the memory.
+      void* result = cl::sycl::malloc_host( nbytes,
+                                            details::get_queue( m_queue ) );
+
+      // Let the user know what's happening.
+      VECMEM_DEBUG_MSG( 5, "Allocated %ld bytes of host memory at %p", nbytes,
+                        result );
+
+      // Return the allocated block's pointer.
+      return result;
    }
 
 } // namespace vecmem::sycl
