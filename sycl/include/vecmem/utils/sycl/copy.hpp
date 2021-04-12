@@ -27,7 +27,7 @@ namespace vecmem::sycl {
       copy( const queue_wrapper& queue = { "" } );
 
    protected:
-      /// Perform a memory copy using CUDA
+      /// Perform a memory copy using SYCL
       virtual void do_copy( std::size_t size, const void* from, void* to,
                             type::copy_type cptype ) override;
 

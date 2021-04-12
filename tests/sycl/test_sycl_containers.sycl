@@ -148,7 +148,7 @@ TEST_F( sycl_containers_test, device_memory ) {
             return;
          } );
    } );
-   queue.wait(); // This is needed just for the OpenCL CPU driver...
+   queue.wait();
    copy( outputvecdevice, outputvechost );
    queue.wait();
 
