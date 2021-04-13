@@ -72,14 +72,14 @@ TEST_F( core_device_container_test, vector_buffer ) {
 
    // Create an "owning copy" of the host vector's memory.
    vecmem::data::vector_buffer< int >
-      device_data( host_data.m_size, m_resource );
-   memcpy( device_data.m_ptr, host_data.m_ptr,
-           host_data.m_size * sizeof( int ) );
+      device_data( host_data.size(), m_resource );
+   memcpy( device_data.ptr(), host_data.ptr(),
+           host_data.size() * sizeof( int ) );
 
    // Do some basic tests.
-   EXPECT_EQ( device_data.m_size, host_vector.size() );
-   EXPECT_EQ( memcmp( host_data.m_ptr, device_data.m_ptr,
-                      host_data.m_size * sizeof( int ) ), 0 );
+   EXPECT_EQ( device_data.size(), host_vector.size() );
+   EXPECT_EQ( memcmp( host_data.ptr(), device_data.ptr(),
+                      host_data.size() * sizeof( int ) ), 0 );
 }
 
 /// Test(s) for @c vecmem::data::jagged_vector_buffer
@@ -110,13 +110,13 @@ TEST_F( core_device_container_test, jagged_vector_buffer ) {
    EXPECT_NE( device_data2.m_ptr, device_data2.host_ptr() );
    EXPECT_EQ( device_data2.m_size, host_vector.size() );
    for( std::size_t i = 0; i < host_vector.size(); ++i ) {
-      EXPECT_EQ( device_data1.host_ptr()[ i ].m_size, host_vector[ i ].size() );
-      EXPECT_EQ( device_data2.host_ptr()[ i ].m_size, host_vector[ i ].size() );
+      EXPECT_EQ( device_data1.host_ptr()[ i ].size(), host_vector[ i ].size() );
+      EXPECT_EQ( device_data2.host_ptr()[ i ].size(), host_vector[ i ].size() );
    }
    for( std::size_t i = 0; i < host_vector.size() - 1; ++i ) {
-      EXPECT_EQ( device_data1.host_ptr()[ i ].m_ptr + host_vector[ i ].size(),
-                 device_data1.host_ptr()[ i + 1 ].m_ptr );
-      EXPECT_EQ( device_data2.host_ptr()[ i ].m_ptr + host_vector[ i ].size(),
-                 device_data2.host_ptr()[ i + 1 ].m_ptr );
+      EXPECT_EQ( device_data1.host_ptr()[ i ].ptr() + host_vector[ i ].size(),
+                 device_data1.host_ptr()[ i + 1 ].ptr() );
+      EXPECT_EQ( device_data2.host_ptr()[ i ].ptr() + host_vector[ i ].size(),
+                 device_data2.host_ptr()[ i + 1 ].ptr() );
    }
 }

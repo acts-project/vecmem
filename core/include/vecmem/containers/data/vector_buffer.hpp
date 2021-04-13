@@ -30,6 +30,12 @@ namespace vecmem::data {
    public:
       /// The base type used by this class
       typedef vector_view< TYPE > base_type;
+      /// Size type definition coming from the base class
+      typedef typename base_type::size_type size_type;
+      /// Size pointer type definition coming from the base class
+      typedef typename base_type::size_pointer size_pointer;
+      /// Pointer type definition coming from the base class
+      typedef typename base_type::pointer pointer;
 
       /// @name Checks on the type of the array element
       /// @{
@@ -41,16 +47,17 @@ namespace vecmem::data {
 
       /// @}
 
-      /// Constructor with a size
-      ///
-      /// It is left up to external code to copy data into the allocated memory.
-      ///
+      /// Constant size data constructor
       VECMEM_HOST
-      vector_buffer( std::size_t size, memory_resource& resource );
+      vector_buffer( size_type size, memory_resource& resource );
+      /// Resizable data constructor
+      VECMEM_HOST
+      vector_buffer( size_type capacity, size_type size,
+                     memory_resource& resource );
 
    private:
       /// Data object owning the allocated memory
-      std::unique_ptr< TYPE, details::deallocator > m_memory;
+      std::unique_ptr< char, details::deallocator > m_memory;
 
    }; // class vector_buffer
 

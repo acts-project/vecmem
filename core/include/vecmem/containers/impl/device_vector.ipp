@@ -18,7 +18,7 @@ namespace vecmem {
    VECMEM_HOST_AND_DEVICE
    device_vector< TYPE >::
    device_vector( const data::vector_view< value_type >& data )
-   : m_size( data.m_size ), m_ptr( data.m_ptr ) {
+   : m_size( data.size() ), m_ptr( data.ptr() ) {
 
       VECMEM_DEBUG_MSG( 5, "Created vecmem::device_vector with size %i from "
                         "pointer %p", static_cast< int >( m_size ),
@@ -33,7 +33,7 @@ namespace vecmem {
    VECMEM_HOST_AND_DEVICE
    device_vector< TYPE >::
    device_vector( const data::vector_view< OTHERTYPE >& data )
-   : m_size( data.m_size ), m_ptr( data.m_ptr ) {
+   : m_size( data.size() ), m_ptr( data.ptr() ) {
 
       VECMEM_DEBUG_MSG( 5, "Created vecmem::device_vector with size %i from "
                         "pointer %p", static_cast< int >( m_size ),
