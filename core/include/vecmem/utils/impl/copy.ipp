@@ -9,9 +9,11 @@
 
 // VecMem include(s).
 #include "vecmem/utils/debug.hpp"
+#include "vecmem/utils/type_traits.hpp"
 
 // System include(s).
 #include <cassert>
+#include <type_traits>
 
 namespace vecmem {
 
@@ -34,6 +36,23 @@ namespace vecmem {
 
       assert( from.m_size == to.m_size );
       do_copy( from.m_size * sizeof( TYPE ), from.m_ptr, to.m_ptr, cptype );
+   }
+
+   template< typename TYPE1, typename TYPE2, typename ALLOC >
+   void copy::operator()( const data::vector_view< TYPE1 >& from,
+                          std::vector< TYPE2, ALLOC >& to,
+                          type::copy_type cptype ) {
+
+      // The input and output types are allowed to be different, but only by
+      // const-ness.
+      static_assert( std::is_same< TYPE1, TYPE2 >::value ||
+                     details::is_same_nc< TYPE1, TYPE2 >::value ||
+                     details::is_same_nc< TYPE2, TYPE1 >::value,
+                     "Can only use compatible types in the copy" );
+      // Make the target vector the correct size.
+      to.resize( from.m_size );
+      // Perform the memory copy.
+      do_copy( from.m_size * sizeof( TYPE1 ), from.m_ptr, to.data(), cptype );
    }
 
    template< typename TYPE >

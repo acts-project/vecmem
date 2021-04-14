@@ -16,6 +16,7 @@
 
 // System include(s).
 #include <cstddef>
+#include <vector>
 
 namespace vecmem {
 
@@ -70,6 +71,12 @@ namespace vecmem {
       template< typename TYPE >
       void operator()( const data::vector_view< TYPE >& from,
                        data::vector_view< TYPE >& to,
+                       type::copy_type cptype = type::unknown );
+
+      /// Copy a 1-dimensional vector's data into a vector object
+      template< typename TYPE1, typename TYPE2, typename ALLOC >
+      void operator()( const data::vector_view< TYPE1 >& from,
+                       std::vector< TYPE2, ALLOC >& to,
                        type::copy_type cptype = type::unknown );
 
       /// @}
