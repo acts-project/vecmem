@@ -49,6 +49,8 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/memory/deallocator.hpp"
    "src/memory/deallocator.cpp"
    # Memory management.
+   "include/vecmem/memory/atomic.hpp"
+   "include/vecmem/memory/impl/atomic.ipp"
    "include/vecmem/memory/polymorphic_allocator.hpp"
    "include/vecmem/memory/memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
