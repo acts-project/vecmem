@@ -147,4 +147,5 @@ namespace vecmem {
     };
 }
 
-#include "allocator.ipp"
+// Include the implementation.
+#include "vecmem/memory/impl/allocator.ipp"
