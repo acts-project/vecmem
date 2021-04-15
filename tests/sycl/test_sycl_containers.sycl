@@ -57,7 +57,7 @@ TEST_F( sycl_containers_test, shared_memory ) {
            output = vecmem::get_data( outputvec ) ]( cl::sycl::id< 1 > id ) {
 
             // Skip invalid indices.
-            if( id >= input.m_size ) {
+            if( id >= input.size() ) {
                return;
             }
 
@@ -126,13 +126,13 @@ TEST_F( sycl_containers_test, device_memory ) {
 
       // Run the kernel.
       h.parallel_for< class LinearTransform2 >(
-         cl::sycl::range< 1 >( input_data.m_size ),
+         cl::sycl::range< 1 >( input_data.size() ),
          [ constants = vecmem::get_data( const_data ),
            input = vecmem::get_data( input_data ),
            output = vecmem::get_data( outputvecdevice ) ]( cl::sycl::id< 1 > id ) {
 
             // Skip invalid indices.
-            if( id >= input.m_size ) {
+            if( id >= input.size() ) {
                return;
             }
 

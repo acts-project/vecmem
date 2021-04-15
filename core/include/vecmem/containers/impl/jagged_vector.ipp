@@ -24,10 +24,12 @@ namespace vecmem {
          result( size, ( resource != nullptr ? *resource :
                          *( vec.get_allocator().resource() ) ) );
 
+      // Helper local type definition.
+      typedef typename data::jagged_vector_data< TYPE >::value_type value_type;
+
       // Fill the result object with information.
       for( std::size_t i = 0; i < size; ++i ) {
-         result.m_ptr[ i ].m_size = vec[ i ].size();
-         result.m_ptr[ i ].m_ptr = vec[ i ].data();
+         result.m_ptr[ i ] = value_type( vec[ i ].size(), vec[ i ].data() );
       }
 
       // Return the created object.
@@ -48,10 +50,12 @@ namespace vecmem {
       // Construct the object to be returned.
       data::jagged_vector_data< TYPE > result( size, *resource );
 
+      // Helper local type definition.
+      typedef typename data::jagged_vector_data< TYPE >::value_type value_type;
+
       // Fill the result object with information.
       for( std::size_t i = 0; i < size; ++i ) {
-         result.m_ptr[ i ].m_size = vec[ i ].size();
-         result.m_ptr[ i ].m_ptr = vec[ i ].data();
+         result.m_ptr[ i ] = value_type( vec[ i ].size(), vec[ i ].data() );
       }
 
       // Return the created object.
@@ -70,10 +74,13 @@ namespace vecmem {
          result( size, ( resource != nullptr ? *resource :
                          *( vec.get_allocator().resource() ) ) );
 
+      // Helper local type definition.
+      typedef typename data::jagged_vector_data< const TYPE >::value_type
+         value_type;
+
       // Fill the result object with information.
       for( std::size_t i = 0; i < size; ++i ) {
-         result.m_ptr[ i ].m_size = vec[ i ].size();
-         result.m_ptr[ i ].m_ptr = vec[ i ].data();
+         result.m_ptr[ i ] = value_type( vec[ i ].size(), vec[ i ].data() );
       }
 
       // Return the created object.
@@ -94,10 +101,13 @@ namespace vecmem {
       // Construct the object to be returned.
       data::jagged_vector_data< const TYPE > result( size, *resource );
 
+      // Helper local type definition.
+      typedef typename data::jagged_vector_data< const TYPE >::value_type
+         value_type;
+
       // Fill the result object with information.
       for( std::size_t i = 0; i < size; ++i ) {
-         result.m_ptr[ i ].m_size = vec[ i ].size();
-         result.m_ptr[ i ].m_ptr = vec[ i ].data();
+         result.m_ptr[ i ] = value_type( vec[ i ].size(), vec[ i ].data() );
       }
 
       // Return the created object.

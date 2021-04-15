@@ -15,9 +15,9 @@ namespace vecmem {
    VECMEM_HOST_AND_DEVICE
    device_array< T, N >::
    device_array( const data::vector_view< value_type >& data )
-   : m_ptr( data.m_ptr ) {
+   : m_ptr( data.ptr() ) {
 
-      assert( data.m_size >= N );
+      assert( data.size() >= N );
    }
 
    template< typename T, std::size_t N >
@@ -28,8 +28,9 @@ namespace vecmem {
    VECMEM_HOST_AND_DEVICE
    device_array< T, N >::
    device_array( const data::vector_view< OTHERTYPE >& data )
-   : m_ptr( data.m_ptr ) {
+   : m_ptr( data.ptr() ) {
 
+      assert( data.size() >= N );
    }
 
    template< typename T, std::size_t N >

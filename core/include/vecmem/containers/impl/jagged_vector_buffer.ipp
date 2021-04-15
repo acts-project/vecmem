@@ -21,7 +21,7 @@ namespace {
 
       std::vector< std::size_t > result( jvv.m_size );
       for( std::size_t i = 0; i < jvv.m_size; ++i ) {
-         result[ i ] = jvv.m_ptr[ i ].m_size;
+         result[ i ] = jvv.m_ptr[ i ].size();
       }
       return result;
    }
@@ -96,18 +96,15 @@ namespace vecmem { namespace data {
         ::allocate_jagged_buffer_inner_memory< TYPE >( sizes, resource ) ) {
 
       // Point the base class at the newly allocated memory.
-      if( host_access_resource != nullptr ) {
-         base_type::m_ptr = m_outer_memory.get();
-      } else {
-         base_type::m_ptr = m_outer_host_memory.get();
-      }
+      base_type::m_ptr = ( ( host_access_resource != nullptr ) ?
+                           m_outer_memory.get() : m_outer_host_memory.get() );
 
       // Set up the host accessible memory array.
       std::ptrdiff_t ptrdiff = 0;
       for( std::size_t i = 0; i < sizes.size(); ++i ) {
-         new( m_outer_host_memory.get() + i ) value_type();
-         m_outer_host_memory.get()[ i ].m_size = sizes[ i ];
-         m_outer_host_memory.get()[ i ].m_ptr = m_inner_memory.get() + ptrdiff;
+         new( host_ptr() + i ) value_type();
+         host_ptr()[ i ] =
+            value_type( sizes[ i ], m_inner_memory.get() + ptrdiff );
          ptrdiff += sizes[ i ];
       }
    }

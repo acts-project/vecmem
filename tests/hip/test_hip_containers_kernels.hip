@@ -24,7 +24,7 @@ void linearTransformKernel( vecmem::data::vector_view< const int > constants,
 
    // Find the current index.
    const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
-   if( i >= input.m_size ) {
+   if( i >= input.size() ) {
       return;
    }
 
@@ -44,7 +44,7 @@ void linearTransform( vecmem::data::vector_view< const int > constants,
                       vecmem::data::vector_view< int > output ) {
 
    // Launch the kernel.
-   hipLaunchKernelGGL( linearTransformKernel, 1, input.m_size, 0, nullptr,
+   hipLaunchKernelGGL( linearTransformKernel, 1, input.size(), 0, nullptr,
                        constants, input, output );
    // Check whether it succeeded to run.
    VECMEM_HIP_ERROR_CHECK( hipGetLastError() );
