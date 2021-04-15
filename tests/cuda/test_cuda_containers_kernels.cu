@@ -21,7 +21,7 @@ void linearTransformKernel( vecmem::data::vector_view< const int > constants,
 
    // Find the current index.
    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
-   if( i >= input.m_size ) {
+   if( i >= input.size() ) {
       return;
    }
 
@@ -41,7 +41,7 @@ void linearTransform( vecmem::data::vector_view< const int > constants,
                       vecmem::data::vector_view< int > output ) {
 
    // Launch the kernel.
-   linearTransformKernel<<< 1, input.m_size >>>( constants, input, output );
+   linearTransformKernel<<< 1, input.size() >>>( constants, input, output );
    // Check whether it succeeded to run.
    VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
    VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );
@@ -54,14 +54,14 @@ void atomicTransformKernel( std::size_t iterations,
 
    // Find the current global index.
    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
-   if( i >= ( data.m_size * iterations ) ) {
+   if( i >= ( data.size() * iterations ) ) {
       return;
    }
 
    // Get a pointer to the integer that this thread will work on.
-   const std::size_t array_index = i % data.m_size;
-   assert( array_index < data.m_size );
-   int* ptr = data.m_ptr + array_index;
+   const std::size_t array_index = i % data.size();
+   assert( array_index < data.size() );
+   int* ptr = data.ptr() + array_index;
 
    // Do some simple stuff with it.
    vecmem::atomic< int > a( ptr );
@@ -76,7 +76,7 @@ void atomicTransform( std::size_t iterations,
                       vecmem::data::vector_view< int > vec ) {
 
    // Launch the kernel.
-   atomicTransformKernel<<< iterations, vec.m_size >>>( iterations, vec );
+   atomicTransformKernel<<< iterations, vec.size() >>>( iterations, vec );
    // Check whether it succeeded to run.
    VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
    VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );

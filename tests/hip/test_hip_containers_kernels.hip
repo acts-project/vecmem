@@ -25,7 +25,7 @@ void linearTransformKernel( vecmem::data::vector_view< const int > constants,
 
    // Find the current index.
    const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
-   if( i >= input.m_size ) {
+   if( i >= input.size() ) {
       return;
    }
 
@@ -45,7 +45,7 @@ void linearTransform( vecmem::data::vector_view< const int > constants,
                       vecmem::data::vector_view< int > output ) {
 
    // Launch the kernel.
-   hipLaunchKernelGGL( linearTransformKernel, 1, input.m_size, 0, nullptr,
+   hipLaunchKernelGGL( linearTransformKernel, 1, input.size(), 0, nullptr,
                        constants, input, output );
    // Check whether it succeeded to run.
    VECMEM_HIP_ERROR_CHECK( hipGetLastError() );
@@ -59,14 +59,14 @@ void atomicTransformKernel( std::size_t iterations,
 
    // Find the current global index.
    const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
-   if( i >= ( data.m_size * iterations ) ) {
+   if( i >= ( data.size() * iterations ) ) {
       return;
    }
 
    // Get a pointer to the integer that this thread will work on.
-   const std::size_t array_index = i % data.m_size;
-   assert( array_index < data.m_size );
-   int* ptr = data.m_ptr + array_index;
+   const std::size_t array_index = i % data.size();
+   assert( array_index < data.size() );
+   int* ptr = data.ptr() + array_index;
 
    // Do some simple stuff with it.
    vecmem::atomic< int > a( ptr );
@@ -79,7 +79,7 @@ void atomicTransform( std::size_t iterations,
                       vecmem::data::vector_view< int > vec ) {
 
    // Launch the kernel.
-   hipLaunchKernelGGL( atomicTransformKernel, iterations, vec.m_size, 0,
+   hipLaunchKernelGGL( atomicTransformKernel, iterations, vec.size(), 0,
                        nullptr, iterations, vec );
    // Check whether it succeeded to run.
    VECMEM_HIP_ERROR_CHECK( hipGetLastError() );

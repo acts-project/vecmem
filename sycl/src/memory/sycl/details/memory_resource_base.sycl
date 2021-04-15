@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "vecmem/memory/sycl/details/memory_resource_base.hpp"
+#include "vecmem/utils/debug.hpp"
 #include "../../../utils/sycl/get_queue.hpp"
 
 // SYCL include(s).
@@ -23,9 +24,13 @@ namespace vecmem::sycl::details {
    }
 
    void memory_resource_base::do_deallocate( void* ptr, std::size_t,
-                                               std::size_t ) {
+                                             std::size_t ) {
 
+      // Free the memory.
       cl::sycl::free( ptr, get_queue( m_queue ) );
+
+      // Let the user know what happened.
+      VECMEM_DEBUG_MSG( 5, "Freed the memory block at %p", ptr );
    }
 
    bool memory_resource_base::do_is_equal(

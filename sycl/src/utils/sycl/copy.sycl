@@ -1,0 +1,35 @@
+/*
+ * VecMem project, part of the ACTS project (R&D line)
+ *
+ * (c) 2021 CERN for the benefit of the ACTS project
+ *
+ * Mozilla Public License Version 2.0
+ */
+
+// SYCL include(s).
+#include <CL/sycl.hpp>
+
+// VecMem include(s).
+#include "vecmem/utils/sycl/copy.hpp"
+#include "vecmem/utils/debug.hpp"
+#include "get_queue.hpp"
+
+namespace vecmem::sycl {
+
+   copy::copy( const queue_wrapper& queue )
+   : m_queue( queue ) {
+
+   }
+
+   void copy::do_copy( std::size_t size, const void* from, void* to,
+                       type::copy_type ) {
+
+      // Perform the copy.
+      details::get_queue( m_queue ).memcpy( to, from, size );
+
+      // Let the user know what happened.
+      VECMEM_DEBUG_MSG( 4, "Performed memory copy of %lu bytes from %p to %p",
+                        size, from, to );
+   }
+
+} // namespace vecmem::sycl

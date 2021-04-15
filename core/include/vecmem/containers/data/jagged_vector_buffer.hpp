@@ -18,7 +18,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace vecmem::data {
+namespace vecmem { namespace data {
 
    /// Object owning all the data of a jagged vector
    ///
@@ -101,7 +101,19 @@ namespace vecmem::data {
 
    }; // class jagged_vector_buffer
 
-} // namespace vecmem::data
+} // namespace data
+
+   /// Helper function creating a @c vecmem::data::jagged_vector_view object
+   template< typename TYPE >
+   data::jagged_vector_view< TYPE >&
+   get_data( data::jagged_vector_buffer< TYPE >& data );
+
+   /// Helper function creating a @c vecmem::data::jagged_vector_view object
+   template< typename TYPE >
+   const data::jagged_vector_view< TYPE >&
+   get_data( const data::jagged_vector_buffer< TYPE >& data );
+
+} // namespace vecmem
 
 // Include the implementation.
 #include "vecmem/containers/impl/jagged_vector_buffer.ipp"

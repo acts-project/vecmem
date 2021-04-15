@@ -22,10 +22,11 @@ namespace vecmem {
    copy::to( const vecmem::data::vector_view< TYPE >& data,
              memory_resource& resource, type::copy_type cptype ) {
 
-      data::vector_buffer< TYPE > result( data.m_size, resource );
-      do_copy( data.m_size * sizeof( TYPE ), data.m_ptr, result.m_ptr, cptype );
+      data::vector_buffer< TYPE > result( data.capacity(), data.size(),
+                                          resource );
+      this->operator()< TYPE >( data, result, cptype );
       VECMEM_DEBUG_MSG( 2, "Created a vector buffer of type \"%s\" with "
-                        "size %lu", typeid( TYPE ).name(), data.m_size );
+                        "size %lu", typeid( TYPE ).name(), data.size() );
       return result;
    }
 
@@ -34,8 +35,8 @@ namespace vecmem {
                           data::vector_view< TYPE >& to,
                           type::copy_type cptype ) {
 
-      assert( from.m_size == to.m_size );
-      do_copy( from.m_size * sizeof( TYPE ), from.m_ptr, to.m_ptr, cptype );
+      assert( from.size() == to.size() );
+      do_copy( from.size() * sizeof( TYPE ), from.ptr(), to.ptr(), cptype );
    }
 
    template< typename TYPE1, typename TYPE2, typename ALLOC >
@@ -50,9 +51,9 @@ namespace vecmem {
                      details::is_same_nc< TYPE2, TYPE1 >::value,
                      "Can only use compatible types in the copy" );
       // Make the target vector the correct size.
-      to.resize( from.m_size );
+      to.resize( from.size() );
       // Perform the memory copy.
-      do_copy( from.m_size * sizeof( TYPE1 ), from.m_ptr, to.data(), cptype );
+      do_copy( from.size() * sizeof( TYPE1 ), from.ptr(), to.data(), cptype );
    }
 
    template< typename TYPE >
@@ -181,12 +182,12 @@ namespace vecmem {
             // current one.
             std::size_t j = i + 1;
             while( j < size ) {
-               if( array[ j ].m_size == 0 ) {
+               if( array[ j ].size() == 0 ) {
                   ++j;
                   continue;
                }
-               return ( ( array[ i ].m_ptr + array[ i ].m_size ) ==
-                        array[ j ].m_ptr );
+               return ( ( array[ i ].ptr() + array[ i ].size() ) ==
+                        array[ j ].ptr() );
             }
             // If we got here, then the answer is no...
             return false;
@@ -196,27 +197,27 @@ namespace vecmem {
       for( std::size_t i = 0; i < size; ++i ) {
 
          // Skip empty "inner vectors".
-         if( ( from[ i ].m_size == 0 ) && ( to[ i ].m_size == 0 ) ) {
+         if( ( from[ i ].size() == 0 ) && ( to[ i ].size() == 0 ) ) {
             continue;
          }
 
          // Some sanity checks.
-         assert( from[ i ].m_ptr != nullptr );
-         assert( to[ i ].m_ptr != nullptr );
-         assert( from[ i ].m_size != 0 );
-         assert( from[ i ].m_size == to[ i ].m_size );
+         assert( from[ i ].ptr() != nullptr );
+         assert( to[ i ].ptr() != nullptr );
+         assert( from[ i ].size() != 0 );
+         assert( from[ i ].size() == to[ i ].size() );
 
          // Set/update the helper variables.
          if( ( from_ptr == nullptr ) && ( to_ptr == nullptr ) &&
              ( copy_size == 0 ) ) {
-            from_ptr = from[ i ].m_ptr;
-            to_ptr = to[ i ].m_ptr;
-            copy_size = from[ i ].m_size * sizeof( TYPE );
+            from_ptr = from[ i ].ptr();
+            to_ptr = to[ i ].ptr();
+            copy_size = from[ i ].size() * sizeof( TYPE );
          } else {
             assert( from_ptr != nullptr );
             assert( to_ptr != nullptr );
             assert( copy_size != 0 );
-            copy_size += from[ i ].m_size * sizeof( TYPE );
+            copy_size += from[ i ].size() * sizeof( TYPE );
          }
 
          // Check if the next vector element connects to this one. If not,
