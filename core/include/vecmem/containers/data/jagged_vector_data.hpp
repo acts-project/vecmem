@@ -16,7 +16,7 @@
 // System include(s).
 #include <memory>
 
-namespace vecmem::data {
+namespace vecmem { namespace data {
 
     /**
      * @brief A data wrapper for jagged vectors.
@@ -56,7 +56,19 @@ namespace vecmem::data {
 
     }; // class jagged_vector_data
 
-} // namespace vecmem::data
+} // namespace data
+
+   /// Helper function creating a @c vecmem::data::jagged_vector_view object
+   template< typename TYPE >
+   data::jagged_vector_view< TYPE >&
+   get_data( data::jagged_vector_data< TYPE >& data );
+
+   /// Helper function creating a @c vecmem::data::jagged_vector_view object
+   template< typename TYPE >
+   const data::jagged_vector_view< TYPE >&
+   get_data( const data::jagged_vector_data< TYPE >& data );
+
+} // namespace vecmem
 
 // Include the implementation.
 #include "vecmem/containers/impl/jagged_vector_data.ipp"

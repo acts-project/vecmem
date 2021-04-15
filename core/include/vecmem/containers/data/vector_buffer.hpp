@@ -10,14 +10,13 @@
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/memory/deallocator.hpp"
-#include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
 #include <memory>
 #include <type_traits>
 
-namespace vecmem::data {
+namespace vecmem { namespace data {
 
    /// Object owning the data held by it
    ///
@@ -48,10 +47,8 @@ namespace vecmem::data {
       /// @}
 
       /// Constant size data constructor
-      VECMEM_HOST
       vector_buffer( size_type size, memory_resource& resource );
       /// Resizable data constructor
-      VECMEM_HOST
       vector_buffer( size_type capacity, size_type size,
                      memory_resource& resource );
 
@@ -61,7 +58,19 @@ namespace vecmem::data {
 
    }; // class vector_buffer
 
-} // namespace vecmem::data
+} // namespace data
+
+   /// Helper function creating a @c vecmem::data::vector_view object
+   template< typename TYPE >
+   data::vector_view< TYPE >&
+   get_data( data::vector_buffer< TYPE >& data );
+
+   /// Helper function creating a @c vecmem::data::vector_view object
+   template< typename TYPE >
+   const data::vector_view< TYPE >&
+   get_data( const data::vector_buffer< TYPE >& data );
+
+} // namespace vecmem
 
 // Include the implementation.
 #include "vecmem/containers/impl/vector_buffer.ipp"

@@ -6,8 +6,10 @@
  */
 
 // Local include(s).
+#include "vecmem/utils/debug.hpp"
 #include "vecmem/utils/sycl/queue_wrapper.hpp"
 #include "device_selector.hpp"
+#include "get_queue.hpp"
 #include "opaque_queue.hpp"
 
 // SYCL include(s).
@@ -21,11 +23,19 @@ namespace vecmem::sycl {
         device_selector( deviceName ) ) ) {
 
       m_queue = m_managedQueue.get();
+      VECMEM_DEBUG_MSG( 2, "Created an \"owning wrapper\" around a queue on "
+                        "device: %s",
+                        details::get_queue( *this ).get_device().get_info<
+                           cl::sycl::info::device::name >().c_str() );
    }
 
    queue_wrapper::queue_wrapper( void* queue )
    : m_queue( queue ), m_managedQueue() {
 
+      VECMEM_DEBUG_MSG( 2, "Created a \"view wrapper\" around a queue on "
+                        "device: %s",
+                        details::get_queue( *this ).get_device().get_info<
+                           cl::sycl::info::device::name >().c_str() );
    }
 
    queue_wrapper::queue_wrapper( const queue_wrapper& parent )

@@ -35,10 +35,9 @@ namespace {
 
 } // private namespace
 
-namespace vecmem::data {
+namespace vecmem { namespace data {
 
    template< typename TYPE >
-   VECMEM_HOST
    vector_buffer< TYPE >::
    vector_buffer( size_type size, memory_resource& resource )
    : vector_buffer( size, size, resource ) {
@@ -46,7 +45,6 @@ namespace vecmem::data {
    }
 
    template< typename TYPE >
-   VECMEM_HOST
    vector_buffer< TYPE >::
    vector_buffer( size_type capacity, size_type size,
                   memory_resource& resource )
@@ -67,4 +65,20 @@ namespace vecmem::data {
       }
    }
 
-} // namespace vecmem::data
+} // namespace data
+
+   template< typename TYPE >
+   data::vector_view< TYPE >&
+   get_data( data::vector_buffer< TYPE >& data ) {
+
+      return data;
+   }
+
+   template< typename TYPE >
+   const data::vector_view< TYPE >&
+   get_data( const data::vector_buffer< TYPE >& data ) {
+
+      return data;
+   }
+
+} // namespace vecmem
