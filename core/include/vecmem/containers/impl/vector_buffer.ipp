@@ -24,10 +24,9 @@ namespace {
 
 } // private namespace
 
-namespace vecmem::data {
+namespace vecmem { namespace data {
 
    template< typename TYPE >
-   VECMEM_HOST
    vector_buffer< TYPE >::
    vector_buffer( std::size_t size, memory_resource& resource )
    : base_type( size, nullptr ),
@@ -38,4 +37,20 @@ namespace vecmem::data {
       base_type::m_ptr = m_memory.get();
    }
 
-} // namespace vecmem::data
+} // namespace data
+
+   template< typename TYPE >
+   data::vector_view< TYPE >&
+   get_data( data::vector_buffer< TYPE >& data ) {
+
+      return data;
+   }
+
+   template< typename TYPE >
+   const data::vector_view< TYPE >&
+   get_data( const data::vector_buffer< TYPE >& data ) {
+
+      return data;
+   }
+
+} // namespace vecmem

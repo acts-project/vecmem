@@ -63,7 +63,7 @@ namespace {
 
 } // private namespace
 
-namespace vecmem::data {
+namespace vecmem { namespace data {
 
    template< typename TYPE >
    template< typename OTHERTYPE,
@@ -119,4 +119,20 @@ namespace vecmem::data {
       return m_outer_host_memory.get();
    }
 
-} // namespace vecmem::data
+} // namespace data
+
+   template< typename TYPE >
+   data::jagged_vector_view< TYPE >&
+   get_data( data::jagged_vector_buffer< TYPE >& data ) {
+
+      return data;
+   }
+
+   template< typename TYPE >
+   const data::jagged_vector_view< TYPE >&
+   get_data( const data::jagged_vector_buffer< TYPE >& data ) {
+
+      return data;
+   }
+
+} // namespace vecmem

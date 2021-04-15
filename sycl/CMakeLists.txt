@@ -23,6 +23,8 @@ vecmem_add_library( vecmem_sycl sycl SHARED
    "include/vecmem/memory/sycl/shared_memory_resource.hpp"
    "src/memory/sycl/shared_memory_resource.sycl"
    # Utilities.
+   "include/vecmem/utils/sycl/copy.hpp"
+   "src/utils/sycl/copy.sycl"
    "include/vecmem/utils/sycl/queue_wrapper.hpp"
    "src/utils/sycl/queue_wrapper.sycl"
    "src/utils/sycl/device_selector.hpp"
