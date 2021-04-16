@@ -71,7 +71,7 @@ jobs:
 
     # The system to run on.
     runs-on: ubuntu-latest
-    container: ghcr.io/acts-project/ubuntu2004_oneapi:v11
+    container: ghcr.io/acts-project/ubuntu2004_oneapi:v12
 
     # The different build modes to test.
     strategy:
@@ -103,4 +103,5 @@ jobs:
       run: |
         cd build
         source /opt/intel/oneapi/setvars.sh
+        export SYCL_DEVICE_FILTER=gpu,host
         ctest --output-on-failure
