@@ -15,14 +15,15 @@
 
 namespace vecmem {
 
-   /// Atomic access helper class for use in device code
+   /// Class providing atomic operations for the VecMem code
    ///
    /// It is only meant to be used with primitive types. Ones that CUDA, HIP and
    /// SYCL built-in functions exist for. So no structs, or even pointers.
    ///
-   /// Note that it is also not meant to work in host code. Support in host
-   /// code could be added with @c std::atomic_ref in C++20, but until then
-   /// this type will only work in "device code" for atomic access.
+   /// Note that it does not perform atomic operations in host code! That may
+   /// be implemented with @c std::atomic_ref in C++20 when VecMem switches to
+   /// that standard. But for now all operations in host code are performed as
+   /// "regular" operations.
    ///
    template< typename T >
    class atomic {
@@ -51,25 +52,25 @@ namespace vecmem {
       /// @}
 
       /// Constructor, with a pointer to the managed variable
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       atomic( pointer ptr );
 
       /// @name Value setter/getter functions
       /// @{
 
       /// Set the variable to the desired value
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       void store( value_type data );
       /// Get the value of the variable
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       value_type load() const;
 
       /// Exchange the current value of the variable with a different one
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       value_type exchange( value_type data );
 
       /// Compare against the current value, and exchange only if different
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       bool compare_exchange_strong( reference expected, value_type desired );
 
       /// @}
@@ -78,20 +79,20 @@ namespace vecmem {
       /// @{
 
       /// Add a chosen value to the stored variable
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       value_type fetch_add( value_type data );
       /// Substitute a chosen value from the stored variable
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       value_type fetch_sub( value_type data );
 
       /// Replace the current value with the specified value AND-ed to it
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       value_type fetch_and( value_type data );
       /// Replace the current value with the specified value OR-d to it
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       value_type fetch_or( value_type data );
       /// Replace the current value with the specified value XOR-d to it
-      VECMEM_DEVICE
+      VECMEM_HOST_AND_DEVICE
       value_type fetch_xor( value_type data );
 
       /// @}
