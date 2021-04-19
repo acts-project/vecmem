@@ -44,11 +44,13 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/containers/impl/reverse_iterator.ipp"
    # Allocator
    "include/vecmem/memory/allocator.hpp"
-   "include/vecmem/memory/allocator.ipp"
+   "include/vecmem/memory/impl/allocator.ipp"
    "src/memory/allocator.cpp"
    "include/vecmem/memory/deallocator.hpp"
    "src/memory/deallocator.cpp"
    # Memory management.
+   "include/vecmem/memory/atomic.hpp"
+   "include/vecmem/memory/impl/atomic.ipp"
    "include/vecmem/memory/polymorphic_allocator.hpp"
    "include/vecmem/memory/memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"

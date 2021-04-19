@@ -17,7 +17,13 @@
 #include <gtest/gtest.h>
 
 /// Test fixture for the on-device vecmem container tests
-class hip_containers_test : public testing::Test {};
+class hip_containers_test : public testing::Test {
+
+protected:
+   /// Helper object for performing memory copies
+   vecmem::hip::copy m_copy;
+
+}; // class hip_containers_test
 
 /// Test a linear transformation using the host (managed) memory resource
 TEST_F( hip_containers_test, host_memory ) {
@@ -56,9 +62,6 @@ TEST_F( hip_containers_test, device_memory ) {
    vecmem::hip::device_memory_resource device_resource;
    vecmem::hip::host_memory_resource host_resource;
 
-   // Helper object for performing memory copies.
-   vecmem::hip::copy copy;
-
    // Create input/output vectors on the host.
    vecmem::vector< int > inputvec( { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
                                    &host_resource );
@@ -76,16 +79,42 @@ TEST_F( hip_containers_test, device_memory ) {
    constants[ 1 ] = 3;
 
    // Perform a linear transformation with explicit memory copies.
-   linearTransform( copy.to( vecmem::get_data( constants ), device_resource,
-                             vecmem::copy::type::host_to_device ),
-                    copy.to( vecmem::get_data( inputvec ), device_resource ),
+   linearTransform( m_copy.to( vecmem::get_data( constants ), device_resource,
+                               vecmem::copy::type::host_to_device ),
+                    m_copy.to( vecmem::get_data( inputvec ), device_resource ),
                     outputvecdevice );
-   copy( outputvecdevice, outputvechost, vecmem::copy::type::device_to_host );
+   m_copy( outputvecdevice, outputvechost, vecmem::copy::type::device_to_host );
 
    // Check the output.
    EXPECT_EQ( inputvec.size(), outputvec.size() );
    for( std::size_t i = 0; i < outputvec.size(); ++i ) {
       EXPECT_EQ( outputvec.at( i ),
                  inputvec.at( i ) * constants[ 0 ] + constants[ 1 ] );
+   }
+}
+
+/// Test the execution of atomic operations as part of a kernel
+TEST_F( hip_containers_test, atomic_memory ) {
+
+   // The host (managed) memory resource.
+   vecmem::hip::host_memory_resource host_resource;
+   vecmem::hip::device_memory_resource device_resource;
+
+   // Create a small vector in host memory.
+   vecmem::vector< int > vec( 100, 0, &host_resource );
+
+   // Copy it to the device.
+   auto vec_on_device = m_copy.to( vecmem::get_data( vec ), device_resource );
+
+   // Give it to the test function.
+   static constexpr int ITERATIONS = 100;
+   atomicTransform( ITERATIONS, vec_on_device );
+
+   // Copy it back to the host.
+   m_copy( vec_on_device, vec );
+
+   // Check the output.
+   for( int value : vec ) {
+      EXPECT_EQ( value, 4 * ITERATIONS );
    }
 }

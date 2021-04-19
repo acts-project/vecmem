@@ -14,6 +14,7 @@
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/vector.hpp"
+#include "vecmem/memory/atomic.hpp"
 #include "vecmem/memory/sycl/device_memory_resource.hpp"
 #include "vecmem/memory/sycl/host_memory_resource.hpp"
 #include "vecmem/memory/sycl/shared_memory_resource.hpp"
@@ -157,5 +158,51 @@ TEST_F( sycl_containers_test, device_memory ) {
    for( std::size_t i = 0; i < outputvec.size(); ++i ) {
       EXPECT_EQ( outputvec.at( i ),
                  inputvec.at( i ) * constants[ 0 ] + constants[ 1 ] );
+   }
+}
+
+/// Test atomic access in a simple kernel
+TEST_F( sycl_containers_test, atomic_memory ) {
+
+   // Create the SYCL queue that we'll be using in the test.
+   cl::sycl::queue queue{ vecmem::sycl::device_selector() };
+
+   // The shared memory resource.
+   vecmem::sycl::shared_memory_resource resource( &queue );
+
+   // Allocate memory on it that would be modified atomically.
+   vecmem::vector< int > buffer( 100, 0, &resource );
+
+   // Number of iterations performed on a single buffer element.
+   static constexpr int ITERATIONS = 100;
+
+   // Do very basic atomic modifications on the buffer.
+   queue.submit( [ &buffer ]( cl::sycl::handler& h ) {
+      h.parallel_for< class AtomicTests >(
+         cl::sycl::range< 1 >( buffer.size() * ITERATIONS ),
+         [ buffer = vecmem::get_data( buffer ) ]( cl::sycl::item< 1 > id ) {
+
+            // Check if anything needs to be done.
+            if( id >= buffer.size() * ITERATIONS ) {
+               return;
+            }
+
+            // Index/pointer to modify.
+            const std::size_t index = id % buffer.size();
+            int* ptr = buffer.ptr() + index;
+
+            // Do some simple stuff with it.
+            vecmem::atomic< int > a( ptr );
+            a.fetch_add( 4 );
+            a.fetch_sub( 2 );
+            a.fetch_and( 0xffffffff );
+            a.fetch_or( 0x00000000 );
+         } );
+   } );
+   queue.wait();
+
+   // Check the output.
+   for( int value : buffer ) {
+      EXPECT_EQ( value, ITERATIONS * 2 );
    }
 }
