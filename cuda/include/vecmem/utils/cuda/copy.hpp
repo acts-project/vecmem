@@ -19,6 +19,8 @@ namespace vecmem::cuda {
       /// Perform a memory copy using CUDA
       virtual void do_copy( std::size_t size, const void* from, void* to,
                             type::copy_type cptype ) override;
+      /// Fill a memory area using CUDA
+      virtual void do_memset( std::size_t size, void* ptr, int value ) override;
 
    }; // class copy
 

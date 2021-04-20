@@ -24,12 +24,43 @@ namespace vecmem::sycl {
    void copy::do_copy( std::size_t size, const void* from, void* to,
                        type::copy_type ) {
 
+      // Check if anything needs to be done.
+      if( size == 0 ) {
+         VECMEM_DEBUG_MSG( 5, "Skipping unnecessary memory copy" );
+         return;
+      }
+
+      // Some sanity checks.
+      assert( from != nullptr );
+      assert( to != nullptr );
+
       // Perform the copy.
-      details::get_queue( m_queue ).memcpy( to, from, size );
+      auto event = details::get_queue( m_queue ).memcpy( to, from, size );
+      event.wait_and_throw();
 
       // Let the user know what happened.
       VECMEM_DEBUG_MSG( 4, "Performed memory copy of %lu bytes from %p to %p",
                         size, from, to );
+   }
+
+   void copy::do_memset( std::size_t size, void* ptr, int value ) {
+
+      // Check if anything needs to be done.
+      if( size == 0 ) {
+         VECMEM_DEBUG_MSG( 5, "Skipping unnecessary memory filling" );
+         return;
+      }
+
+      // Some sanity checks.
+      assert( ptr != nullptr );
+
+      // Perform the operation.
+      auto event = details::get_queue( m_queue ).memset( ptr, value, size );
+      event.wait_and_throw();
+
+      // Let the user know what happened.
+      VECMEM_DEBUG_MSG( 4, "Set %lu bytes to %i at %p with SYCL", size, value,
+                        ptr );
    }
 
 } // namespace vecmem::sycl

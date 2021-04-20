@@ -65,4 +65,23 @@ namespace vecmem::hip {
                         to );
    }
 
+   void copy::do_memset( std::size_t size, void* ptr, int value ) {
+
+      // Check if anything needs to be done.
+      if( size == 0 ) {
+         VECMEM_DEBUG_MSG( 5, "Skipping unnecessary memory filling" );
+         return;
+      }
+
+      // Some sanity checks.
+      assert( ptr != nullptr );
+
+      // Perform the operation.
+      VECMEM_HIP_ERROR_CHECK( hipMemset( ptr, value, size ) );
+
+      // Let the user know what happened.
+      VECMEM_DEBUG_MSG( 4, "Set %lu bytes to %i at %p with HIP", size, value,
+                        ptr );
+   }
+
 } // namespace vecmem::hip

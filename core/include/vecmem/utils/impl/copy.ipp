@@ -18,15 +18,34 @@
 namespace vecmem {
 
    template< typename TYPE >
+   void copy::setup( data::vector_view< TYPE >& data ) {
+
+      // Check if anything needs to be done.
+      if( ( data.size_ptr() == nullptr ) || ( data.capacity() == 0 ) ) {
+         return;
+      }
+
+      // Initialize the "size variable" correctly on the buffer.
+      do_memset( sizeof( typename data::vector_buffer< TYPE >::size_type ),
+                 data.size_ptr(), 0 );
+      VECMEM_DEBUG_MSG( 2, "Prepared a device vector buffer of capacity %lu "
+                        "for use on a device", data.capacity() );
+   }
+
+   template< typename TYPE >
    data::vector_buffer< TYPE >
    copy::to( const vecmem::data::vector_view< TYPE >& data,
              memory_resource& resource, type::copy_type cptype ) {
 
-      data::vector_buffer< TYPE > result( data.capacity(), data.size(),
+      // Set up the result buffer.
+      data::vector_buffer< TYPE > result( data.capacity(), get_size( data ),
                                           resource );
+      setup( result );
+
+      // Copy the payload of the vector.
       this->operator()< TYPE >( data, result, cptype );
       VECMEM_DEBUG_MSG( 2, "Created a vector buffer of type \"%s\" with "
-                        "size %lu", typeid( TYPE ).name(), data.size() );
+                        "capacity %lu", typeid( TYPE ).name(), data.capacity() );
       return result;
    }
 
@@ -35,8 +54,22 @@ namespace vecmem {
                           data::vector_view< TYPE >& to,
                           type::copy_type cptype ) {
 
-      assert( from.size() == to.size() );
-      do_copy( from.size() * sizeof( TYPE ), from.ptr(), to.ptr(), cptype );
+      // Get the size of the source view.
+      const typename data::vector_view< TYPE >::size_type size =
+         get_size( from );
+
+      // Make sure that if the target view is resizable, that it would be set up
+      // for the correct size.
+      if( to.size_ptr() != 0 ) {
+         assert( to.capacity() >= size );
+         do_copy( sizeof( typename data::vector_view< TYPE >::size_type ),
+                  &size, to.size_ptr(), cptype );
+      }
+
+      // Copy the payload.
+      assert( size == get_size( to ) );
+      do_copy( size * sizeof( TYPE ), from.ptr(), to.ptr(),
+               cptype );
    }
 
    template< typename TYPE1, typename TYPE2, typename ALLOC >
@@ -50,10 +83,15 @@ namespace vecmem {
                      details::is_same_nc< TYPE1, TYPE2 >::value ||
                      details::is_same_nc< TYPE2, TYPE1 >::value,
                      "Can only use compatible types in the copy" );
+
+      // Figure out the size of the buffer.
+      const typename data::vector_view< TYPE1 >::size_type size =
+         get_size( from );
+
       // Make the target vector the correct size.
-      to.resize( from.size() );
+      to.resize( size );
       // Perform the memory copy.
-      do_copy( from.size() * sizeof( TYPE1 ), from.ptr(), to.data(), cptype );
+      do_copy( size * sizeof( TYPE1 ), from.ptr(), to.data(), cptype );
    }
 
    template< typename TYPE >
@@ -176,17 +214,18 @@ namespace vecmem {
 
       // Helper lambda for figuring out if the next vector element is
       // connected to the currently processed one or not.
-      auto next_is_connected = [ size ]( const data::vector_view< TYPE >* array,
-                                         std::size_t i ) {
+      auto next_is_connected =
+         [ this, size ]( const data::vector_view< TYPE >* array,
+                         std::size_t i ) {
             // Check if the next non-empty vector element is connected to the
             // current one.
             std::size_t j = i + 1;
             while( j < size ) {
-               if( array[ j ].size() == 0 ) {
+               if( this->get_size( array[ j ] ) == 0 ) {
                   ++j;
                   continue;
                }
-               return ( ( array[ i ].ptr() + array[ i ].size() ) ==
+               return ( ( array[ i ].ptr() + this->get_size( array[ i ] ) ) ==
                         array[ j ].ptr() );
             }
             // If we got here, then the answer is no...
@@ -197,27 +236,27 @@ namespace vecmem {
       for( std::size_t i = 0; i < size; ++i ) {
 
          // Skip empty "inner vectors".
-         if( ( from[ i ].size() == 0 ) && ( to[ i ].size() == 0 ) ) {
+         if( ( get_size( from[ i ] ) == 0 ) && ( get_size( to[ i ] ) == 0 ) ) {
             continue;
          }
 
          // Some sanity checks.
          assert( from[ i ].ptr() != nullptr );
          assert( to[ i ].ptr() != nullptr );
-         assert( from[ i ].size() != 0 );
-         assert( from[ i ].size() == to[ i ].size() );
+         assert( get_size( from[ i ] ) != 0 );
+         assert( get_size( from[ i ] ) == get_size( to[ i ] ) );
 
          // Set/update the helper variables.
          if( ( from_ptr == nullptr ) && ( to_ptr == nullptr ) &&
              ( copy_size == 0 ) ) {
             from_ptr = from[ i ].ptr();
             to_ptr = to[ i ].ptr();
-            copy_size = from[ i ].size() * sizeof( TYPE );
+            copy_size = get_size( from[ i ] ) * sizeof( TYPE );
          } else {
             assert( from_ptr != nullptr );
             assert( to_ptr != nullptr );
             assert( copy_size != 0 );
-            copy_size += from[ i ].size() * sizeof( TYPE );
+            copy_size += get_size( from[ i ] ) * sizeof( TYPE );
          }
 
          // Check if the next vector element connects to this one. If not,
@@ -240,6 +279,25 @@ namespace vecmem {
       VECMEM_DEBUG_MSG( 2, "Copied the payload of a jagged vector of type "
                         "\"%s\" with %lu copy operation(s)",
                         typeid( TYPE ).name(), copy_ops );
+   }
+
+   template< typename TYPE >
+   typename data::vector_view< TYPE >::size_type
+   copy::get_size( const data::vector_view< TYPE >& data ) {
+
+      // Handle the simple case, when the view/buffer is not resizable.
+      if( data.size_ptr() == nullptr ) {
+         return data.capacity();
+      }
+
+      // If it *is* resizable, don't assume that the size is host-accessible.
+      // Explicitly copy it for access.
+      typename data::vector_view< TYPE >::size_type result = 0;
+      do_copy( sizeof( typename data::vector_view< TYPE >::size_type ),
+               data.size_ptr(), &result, type::unknown );
+
+      // Return what we got.
+      return result;
    }
 
 } // namespace vecmem
