@@ -24,8 +24,9 @@ namespace {
 
       // Decide how many bytes to allocate.
       const std::size_t byteSize =
-         ( ( capacity == size ) ? ( size * sizeof( TYPE ) ) :
-           ( sizeof( std::size_t ) + size * sizeof( TYPE ) ) );
+         ( ( capacity == size ) ? ( capacity * sizeof( TYPE ) ) :
+           ( sizeof( typename vecmem::data::vector_buffer< TYPE >::size_type ) +
+             capacity * sizeof( TYPE ) ) );
 
       // Return the appropriate smart pointer.
       return { capacity == 0 ? nullptr :
