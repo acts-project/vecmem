@@ -85,3 +85,37 @@ void atomicTransform( std::size_t iterations,
    VECMEM_HIP_ERROR_CHECK( hipGetLastError() );
    VECMEM_HIP_ERROR_CHECK( hipDeviceSynchronize() );
 }
+
+/// Kernel filtering the input vector elements into the output vector
+__global__
+void filterTransformKernel( vecmem::data::vector_view< const int > input,
+                            vecmem::data::vector_view< int > output ) {
+
+   // Find the current global index.
+   const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+   if( i >= input.size() ) {
+      return;
+   }
+
+   // Set up the vector objects.
+   const vecmem::const_device_vector< int > inputvec( input );
+   vecmem::device_vector< int > outputvec( output );
+
+   // Add this thread's element, if it passes the selection.
+   const int element = inputvec.at( i );
+   if( element > 10 ) {
+      outputvec.push_back( element );
+   }
+   return;
+}
+
+void filterTransform( vecmem::data::vector_view< const int > input,
+                      vecmem::data::vector_view< int > output ) {
+
+   // Launch the kernel.
+   hipLaunchKernelGGL( filterTransformKernel, 1, input.size(), 0, nullptr,
+                       input, output );
+   // Check whether it succeeded to run.
+   VECMEM_HIP_ERROR_CHECK( hipGetLastError() );
+   VECMEM_HIP_ERROR_CHECK( hipDeviceSynchronize() );
+}

@@ -9,6 +9,7 @@
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/containers/details/reverse_iterator.hpp"
+#include "vecmem/memory/atomic.hpp"
 #include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -35,9 +36,14 @@ namespace vecmem {
       /// Type of the array elements
       typedef TYPE              value_type;
       /// Size type for the array
-      typedef std::size_t       size_type;
+      typedef unsigned int      size_type;
       /// Pointer difference type
       typedef std::ptrdiff_t    difference_type;
+
+      /// Pointer type to the size of the array
+      typedef typename std::conditional< std::is_const< TYPE >::value,
+                                         const size_type*,
+                                         size_type* >::type size_pointer;
 
       /// Value reference type
       typedef value_type&       reference;
@@ -118,6 +124,60 @@ namespace vecmem {
 
       /// @}
 
+      /// @name Payload modification functions
+      /// @{
+
+      /// Assign new values to the vector (not thread-safe)
+      VECMEM_HOST_AND_DEVICE
+      void assign( size_type count, const_reference value );
+      /// Assign new values to the vector (not thread-safe)
+      template< typename InputIt,
+                std::enable_if_t<
+                   details::is_iterator_of< InputIt, value_type >::value,
+                   bool > = true >
+      VECMEM_HOST_AND_DEVICE
+      void assign( InputIt other_begin, InputIt other_end ) {
+
+         // This can only be done on a resizable vector.
+         assert( m_size != nullptr );
+
+         // Remove all previous elements.
+         clear();
+
+         // Create copies of all of the elements one-by-one. It's very
+         // inefficient, but we can't make any assumptions about the type of the
+         // input iterator received by this function.
+         atomic< size_type > asize( m_size );
+         for( InputIt itr = other_begin; itr != other_end; ++itr ) {
+            construct( asize.fetch_add( 1 ), *itr );
+         }
+      }
+
+      /// Add a new element at the end of the vector ("kind of" thread-safe)
+      template< typename... Args >
+      VECMEM_HOST_AND_DEVICE
+      reference emplace_back( Args&&... args );
+      /// Add a new element at the end of the vector ("kind of" thread-safe)
+      VECMEM_HOST_AND_DEVICE
+      size_type push_back( const_reference value );
+
+      /// Remove the last element of the vector (not thread-safe)
+      VECMEM_HOST_AND_DEVICE
+      size_type pop_back();
+
+      /// Clear the vector (not thread-safe)
+      VECMEM_HOST_AND_DEVICE
+      void clear();
+      /// Resize the vector (not thread-safe)
+      VECMEM_HOST_AND_DEVICE
+      void resize( size_type new_size );
+      /// Resize the vector and fill any new elements with the specified value
+      /// (not thread-safe)
+      VECMEM_HOST_AND_DEVICE
+      void resize( size_type new_size, const_reference value );
+
+      /// @}
+
       /// @name Iterator providing functions
       /// @{
 
@@ -182,8 +242,17 @@ namespace vecmem {
       /// @}
 
    private:
+      /// Construct a new vector element
+      VECMEM_HOST_AND_DEVICE
+      void construct( size_type pos, const_reference value );
+      /// Destruct a vector element
+      VECMEM_HOST_AND_DEVICE
+      void destruct( size_type pos );
+
       /// Size of the array that this object looks at
-      size_type m_size;
+      size_type m_capacity;
+      /// Current size of the vector
+      size_pointer m_size;
       /// Pointer to the start of the array
       pointer m_ptr;
 

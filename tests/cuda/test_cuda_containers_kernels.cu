@@ -81,3 +81,36 @@ void atomicTransform( std::size_t iterations,
    VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
    VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );
 }
+
+/// Kernel filtering the input vector elements into the output vector
+__global__
+void filterTransformKernel( vecmem::data::vector_view< const int > input,
+                            vecmem::data::vector_view< int > output ) {
+
+   // Find the current global index.
+   const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+   if( i >= input.size() ) {
+      return;
+   }
+
+   // Set up the vector objects.
+   const vecmem::const_device_vector< int > inputvec( input );
+   vecmem::device_vector< int > outputvec( output );
+
+   // Add this thread's element, if it passes the selection.
+   const int element = inputvec.at( i );
+   if( element > 10 ) {
+      outputvec.push_back( element );
+   }
+   return;
+}
+
+void filterTransform( vecmem::data::vector_view< const int > input,
+                      vecmem::data::vector_view< int > output ) {
+
+   // Launch the kernel.
+   filterTransformKernel<<< 1, input.size() >>>( input, output );
+   // Check whether it succeeded to run.
+   VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
+   VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );
+}

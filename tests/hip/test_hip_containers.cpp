@@ -96,7 +96,7 @@ TEST_F( hip_containers_test, device_memory ) {
 /// Test the execution of atomic operations as part of a kernel
 TEST_F( hip_containers_test, atomic_memory ) {
 
-   // The host (managed) memory resource.
+   // The host/device memory resources.
    vecmem::hip::host_memory_resource host_resource;
    vecmem::hip::device_memory_resource device_resource;
 
@@ -116,5 +116,37 @@ TEST_F( hip_containers_test, atomic_memory ) {
    // Check the output.
    for( int value : vec ) {
       EXPECT_EQ( value, 4 * ITERATIONS );
+   }
+}
+
+/// Test the usage of extendable vectors in a kernel
+TEST_F( hip_containers_test, extendable_memory ) {
+
+   // The memory resources.
+   vecmem::hip::device_memory_resource device_resource;
+   vecmem::hip::host_memory_resource host_resource;
+
+   // Create a small vector in host memory.
+   vecmem::vector< int > input( &host_resource );
+   for( int i = 0; i < 100; ++i ) {
+      input.push_back( i );
+   }
+
+   // Create a buffer that will hold the filtered elements of the input vector.
+   vecmem::data::vector_buffer< int >
+      output_buffer( input.size(), 0, device_resource );
+   m_copy.setup( output_buffer );
+
+   // Run the filtering kernel.
+   filterTransform( vecmem::get_data( input ), output_buffer );
+
+   // Copy the output into the host's memory.
+   vecmem::vector< int > output( &host_resource );
+   m_copy( output_buffer, output );
+
+   // Check its contents.
+   EXPECT_EQ( output.size(), 89 );
+   for( int value : output ) {
+      EXPECT_LT( 10, value );
    }
 }

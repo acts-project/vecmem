@@ -74,7 +74,7 @@ TEST_F( sycl_containers_test, shared_memory ) {
             return;
          } );
    } );
-   queue.wait();
+   queue.wait_and_throw();
 
    // Check the output.
    EXPECT_EQ( inputvec.size(), outputvec.size() );
@@ -149,9 +149,8 @@ TEST_F( sycl_containers_test, device_memory ) {
             return;
          } );
    } );
-   queue.wait();
+   queue.wait_and_throw();
    copy( outputvecdevice, outputvechost );
-   queue.wait();
 
    // Check the output.
    EXPECT_EQ( inputvec.size(), outputvec.size() );
@@ -167,7 +166,7 @@ TEST_F( sycl_containers_test, atomic_memory ) {
    // Create the SYCL queue that we'll be using in the test.
    cl::sycl::queue queue{ vecmem::sycl::device_selector() };
 
-   // The shared memory resource.
+   // The memory resources.
    vecmem::sycl::shared_memory_resource resource( &queue );
 
    // Allocate memory on it that would be modified atomically.
@@ -199,10 +198,72 @@ TEST_F( sycl_containers_test, atomic_memory ) {
             a.fetch_or( 0x00000000 );
          } );
    } );
-   queue.wait();
+   queue.wait_and_throw();
 
    // Check the output.
    for( int value : buffer ) {
       EXPECT_EQ( value, ITERATIONS * 2 );
+   }
+}
+
+/// Test the usage of extendable vectors in a kernel
+TEST_F( sycl_containers_test, extendable_memory ) {
+
+   // Create the SYCL queue that we'll be using in the test.
+   cl::sycl::queue queue{ vecmem::sycl::device_selector() };
+
+   // The memory resources.
+   vecmem::sycl::host_memory_resource host_resource( &queue );
+   vecmem::sycl::device_memory_resource device_resource( &queue );
+   vecmem::sycl::shared_memory_resource shared_resource( &queue );
+
+   // Helper object for performing memory copies.
+   vecmem::sycl::copy copy( &queue );
+
+   // Create a small (input) vector in shared memory.
+   vecmem::vector< int > input( &shared_resource );
+   for( int i = 0; i < 100; ++i ) {
+      input.push_back( i );
+   }
+
+   // Create a buffer that will hold the filtered elements of the input vector.
+   vecmem::data::vector_buffer< int >
+      output_buffer( input.size(), 0, device_resource );
+   copy.setup( output_buffer );
+
+   // Run a kernel that filters the elements of the input vector.
+   queue.submit( [ &input, &output_buffer ]( cl::sycl::handler& h ) {
+      h.parallel_for< class FilterTests > (
+         cl::sycl::range< 1 >( input.size() ),
+         [ input = vecmem::get_data( input ),
+           output = vecmem::get_data( output_buffer ) ]
+         ( cl::sycl::item< 1 > id ) {
+
+            // Check if anything needs to be done.
+            if( id >= input.size() ) {
+               return;
+            }
+
+            // Set up the vector objects.
+            const vecmem::const_device_vector< int > inputvec( input );
+            vecmem::device_vector< int > outputvec( output );
+
+            // Add this thread's element, if it passes the selection.
+            const int element = inputvec.at( id );
+            if( element > 10 ) {
+               outputvec.push_back( element );
+            }
+         } );
+   } );
+   queue.wait_and_throw();
+
+   // Copy the output into the host's memory.
+   vecmem::vector< int > output( &host_resource );
+   copy( output_buffer, output );
+
+   // Check its contents.
+   EXPECT_EQ( output.size(), 89 );
+   for( int value : output ) {
+      EXPECT_LT( 10, value );
    }
 }
