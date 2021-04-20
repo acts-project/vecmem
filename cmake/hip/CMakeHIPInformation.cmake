@@ -97,5 +97,10 @@ endif()
 set( CMAKE_HIP_LINK_EXECUTABLE
    "${CMAKE_HIP_HOST_LINKER} <FLAGS> <CMAKE_HIP_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> ${CMAKE_HIP_IMPLICIT_LINK_LIBRARIES}" )
 
+# Set up the default flags for the HIP build.
+set( CMAKE_HIP_FLAGS_INIT "$ENV{HIPFLAGS} ${CMAKE_HIP_FLAGS_INIT}" )
+cmake_initialize_per_config_variable( CMAKE_HIP_FLAGS
+   "Flags used by the HIP compiler" )
+
 # Tell CMake that the information was loaded.
 set( CMAKE_HIP_INFORMATION_LOADED TRUE )
