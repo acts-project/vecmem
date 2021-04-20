@@ -4,9 +4,6 @@
 #
 # Mozilla Public License Version 2.0
 
-# Guard against multiple includes.
-include_guard( GLOBAL )
-
 # Include the helper function(s).
 include( vecmem-functions )
 
