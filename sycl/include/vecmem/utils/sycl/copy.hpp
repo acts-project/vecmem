@@ -30,6 +30,8 @@ namespace vecmem::sycl {
       /// Perform a memory copy using SYCL
       virtual void do_copy( std::size_t size, const void* from, void* to,
                             type::copy_type cptype ) override;
+      /// Fill a memory area using SYCL
+      virtual void do_memset( std::size_t size, void* ptr, int value ) override;
 
    private:
       /// The queue that the copy operations are made with/for

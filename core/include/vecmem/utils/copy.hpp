@@ -60,6 +60,10 @@ namespace vecmem {
       /// @name 1-dimensional vector data handling functions
       /// @{
 
+      /// Set up the internal state of a vector buffer correctly on a device
+      template< typename TYPE >
+      void setup( data::vector_view< TYPE >& data );
+
       /// Copy a 1-dimensional vector to the specified memory resource
       template< typename TYPE >
       data::vector_buffer< TYPE >
@@ -134,6 +138,8 @@ namespace vecmem {
       /// Perform a "low level" memory copy
       virtual void do_copy( std::size_t size, const void* from, void* to,
                             type::copy_type cptype );
+      /// Perform a "low level" memory filling operation
+      virtual void do_memset( std::size_t size, void* ptr, int value );
 
    private:
       /// Helper function performing the copy of a jagged array/vector
@@ -141,6 +147,10 @@ namespace vecmem {
       void copy_views( std::size_t size, const data::vector_view< TYPE >* from,
                        data::vector_view< TYPE >* to,
                        type::copy_type cptype );
+      /// Helper function for getting the size of a resizable 1D buffer
+      template< typename TYPE >
+      typename data::vector_view< TYPE >::size_type
+      get_size( const data::vector_view< TYPE >& data );
 
    }; // class copy
 
