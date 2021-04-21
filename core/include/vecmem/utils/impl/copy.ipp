@@ -28,7 +28,7 @@ namespace vecmem {
       // Initialize the "size variable" correctly on the buffer.
       do_memset( sizeof( typename data::vector_buffer< TYPE >::size_type ),
                  data.size_ptr(), 0 );
-      VECMEM_DEBUG_MSG( 2, "Prepared a device vector buffer of capacity %lu "
+      VECMEM_DEBUG_MSG( 2, "Prepared a device vector buffer of capacity %u "
                         "for use on a device", data.capacity() );
    }
 
@@ -45,7 +45,7 @@ namespace vecmem {
       // Copy the payload of the vector.
       this->operator()< TYPE >( data, result, cptype );
       VECMEM_DEBUG_MSG( 2, "Created a vector buffer of type \"%s\" with "
-                        "capacity %lu", typeid( TYPE ).name(), data.capacity() );
+                        "capacity %u", typeid( TYPE ).name(), data.capacity() );
       return result;
    }
 
