@@ -26,4 +26,14 @@ namespace vecmem {
                         "to %p", size, from, to );
    }
 
+   void copy::do_memset( std::size_t size, void* ptr, int value ) {
+
+      // Perform the POSIX memory setting operation.
+      memset( ptr, value, size );
+
+      // Let the user know what happened.
+      VECMEM_DEBUG_MSG( 4, "Set %lu bytes to %i at %p with POSIX memset", size,
+                        value, ptr );
+   }
+
 } // namespace vecmem
