@@ -12,27 +12,17 @@
 #   include <CL/sycl/atomic.hpp>
 #endif
 
-/// Helpers for super explicit calls to the SYCL atomic functions
+/// Helpers for explicit calls to the SYCL atomic functions
 #if defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
 #   define __VECMEM_SYCL_ATOMIC_CALL0( FNAME, PTR )                            \
-   cl::sycl::atomic_##FNAME< value_type,                                       \
-                             cl::sycl::access::address_space::global_space >(  \
-      cl::sycl::atomic< value_type >(                                          \
-         cl::sycl::multi_ptr< value_type,                                      \
-            cl::sycl::access::address_space::global_space >( PTR ) ) )
+   cl::sycl::atomic_##FNAME< value_type >( cl::sycl::atomic< value_type >(     \
+         cl::sycl::global_ptr< value_type >( PTR ) ) )
 #   define __VECMEM_SYCL_ATOMIC_CALL1( FNAME, PTR, ARG1 )                      \
-   cl::sycl::atomic_##FNAME< value_type,                                       \
-                             cl::sycl::access::address_space::global_space >(  \
-      cl::sycl::atomic< value_type >(                                          \
-         cl::sycl::multi_ptr< value_type,                                      \
-            cl::sycl::access::address_space::global_space >( PTR ) ), ARG1 )
+   cl::sycl::atomic_##FNAME< value_type >( cl::sycl::atomic< value_type >(     \
+         cl::sycl::global_ptr< value_type >( PTR ) ), ARG1 )
 #   define __VECMEM_SYCL_ATOMIC_CALL2( FNAME, PTR, ARG1, ARG2 )                \
-   cl::sycl::atomic_##FNAME< value_type,                                       \
-                             cl::sycl::access::address_space::global_space >(  \
-      cl::sycl::atomic< value_type >(                                          \
-         cl::sycl::multi_ptr< value_type,                                      \
-            cl::sycl::access::address_space::global_space >( PTR ) ), ARG1,    \
-            ARG2 )
+   cl::sycl::atomic_##FNAME< value_type >( cl::sycl::atomic< value_type >(     \
+         cl::sycl::global_ptr< value_type >( PTR ) ), ARG1, ARG2 )
 #endif
 
 namespace vecmem {
@@ -124,7 +114,9 @@ namespace vecmem {
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
       return __VECMEM_SYCL_ATOMIC_CALL1( fetch_add, m_ptr, data );
 #else
-      return ( *m_ptr += data );
+      const value_type result = *m_ptr;
+      *m_ptr += data;
+      return result;
 #endif
    }
 
@@ -138,7 +130,9 @@ namespace vecmem {
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
       return __VECMEM_SYCL_ATOMIC_CALL1( fetch_sub, m_ptr, data );
 #else
-      return ( *m_ptr -= data );
+      const value_type result = *m_ptr;
+      *m_ptr -= data;
+      return result;
 #endif
    }
 
@@ -152,7 +146,9 @@ namespace vecmem {
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
       return __VECMEM_SYCL_ATOMIC_CALL1( fetch_and, m_ptr, data );
 #else
-      return ( *m_ptr &= data );
+      const value_type result = *m_ptr;
+      *m_ptr &= data;
+      return result;
 #endif
    }
 
@@ -166,7 +162,9 @@ namespace vecmem {
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
       return __VECMEM_SYCL_ATOMIC_CALL1( fetch_or, m_ptr, data );
 #else
-      return ( *m_ptr |= data );
+      const value_type result = *m_ptr;
+      *m_ptr |= data;
+      return result;
 #endif
    }
 
@@ -180,7 +178,9 @@ namespace vecmem {
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
       return __VECMEM_SYCL_ATOMIC_CALL1( fetch_xor, m_ptr, data );
 #else
-      return ( *m_ptr ^= data );
+      const value_type result = *m_ptr;
+      *m_ptr ^= data;
+      return result;
 #endif
    }
 
