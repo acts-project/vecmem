@@ -47,7 +47,7 @@
 #include "deviceAllocatorStatus.h"
 
 /// CUB namespace
-namespace notcub {
+namespace vecmem::cuda::notcub {
 
   /**
  * \addtogroup UtilMgmt

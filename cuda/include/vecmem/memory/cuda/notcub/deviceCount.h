@@ -10,7 +10,7 @@ namespace vecmem {
     namespace notcub {
       inline int deviceCount() {
         int ndevices;
-        cudaCheck(cudaGetDeviceCount(&ndevices));
+        VECMEM_CUDA_ERROR_CHECK(cudaGetDeviceCount(&ndevices));
         return ndevices;
       }
     } // namespace notcub

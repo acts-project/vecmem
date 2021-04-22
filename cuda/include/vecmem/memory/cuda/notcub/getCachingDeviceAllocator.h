@@ -36,7 +36,7 @@ namespace vecmem::cuda::allocator {
     size_t ret = std::numeric_limits<size_t>::max();
     int currentDevice;
     VECMEM_CUDA_ERROR_CHECK(cudaGetDevice(&currentDevice));
-    const int numberOfDevices = deviceCount();
+    const int numberOfDevices = vecmem::cuda::notcub::deviceCount();
     for (int i = 0; i < numberOfDevices; ++i) {
       size_t freeMemory, totalMemory;
       VECMEM_CUDA_ERROR_CHECK(cudaSetDevice(i));

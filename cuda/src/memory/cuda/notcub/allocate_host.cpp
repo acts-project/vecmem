@@ -3,10 +3,11 @@
 #include "../../../utils/cuda_error_handling.hpp"
 #include "vecmem/memory/cuda/notcub/allocate_host.h"
 #include "vecmem/memory/cuda/notcub/getCachingDeviceAllocator.h"
+#include "vecmem/memory/cuda/notcub/getCachingHostAllocator.h"
 
 namespace {
   const size_t maxAllocationSize =
-      notcub::CachingDeviceAllocator::IntPow(vecmem::cuda::allocator::binGrowth, vecmem::cuda::allocator::maxBin);
+    vecmem::cuda::notcub::CachingDeviceAllocator::IntPow(vecmem::cuda::allocator::binGrowth, vecmem::cuda::allocator::maxBin);
 }
 
 namespace vecmem::cuda::notcub {
