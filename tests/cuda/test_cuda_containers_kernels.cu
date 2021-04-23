@@ -10,6 +10,7 @@
 #include "vecmem/containers/const_device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
+#include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/memory/atomic.hpp"
 #include "../../cuda/src/utils/cuda_error_handling.hpp"
 
@@ -110,6 +111,45 @@ void filterTransform( vecmem::data::vector_view< const int > input,
 
    // Launch the kernel.
    filterTransformKernel<<< 1, input.size() >>>( input, output );
+   // Check whether it succeeded to run.
+   VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
+   VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );
+}
+
+/// Kernel filtering the input vector elements into the output vector
+__global__
+void filterTransformKernel( vecmem::data::jagged_vector_view< const int > input,
+                            vecmem::data::jagged_vector_view< int > output ) {
+
+   // Find the current indices.
+   const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+   if( i >= input.m_size ) {
+      return;
+   }
+   const std::size_t j = blockIdx.y * blockDim.y + threadIdx.y;
+   if( j >= input.m_ptr[ i ].size() ) {
+      return;
+   }
+
+   // Set up the vector objects.
+   const vecmem::jagged_device_vector< const int > inputvec( input );
+   vecmem::jagged_device_vector< int > outputvec( output );
+
+   // Keep just the odd elements.
+   const int value = inputvec[ i ][ j ];
+   if( ( value % 2 ) != 0 ) {
+      outputvec.at( i ).push_back( value );
+   }
+   return;
+}
+
+void filterTransform( vecmem::data::jagged_vector_view< const int > input,
+                      std::size_t max_vec_size,
+                      vecmem::data::jagged_vector_view< int > output ) {
+
+   // Launch the kernel.
+   filterTransformKernel<<< 1, dim3( input.m_size, max_vec_size ) >>>( input,
+                                                                       output );
    // Check whether it succeeded to run.
    VECMEM_CUDA_ERROR_CHECK( cudaGetLastError() );
    VECMEM_CUDA_ERROR_CHECK( cudaDeviceSynchronize() );
