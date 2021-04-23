@@ -14,6 +14,6 @@ include( vecmem-compiler-options-sycl )
 # Test all of the SYCL library's features.
 vecmem_add_test( sycl
    "test_sycl_memory_resources.cpp"
-   "test_sycl_containers.sycl"
+   "test_sycl_containers.sycl" "test_sycl_jagged_containers.sycl"
    LINK_LIBRARIES vecmem::core vecmem::sycl GTest::gtest_main
                   vecmem_testing_common )

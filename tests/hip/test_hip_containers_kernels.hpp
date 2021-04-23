@@ -7,6 +7,7 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
 
 // System include(s).
@@ -16,6 +17,11 @@
 void linearTransform( vecmem::data::vector_view< const int > constants,
                       vecmem::data::vector_view< const int > input,
                       vecmem::data::vector_view< int > output );
+
+/// Perform a linear transformation using the received vectors
+void linearTransform( vecmem::data::vector_view< const int > constants,
+                      vecmem::data::jagged_vector_view< const int > input,
+                      vecmem::data::jagged_vector_view< int > output );
 
 /// Function incrementing the elements of the received vector using atomics
 void atomicTransform( std::size_t iterations,
