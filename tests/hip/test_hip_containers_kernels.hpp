@@ -30,3 +30,8 @@ void atomicTransform( std::size_t iterations,
 /// Function filtering elements of an input vector into an output vector
 void filterTransform( vecmem::data::vector_view< const int > input,
                       vecmem::data::vector_view< int > output );
+
+/// Function filtering elements of an input vector into an output vector
+void filterTransform( vecmem::data::jagged_vector_view< const int > input,
+                      std::size_t max_vec_size,
+                      vecmem::data::jagged_vector_view< int > output );
