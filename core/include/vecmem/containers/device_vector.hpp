@@ -153,11 +153,11 @@ namespace vecmem {
          }
       }
 
-      /// Add a new element at the end of the vector ("kind of" thread-safe)
+      /// Add a new element at the end of the vector (thread-safe)
       template< typename... Args >
       VECMEM_HOST_AND_DEVICE
       reference emplace_back( Args&&... args );
-      /// Add a new element at the end of the vector ("kind of" thread-safe)
+      /// Add a new element at the end of the vector (thread-safe)
       VECMEM_HOST_AND_DEVICE
       size_type push_back( const_reference value );
 
