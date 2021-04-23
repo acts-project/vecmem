@@ -14,7 +14,7 @@ include( vecmem-compiler-options-hip )
 # Test all of the HIP library's features.
 vecmem_add_test( hip
    "test_hip_memory_resources.cpp"
-   "test_hip_containers.cpp" "test_hip_containers_kernels.hpp"
-   "test_hip_containers_kernels.hip"
+   "test_hip_containers.cpp" "test_hip_jagged_containers.cpp"
+   "test_hip_containers_kernels.hpp" "test_hip_containers_kernels.hip"
    LINK_LIBRARIES vecmem::core vecmem::hip GTest::gtest_main
                   vecmem_testing_common )

@@ -109,5 +109,5 @@ jobs:
       run: |
         cd build
         source /opt/intel/oneapi/setvars.sh
-        export SYCL_DEVICE_FILTER=gpu,host
+        export SYCL_DEVICE_FILTER=level_zero:gpu,host
         ctest --output-on-failure
