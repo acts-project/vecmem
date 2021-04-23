@@ -97,7 +97,7 @@ TEST_F( cuda_containers_test, explicit_memory ) {
 /// Test the execution of atomic operations as part of a kernel
 TEST_F( cuda_containers_test, atomic_memory ) {
 
-   // The host (managed) memory resource.
+   // The memory resources.
    vecmem::cuda::host_memory_resource host_resource;
    vecmem::cuda::device_memory_resource device_resource;
 
@@ -117,5 +117,38 @@ TEST_F( cuda_containers_test, atomic_memory ) {
    // Check the output.
    for( int value : vec ) {
       EXPECT_EQ( value, 2 * ITERATIONS );
+   }
+}
+
+/// Test the usage of extendable vectors in a kernel
+TEST_F( cuda_containers_test, extendable_memory ) {
+
+   // The memory resources.
+   vecmem::cuda::managed_memory_resource managed_resource;
+   vecmem::cuda::device_memory_resource device_resource;
+   vecmem::cuda::host_memory_resource host_resource;
+
+   // Create a small (input) vector in managed memory.
+   vecmem::vector< int > input( &managed_resource );
+   for( int i = 0; i < 100; ++i ) {
+      input.push_back( i );
+   }
+
+   // Create a buffer that will hold the filtered elements of the input vector.
+   vecmem::data::vector_buffer< int >
+      output_buffer( input.size(), 0, device_resource );
+   m_copy.setup( output_buffer );
+
+   // Run the filtering kernel.
+   filterTransform( vecmem::get_data( input ), output_buffer );
+
+   // Copy the output into the host's memory.
+   vecmem::vector< int > output( &host_resource );
+   m_copy( output_buffer, output );
+
+   // Check its contents.
+   EXPECT_EQ( output.size(), 89 );
+   for( int value : output ) {
+      EXPECT_LT( 10, value );
    }
 }

@@ -31,7 +31,7 @@ namespace vecmem { namespace data {
 
    public:
       /// Size type used in the class
-      typedef std::size_t size_type;
+      typedef unsigned int size_type;
       /// Pointer type to the size of the array
       typedef typename std::conditional< std::is_const< TYPE >::value,
                                          const size_type*,

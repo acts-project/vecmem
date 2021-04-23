@@ -10,10 +10,12 @@
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/contiguous_memory_resource.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
+#include "vecmem/utils/copy.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
@@ -28,6 +30,8 @@ class core_device_container_test : public testing::Test {
 protected:
    /// Memory resource for the test(s)
    vecmem::host_memory_resource m_resource;
+   /// Helper object for the memory copies.
+   vecmem::copy m_copy;
 
 }; // class core_device_container_test
 
@@ -73,8 +77,7 @@ TEST_F( core_device_container_test, vector_buffer ) {
    // Create an "owning copy" of the host vector's memory.
    vecmem::data::vector_buffer< int >
       device_data( host_data.size(), m_resource );
-   memcpy( device_data.ptr(), host_data.ptr(),
-           host_data.size() * sizeof( int ) );
+   m_copy( vecmem::get_data( host_vector ), device_data );
 
    // Do some basic tests.
    EXPECT_EQ( device_data.size(), host_vector.size() );
@@ -118,5 +121,88 @@ TEST_F( core_device_container_test, jagged_vector_buffer ) {
                  device_data1.host_ptr()[ i + 1 ].ptr() );
       EXPECT_EQ( device_data2.host_ptr()[ i ].ptr() + host_vector[ i ].size(),
                  device_data2.host_ptr()[ i + 1 ].ptr() );
+   }
+}
+
+/// Test(s) for a "resizable" @c vecmem::data::vector_buffer
+TEST_F( core_device_container_test, resizable_vector_buffer ) {
+
+   // Create an input vector in regular host memory.
+   std::vector< int > host_vector { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+   // Create a resizable buffer from that data.
+   static constexpr std::size_t BUFFER_SIZE = 100;
+   vecmem::data::vector_buffer< int >
+      resizable_buffer( BUFFER_SIZE, host_vector.size(), m_resource );
+   m_copy.setup( resizable_buffer );
+   EXPECT_EQ( resizable_buffer.capacity(), BUFFER_SIZE );
+   m_copy( vecmem::get_data( host_vector ), resizable_buffer );
+   EXPECT_EQ( resizable_buffer.size(), host_vector.size() );
+
+   // Create a "device vector" on top of that resizable data.
+   vecmem::device_vector< int > device_vector( resizable_buffer );
+
+   // Perform some simple tests as a start.
+   EXPECT_EQ( device_vector.size(), host_vector.size() );
+   EXPECT_EQ( device_vector.capacity(), BUFFER_SIZE );
+   EXPECT_EQ( device_vector.max_size(), BUFFER_SIZE );
+   for( int i = 0; i < 10; ++i ) {
+      EXPECT_EQ( device_vector[ i ], i + 1 );
+   }
+
+   // Modify the device vector in different ways, and check that it would work
+   // as expected.
+   device_vector.clear();
+   EXPECT_EQ( device_vector.size(), 0 );
+
+   device_vector.push_back( 10 );
+   EXPECT_EQ( device_vector.size(), 1 );
+   EXPECT_EQ( device_vector.at( 0 ), 10 );
+
+   device_vector.emplace_back( 15 );
+   EXPECT_EQ( device_vector.size(), 2 );
+   EXPECT_EQ( device_vector.back(), 15 );
+
+   device_vector.assign( 20, 123 );
+   EXPECT_EQ( device_vector.size(), 20 );
+   for( int value : device_vector ) {
+      EXPECT_EQ( value, 123 );
+   }
+
+   device_vector.resize( 40, 234 );
+   EXPECT_EQ( device_vector.size(), 40 );
+   for( std::size_t i = 0; i < 20; ++i ) {
+      EXPECT_EQ( device_vector[ i ], 123 );
+   }
+   for( std::size_t i = 20; i < 40; ++i ) {
+      EXPECT_EQ( device_vector[ i ], 234 );
+   }
+   device_vector.resize( 25 );
+   EXPECT_EQ( device_vector.size(), 25 );
+   for( std::size_t i = 0; i < 20; ++i ) {
+      EXPECT_EQ( device_vector[ i ], 123 );
+   }
+   for( std::size_t i = 20; i < 25; ++i ) {
+      EXPECT_EQ( device_vector[ i ], 234 );
+   }
+
+   device_vector.pop_back();
+   EXPECT_EQ( device_vector.size(), 24 );
+   for( std::size_t i = 0; i < 20; ++i ) {
+      EXPECT_EQ( device_vector[ i ], 123 );
+   }
+   for( std::size_t i = 20; i < 24; ++i ) {
+      EXPECT_EQ( device_vector[ i ], 234 );
+   }
+
+   // Copy the modified data back into the "host vector", and check if that
+   // succeeded.
+   m_copy( resizable_buffer, host_vector );
+   EXPECT_EQ( host_vector.size(), 24 );
+   for( std::size_t i = 0; i < 20; ++i ) {
+      EXPECT_EQ( host_vector[ i ], 123 );
+   }
+   for( std::size_t i = 20; i < 24; ++i ) {
+      EXPECT_EQ( host_vector[ i ], 234 );
    }
 }
