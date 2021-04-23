@@ -330,3 +330,71 @@ TEST_F( sycl_jagged_containers_test, set_in_contiguous_kernel ) {
    EXPECT_EQ( output[ 5 ][ 3 ], 31 );
    EXPECT_EQ( output[ 5 ][ 4 ], 33 );
 }
+
+/// Test filling a resizable jagged vector
+TEST_F( sycl_jagged_containers_test, filter ) {
+
+   // Helper object for performing memory copies.
+   vecmem::sycl::copy copy( &m_queue );
+
+   // Create the output data on the device.
+   vecmem::sycl::device_memory_resource device_resource( &m_queue );
+   vecmem::data::jagged_vector_buffer< int >
+       output_data_device( { 0, 0, 0, 0, 0, 0 }, { 10, 10, 10, 10, 10, 10 },
+                           device_resource, &m_mem );
+   copy.setup( output_data_device );
+
+   // Create the view/data objects of the jagged vector outside of the
+   // submission.
+   auto input_data = vecmem::get_data( m_vec );
+
+   // Run the filtering.
+   m_queue.submit( [ &input_data,
+                     &output_data_device ]( cl::sycl::handler& h ) {
+      h.parallel_for< class FilterKernel >(
+         cl::sycl::range< 2 >( input_data.m_size, 5 ),
+         [ input = vecmem::get_data( input_data ),
+           output = vecmem::get_data( output_data_device ) ](
+            cl::sycl::item< 2 > id ) {
+
+            // Skip invalid indices.
+            if( id[ 0 ] >= input.m_size ) {
+               return;
+            }
+            if( id[ 1 ] >= input.m_ptr[ id[ 0 ] ].size() ) {
+               return;
+            }
+
+            // Set up the vector objects.
+            const vecmem::jagged_device_vector< const int > inputvec( input );
+            vecmem::jagged_device_vector< int > outputvec( output );
+
+            // Keep just the odd elements.
+            const int value = inputvec[ id[ 0 ] ][ id[ 1 ] ];
+            if( ( value % 2 ) != 0 ) {
+               outputvec.at( id[ 0 ] ).push_back( value );
+            }
+         } );
+   } );
+
+   // Copy the filtered output back into the host's memory.
+   vecmem::jagged_vector< int > output( &m_mem );
+   copy( output_data_device, output );
+
+   // Check the output. Note that the order of elements in the "inner vectors"
+   // is not fixed. And for the single-element and empty vectors I just decided
+   // to use the same formalism simply for symmetry...
+   EXPECT_EQ( output.size(), 6 );
+   EXPECT_EQ( std::set< int >( output[ 0 ].begin(), output[ 0 ].end() ),
+              std::set< int >( { 1, 3 } ) );
+   EXPECT_EQ( std::set< int >( output[ 1 ].begin(), output[ 1 ].end() ),
+              std::set< int >( { 5 } ) );
+   EXPECT_EQ( std::set< int >( output[ 2 ].begin(), output[ 2 ].end() ),
+              std::set< int >( { 7, 9 } ) );
+   EXPECT_EQ( std::set< int >( output[ 3 ].begin(), output[ 3 ].end() ),
+              std::set< int >( { 11 } ) );
+   EXPECT_EQ( std::set< int >( output[ 4 ].begin(), output[ 4 ].end() ),
+              std::set< int >( {} ) );
+   EXPECT_EQ( std::set< int >( output[ 5 ].begin(), output[ 5 ].end() ),
+              std::set< int >( { 13, 15 } ) );
+}
