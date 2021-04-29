@@ -24,9 +24,6 @@ namespace vecmem { namespace data {
                                      pointer ptr )
    : m_capacity( capacity ), m_size( size ), m_ptr( ptr ) {
 
-      // A sanity check.
-      assert( ( ( m_size != nullptr ) && ( m_capacity >= *m_size ) ) ||
-              ( m_size == nullptr ) );
    }
 
    template< typename TYPE >
