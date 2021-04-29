@@ -79,6 +79,21 @@ namespace vecmem { namespace data {
                             memory_resource& resource,
                             memory_resource* host_access_resource = nullptr );
 
+      /// Constructor from a vector of ("inner vector") sizes and capacities
+      ///
+      /// @param sizes Simple vector holding the sizes of the "inner vectors"
+      ///        for the jagged vector buffer.
+      /// @param capacities Simple vector holding the capacities of the
+      ///        "inner vectors" for the jagged vector buffer.
+      /// @param resource The device accessible memory resource, which may also
+      ///        be host accessible.
+      /// @param host_access_resource An optional host accessible memory
+      ///        resource. Needed if @c resource is not host accessible.
+      jagged_vector_buffer( const std::vector< std::size_t >& sizes,
+                            const std::vector< std::size_t >& capacities,
+                            memory_resource& resource,
+                            memory_resource* host_access_resource = nullptr );
+
       /// Access the host accessible array describing the inner vectors
       ///
       /// This may or may not return the same pointer that
@@ -97,7 +112,7 @@ namespace vecmem { namespace data {
       /// Data object for the @c vecmem::data::vector_view array on the host
       std::unique_ptr< value_type, details::deallocator > m_outer_host_memory;
       /// Data object owning the memory of the "inner vectors"
-      std::unique_ptr< TYPE, details::deallocator > m_inner_memory;
+      std::unique_ptr< char, details::deallocator > m_inner_memory;
 
    }; // class jagged_vector_buffer
 

@@ -132,6 +132,20 @@ namespace vecmem {
                        data::jagged_vector_buffer< TYPE >& to,
                        type::copy_type cptype = type::unknown );
 
+      /// Copy a jagged vector's data into a vector object
+      template< typename TYPE1, typename TYPE2,
+                typename ALLOC1, typename ALLOC2 >
+      void operator()( const data::jagged_vector_view< TYPE1 >& from,
+                       std::vector< std::vector< TYPE2, ALLOC2 >, ALLOC1 >& to,
+                       type::copy_type cptype = type::unknown );
+
+      /// Copy a jagged vector's data into a vector object
+      template< typename TYPE1, typename TYPE2,
+                typename ALLOC1, typename ALLOC2 >
+      void operator()( const data::jagged_vector_buffer< TYPE1 >& from,
+                       std::vector< std::vector< TYPE2, ALLOC2 >, ALLOC1 >& to,
+                       type::copy_type cptype = type::unknown );
+
       /// @}
 
    protected:

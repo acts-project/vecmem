@@ -177,3 +177,43 @@ void filterTransform( vecmem::data::vector_view< const int > input,
    VECMEM_HIP_ERROR_CHECK( hipGetLastError() );
    VECMEM_HIP_ERROR_CHECK( hipDeviceSynchronize() );
 }
+
+/// Kernel filtering the input vector elements into the output vector
+__global__
+void filterTransformKernel( vecmem::data::jagged_vector_view< const int > input,
+                            vecmem::data::jagged_vector_view< int > output ) {
+
+   // Find the current indices.
+   const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+   if( i >= input.m_size ) {
+      return;
+   }
+   const std::size_t j = hipBlockIdx_y * hipBlockDim_y + hipThreadIdx_y;
+   if( j >= input.m_ptr[ i ].size() ) {
+      return;
+   }
+
+   // Set up the vector objects.
+   const vecmem::jagged_device_vector< const int > inputvec( input );
+   vecmem::jagged_device_vector< int > outputvec( output );
+
+   // Keep just the odd elements.
+   const int value = inputvec[ i ][ j ];
+   if( ( value % 2 ) != 0 ) {
+      outputvec.at( i ).push_back( value );
+   }
+   return;
+}
+
+void filterTransform( vecmem::data::jagged_vector_view< const int > input,
+                      std::size_t max_vec_size,
+                      vecmem::data::jagged_vector_view< int > output ) {
+
+   // Launch the kernel.
+   hipLaunchKernelGGL( filterTransformKernel, 1,
+                       dim3( input.m_size, max_vec_size ), 0, nullptr,
+                       input, output );
+   // Check whether it succeeded to run.
+   VECMEM_HIP_ERROR_CHECK( hipGetLastError() );
+   VECMEM_HIP_ERROR_CHECK( hipDeviceSynchronize() );
+}

@@ -8,6 +8,7 @@
 #pragma once
 
 // VecMem include(s).
+#include "vecmem/containers/jagged_vector.hpp"
 #include "vecmem/utils/debug.hpp"
 #include "vecmem/utils/type_traits.hpp"
 
@@ -98,7 +99,18 @@ namespace vecmem {
    void copy::setup( data::jagged_vector_buffer< TYPE >& data ) {
 
       // Check if anything needs to be done.
-      if( ( data.m_ptr == data.host_ptr() ) || ( data.m_size == 0 ) ) {
+      if( data.m_size == 0 ) {
+         return;
+      }
+
+      // "Set up" the inner vector descriptors, using the host-accessible data.
+      for( typename data::jagged_vector_buffer< TYPE >::size_type i = 0;
+           i < data.m_size; ++i ) {
+         setup( data.host_ptr()[ i ] );
+      }
+
+      // Check if anything else needs to be done.
+      if( data.m_ptr == data.host_ptr() ) {
          return;
       }
 
@@ -199,6 +211,58 @@ namespace vecmem {
 
       // Copy the payload of the inner vectors.
       copy_views( from.m_size, from.host_ptr(), to.host_ptr(), cptype );
+   }
+
+   template< typename TYPE1, typename TYPE2,
+             typename ALLOC1, typename ALLOC2 >
+   void
+   copy::operator()( const data::jagged_vector_view< TYPE1 >& from,
+                     std::vector< std::vector< TYPE2, ALLOC2 >, ALLOC1 >& to,
+                     type::copy_type cptype ) {
+
+      // The input and output types are allowed to be different, but only by
+      // const-ness.
+      static_assert( std::is_same< TYPE1, TYPE2 >::value ||
+                     details::is_same_nc< TYPE1, TYPE2 >::value ||
+                     details::is_same_nc< TYPE2, TYPE1 >::value,
+                     "Can only use compatible types in the copy" );
+
+      // Resize the output object to the correct size.
+      to.resize( from.m_size );
+      for( typename data::jagged_vector_view< TYPE1 >::size_type i = 0;
+           i < from.m_size; ++i ) {
+         to[ i ].resize( get_size( from.m_ptr[ i ] ) );
+      }
+
+      // Perform the memory copy.
+      auto helper = vecmem::get_data( to );
+      this->operator()( from, helper, cptype );
+   }
+
+   template< typename TYPE1, typename TYPE2,
+             typename ALLOC1, typename ALLOC2 >
+   void
+   copy::operator()( const data::jagged_vector_buffer< TYPE1 >& from,
+                     std::vector< std::vector< TYPE2, ALLOC2 >, ALLOC1 >& to,
+                     type::copy_type cptype ) {
+
+      // The input and output types are allowed to be different, but only by
+      // const-ness.
+      static_assert( std::is_same< TYPE1, TYPE2 >::value ||
+                     details::is_same_nc< TYPE1, TYPE2 >::value ||
+                     details::is_same_nc< TYPE2, TYPE1 >::value,
+                     "Can only use compatible types in the copy" );
+
+      // Resize the output object to the correct size.
+      to.resize( from.m_size );
+      for( typename data::jagged_vector_view< TYPE1 >::size_type i = 0;
+           i < from.m_size; ++i ) {
+         to[ i ].resize( get_size( from.host_ptr()[ i ] ) );
+      }
+
+      // Perform the memory copy.
+      auto helper = vecmem::get_data( to );
+      this->operator()( from, helper, cptype );
    }
 
    template< typename TYPE >

@@ -7,6 +7,7 @@
  */
 
 #include "test_cuda_jagged_vector_view_kernels.cuh"
+#include "test_cuda_containers_kernels.cuh"
 
 #include "vecmem/memory/contiguous_memory_resource.hpp"
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
@@ -165,4 +166,42 @@ TEST_F( cuda_jagged_vector_view_test, set_in_contiguous_kernel ) {
     EXPECT_EQ( output[ 5 ][ 2 ], 29 );
     EXPECT_EQ( output[ 5 ][ 3 ], 31 );
     EXPECT_EQ( output[ 5 ][ 4 ], 33 );
+}
+
+/// Test filling a resizable jagged vector
+TEST_F( cuda_jagged_vector_view_test, filter ) {
+
+   // Helper object for performing memory copies.
+   vecmem::cuda::copy copy;
+
+   // Create the output data on the device.
+   vecmem::cuda::device_memory_resource device_resource;
+   vecmem::data::jagged_vector_buffer< int >
+       output_data_device( { 0, 0, 0, 0, 0, 0 }, { 10, 10, 10, 10, 10, 10 },
+                           device_resource, &m_mem );
+   copy.setup( output_data_device );
+
+   // Run the filtering.
+   filterTransform( vecmem::get_data( m_vec ), 5, output_data_device );
+
+   // Copy the filtered output back into the host's memory.
+   vecmem::jagged_vector< int > output( &m_mem );
+   copy( output_data_device, output );
+
+   // Check the output. Note that the order of elements in the "inner vectors"
+   // is not fixed. And for the single-element and empty vectors I just decided
+   // to use the same formalism simply for symmetry...
+   EXPECT_EQ( output.size(), 6 );
+   EXPECT_EQ( std::set< int >( output[ 0 ].begin(), output[ 0 ].end() ),
+              std::set< int >( { 1, 3 } ) );
+   EXPECT_EQ( std::set< int >( output[ 1 ].begin(), output[ 1 ].end() ),
+              std::set< int >( { 5 } ) );
+   EXPECT_EQ( std::set< int >( output[ 2 ].begin(), output[ 2 ].end() ),
+              std::set< int >( { 7, 9 } ) );
+   EXPECT_EQ( std::set< int >( output[ 3 ].begin(), output[ 3 ].end() ),
+              std::set< int >( { 11 } ) );
+   EXPECT_EQ( std::set< int >( output[ 4 ].begin(), output[ 4 ].end() ),
+              std::set< int >( {} ) );
+   EXPECT_EQ( std::set< int >( output[ 5 ].begin(), output[ 5 ].end() ),
+              std::set< int >( { 13, 15 } ) );
 }
