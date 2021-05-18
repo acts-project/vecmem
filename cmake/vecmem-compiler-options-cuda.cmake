@@ -7,6 +7,9 @@
 # Include the helper function(s).
 include( vecmem-functions )
 
+# Figure out the properties of CUDA being used.
+find_package( CUDAToolkit REQUIRED )
+
 # Set up the used C++ standard(s).
 set( CMAKE_CUDA_STANDARD 14 CACHE STRING "The (CUDA) C++ standard to use" )
 
@@ -19,4 +22,6 @@ set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
 vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-G" )
 
 # More rigorous tests for the Debug builds.
-vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-Werror all-warnings" )
+if( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "10.2" )
+   vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-Werror all-warnings" )
+endif()
