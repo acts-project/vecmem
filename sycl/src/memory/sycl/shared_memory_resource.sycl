@@ -6,30 +6,33 @@
  */
 
 // Local include(s).
+#include "../../utils/sycl/get_queue.hpp"
 #include "vecmem/memory/sycl/shared_memory_resource.hpp"
 #include "vecmem/utils/debug.hpp"
-#include "../../utils/sycl/get_queue.hpp"
 
 // SYCL include(s).
 #include <CL/sycl.hpp>
 
 namespace vecmem::sycl {
 
-   void* shared_memory_resource::do_allocate( std::size_t nbytes,
-                                              std::size_t ) {
+void* shared_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 
-      // Allocate the memory.
-      void* result = cl::sycl::malloc_shared( nbytes,
-                                              details::get_queue( m_queue ) );
+    // Allocate the memory.
+    void* result = cl::sycl::malloc_shared(nbytes, details::get_queue(m_queue));
 
-      // Let the user know what's happening.
-      VECMEM_DEBUG_MSG( 5, "Allocated %ld bytes of shared memory on \"%s\" "
-                        "at %p", nbytes,
-                        details::get_queue( m_queue ).get_device().get_info<
-                           cl::sycl::info::device::name >().c_str(), result );
+    // Let the user know what's happening.
+    VECMEM_DEBUG_MSG(5,
+                     "Allocated %ld bytes of shared memory on \"%s\" "
+                     "at %p",
+                     nbytes,
+                     details::get_queue(m_queue)
+                         .get_device()
+                         .get_info<cl::sycl::info::device::name>()
+                         .c_str(),
+                     result);
 
-      // Return the allocated block's pointer.
-      return result;
-   }
+    // Return the allocated block's pointer.
+    return result;
+}
 
-} // namespace vecmem::sycl
+}  // namespace vecmem::sycl

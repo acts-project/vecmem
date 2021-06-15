@@ -12,16 +12,16 @@
 
 namespace vecmem::cuda {
 
-   /// Specialisation of @c vecmem::copy for CUDA
-   class copy : public vecmem::copy {
+/// Specialisation of @c vecmem::copy for CUDA
+class copy : public vecmem::copy {
 
-   protected:
-      /// Perform a memory copy using CUDA
-      virtual void do_copy( std::size_t size, const void* from, void* to,
-                            type::copy_type cptype ) override;
-      /// Fill a memory area using CUDA
-      virtual void do_memset( std::size_t size, void* ptr, int value ) override;
+    protected:
+    /// Perform a memory copy using CUDA
+    virtual void do_copy(std::size_t size, const void* from, void* to,
+                         type::copy_type cptype) override;
+    /// Fill a memory area using CUDA
+    virtual void do_memset(std::size_t size, void* ptr, int value) override;
 
-   }; // class copy
+};  // class copy
 
-} // namespace vecmem::cuda
+}  // namespace vecmem::cuda

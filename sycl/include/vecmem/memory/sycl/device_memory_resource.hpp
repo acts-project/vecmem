@@ -11,18 +11,17 @@
 
 namespace vecmem::sycl {
 
-   /// Memory resource for a specific SYCL device
-   class device_memory_resource final : public details::memory_resource_base {
+/// Memory resource for a specific SYCL device
+class device_memory_resource final : public details::memory_resource_base {
 
-   public:
-      // Inherit the base class's constructor(s).
-      using details::memory_resource_base::memory_resource_base;
+    public:
+    // Inherit the base class's constructor(s).
+    using details::memory_resource_base::memory_resource_base;
 
-   private:
-      /// Function performing the memory allocation
-      void* do_allocate( std::size_t nbytes,
-                         std::size_t alignment ) override final;
+    private:
+    /// Function performing the memory allocation
+    void* do_allocate(std::size_t nbytes, std::size_t alignment) override final;
 
-   }; // device_memory_resource
+};  // device_memory_resource
 
-} // namespace vecmem::sycl
+}  // namespace vecmem::sycl

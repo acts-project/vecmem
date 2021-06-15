@@ -15,19 +15,19 @@
 #include <cstddef>
 
 /// Perform a linear transformation using the received vectors
-void linearTransform( vecmem::data::vector_view< const int > constants,
-                      vecmem::data::vector_view< const int > input,
-                      vecmem::data::vector_view< int > output );
+void linearTransform(vecmem::data::vector_view<const int> constants,
+                     vecmem::data::vector_view<const int> input,
+                     vecmem::data::vector_view<int> output);
 
 /// Function incrementing the elements of the received vector using atomics
-void atomicTransform( std::size_t iterations,
-                      vecmem::data::vector_view< int > vec );
+void atomicTransform(std::size_t iterations,
+                     vecmem::data::vector_view<int> vec);
 
 /// Function filtering elements of an input vector into an output vector
-void filterTransform( vecmem::data::vector_view< const int > input,
-                      vecmem::data::vector_view< int > output );
+void filterTransform(vecmem::data::vector_view<const int> input,
+                     vecmem::data::vector_view<int> output);
 
 /// Function filtering elements of an input vector into an output vector
-void filterTransform( vecmem::data::jagged_vector_view< const int > input,
-                      std::size_t max_vec_size,
-                      vecmem::data::jagged_vector_view< int > output );
+void filterTransform(vecmem::data::jagged_vector_view<const int> input,
+                     std::size_t max_vec_size,
+                     vecmem::data::jagged_vector_view<int> output);

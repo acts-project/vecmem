@@ -18,15 +18,15 @@
 #include <memory_resource>
 
 namespace vecmem {
-    template<typename T>
-    using polymorphic_allocator = std::pmr::polymorphic_allocator<T>;
+template <typename T>
+using polymorphic_allocator = std::pmr::polymorphic_allocator<T>;
 }
 #elif __has_include(<experimental/memory_resource>)
 #include <experimental/memory_resource>
 
 namespace vecmem {
-    template<typename T>
-    using polymorphic_allocator = std::experimental::pmr::polymorphic_allocator<T>;
+template <typename T>
+using polymorphic_allocator = std::experimental::pmr::polymorphic_allocator<T>;
 }
 #else
 #error "vecmem requires C++17 LFTS V1 (P0220R1) component memory_resource!"

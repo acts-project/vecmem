@@ -18,31 +18,31 @@
 
 namespace vecmem::testing {
 
-   /// Custom functor for printing user readable names for memory resources
-   ///
-   /// In parametrised GoogleTests, where the parameter is a pointer to a
-   /// memory resource, this functor can come in handy for printing nice names
-   /// for the tests to the screen.
-   ///
-   class memory_resource_name_gen {
+/// Custom functor for printing user readable names for memory resources
+///
+/// In parametrised GoogleTests, where the parameter is a pointer to a
+/// memory resource, this functor can come in handy for printing nice names
+/// for the tests to the screen.
+///
+class memory_resource_name_gen {
 
-   public:
-      /// Storage type for the memory resource names
-      typedef std::map< memory_resource*, std::string > storage_type;
+    public:
+    /// Storage type for the memory resource names
+    typedef std::map<memory_resource*, std::string> storage_type;
 
-      /// Constructor with the known memory resource instances, and their names
-      memory_resource_name_gen( const storage_type& names );
+    /// Constructor with the known memory resource instances, and their names
+    memory_resource_name_gen(const storage_type& names);
 
-      /// Operator returning a user readable name for a memory resource pointer
-      std::string
-      operator()( const ::testing::TestParamInfo< memory_resource* >& info );
+    /// Operator returning a user readable name for a memory resource pointer
+    std::string operator()(
+        const ::testing::TestParamInfo<memory_resource*>& info);
 
-   private:
-      /// Internal map keeping track of the user readable names of the resources
-      storage_type m_names;
-      /// Unknown name counter
-      int m_unknown_count;
+    private:
+    /// Internal map keeping track of the user readable names of the resources
+    storage_type m_names;
+    /// Unknown name counter
+    int m_unknown_count;
 
-   }; // class memory_resource_name_gen
+};  // class memory_resource_name_gen
 
-} // namespace vecmem::testing
+}  // namespace vecmem::testing

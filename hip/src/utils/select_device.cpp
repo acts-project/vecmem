@@ -8,6 +8,7 @@
 
 // Local include(s).
 #include "select_device.hpp"
+
 #include "get_device.hpp"
 #include "hip_error_handling.hpp"
 
@@ -16,15 +17,14 @@
 
 namespace vecmem::hip::details {
 
-   select_device::select_device( int device )
-   : m_device( get_device() ) {
+select_device::select_device(int device) : m_device(get_device()) {
 
-      VECMEM_HIP_ERROR_CHECK( hipSetDevice( device ) );
-   }
+    VECMEM_HIP_ERROR_CHECK(hipSetDevice(device));
+}
 
-   select_device::~select_device() {
+select_device::~select_device() {
 
-      VECMEM_HIP_ERROR_CHECK( hipSetDevice( m_device ) );
-   }
+    VECMEM_HIP_ERROR_CHECK(hipSetDevice(m_device));
+}
 
-} // namespace vecmem::hip::details
+}  // namespace vecmem::hip::details

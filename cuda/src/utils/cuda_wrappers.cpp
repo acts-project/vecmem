@@ -6,16 +6,16 @@
  * Mozilla Public License Version 2.0
  */
 
-#include "cuda_error_handling.hpp"
-
 #include <cuda_runtime_api.h>
 
+#include "cuda_error_handling.hpp"
+
 namespace vecmem::cuda::details {
-    int get_device() {
-        int d;
+int get_device() {
+    int d;
 
-        VECMEM_CUDA_ERROR_CHECK(cudaGetDevice(&d));
+    VECMEM_CUDA_ERROR_CHECK(cudaGetDevice(&d));
 
-        return d;
-    }
+    return d;
 }
+}  // namespace vecmem::cuda::details

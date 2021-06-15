@@ -13,18 +13,22 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace vecmem { namespace hip { namespace details {
+namespace vecmem {
+namespace hip {
+namespace details {
 
-   void throw_error( hipError_t errorCode, const char* expression,
-                     const char* file, int line ) {
+void throw_error(hipError_t errorCode, const char* expression, const char* file,
+                 int line) {
 
-      // Create a nice error message.
-      std::ostringstream errorMsg;
-      errorMsg << file << ":" << line << " Failed to execute: " << expression
-               << " (" << hipGetErrorString( errorCode ) << ")";
+    // Create a nice error message.
+    std::ostringstream errorMsg;
+    errorMsg << file << ":" << line << " Failed to execute: " << expression
+             << " (" << hipGetErrorString(errorCode) << ")";
 
-      // Now throw a runtime error with this message.
-      throw std::runtime_error( errorMsg.str() );
-   }
+    // Now throw a runtime error with this message.
+    throw std::runtime_error(errorMsg.str());
+}
 
-} } } // namespace vecmem::hip::details
+}  // namespace details
+}  // namespace hip
+}  // namespace vecmem

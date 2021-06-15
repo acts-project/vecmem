@@ -8,34 +8,25 @@
 
 #pragma once
 
+#include <cstddef>
+#include <memory>
+
 #include "vecmem/memory/memory_resource.hpp"
 
-#include <memory>
-#include <cstddef>
-
 namespace vecmem {
-    /**
-     * @brief Memory resource which wraps the malloc standard library call.
-     *
-     * This is probably the simplest memory resource you can possibly write. It
-     * is a terminal resource which does nothing but wrap malloc and free. It
-     * is state-free (on the relevant levels of abstraction).
-     */
-    class host_memory_resource : public vecmem::memory_resource {
+/**
+ * @brief Memory resource which wraps the malloc standard library call.
+ *
+ * This is probably the simplest memory resource you can possibly write. It
+ * is a terminal resource which does nothing but wrap malloc and free. It
+ * is state-free (on the relevant levels of abstraction).
+ */
+class host_memory_resource : public vecmem::memory_resource {
     private:
-        virtual void * do_allocate(
-            std::size_t,
-            std::size_t
-        ) override;
+    virtual void* do_allocate(std::size_t, std::size_t) override;
 
-        virtual void do_deallocate(
-            void * p,
-            std::size_t,
-            std::size_t
-        ) override;
+    virtual void do_deallocate(void* p, std::size_t, std::size_t) override;
 
-        virtual bool do_is_equal(
-            const memory_resource &
-        ) const noexcept override;
-    };
-}
+    virtual bool do_is_equal(const memory_resource&) const noexcept override;
+};
+}  // namespace vecmem

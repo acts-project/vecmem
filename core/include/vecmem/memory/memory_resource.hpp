@@ -18,13 +18,13 @@
 #include <memory_resource>
 
 namespace vecmem {
-    using memory_resource = std::pmr::memory_resource;
+using memory_resource = std::pmr::memory_resource;
 }
 #elif __has_include(<experimental/memory_resource>)
 #include <experimental/memory_resource>
 
 namespace vecmem {
-    using memory_resource = std::experimental::pmr::memory_resource;
+using memory_resource = std::experimental::pmr::memory_resource;
 }
 #else
 #error "vecmem requires C++17 LFTS V1 (P0220R1) component memory_resource!"

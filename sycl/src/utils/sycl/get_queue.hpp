@@ -14,13 +14,12 @@
 
 namespace vecmem::sycl::details {
 
-   /// Helper function for getting a @c cl::sycl::queue out of
-   /// @c vecmem::sycl::queue_wrapper (non-const)
-   cl::sycl::queue& get_queue( vecmem::sycl::queue_wrapper& queue );
+/// Helper function for getting a @c cl::sycl::queue out of
+/// @c vecmem::sycl::queue_wrapper (non-const)
+cl::sycl::queue& get_queue(vecmem::sycl::queue_wrapper& queue);
 
-   /// Helper function for getting a @c cl::sycl::queue out of
-   /// @c vecmem::sycl::queue_wrapper (const)
-   const cl::sycl::queue&
-   get_queue( const vecmem::sycl::queue_wrapper& queue );
+/// Helper function for getting a @c cl::sycl::queue out of
+/// @c vecmem::sycl::queue_wrapper (const)
+const cl::sycl::queue& get_queue(const vecmem::sycl::queue_wrapper& queue);
 
-} // namespace vecmem::sycl::details
+}  // namespace vecmem::sycl::details

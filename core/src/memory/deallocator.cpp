@@ -10,16 +10,14 @@
 
 namespace vecmem::details {
 
-   deallocator::deallocator( std::size_t bytes, memory_resource& resource )
-   : m_bytes( bytes ), m_resource( &resource ) {
+deallocator::deallocator(std::size_t bytes, memory_resource& resource)
+    : m_bytes(bytes), m_resource(&resource) {}
 
-   }
+void deallocator::operator()(void* ptr) {
 
-   void deallocator::operator()( void* ptr ) {
+    if (ptr != nullptr) {
+        m_resource->deallocate(ptr, m_bytes);
+    }
+}
 
-      if( ptr != nullptr ) {
-         m_resource->deallocate( ptr, m_bytes );
-      }
-   }
-
-} // namespace vecmem::details
+}  // namespace vecmem::details
