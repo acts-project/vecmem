@@ -267,7 +267,8 @@ void copy::copy_views(std::size_t size, const data::vector_view<TYPE>* from,
     // Helper variables used in the copy.
     const TYPE* from_ptr = nullptr;
     TYPE* to_ptr = nullptr;
-    std::size_t copy_size = 0, copy_ops = 0;
+    std::size_t copy_size = 0;
+    [[maybe_unused]] std::size_t copy_ops = 0;
 
     // Helper lambda for figuring out if the next vector element is
     // connected to the currently processed one or not.
