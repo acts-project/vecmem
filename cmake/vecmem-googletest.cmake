@@ -24,8 +24,8 @@ message( STATUS "Building GoogleTest as part of the project" )
 
 # Declare where to get GoogleTest from.
 FetchContent_Declare( GoogleTest
-   URL "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
-   URL_MD5 "ecd1fa65e7de707cd5c00bdac56022cd" )
+   URL "https://github.com/google/googletest/archive/release-1.11.0.tar.gz"
+   URL_MD5 "e8a8df240b6938bb6384155d4c37d937" )
 
 # Options used in the build of GoogleTest.
 set( BUILD_GMOCK FALSE CACHE BOOL "Turn off the build of GMock" )
