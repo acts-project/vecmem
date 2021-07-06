@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "get_device.hpp"
+
 #include "hip_error_handling.hpp"
 
 // HIP include(s).
@@ -14,11 +15,11 @@
 
 namespace vecmem::hip::details {
 
-   int get_device() {
+int get_device() {
 
-      int result = 0;
-      VECMEM_HIP_ERROR_CHECK( hipGetDevice( &result ) );
-      return result;
-   }
+    int result = 0;
+    VECMEM_HIP_ERROR_CHECK(hipGetDevice(&result));
+    return result;
+}
 
-} // namespace vecmem::hip::details
+}  // namespace vecmem::hip::details

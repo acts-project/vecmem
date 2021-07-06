@@ -8,7 +8,7 @@
 
 namespace vecmem::hip::details {
 
-   /// Helper function for determining the "currently active device"
-   int get_device();
+/// Helper function for determining the "currently active device"
+int get_device();
 
-} // namespace vecmem::hip::details
+}  // namespace vecmem::hip::details

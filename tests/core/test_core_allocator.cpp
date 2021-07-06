@@ -6,14 +6,14 @@
  * Mozilla Public License Version 2.0
  */
 
-#include "vecmem/memory/allocator.hpp"
-#include "vecmem/memory/host_memory_resource.hpp"
-
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <type_traits>
 #include <vector>
+
+#include "vecmem/memory/allocator.hpp"
+#include "vecmem/memory/host_memory_resource.hpp"
 
 class test_class {
     public:
@@ -31,15 +31,13 @@ class test_class {
 class core_allocator_test : public testing::Test {
     protected:
     vecmem::host_memory_resource m_upstream;
-    vecmem::allocator * m_alloc;
+    vecmem::allocator* m_alloc;
 
-    void SetUp() override {
-        m_alloc = new vecmem::allocator(m_upstream);
-    }
+    void SetUp() override { m_alloc = new vecmem::allocator(m_upstream); }
 };
 
 TEST_F(core_allocator_test, basic) {
-    void * p = m_alloc->allocate_bytes(1024);
+    void* p = m_alloc->allocate_bytes(1024);
 
     EXPECT_TRUE(p != nullptr);
 
@@ -47,7 +45,7 @@ TEST_F(core_allocator_test, basic) {
 }
 
 TEST_F(core_allocator_test, primitive) {
-    int * p = m_alloc->allocate_object<int>();
+    int* p = m_alloc->allocate_object<int>();
 
     ASSERT_TRUE(p != nullptr);
 
@@ -59,7 +57,7 @@ TEST_F(core_allocator_test, primitive) {
 }
 
 TEST_F(core_allocator_test, array) {
-    int * p = m_alloc->allocate_object<int>(10);
+    int* p = m_alloc->allocate_object<int>(10);
 
     ASSERT_TRUE(p != nullptr);
 
@@ -75,10 +73,10 @@ TEST_F(core_allocator_test, array) {
 }
 
 TEST_F(core_allocator_test, constructor) {
-    test_class * p1 = m_alloc->new_object<test_class>();
-    test_class * p2 = m_alloc->new_object<test_class>(12);
-    test_class * p3 = m_alloc->new_object<test_class>(21, 611);
-    test_class * p4 = m_alloc->new_object<test_class>(21, 15);
+    test_class* p1 = m_alloc->new_object<test_class>();
+    test_class* p2 = m_alloc->new_object<test_class>(12);
+    test_class* p3 = m_alloc->new_object<test_class>(21, 611);
+    test_class* p4 = m_alloc->new_object<test_class>(21, 15);
 
     ASSERT_TRUE(p1 != nullptr);
     ASSERT_TRUE(p2 != nullptr);

@@ -8,8 +8,9 @@
 
 // VecMem include(s).
 #include "vecmem/utils/hip/copy.hpp"
-#include "vecmem/utils/debug.hpp"
+
 #include "../hip_error_handling.hpp"
+#include "vecmem/utils/debug.hpp"
 
 // HIP include(s).
 #include <hip/hip_runtime_api.h>
@@ -20,68 +21,59 @@
 
 namespace vecmem::hip {
 
-   /// Helper array for translating between the vecmem and HIP copy type
-   /// definitions
-   static constexpr hipMemcpyKind copy_type_translator[ copy::type::count ] = {
-      hipMemcpyHostToDevice,
-      hipMemcpyDeviceToHost,
-      hipMemcpyHostToHost,
-      hipMemcpyDeviceToDevice,
-      hipMemcpyDefault
-   };
+/// Helper array for translating between the vecmem and HIP copy type
+/// definitions
+static constexpr hipMemcpyKind copy_type_translator[copy::type::count] = {
+    hipMemcpyHostToDevice, hipMemcpyDeviceToHost, hipMemcpyHostToHost,
+    hipMemcpyDeviceToDevice, hipMemcpyDefault};
 
-   /// Helper array for providing a printable name for the copy type definitions
-   static const std::string copy_type_printer[ copy::type::count ] = {
-      "host to device",
-      "device to host",
-      "host to host",
-      "device to device",
-      "unknown"
-   };
+/// Helper array for providing a printable name for the copy type definitions
+static const std::string copy_type_printer[copy::type::count] = {
+    "host to device", "device to host", "host to host", "device to device",
+    "unknown"};
 
-   void copy::do_copy( std::size_t size, const void* from, void* to,
-                       type::copy_type cptype ) {
+void copy::do_copy(std::size_t size, const void* from, void* to,
+                   type::copy_type cptype) {
 
-      // Check if anything needs to be done.
-      if( size == 0 ) {
-         VECMEM_DEBUG_MSG( 5, "Skipping unnecessary memory copy" );
-         return;
-      }
+    // Check if anything needs to be done.
+    if (size == 0) {
+        VECMEM_DEBUG_MSG(5, "Skipping unnecessary memory copy");
+        return;
+    }
 
-      // Some sanity checks.
-      assert( from != nullptr );
-      assert( to != nullptr );
-      assert( static_cast< int >( cptype ) >= 0 );
-      assert( static_cast< int >( cptype ) <
-              static_cast< int >( copy::type::count ) );
+    // Some sanity checks.
+    assert(from != nullptr);
+    assert(to != nullptr);
+    assert(static_cast<int>(cptype) >= 0);
+    assert(static_cast<int>(cptype) < static_cast<int>(copy::type::count));
 
-      // Perform the copy.
-      VECMEM_HIP_ERROR_CHECK( hipMemcpy( to, from, size,
-                                         copy_type_translator[ cptype ] ) );
+    // Perform the copy.
+    VECMEM_HIP_ERROR_CHECK(
+        hipMemcpy(to, from, size, copy_type_translator[cptype]));
 
-      // Let the user know what happened.
-      VECMEM_DEBUG_MSG( 4, "Performed %s memory copy of %lu bytes from %p to "
-                        "%p", copy_type_printer[ cptype ].c_str(), size, from,
-                        to );
-   }
+    // Let the user know what happened.
+    VECMEM_DEBUG_MSG(4,
+                     "Performed %s memory copy of %lu bytes from %p to "
+                     "%p",
+                     copy_type_printer[cptype].c_str(), size, from, to);
+}
 
-   void copy::do_memset( std::size_t size, void* ptr, int value ) {
+void copy::do_memset(std::size_t size, void* ptr, int value) {
 
-      // Check if anything needs to be done.
-      if( size == 0 ) {
-         VECMEM_DEBUG_MSG( 5, "Skipping unnecessary memory filling" );
-         return;
-      }
+    // Check if anything needs to be done.
+    if (size == 0) {
+        VECMEM_DEBUG_MSG(5, "Skipping unnecessary memory filling");
+        return;
+    }
 
-      // Some sanity checks.
-      assert( ptr != nullptr );
+    // Some sanity checks.
+    assert(ptr != nullptr);
 
-      // Perform the operation.
-      VECMEM_HIP_ERROR_CHECK( hipMemset( ptr, value, size ) );
+    // Perform the operation.
+    VECMEM_HIP_ERROR_CHECK(hipMemset(ptr, value, size));
 
-      // Let the user know what happened.
-      VECMEM_DEBUG_MSG( 4, "Set %lu bytes to %i at %p with HIP", size, value,
-                        ptr );
-   }
+    // Let the user know what happened.
+    VECMEM_DEBUG_MSG(4, "Set %lu bytes to %i at %p with HIP", size, value, ptr);
+}
 
-} // namespace vecmem::hip
+}  // namespace vecmem::hip

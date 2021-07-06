@@ -11,8 +11,8 @@
 
 namespace vecmem {
 
-   /// Class mimicking a host-filled constant @c std::array in "device code"
-   template< typename T, std::size_t N >
-   using const_device_array = device_array< const T, N >;
+/// Class mimicking a host-filled constant @c std::array in "device code"
+template <typename T, std::size_t N>
+using const_device_array = device_array<const T, N>;
 
-} // namespace vecmem
+}  // namespace vecmem

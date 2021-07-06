@@ -13,17 +13,16 @@
 
 namespace vecmem::sycl::details {
 
-   cl::sycl::queue& get_queue( vecmem::sycl::queue_wrapper& queue ) {
+cl::sycl::queue& get_queue(vecmem::sycl::queue_wrapper& queue) {
 
-      assert( queue.queue() != nullptr );
-      return *( reinterpret_cast< cl::sycl::queue* >( queue.queue() ) );
-   }
+    assert(queue.queue() != nullptr);
+    return *(reinterpret_cast<cl::sycl::queue*>(queue.queue()));
+}
 
-   const cl::sycl::queue&
-   get_queue( const vecmem::sycl::queue_wrapper& queue ) {
+const cl::sycl::queue& get_queue(const vecmem::sycl::queue_wrapper& queue) {
 
-      assert( queue.queue() != nullptr );
-      return *( reinterpret_cast< const cl::sycl::queue* >( queue.queue() ) );
-   }
+    assert(queue.queue() != nullptr);
+    return *(reinterpret_cast<const cl::sycl::queue*>(queue.queue()));
+}
 
-} // namespace vecmem::sycl::details
+}  // namespace vecmem::sycl::details

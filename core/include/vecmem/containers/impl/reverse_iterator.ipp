@@ -9,191 +9,167 @@
 // Local include(s).
 #include "vecmem/utils/types.hpp"
 
-namespace vecmem { namespace details {
+namespace vecmem {
+namespace details {
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >::reverse_iterator()
-   : m_current() {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>::reverse_iterator()
+    : m_current() {}
 
-   }
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>::reverse_iterator(
+    iterator_type itr)
+    : m_current(itr) {}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >::reverse_iterator( iterator_type itr )
-   : m_current( itr ) {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>::reverse_iterator(
+    const reverse_iterator& parent)
+    : m_current(parent.m_current) {}
 
-   }
+template <typename Iterator>
+template <typename T>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>::reverse_iterator(
+    const reverse_iterator<T>& parent)
+    : m_current(parent.base()) {}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >::
-   reverse_iterator( const reverse_iterator& parent )
-   : m_current( parent.m_current ) {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>&
+reverse_iterator<Iterator>::operator=(const reverse_iterator& rhs) {
 
-   }
+    // Avoid a self-assignment.
+    if (this == &rhs) {
+        return *this;
+    }
 
-   template< typename Iterator >
-   template< typename T >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >::
-   reverse_iterator( const reverse_iterator< T >& parent )
-   : m_current( parent.base() ) {
+    // Copy the forward iterator from the other object.
+    m_current = rhs.m_current;
 
-   }
+    // Return this object.
+    return *this;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >&
-   reverse_iterator< Iterator >::operator=( const reverse_iterator& rhs ) {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE typename reverse_iterator<Iterator>::iterator_type
+reverse_iterator<Iterator>::base() const {
 
-      // Avoid a self-assignment.
-      if( this == &rhs ) {
-         return *this;
-      }
+    return m_current;
+}
 
-      // Copy the forward iterator from the other object.
-      m_current = rhs.m_current;
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE typename reverse_iterator<Iterator>::reference
+reverse_iterator<Iterator>::operator*() const {
 
-      // Return this object.
-      return *this;
-   }
+    iterator_type tmp = m_current;
+    return *(--tmp);
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   typename reverse_iterator< Iterator >::iterator_type
-   reverse_iterator< Iterator >::base() const {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE typename reverse_iterator<Iterator>::pointer
+reverse_iterator<Iterator>::operator->() const {
 
-      return m_current;
-   }
+    iterator_type tmp = m_current;
+    return to_pointer(--tmp);
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   typename reverse_iterator< Iterator >::reference
-   reverse_iterator< Iterator >::operator*() const {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE typename reverse_iterator<Iterator>::reference
+reverse_iterator<Iterator>::operator[](difference_type n) const {
 
-      iterator_type tmp = m_current;
-      return *( --tmp );
-   }
+    return *(*this + n);
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   typename reverse_iterator< Iterator >::pointer
-   reverse_iterator< Iterator >::operator->() const {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>&
+reverse_iterator<Iterator>::operator++() {
 
-      iterator_type tmp = m_current;
-      return to_pointer( --tmp );
-   }
+    --m_current;
+    return *this;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   typename reverse_iterator< Iterator >::reference
-   reverse_iterator< Iterator >::operator[]( difference_type n ) const {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>
+reverse_iterator<Iterator>::operator++(int) {
 
-      return *( *this + n );
-   }
+    reverse_iterator tmp = *this;
+    --m_current;
+    return tmp;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >& reverse_iterator< Iterator >::operator++() {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>&
+reverse_iterator<Iterator>::operator--() {
 
-      --m_current;
-      return *this;
-   }
+    ++m_current;
+    return *this;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >
-   reverse_iterator< Iterator >::operator++( int ) {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>
+reverse_iterator<Iterator>::operator--(int) {
 
-      reverse_iterator tmp = *this;
-      --m_current;
-      return tmp;
-   }
+    reverse_iterator tmp = *this;
+    ++m_current;
+    return tmp;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >& reverse_iterator< Iterator >::operator--() {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>
+reverse_iterator<Iterator>::operator+(difference_type n) const {
 
-      ++m_current;
-      return *this;
-   }
+    return reverse_iterator(m_current - n);
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >
-   reverse_iterator< Iterator >::operator--( int ) {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>&
+reverse_iterator<Iterator>::operator+=(difference_type n) {
 
-      reverse_iterator tmp = *this;
-      ++m_current;
-      return tmp;
-   }
+    m_current -= n;
+    return *this;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >
-   reverse_iterator< Iterator >::operator+( difference_type n ) const {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>
+reverse_iterator<Iterator>::operator-(difference_type n) const {
 
-      return reverse_iterator( m_current - n );
-   }
+    return reverse_iterator(m_current + n);
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >&
-   reverse_iterator< Iterator >::operator+=( difference_type n ) {
+template <typename Iterator>
+VECMEM_HOST_AND_DEVICE reverse_iterator<Iterator>&
+reverse_iterator<Iterator>::operator-=(difference_type n) {
 
-      m_current -= n;
-      return *this;
-   }
+    m_current += n;
+    return *this;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >
-   reverse_iterator< Iterator >::operator-( difference_type n ) const {
+template <typename Iterator>
+template <typename T>
+VECMEM_HOST_AND_DEVICE T* reverse_iterator<Iterator>::to_pointer(T* ptr) {
 
-      return reverse_iterator( m_current + n );
-   }
+    return ptr;
+}
 
-   template< typename Iterator >
-   VECMEM_HOST_AND_DEVICE
-   reverse_iterator< Iterator >&
-   reverse_iterator< Iterator >::operator-=( difference_type n ) {
+template <typename Iterator>
+template <typename T>
+VECMEM_HOST_AND_DEVICE typename reverse_iterator<Iterator>::pointer
+reverse_iterator<Iterator>::to_pointer(T itr) {
 
-      m_current += n;
-      return *this;
-   }
+    return itr.operator->();
+}
 
-   template< typename Iterator >
-   template< typename T >
-   VECMEM_HOST_AND_DEVICE
-   T* reverse_iterator< Iterator >::to_pointer( T* ptr ) {
+template <typename T>
+VECMEM_HOST_AND_DEVICE bool operator==(const reverse_iterator<T>& itr1,
+                                       const reverse_iterator<T>& itr2) {
 
-      return ptr;
-   }
+    return (itr1.base() == itr2.base());
+}
 
-   template< typename Iterator >
-   template< typename T >
-   VECMEM_HOST_AND_DEVICE
-   typename reverse_iterator< Iterator >::pointer
-   reverse_iterator< Iterator >::to_pointer( T itr ) {
+template <typename T>
+VECMEM_HOST_AND_DEVICE bool operator!=(const reverse_iterator<T>& itr1,
+                                       const reverse_iterator<T>& itr2) {
 
-      return itr.operator->();
-   }
+    return !(itr1 == itr2);
+}
 
-   template< typename T >
-   VECMEM_HOST_AND_DEVICE
-   bool operator==( const reverse_iterator< T >& itr1,
-                    const reverse_iterator< T >& itr2 ) {
-
-      return ( itr1.base() == itr2.base() );
-   }
-
-   template< typename T >
-   VECMEM_HOST_AND_DEVICE
-   bool operator!=( const reverse_iterator< T >& itr1,
-                    const reverse_iterator< T >& itr2 ) {
-
-      return !( itr1 == itr2 );
-   }
-
-} } // namespace vecmem::details
+}  // namespace details
+}  // namespace vecmem

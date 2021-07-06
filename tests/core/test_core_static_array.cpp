@@ -12,8 +12,7 @@
 // GoogleTest include(s).
 #include <gtest/gtest.h>
 
-class core_static_array_test : public testing::Test {
-};
+class core_static_array_test : public testing::Test {};
 
 TEST_F(core_static_array_test, basic_write_read) {
     vecmem::static_array<int, 3> arr;

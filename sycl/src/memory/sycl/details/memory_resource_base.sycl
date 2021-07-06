@@ -6,9 +6,9 @@
  */
 
 // Local include(s).
+#include "../../../utils/sycl/get_queue.hpp"
 #include "vecmem/memory/sycl/details/memory_resource_base.hpp"
 #include "vecmem/utils/debug.hpp"
-#include "../../../utils/sycl/get_queue.hpp"
 
 // SYCL include(s).
 #include <CL/sycl.hpp>
@@ -18,31 +18,27 @@
 
 namespace vecmem::sycl::details {
 
-   memory_resource_base::memory_resource_base( const queue_wrapper& queue )
-   : m_queue( queue ) {
+memory_resource_base::memory_resource_base(const queue_wrapper& queue)
+    : m_queue(queue) {}
 
-   }
+void memory_resource_base::do_deallocate(void* ptr, std::size_t, std::size_t) {
 
-   void memory_resource_base::do_deallocate( void* ptr, std::size_t,
-                                             std::size_t ) {
+    // Free the memory.
+    cl::sycl::free(ptr, get_queue(m_queue));
 
-      // Free the memory.
-      cl::sycl::free( ptr, get_queue( m_queue ) );
+    // Let the user know what happened.
+    VECMEM_DEBUG_MSG(5, "Freed the memory block at %p", ptr);
+}
 
-      // Let the user know what happened.
-      VECMEM_DEBUG_MSG( 5, "Freed the memory block at %p", ptr );
-   }
+bool memory_resource_base::do_is_equal(
+    const memory_resource& other) const noexcept {
 
-   bool memory_resource_base::do_is_equal(
-      const memory_resource& other ) const noexcept {
+    // Try to cast the other object to this exact type.
+    const memory_resource_base* p =
+        dynamic_cast<const memory_resource_base*>(&other);
 
-      // Try to cast the other object to this exact type.
-      const memory_resource_base* p =
-         dynamic_cast< const memory_resource_base* >( &other );
+    // The two are equal if they have equal queues.
+    return ((p != nullptr) && (get_queue(p->m_queue) == get_queue(m_queue)));
+}
 
-      // The two are equal if they have equal queues.
-      return ( ( p != nullptr ) &&
-               ( get_queue( p->m_queue ) == get_queue( m_queue ) ) );
-   }
-
-} // namespace vecmem::sycl::details
+}  // namespace vecmem::sycl::details

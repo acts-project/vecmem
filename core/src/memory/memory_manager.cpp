@@ -7,41 +7,38 @@
 
 // Local include(s).
 #include "vecmem/memory/memory_manager.hpp"
-#include "vecmem/memory/memory_manager_interface.hpp"
 
 #include <stdexcept>
 
+#include "vecmem/memory/memory_manager_interface.hpp"
+
 namespace vecmem {
 
-   /// The destructor needs to be explicitly implemented, so that
-   /// @c vecmem::memory_manager_interface could be forward-declared in
-   /// @c memory_manager.hpp.
-   memory_manager::~memory_manager() {
+/// The destructor needs to be explicitly implemented, so that
+/// @c vecmem::memory_manager_interface could be forward-declared in
+/// @c memory_manager.hpp.
+memory_manager::~memory_manager() {}
 
-   }
+memory_manager& memory_manager::instance() {
 
-   memory_manager& memory_manager::instance() {
+    static memory_manager instance;
+    return instance;
+}
 
-      static memory_manager instance;
-      return instance;
-   }
+void memory_manager::set(std::unique_ptr<memory_manager_interface> mgr) {
 
-   void memory_manager::set( std::unique_ptr< memory_manager_interface > mgr ) {
+    m_mgr = std::move(mgr);
+    return;
+}
 
-      m_mgr = std::move( mgr );
-      return;
-   }
+memory_manager_interface& memory_manager::get() const {
+    if (m_mgr == nullptr) {
+        throw std::runtime_error("No memory manager has been set!");
+    }
 
-   memory_manager_interface& memory_manager::get() const {
-      if (m_mgr == nullptr) {
-         throw std::runtime_error("No memory manager has been set!");
-      }
+    return *m_mgr;
+}
 
-      return *m_mgr;
-   }
+memory_manager::memory_manager() : m_mgr(nullptr) {}
 
-   memory_manager::memory_manager()
-   : m_mgr( nullptr ) {
-   }
-
-} // namespace vecmem
+}  // namespace vecmem

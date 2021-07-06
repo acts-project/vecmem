@@ -11,8 +11,8 @@
 
 namespace vecmem {
 
-   /// Class mimicking a constant @c std::vector in "device code"
-   template< typename T >
-   using const_device_vector = device_vector< const T >;
+/// Class mimicking a constant @c std::vector in "device code"
+template <typename T>
+using const_device_vector = device_vector<const T>;
 
-} // namespace vecmem
+}  // namespace vecmem

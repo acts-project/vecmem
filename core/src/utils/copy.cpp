@@ -8,6 +8,7 @@
 
 // VecMem include(s).
 #include "vecmem/utils/copy.hpp"
+
 #include "vecmem/utils/debug.hpp"
 
 // System include(s).
@@ -15,25 +16,27 @@
 
 namespace vecmem {
 
-   void copy::do_copy( std::size_t size, const void* from, void* to,
-                       type::copy_type ) {
+void copy::do_copy(std::size_t size, const void* from, void* to,
+                   type::copy_type) {
 
-      // Perform a simple POSIX memory copy.
-      memcpy( to, from, size );
+    // Perform a simple POSIX memory copy.
+    memcpy(to, from, size);
 
-      // Let the user know what happened.
-      VECMEM_DEBUG_MSG( 4, "Performed POSIX memory copy of %lu bytes from %p "
-                        "to %p", size, from, to );
-   }
+    // Let the user know what happened.
+    VECMEM_DEBUG_MSG(4,
+                     "Performed POSIX memory copy of %lu bytes from %p "
+                     "to %p",
+                     size, from, to);
+}
 
-   void copy::do_memset( std::size_t size, void* ptr, int value ) {
+void copy::do_memset(std::size_t size, void* ptr, int value) {
 
-      // Perform the POSIX memory setting operation.
-      memset( ptr, value, size );
+    // Perform the POSIX memory setting operation.
+    memset(ptr, value, size);
 
-      // Let the user know what happened.
-      VECMEM_DEBUG_MSG( 4, "Set %lu bytes to %i at %p with POSIX memset", size,
-                        value, ptr );
-   }
+    // Let the user know what happened.
+    VECMEM_DEBUG_MSG(4, "Set %lu bytes to %i at %p with POSIX memset", size,
+                     value, ptr);
+}
 
-} // namespace vecmem
+}  // namespace vecmem
