@@ -281,13 +281,13 @@ class static_array {
     private:
     /**
      * @brief Private helper-constructor for the parameter pack constructor.
-     *
-     * HACK: This template pack is defined as std::size_t instead of
-     * size_type because the SYCL compiler refuses to accept it otherwise.
      */
     template <typename Tp1, typename... Tp>
     VECMEM_HOST_AND_DEVICE void static_array_impl(size_type i, Tp1 &&a1,
                                                   Tp &&... a);
+    /**
+     * @brief Private helper-constructor for the parameter pack constructor.
+     */
     template <typename Tp1>
     VECMEM_HOST_AND_DEVICE void static_array_impl(size_type i, Tp1 &&a1);
 
