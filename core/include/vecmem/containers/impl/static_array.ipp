@@ -59,7 +59,7 @@ static_array<T, N>::operator[](size_type i) {
      * Non-bounds checking access, which could cause a segmentation
      * violation.
      */
-    return v[i];
+    return m_array[i];
 }
 
 template <typename T, std::size_t N>
@@ -68,7 +68,7 @@ static_array<T, N>::operator[](size_type i) const {
     /*
      * Return an element as constant.
      */
-    return v[i];
+    return m_array[i];
 }
 
 template <typename T, std::size_t N>
@@ -77,7 +77,7 @@ static_array<T, N>::front(void) {
     /*
      * Return the first element.
      */
-    return v[0];
+    return m_array[0];
 }
 
 template <typename T, std::size_t N>
@@ -86,7 +86,7 @@ static_array<T, N>::front(void) const {
     /*
      * Return the first element, but it's const.
      */
-    return v[0];
+    return m_array[0];
 }
 
 template <typename T, std::size_t N>
@@ -95,7 +95,7 @@ static_array<T, N>::back(void) {
     /*
      * Return the last element.
      */
-    return v[N - 1];
+    return m_array[N - 1];
 }
 
 template <typename T, std::size_t N>
@@ -104,7 +104,7 @@ static_array<T, N>::back(void) const {
     /*
      * Return the last element, but it's const.
      */
-    return v[N - 1];
+    return m_array[N - 1];
 }
 
 template <typename T, std::size_t N>
@@ -113,7 +113,7 @@ static_array<T, N>::data(void) {
     /*
      * Return a pointer to the underlying data.
      */
-    return v;
+    return m_array;
 }
 
 template <typename T, std::size_t N>
@@ -122,20 +122,141 @@ static_array<T, N>::data(void) const {
     /*
      * Return a pointer to the underlying data, but the elements are const.
      */
-    return v;
+    return m_array;
 }
 
 template <typename T, std::size_t N>
-template <typename std::size_t... Is, typename... Tp>
-VECMEM_HOST_AND_DEVICE static_array<T, N>::static_array(
-    std::index_sequence<Is...>, Tp&&... a) {
-    /*
-     * Construct the array from an enumerated list of elements of arbitrary
-     * size. This is a fold expression which iterates over the elements of
-     * Is (the indices) and Tp (the values), and inserts them into the inner
-     * array using a comma expression.
-     */
-    (static_cast<void>(v[Is] = a), ...);
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::iterator
+static_array<T, N>::begin() {
+
+    return m_array;
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
+static_array<T, N>::begin() const {
+
+    return m_array;
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
+static_array<T, N>::cbegin() const {
+
+    return begin();
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::iterator
+static_array<T, N>::end() {
+
+    return m_array + N;
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
+static_array<T, N>::end() const {
+
+    return m_array + N;
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
+static_array<T, N>::cend() const {
+
+    return end();
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::reverse_iterator
+static_array<T, N>::rbegin() {
+
+    return reverse_iterator(end());
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr
+    typename static_array<T, N>::const_reverse_iterator
+    static_array<T, N>::rbegin() const {
+
+    return const_reverse_iterator(end());
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr
+    typename static_array<T, N>::const_reverse_iterator
+    static_array<T, N>::crbegin() const {
+
+    return rbegin();
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::reverse_iterator
+static_array<T, N>::rend() {
+
+    return reverse_iterator(begin());
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr
+    typename static_array<T, N>::const_reverse_iterator
+    static_array<T, N>::rend() const {
+
+    return const_reverse_iterator(begin());
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr
+    typename static_array<T, N>::const_reverse_iterator
+    static_array<T, N>::crend() const {
+
+    return rend();
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr bool static_array<T, N>::empty() const {
+
+    return N == 0;
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::size_type
+static_array<T, N>::size() const {
+
+    return N;
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::size_type
+static_array<T, N>::max_size() const {
+
+    return N;
+}
+
+template <typename T, std::size_t N>
+VECMEM_HOST_AND_DEVICE void static_array<T, N>::fill(const_reference value) {
+
+    for (std::size_t i = 0; i < N; ++i) {
+        m_array[i] = value;
+    }
+}
+
+template <typename T, std::size_t N>
+template <typename Tp1, typename... Tp>
+VECMEM_HOST_AND_DEVICE void static_array<T, N>::static_array_impl(size_type i,
+                                                                  Tp1&& a1,
+                                                                  Tp&&... a) {
+
+    m_array[i] = a1;
+    static_array_impl(i + 1, std::forward<Tp>(a)...);
+}
+
+template <typename T, std::size_t N>
+template <typename Tp1>
+VECMEM_HOST_AND_DEVICE void static_array<T, N>::static_array_impl(size_type i,
+                                                                  Tp1&& a1) {
+
+    m_array[i] = a1;
 }
 
 template <typename T, std::size_t N>

@@ -8,11 +8,15 @@
 
 #pragma once
 
+// Local include(s).
+#include "vecmem/containers/details/reverse_iterator.hpp"
+#include "vecmem/utils/type_traits.hpp"
+#include "vecmem/utils/types.hpp"
+
+// System include(s).
 #include <cstddef>
 #include <type_traits>
 #include <utility>
-
-#include "vecmem/utils/types.hpp"
 
 namespace vecmem {
 /**
@@ -28,13 +32,39 @@ namespace vecmem {
 template <typename T, std::size_t N>
 class static_array {
     public:
+    /// @name Type definitions, mimicking @c std::array
+    /// @{
+
+    /// Type of the array elements
     using value_type = T;
+    /// Size type for the array
     using size_type = std::size_t;
+    /// Pointer difference type
     using difference_type = std::ptrdiff_t;
+
+    /// Value reference type
     using reference = value_type &;
+    /// Constant value reference type
     using const_reference = const value_type &;
+    /// Value pointer type
     using pointer = value_type *;
+    /// Constant value pointer type
     using const_pointer = const value_type *;
+
+    /// Forward iterator type
+    using iterator = pointer;
+    /// Constant forward iterator type
+    using const_iterator = const_pointer;
+    /// Reverse iterator type
+    using reverse_iterator = vecmem::details::reverse_iterator<iterator>;
+    /// Constant reverse iterator type
+    using const_reverse_iterator =
+        vecmem::details::reverse_iterator<const_iterator>;
+
+    /// @}
+
+    /// @name Constructors
+    /// @{
 
     /**
      * @brief Trivial constructor.
@@ -62,12 +92,18 @@ class static_array {
      * @note All parameters passed to this function must be convertible to
      * the array value type, but the values do not need to be homogeneous.
      */
-    template <
-        typename... Tp, typename = std::enable_if_t<sizeof...(Tp) == N>,
-        typename = std::enable_if_t<(std::is_convertible_v<Tp, T> && ...)> >
-    VECMEM_HOST_AND_DEVICE static_array(Tp &&... a)
-        : static_array(std::index_sequence_for<Tp...>(),
-                       std::forward<Tp>(a)...) {}
+    template <typename... Tp, typename = std::enable_if_t<sizeof...(Tp) == N>,
+              typename = std::enable_if_t<
+                  details::conjunction_v<std::is_convertible<Tp, T>...> > >
+    VECMEM_HOST_AND_DEVICE static_array(Tp &&... a) {
+
+        static_array_impl(0, std::forward<Tp>(a)...);
+    }
+
+    /// @}
+
+    /// @name Array element access functions
+    /// @{
 
     /**
      * @brief Bounds-checked accessor method.
@@ -167,6 +203,81 @@ class static_array {
     VECMEM_HOST_AND_DEVICE
     constexpr const_pointer data(void) const;
 
+    /// @}
+
+    /// @name Iterator providing functions
+    /// @{
+
+    /// Return a forward iterator pointing at the beginning of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr iterator begin();
+    /// Return a constant forward iterator pointing at the beginning of the
+    /// array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_iterator begin() const;
+    /// Return a constant forward iterator pointing at the beginning of the
+    /// array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_iterator cbegin() const;
+
+    /// Return a forward iterator pointing at the end of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr iterator end();
+    /// Return a constant forward iterator pointing at the end of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_iterator end() const;
+    /// Return a constant forward iterator pointing at the end of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_iterator cend() const;
+
+    /// Return a reverse iterator pointing at the end of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr reverse_iterator rbegin();
+    /// Return a constant reverse iterator pointing at the end of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_reverse_iterator rbegin() const;
+    /// Return a constant reverse iterator pointing at the end of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_reverse_iterator crbegin() const;
+
+    /// Return a reverse iterator pointing at the beginning of the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr reverse_iterator rend();
+    /// Return a constant reverse iterator pointing at the beginning of the
+    /// array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_reverse_iterator rend() const;
+    /// Return a constant reverse iterator pointing at the beginning of the
+    /// array
+    VECMEM_HOST_AND_DEVICE
+    constexpr const_reverse_iterator crend() const;
+
+    /// @}
+
+    /// @name Capacity checking functions
+    /// @{
+
+    /// Check whether the array is empty
+    VECMEM_HOST_AND_DEVICE
+    constexpr bool empty() const;
+    /// Return the number of elements in the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr size_type size() const;
+    /// Return the maximum (fixed) number of elements in the array
+    VECMEM_HOST_AND_DEVICE
+    constexpr size_type max_size() const;
+
+    /// @}
+
+    /// @name Payload modification functions
+    /// @{
+
+    /// Fill the array with a constant value
+    VECMEM_HOST_AND_DEVICE
+    void fill(const_reference value);
+
+    /// @}
+
     private:
     /**
      * @brief Private helper-constructor for the parameter pack constructor.
@@ -174,10 +285,14 @@ class static_array {
      * HACK: This template pack is defined as std::size_t instead of
      * size_type because the SYCL compiler refuses to accept it otherwise.
      */
-    template <std::size_t... Is, typename... Tp>
-    VECMEM_HOST_AND_DEVICE static_array(std::index_sequence<Is...>, Tp &&... a);
+    template <typename Tp1, typename... Tp>
+    VECMEM_HOST_AND_DEVICE void static_array_impl(size_type i, Tp1 &&a1,
+                                                  Tp &&... a);
+    template <typename Tp1>
+    VECMEM_HOST_AND_DEVICE void static_array_impl(size_type i, Tp1 &&a1);
 
-    T v[N];
+    /// Array holding the container's data
+    typename details::array_type<T, N>::type m_array;
 };
 
 template <typename T, std::size_t N>
