@@ -11,6 +11,7 @@
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_array.hpp"
 #include "vecmem/containers/device_vector.hpp"
+#include "vecmem/containers/static_array.hpp"
 #include "vecmem/containers/static_vector.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
@@ -121,4 +122,34 @@ TEST_F(core_container_test, device_array) {
         EXPECT_TRUE(test_array.at(i) == m_reference_vector.at(i));
         EXPECT_TRUE(test_array[i] == m_reference_vector[i]);
     }
+}
+
+/// Test(s) for @c vecmem::static_array
+TEST_F(core_container_test, static_array) {
+
+    static constexpr int ARRAY_SIZE = 10;
+    const vecmem::static_array<int, ARRAY_SIZE> test_array1 = {0, 1, 2, 3, 4,
+                                                               5, 6, 7, 8, 9};
+    EXPECT_EQ(test_array1.size(), ARRAY_SIZE);
+    EXPECT_EQ(test_array1.max_size(), ARRAY_SIZE);
+    EXPECT_FALSE(test_array1.empty());
+    const vecmem::static_array<int, ARRAY_SIZE> test_array2 = test_array1;
+    vecmem::static_array<int, ARRAY_SIZE> test_array3 = {2, 3, 4, 5, 6,
+                                                         7, 8, 9, 0, 1};
+    EXPECT_EQ(test_array1, test_array2);
+    EXPECT_NE(test_array1, test_array3);
+    EXPECT_TRUE(std::equal(test_array1.begin(), test_array1.end(),
+                           test_array2.begin()));
+    EXPECT_FALSE(std::equal(test_array1.begin(), test_array1.end(),
+                            test_array3.begin()));
+    EXPECT_EQ(std::accumulate(test_array1.begin(), test_array1.end(), 0),
+              std::accumulate(test_array2.rbegin(), test_array2.rend(), 0));
+    test_array3.fill(12);
+    for (int i = 0; i < ARRAY_SIZE; ++i) {
+        EXPECT_EQ(test_array3.at(i), 12);
+    }
+    const vecmem::static_array<int, 0> test_array4;
+    EXPECT_EQ(test_array4.size(), 0);
+    EXPECT_EQ(test_array4.max_size(), 0);
+    EXPECT_TRUE(test_array4.empty());
 }

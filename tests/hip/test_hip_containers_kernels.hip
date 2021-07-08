@@ -16,6 +16,7 @@
 #include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
+#include "vecmem/containers/static_array.hpp"
 #include "vecmem/memory/atomic.hpp"
 
 /// Kernel performing a linear transformation using the vector helper types
@@ -31,13 +32,14 @@ __global__ void linearTransformKernel(
     }
 
     // Create the helper containers.
-    const vecmem::const_device_array<int, 2> constantarray(constants);
+    const vecmem::const_device_array<int, 2> constantarray1(constants);
+    const vecmem::static_array<int, 2> constantarray2 = {constantarray1[0],
+                                                         constantarray1[1]};
     const vecmem::const_device_vector<int> inputvec(input);
     vecmem::device_vector<int> outputvec(output);
 
     // Perform the linear transformation.
-    outputvec.at(i) =
-        inputvec.at(i) * constantarray.at(0) + constantarray.at(1);
+    outputvec.at(i) = inputvec.at(i) * constantarray1.at(0) + constantarray2[1];
     return;
 }
 
