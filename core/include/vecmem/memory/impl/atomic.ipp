@@ -47,7 +47,7 @@ VECMEM_HOST_AND_DEVICE void atomic<T>::store(value_type data) {
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::load() const {
+VECMEM_HOST_AND_DEVICE auto atomic<T>::load() const -> value_type {
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
     volatile pointer addr = m_ptr;
@@ -63,8 +63,7 @@ VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::load() const {
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::exchange(
-    value_type data) {
+VECMEM_HOST_AND_DEVICE auto atomic<T>::exchange(value_type data) -> value_type {
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
     return atomicExch(m_ptr, data);
@@ -98,8 +97,8 @@ VECMEM_HOST_AND_DEVICE bool atomic<T>::compare_exchange_strong(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_add(
-    value_type data) {
+VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_add(value_type data)
+    -> value_type {
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
     return atomicAdd(m_ptr, data);
@@ -113,8 +112,8 @@ VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_add(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_sub(
-    value_type data) {
+VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_sub(value_type data)
+    -> value_type {
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
     return atomicSub(m_ptr, data);
@@ -128,8 +127,8 @@ VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_sub(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_and(
-    value_type data) {
+VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_and(value_type data)
+    -> value_type {
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
     return atomicAnd(m_ptr, data);
@@ -143,8 +142,7 @@ VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_and(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_or(
-    value_type data) {
+VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_or(value_type data) -> value_type {
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
     return atomicOr(m_ptr, data);
@@ -158,8 +156,8 @@ VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_or(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename atomic<T>::value_type atomic<T>::fetch_xor(
-    value_type data) {
+VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_xor(value_type data)
+    -> value_type {
 
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
     return atomicXor(m_ptr, data);

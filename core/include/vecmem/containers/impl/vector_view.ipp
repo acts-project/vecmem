@@ -33,43 +33,38 @@ VECMEM_HOST_AND_DEVICE vector_view<TYPE>::vector_view(
       m_ptr(parent.ptr()) {}
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename vector_view<TYPE>::size_type
-vector_view<TYPE>::size() const {
+VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::size() const -> size_type {
 
     return (m_size == nullptr ? m_capacity : *m_size);
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename vector_view<TYPE>::size_type
-vector_view<TYPE>::capacity() const {
+VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::capacity() const -> size_type {
 
     return m_capacity;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename vector_view<TYPE>::size_pointer
-vector_view<TYPE>::size_ptr() {
+VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::size_ptr() -> size_pointer {
 
     return m_size;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename vector_view<TYPE>::const_size_pointer
-vector_view<TYPE>::size_ptr() const {
+VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::size_ptr() const
+    -> const_size_pointer {
 
     return m_size;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename vector_view<TYPE>::pointer
-vector_view<TYPE>::ptr() {
+VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::ptr() -> pointer {
 
     return m_ptr;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename vector_view<TYPE>::const_pointer
-vector_view<TYPE>::ptr() const {
+VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::ptr() const -> const_pointer {
 
     return m_ptr;
 }

@@ -16,16 +16,16 @@ VECMEM_HOST_AND_DEVICE jagged_device_vector_iterator<TYPE>::pointer::pointer(
     : m_vec(*data) {}
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename jagged_device_vector_iterator<TYPE>::value_type*
-jagged_device_vector_iterator<TYPE>::pointer::operator->() {
+VECMEM_HOST_AND_DEVICE auto
+jagged_device_vector_iterator<TYPE>::pointer::operator->() -> value_type* {
 
     return &m_vec;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE const typename jagged_device_vector_iterator<
-    TYPE>::value_type*
-jagged_device_vector_iterator<TYPE>::pointer::operator->() const {
+VECMEM_HOST_AND_DEVICE auto
+jagged_device_vector_iterator<TYPE>::pointer::operator->() const
+    -> const value_type* {
 
     return &m_vec;
 }
@@ -72,22 +72,22 @@ jagged_device_vector_iterator<TYPE>::operator=(
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename jagged_device_vector_iterator<TYPE>::reference
-jagged_device_vector_iterator<TYPE>::operator*() const {
+VECMEM_HOST_AND_DEVICE auto jagged_device_vector_iterator<TYPE>::operator*()
+    const -> reference {
 
     return *m_ptr;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename jagged_device_vector_iterator<TYPE>::pointer
-jagged_device_vector_iterator<TYPE>::operator->() const {
+VECMEM_HOST_AND_DEVICE auto
+jagged_device_vector_iterator<TYPE>::operator->() const -> pointer {
 
     return m_ptr;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename jagged_device_vector_iterator<TYPE>::reference
-jagged_device_vector_iterator<TYPE>::operator[](difference_type n) const {
+VECMEM_HOST_AND_DEVICE auto jagged_device_vector_iterator<TYPE>::operator[](
+    difference_type n) const -> reference {
 
     return *(*this + n);
 }

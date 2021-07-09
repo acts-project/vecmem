@@ -147,8 +147,7 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 }
 
 template <typename TYPE>
-typename jagged_vector_buffer<TYPE>::pointer
-jagged_vector_buffer<TYPE>::host_ptr() const {
+auto jagged_vector_buffer<TYPE>::host_ptr() const -> pointer {
 
     return m_outer_host_memory.get();
 }

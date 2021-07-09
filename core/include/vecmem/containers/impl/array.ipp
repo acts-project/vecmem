@@ -34,9 +34,7 @@ allocate_array_memory(vecmem::memory_resource& resource,
 
 /// Helper function used in the @c vecmem::array constructors
 template <typename T, std::size_t N>
-std::unique_ptr<typename vecmem::array<T, N>::value_type,
-                typename vecmem::array<T, N>::deleter>
-initialize_array_memory(
+auto initialize_array_memory(
     std::unique_ptr<typename vecmem::array<T, N>::value_type,
                     typename vecmem::array<T, N>::deleter>
         memory,
@@ -93,7 +91,7 @@ array<T, N>::array(memory_resource& resource, size_type size)
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::reference array<T, N>::at(size_type pos) {
+auto array<T, N>::at(size_type pos) -> reference {
 
     if (pos >= m_size) {
         throw std::out_of_range("Requested element " + std::to_string(pos) +
@@ -104,7 +102,7 @@ typename array<T, N>::reference array<T, N>::at(size_type pos) {
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reference array<T, N>::at(size_type pos) const {
+auto array<T, N>::at(size_type pos) const -> const_reference {
 
     if (pos >= m_size) {
         throw std::out_of_range("Requested element " + std::to_string(pos) +
@@ -115,20 +113,19 @@ typename array<T, N>::const_reference array<T, N>::at(size_type pos) const {
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::reference array<T, N>::operator[](size_type pos) {
+auto array<T, N>::operator[](size_type pos) -> reference {
 
     return m_memory.get()[pos];
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reference array<T, N>::operator[](
-    size_type pos) const {
+auto array<T, N>::operator[](size_type pos) const -> const_reference {
 
     return m_memory.get()[pos];
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::reference array<T, N>::front() {
+auto array<T, N>::front() -> reference {
 
     if (m_size == 0) {
         throw std::out_of_range(
@@ -139,7 +136,7 @@ typename array<T, N>::reference array<T, N>::front() {
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reference array<T, N>::front() const {
+auto array<T, N>::front() const -> const_reference {
 
     if (m_size == 0) {
         throw std::out_of_range(
@@ -150,7 +147,7 @@ typename array<T, N>::const_reference array<T, N>::front() const {
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::reference array<T, N>::back() {
+auto array<T, N>::back() -> reference {
 
     if (m_size == 0) {
         throw std::out_of_range(
@@ -161,7 +158,7 @@ typename array<T, N>::reference array<T, N>::back() {
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reference array<T, N>::back() const {
+auto array<T, N>::back() const -> const_reference {
 
     if (m_size == 0) {
         throw std::out_of_range(
@@ -172,85 +169,85 @@ typename array<T, N>::const_reference array<T, N>::back() const {
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::pointer array<T, N>::data() {
+auto array<T, N>::data() -> pointer {
 
     return m_memory.get();
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_pointer array<T, N>::data() const {
+auto array<T, N>::data() const -> const_pointer {
 
     return m_memory.get();
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::iterator array<T, N>::begin() {
+auto array<T, N>::begin() -> iterator {
 
     return m_memory.get();
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_iterator array<T, N>::begin() const {
+auto array<T, N>::begin() const -> const_iterator {
 
     return m_memory.get();
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_iterator array<T, N>::cbegin() const {
+auto array<T, N>::cbegin() const -> const_iterator {
 
     return m_memory.get();
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::iterator array<T, N>::end() {
+auto array<T, N>::end() -> iterator {
 
     return (m_memory.get() + m_size);
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_iterator array<T, N>::end() const {
+auto array<T, N>::end() const -> const_iterator {
 
     return (m_memory.get() + m_size);
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_iterator array<T, N>::cend() const {
+auto array<T, N>::cend() const -> const_iterator {
 
     return (m_memory.get() + m_size);
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::reverse_iterator array<T, N>::rbegin() {
+auto array<T, N>::rbegin() -> reverse_iterator {
 
     return reverse_iterator(end());
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reverse_iterator array<T, N>::rbegin() const {
+auto array<T, N>::rbegin() const -> const_reverse_iterator {
 
     return const_reverse_iterator(end());
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reverse_iterator array<T, N>::crbegin() const {
+auto array<T, N>::crbegin() const -> const_reverse_iterator {
 
     return const_reverse_iterator(end());
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::reverse_iterator array<T, N>::rend() {
+auto array<T, N>::rend() -> reverse_iterator {
 
     return reverse_iterator(begin());
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reverse_iterator array<T, N>::rend() const {
+auto array<T, N>::rend() const -> const_reverse_iterator {
 
     return const_reverse_iterator(begin());
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::const_reverse_iterator array<T, N>::crend() const {
+auto array<T, N>::crend() const -> const_reverse_iterator {
 
     return const_reverse_iterator(begin());
 }
@@ -262,7 +259,7 @@ bool array<T, N>::empty() const noexcept {
 }
 
 template <typename T, std::size_t N>
-typename array<T, N>::size_type array<T, N>::size() const noexcept {
+auto array<T, N>::size() const noexcept -> size_type {
 
     return m_size;
 }

@@ -51,8 +51,7 @@ VECMEM_HOST_AND_DEVICE device_array<T, N>& device_array<T, N>::operator=(
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::reference
-device_array<T, N>::at(size_type pos) {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::at(size_type pos) -> reference {
 
     // Check if the index is valid.
     assert(pos < N);
@@ -62,8 +61,8 @@ device_array<T, N>::at(size_type pos) {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reference
-device_array<T, N>::at(size_type pos) const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::at(size_type pos) const
+    -> const_reference {
 
     // Check if the index is valid.
     assert(pos < N);
@@ -73,24 +72,23 @@ device_array<T, N>::at(size_type pos) const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::reference
-device_array<T, N>::operator[](size_type pos) {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::operator[](size_type pos)
+    -> reference {
 
     // Return a reference to the vector element.
     return m_ptr[pos];
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reference
-device_array<T, N>::operator[](size_type pos) const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::operator[](size_type pos) const
+    -> const_reference {
 
     // Return a reference to the vector element.
     return m_ptr[pos];
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::reference
-device_array<T, N>::front() {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::front() -> reference {
 
     // Make sure that there is at least one element in the vector.
     static_assert(N > 0, "Cannot return first element of empty array");
@@ -100,8 +98,8 @@ device_array<T, N>::front() {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reference
-device_array<T, N>::front() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::front() const
+    -> const_reference {
 
     // Make sure that there is at least one element in the vector.
     static_assert(N > 0, "Cannot return first element of empty array");
@@ -111,8 +109,7 @@ device_array<T, N>::front() const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::reference
-device_array<T, N>::back() {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::back() -> reference {
 
     // Make sure that there is at least one element in the vector.
     static_assert(N > 0, "Cannot return last element of empty array");
@@ -122,8 +119,8 @@ device_array<T, N>::back() {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reference
-device_array<T, N>::back() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::back() const
+    -> const_reference {
 
     // Make sure that there is at least one element in the vector.
     static_assert(N > 0, "Cannot return last element of empty array");
@@ -133,99 +130,91 @@ device_array<T, N>::back() const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::pointer
-device_array<T, N>::data() {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::data() -> pointer {
 
     return m_ptr;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_pointer
-device_array<T, N>::data() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::data() const -> const_pointer {
 
     return m_ptr;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::iterator
-device_array<T, N>::begin() {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::begin() -> iterator {
 
     return iterator(m_ptr);
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_iterator
-device_array<T, N>::begin() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::begin() const
+    -> const_iterator {
 
     return const_iterator(m_ptr);
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_iterator
-device_array<T, N>::cbegin() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::cbegin() const
+    -> const_iterator {
 
     return begin();
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::iterator
-device_array<T, N>::end() {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::end() -> iterator {
 
     return iterator(m_ptr + N);
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_iterator
-device_array<T, N>::end() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::end() const -> const_iterator {
 
     return const_iterator(m_ptr + N);
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_iterator
-device_array<T, N>::cend() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::cend() const -> const_iterator {
 
     return end();
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::reverse_iterator
-device_array<T, N>::rbegin() {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::rbegin() -> reverse_iterator {
 
     return reverse_iterator(end());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reverse_iterator
-device_array<T, N>::rbegin() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::rbegin() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(end());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reverse_iterator
-device_array<T, N>::crbegin() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::crbegin() const
+    -> const_reverse_iterator {
 
     return rbegin();
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::reverse_iterator
-device_array<T, N>::rend() {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::rend() -> reverse_iterator {
 
     return reverse_iterator(begin());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reverse_iterator
-device_array<T, N>::rend() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::rend() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(begin());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE typename device_array<T, N>::const_reverse_iterator
-device_array<T, N>::crend() const {
+VECMEM_HOST_AND_DEVICE auto device_array<T, N>::crend() const
+    -> const_reverse_iterator {
 
     return rend();
 }
@@ -237,15 +226,15 @@ VECMEM_HOST_AND_DEVICE constexpr bool device_array<T, N>::empty() const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename device_array<T, N>::size_type
-device_array<T, N>::size() const {
+VECMEM_HOST_AND_DEVICE constexpr auto device_array<T, N>::size() const
+    -> size_type {
 
     return N;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename device_array<T, N>::size_type
-device_array<T, N>::max_size() const {
+VECMEM_HOST_AND_DEVICE constexpr auto device_array<T, N>::max_size() const
+    -> size_type {
 
     return size();
 }

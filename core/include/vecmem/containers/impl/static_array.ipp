@@ -24,8 +24,7 @@ VECMEM_HOST_AND_DEVICE static_array<T, N>::static_array(void) {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST constexpr typename static_array<T, N>::reference
-static_array<T, N>::at(size_type i) {
+VECMEM_HOST constexpr auto static_array<T, N>::at(size_type i) -> reference {
     /*
      * The at function is bounds-checking in the standard library, so we
      * do a boundary check in our code, too. This makes this method
@@ -39,8 +38,8 @@ static_array<T, N>::at(size_type i) {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST constexpr typename static_array<T, N>::const_reference
-static_array<T, N>::at(size_type i) const {
+VECMEM_HOST constexpr auto static_array<T, N>::at(size_type i) const
+    -> const_reference {
     /*
      * Same thing as with the other at function, we do a bounds check in
      * accordance with the standard library.
@@ -53,8 +52,8 @@ static_array<T, N>::at(size_type i) const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::reference
-static_array<T, N>::operator[](size_type i) {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::operator[](
+    size_type i) -> reference {
     /*
      * Non-bounds checking access, which could cause a segmentation
      * violation.
@@ -63,8 +62,8 @@ static_array<T, N>::operator[](size_type i) {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_reference
-static_array<T, N>::operator[](size_type i) const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::operator[](
+    size_type i) const -> const_reference {
     /*
      * Return an element as constant.
      */
@@ -72,8 +71,8 @@ static_array<T, N>::operator[](size_type i) const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::reference
-static_array<T, N>::front(void) {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::front(void)
+    -> reference {
     /*
      * Return the first element.
      */
@@ -81,8 +80,8 @@ static_array<T, N>::front(void) {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_reference
-static_array<T, N>::front(void) const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::front(void) const
+    -> const_reference {
     /*
      * Return the first element, but it's const.
      */
@@ -90,8 +89,8 @@ static_array<T, N>::front(void) const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::reference
-static_array<T, N>::back(void) {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::back(void)
+    -> reference {
     /*
      * Return the last element.
      */
@@ -99,8 +98,8 @@ static_array<T, N>::back(void) {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_reference
-static_array<T, N>::back(void) const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::back(void) const
+    -> const_reference {
     /*
      * Return the last element, but it's const.
      */
@@ -108,8 +107,8 @@ static_array<T, N>::back(void) const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::pointer
-static_array<T, N>::data(void) {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::data(void)
+    -> pointer {
     /*
      * Return a pointer to the underlying data.
      */
@@ -117,8 +116,8 @@ static_array<T, N>::data(void) {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_pointer
-static_array<T, N>::data(void) const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::data(void) const
+    -> const_pointer {
     /*
      * Return a pointer to the underlying data, but the elements are const.
      */
@@ -126,89 +125,83 @@ static_array<T, N>::data(void) const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::iterator
-static_array<T, N>::begin() {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::begin() -> iterator {
 
     return m_array;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
-static_array<T, N>::begin() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::begin() const
+    -> const_iterator {
 
     return m_array;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
-static_array<T, N>::cbegin() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::cbegin() const
+    -> const_iterator {
 
     return begin();
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::iterator
-static_array<T, N>::end() {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::end() -> iterator {
 
     return m_array + N;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
-static_array<T, N>::end() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::end() const
+    -> const_iterator {
 
     return m_array + N;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::const_iterator
-static_array<T, N>::cend() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::cend() const
+    -> const_iterator {
 
     return end();
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::reverse_iterator
-static_array<T, N>::rbegin() {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::rbegin()
+    -> reverse_iterator {
 
     return reverse_iterator(end());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr
-    typename static_array<T, N>::const_reverse_iterator
-    static_array<T, N>::rbegin() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::rbegin() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(end());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr
-    typename static_array<T, N>::const_reverse_iterator
-    static_array<T, N>::crbegin() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::crbegin() const
+    -> const_reverse_iterator {
 
     return rbegin();
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::reverse_iterator
-static_array<T, N>::rend() {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::rend()
+    -> reverse_iterator {
 
     return reverse_iterator(begin());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr
-    typename static_array<T, N>::const_reverse_iterator
-    static_array<T, N>::rend() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::rend() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(begin());
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr
-    typename static_array<T, N>::const_reverse_iterator
-    static_array<T, N>::crend() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::crend() const
+    -> const_reverse_iterator {
 
     return rend();
 }
@@ -220,15 +213,15 @@ VECMEM_HOST_AND_DEVICE constexpr bool static_array<T, N>::empty() const {
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::size_type
-static_array<T, N>::size() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::size() const
+    -> size_type {
 
     return N;
 }
 
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr typename static_array<T, N>::size_type
-static_array<T, N>::max_size() const {
+VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::max_size() const
+    -> size_type {
 
     return N;
 }
