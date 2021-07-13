@@ -73,8 +73,8 @@ VECMEM_HOST_AND_DEVICE device_vector<TYPE>& device_vector<TYPE>::operator=(
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::reference
-device_vector<TYPE>::at(size_type pos) {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::at(size_type pos)
+    -> reference {
 
     // Check if the index is valid.
     assert(pos < size());
@@ -84,8 +84,8 @@ device_vector<TYPE>::at(size_type pos) {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reference
-device_vector<TYPE>::at(size_type pos) const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::at(size_type pos) const
+    -> const_reference {
 
     // Check if the index is valid.
     assert(pos < size());
@@ -95,24 +95,23 @@ device_vector<TYPE>::at(size_type pos) const {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::reference
-device_vector<TYPE>::operator[](size_type pos) {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::operator[](size_type pos)
+    -> reference {
 
     // Return a reference to the vector element.
     return m_ptr[pos];
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reference
-device_vector<TYPE>::operator[](size_type pos) const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::operator[](size_type pos) const
+    -> const_reference {
 
     // Return a reference to the vector element.
     return m_ptr[pos];
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::reference
-device_vector<TYPE>::front() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::front() -> reference {
 
     // Make sure that there is at least one element in the vector.
     assert(size() > 0);
@@ -122,8 +121,8 @@ device_vector<TYPE>::front() {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reference
-device_vector<TYPE>::front() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::front() const
+    -> const_reference {
 
     // Make sure that there is at least one element in the vector.
     assert(size() > 0);
@@ -133,8 +132,7 @@ device_vector<TYPE>::front() const {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::reference
-device_vector<TYPE>::back() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::back() -> reference {
 
     // Make sure that there is at least one element in the vector.
     assert(size() > 0);
@@ -144,8 +142,8 @@ device_vector<TYPE>::back() {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reference
-device_vector<TYPE>::back() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::back() const
+    -> const_reference {
 
     // Make sure that there is at least one element in the vector.
     assert(size() > 0);
@@ -155,15 +153,13 @@ device_vector<TYPE>::back() const {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::pointer
-device_vector<TYPE>::data() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::data() -> pointer {
 
     return m_ptr;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_pointer
-device_vector<TYPE>::data() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::data() const -> const_pointer {
 
     return m_ptr;
 }
@@ -190,8 +186,8 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::assign(size_type count,
 
 template <typename TYPE>
 template <typename... Args>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::reference
-device_vector<TYPE>::emplace_back(Args&&... args) {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::emplace_back(Args&&... args)
+    -> reference {
 
     // This can only be done on a resizable vector.
     assert(m_size != nullptr);
@@ -210,8 +206,8 @@ device_vector<TYPE>::emplace_back(Args&&... args) {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::size_type
-device_vector<TYPE>::push_back(const_reference value) {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::push_back(
+    const_reference value) -> size_type {
 
     // This can only be done on a resizable vector.
     assert(m_size != nullptr);
@@ -230,8 +226,7 @@ device_vector<TYPE>::push_back(const_reference value) {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::size_type
-device_vector<TYPE>::pop_back() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::pop_back() -> size_type {
 
     // This can only be done on a resizable vector.
     assert(m_size != nullptr);
@@ -305,85 +300,80 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize(size_type new_size,
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::iterator
-device_vector<TYPE>::begin() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::begin() -> iterator {
 
     return iterator(m_ptr);
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_iterator
-device_vector<TYPE>::begin() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::begin() const
+    -> const_iterator {
 
     return const_iterator(m_ptr);
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_iterator
-device_vector<TYPE>::cbegin() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::cbegin() const
+    -> const_iterator {
 
     return begin();
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::iterator
-device_vector<TYPE>::end() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::end() -> iterator {
 
     return iterator(m_ptr + size());
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_iterator
-device_vector<TYPE>::end() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::end() const -> const_iterator {
 
     return const_iterator(m_ptr + size());
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_iterator
-device_vector<TYPE>::cend() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::cend() const
+    -> const_iterator {
 
     return end();
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::reverse_iterator
-device_vector<TYPE>::rbegin() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::rbegin() -> reverse_iterator {
 
     return reverse_iterator(end());
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reverse_iterator
-device_vector<TYPE>::rbegin() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::rbegin() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(end());
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reverse_iterator
-device_vector<TYPE>::crbegin() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::crbegin() const
+    -> const_reverse_iterator {
 
     return rbegin();
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::reverse_iterator
-device_vector<TYPE>::rend() {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::rend() -> reverse_iterator {
 
     return reverse_iterator(begin());
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reverse_iterator
-device_vector<TYPE>::rend() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::rend() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(begin());
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::const_reverse_iterator
-device_vector<TYPE>::crend() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::crend() const
+    -> const_reverse_iterator {
 
     return rend();
 }
@@ -395,8 +385,7 @@ VECMEM_HOST_AND_DEVICE bool device_vector<TYPE>::empty() const {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::size_type
-device_vector<TYPE>::size() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::size() const -> size_type {
 
     if (m_size == nullptr) {
         return m_capacity;
@@ -412,15 +401,13 @@ device_vector<TYPE>::size() const {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::size_type
-device_vector<TYPE>::max_size() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::max_size() const -> size_type {
 
     return capacity();
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE typename device_vector<TYPE>::size_type
-device_vector<TYPE>::capacity() const {
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::capacity() const -> size_type {
 
     return m_capacity;
 }
