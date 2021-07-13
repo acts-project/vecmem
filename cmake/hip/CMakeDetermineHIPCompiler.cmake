@@ -4,15 +4,30 @@
 #
 # Mozilla Public License Version 2.0
 
-# Find the HIP compiler.
-find_program( CMAKE_HIP_COMPILER NAMES hipcc
-   PATHS "${HIP_ROOT_DIR}"
-         ENV ROCM_PATH
-         ENV HIP_PATH
-         "/opt/rocm"
-         "/opt/rocm/hip"
-   PATH_SUFFIXES "bin"
-   DOC "HIP compiler to use" )
+# Use the HIPCXX environment variable preferably as the HIP compiler.
+if( NOT $ENV{HIPCXX} STREQUAL "" )
+   # Interpret the contents of HIPCXX.
+   get_filename_component( CMAKE_HIP_COMPILER_INIT $ENV{HIPCXX}
+      PROGRAM PROGRAM_ARGS CMAKE_HIP_FLAGS_INIT )
+   if( NOT EXISTS ${CMAKE_HIP_COMPILER_INIT} )
+      message( FATAL_ERROR
+         "Could not find compiler set in environment variable HIPCXX:\n$ENV{HIPCXX}.\n${CMAKE_HIP_COMPILER_INIT}")
+   endif()
+else()
+   # Find the HIP compiler.
+   find_program( CMAKE_HIP_COMPILER_INIT NAMES hipcc
+      PATHS "${HIP_ROOT_DIR}"
+            ENV ROCM_PATH
+            ENV HIP_PATH
+            "/opt/rocm"
+            "/opt/rocm/hip"
+      PATH_SUFFIXES "bin" )
+   set( CMAKE_HIP_FLAGS_INIT "" )
+endif()
+
+# Set up the compiler as a cache variable.
+set( CMAKE_HIP_COMPILER "${CMAKE_HIP_COMPILER_INIT}" CACHE FILEPATH
+   "The HIP compiler to use" )
 mark_as_advanced( CMAKE_HIP_COMPILER )
 
 # If found, figure out the version of ROCm/HIP that we found.
@@ -57,7 +72,7 @@ set( CMAKE_INCLUDE_FLAG_HIP "${CMAKE_INCLUDE_FLAG_CXX}" )
 set( CMAKE_INCLUDE_SYSTEM_FLAG_HIP "${CMAKE_INCLUDE_SYSTEM_FLAG_CXX}" )
 
 # Set up the linker used for components holding HIP source code.
-set( CMAKE_HIP_HOST_LINKER "${CMAKE_CXX_COMPILER}" )
+set( CMAKE_HIP_HOST_LINKER "${CMAKE_HIP_COMPILER}" )
 
 # Decide whether to generate AMD or NVidia code using HIP.
 set( CMAKE_HIP_PLATFORM_DEFAULT "hcc" )
