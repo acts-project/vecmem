@@ -18,3 +18,9 @@ vecmem_add_test( hip
    "test_hip_containers_kernels.hpp" "test_hip_containers_kernels.hip"
    LINK_LIBRARIES vecmem::core vecmem::hip GTest::gtest_main
                   vecmem_testing_common )
+
+# The executable's source code needs to be built into position independent
+# code in certain HIP + GCC combinations. But not most of them... Still, for
+# the test executable let's just take the hit, and always use PIC.
+set_target_properties( vecmem_test_hip PROPERTIES
+   POSITION_INDEPENDENT_CODE TRUE )
