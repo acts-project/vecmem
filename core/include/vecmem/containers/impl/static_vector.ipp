@@ -54,8 +54,8 @@ static_vector<TYPE, MAX_SIZE>::at(size_type pos) {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_reference
-static_vector<TYPE, MAX_SIZE>::at(size_type pos) const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::at(
+    size_type pos) const -> const_reference {
 
     // Make sure that the element exists.
     assert(pos < m_size);
@@ -65,24 +65,24 @@ static_vector<TYPE, MAX_SIZE>::at(size_type pos) const {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::reference
-static_vector<TYPE, MAX_SIZE>::operator[](size_type pos) {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::operator[](
+    size_type pos) -> reference {
 
     // Return the element.
     return *(reinterpret_cast<pointer>(m_elements) + pos);
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_reference
-static_vector<TYPE, MAX_SIZE>::operator[](size_type pos) const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::operator[](
+    size_type pos) const -> const_reference {
 
     // Return the element.
     return *(reinterpret_cast<const_pointer>(m_elements) + pos);
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::reference
-static_vector<TYPE, MAX_SIZE>::front() {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::front()
+    -> reference {
 
     // Make sure that the element exists.
     assert(m_size > 0);
@@ -92,8 +92,8 @@ static_vector<TYPE, MAX_SIZE>::front() {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_reference
-static_vector<TYPE, MAX_SIZE>::front() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::front() const
+    -> const_reference {
 
     // Make sure that the element exists.
     assert(m_size > 0);
@@ -103,8 +103,7 @@ static_vector<TYPE, MAX_SIZE>::front() const {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::reference
-static_vector<TYPE, MAX_SIZE>::back() {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::back() -> reference {
 
     // Make sure that the element exists.
     assert(m_size > 0);
@@ -114,8 +113,8 @@ static_vector<TYPE, MAX_SIZE>::back() {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_reference
-static_vector<TYPE, MAX_SIZE>::back() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::back() const
+    -> const_reference {
 
     // Make sure that the element exists.
     assert(m_size > 0);
@@ -125,15 +124,14 @@ static_vector<TYPE, MAX_SIZE>::back() const {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::pointer
-static_vector<TYPE, MAX_SIZE>::data() {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::data() -> pointer {
 
     return reinterpret_cast<pointer>(m_elements);
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_pointer
-static_vector<TYPE, MAX_SIZE>::data() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::data() const
+    -> const_pointer {
 
     return reinterpret_cast<const_pointer>(m_elements);
 }
@@ -158,9 +156,8 @@ VECMEM_HOST_AND_DEVICE void static_vector<TYPE, MAX_SIZE>::assign(
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::iterator
-static_vector<TYPE, MAX_SIZE>::insert(const_iterator pos,
-                                      const_reference value) {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::insert(
+    const_iterator pos, const_reference value) -> iterator {
 
     // Make sure that one more position is available.
     assert(m_size < array_max_size);
@@ -184,9 +181,8 @@ static_vector<TYPE, MAX_SIZE>::insert(const_iterator pos,
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::iterator
-static_vector<TYPE, MAX_SIZE>::insert(const_iterator pos, size_type count,
-                                      const_reference value) {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::insert(
+    const_iterator pos, size_type count, const_reference value) -> iterator {
 
     // Make sure that the requested number of positions are still available.
     assert(m_size + count <= array_max_size);
@@ -213,8 +209,8 @@ static_vector<TYPE, MAX_SIZE>::insert(const_iterator pos, size_type count,
 
 template <typename TYPE, std::size_t MAX_SIZE>
 template <typename... Args>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::iterator
-static_vector<TYPE, MAX_SIZE>::emplace(const_iterator pos, Args&&... args) {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::emplace(
+    const_iterator pos, Args&&... args) -> iterator {
 
     // Make sure that one more position is available.
     assert(m_size < array_max_size);
@@ -239,8 +235,8 @@ static_vector<TYPE, MAX_SIZE>::emplace(const_iterator pos, Args&&... args) {
 
 template <typename TYPE, std::size_t MAX_SIZE>
 template <typename... Args>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::reference
-static_vector<TYPE, MAX_SIZE>::emplace_back(Args&&... args) {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::emplace_back(
+    Args&&... args) -> reference {
 
     return *(emplace(end(), std::forward<Args>(args)...));
 }
@@ -253,8 +249,8 @@ VECMEM_HOST_AND_DEVICE void static_vector<TYPE, MAX_SIZE>::push_back(
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::iterator
-static_vector<TYPE, MAX_SIZE>::erase(const_iterator pos) {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::erase(
+    const_iterator pos) -> iterator {
 
     // Find the index of this iterator inside of the vector.
     auto id = element_id(pos);
@@ -275,9 +271,8 @@ static_vector<TYPE, MAX_SIZE>::erase(const_iterator pos) {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::iterator
-static_vector<TYPE, MAX_SIZE>::erase(const_iterator first,
-                                     const_iterator last) {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::erase(
+    const_iterator first, const_iterator last) -> iterator {
 
     // Find the indices and pointers of the iterators.
     auto first_id = element_id(first);
@@ -347,89 +342,83 @@ VECMEM_HOST_AND_DEVICE void static_vector<TYPE, MAX_SIZE>::resize(
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::iterator
-static_vector<TYPE, MAX_SIZE>::begin() {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::begin() -> iterator {
 
     return reinterpret_cast<iterator>(m_elements);
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_iterator
-static_vector<TYPE, MAX_SIZE>::begin() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::begin() const
+    -> const_iterator {
 
     return reinterpret_cast<const_iterator>(m_elements);
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_iterator
-static_vector<TYPE, MAX_SIZE>::cbegin() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::cbegin() const
+    -> const_iterator {
 
     return begin();
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::iterator
-static_vector<TYPE, MAX_SIZE>::end() {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::end() -> iterator {
 
     return (reinterpret_cast<iterator>(m_elements) + m_size);
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_iterator
-static_vector<TYPE, MAX_SIZE>::end() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::end() const
+    -> const_iterator {
 
     return (reinterpret_cast<const_iterator>(m_elements) + m_size);
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::const_iterator
-static_vector<TYPE, MAX_SIZE>::cend() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::cend() const
+    -> const_iterator {
 
     return end();
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::reverse_iterator
-static_vector<TYPE, MAX_SIZE>::rbegin() {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::rbegin()
+    -> reverse_iterator {
 
     return reverse_iterator(end());
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE
-    typename static_vector<TYPE, MAX_SIZE>::const_reverse_iterator
-    static_vector<TYPE, MAX_SIZE>::rbegin() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::rbegin() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(end());
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE
-    typename static_vector<TYPE, MAX_SIZE>::const_reverse_iterator
-    static_vector<TYPE, MAX_SIZE>::crbegin() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::crbegin() const
+    -> const_reverse_iterator {
 
     return rbegin();
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::reverse_iterator
-static_vector<TYPE, MAX_SIZE>::rend() {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::rend()
+    -> reverse_iterator {
 
     return reverse_iterator(begin());
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE
-    typename static_vector<TYPE, MAX_SIZE>::const_reverse_iterator
-    static_vector<TYPE, MAX_SIZE>::rend() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::rend() const
+    -> const_reverse_iterator {
 
     return const_reverse_iterator(begin());
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE
-    typename static_vector<TYPE, MAX_SIZE>::const_reverse_iterator
-    static_vector<TYPE, MAX_SIZE>::crend() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::crend() const
+    -> const_reverse_iterator {
 
     return rend();
 }
@@ -441,22 +430,22 @@ VECMEM_HOST_AND_DEVICE bool static_vector<TYPE, MAX_SIZE>::empty() const {
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::size_type
-static_vector<TYPE, MAX_SIZE>::size() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::size() const
+    -> size_type {
 
     return m_size;
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::size_type
-static_vector<TYPE, MAX_SIZE>::max_size() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::max_size() const
+    -> size_type {
 
     return array_max_size;
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::size_type
-static_vector<TYPE, MAX_SIZE>::capacity() const {
+VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::capacity() const
+    -> size_type {
 
     return array_max_size;
 }
