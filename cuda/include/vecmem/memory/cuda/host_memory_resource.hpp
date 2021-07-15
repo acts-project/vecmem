@@ -19,7 +19,7 @@ namespace vecmem::cuda {
  * CUDA devices.
  */
 class host_memory_resource : public memory_resource {
-    private:
+private:
     virtual void* do_allocate(std::size_t, std::size_t) override;
 
     virtual void do_deallocate(void* p, std::size_t, std::size_t) override;

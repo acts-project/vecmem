@@ -27,7 +27,7 @@
 /// Test case for the custom device container types
 class core_device_container_test : public testing::Test {
 
-    protected:
+protected:
     /// Memory resource for the test(s)
     vecmem::host_memory_resource m_resource;
     /// Helper object for the memory copies.

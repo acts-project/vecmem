@@ -15,7 +15,7 @@
 /// Test case for @c vecmem::vector
 class core_vector_test : public testing::Test {
 
-    protected:
+protected:
     /// Memory resource to use in the tests
     vecmem::host_memory_resource m_resource;
 

@@ -28,7 +28,7 @@
 /// Test fixture for the on-device vecmem jagged container tests
 class hip_jagged_containers_test : public testing::Test {
 
-    public:
+public:
     /// Constructor, setting up the input data for the tests.
     hip_jagged_containers_test()
         : m_mem(),
@@ -44,7 +44,7 @@ class hip_jagged_containers_test : public testing::Test {
         m_constants[1] = 1;
     }
 
-    protected:
+protected:
     /// Host (managed) memory resource
     vecmem::hip::host_memory_resource m_mem;
     /// The base vector to perform tests with

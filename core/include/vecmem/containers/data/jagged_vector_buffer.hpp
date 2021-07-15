@@ -28,7 +28,7 @@ namespace data {
 template <typename TYPE>
 class jagged_vector_buffer : public jagged_vector_view<TYPE> {
 
-    public:
+public:
     /// The base type used by this class
     typedef jagged_vector_view<TYPE> base_type;
     /// Use the base class's @c size_type
@@ -107,7 +107,7 @@ class jagged_vector_buffer : public jagged_vector_view<TYPE> {
     ///
     pointer host_ptr() const;
 
-    private:
+private:
     /// Data object for the @c vecmem::data::vector_view array
     std::unique_ptr<value_type, details::deallocator> m_outer_memory;
     /// Data object for the @c vecmem::data::vector_view array on the host

@@ -20,7 +20,7 @@
 /// Test fixture for the on-device vecmem container tests
 class cuda_containers_test : public testing::Test {
 
-    protected:
+protected:
     /// Helper object for performing memory copies
     vecmem::cuda::copy m_copy;
 

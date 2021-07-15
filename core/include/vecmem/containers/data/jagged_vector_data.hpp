@@ -29,7 +29,7 @@ namespace data {
 template <typename T>
 class jagged_vector_data : public jagged_vector_view<T> {
 
-    public:
+public:
     /// Type of the base class
     using base_type = jagged_vector_view<T>;
     /// Use the base class's @c size_type
@@ -48,7 +48,7 @@ class jagged_vector_data : public jagged_vector_view<T> {
      */
     jagged_vector_data(size_type size, memory_resource& mem);
 
-    private:
+private:
     /// Data object owning the allocated memory
     std::unique_ptr<value_type, details::deallocator> m_memory;
 

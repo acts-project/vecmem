@@ -32,7 +32,7 @@ namespace vecmem {
 ///
 class copy {
 
-    public:
+public:
     /// Wrapper struct around the @c copy_type enumeration
     ///
     /// The code does not use "enum struct type" to declare the copy type, as
@@ -143,14 +143,14 @@ class copy {
 
     /// @}
 
-    protected:
+protected:
     /// Perform a "low level" memory copy
     virtual void do_copy(std::size_t size, const void* from, void* to,
                          type::copy_type cptype);
     /// Perform a "low level" memory filling operation
     virtual void do_memset(std::size_t size, void* ptr, int value);
 
-    private:
+private:
     /// Helper function performing the copy of a jagged array/vector
     template <typename TYPE>
     void copy_views(std::size_t size, const data::vector_view<TYPE>* from,

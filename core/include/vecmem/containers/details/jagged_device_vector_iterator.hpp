@@ -32,7 +32,7 @@ namespace details {
 template <typename TYPE>
 class jagged_device_vector_iterator {
 
-    public:
+public:
     /// @name Types describing the underlying data
     /// @{
 
@@ -61,7 +61,7 @@ class jagged_device_vector_iterator {
     ///
     class pointer {
 
-        public:
+    public:
         /// Constructor from a data pointer
         ///
         /// Used a pointer instead of a reference to make the rest of the code
@@ -78,7 +78,7 @@ class jagged_device_vector_iterator {
         VECMEM_HOST_AND_DEVICE
         const value_type* operator->() const;
 
-        private:
+    private:
         /// Temporary device vector created on the stack
         value_type m_vec;
 
@@ -165,7 +165,7 @@ class jagged_device_vector_iterator {
 
     /// @}
 
-    private:
+private:
     /// Pointer to the data (in an array)
     data_pointer m_ptr;
 

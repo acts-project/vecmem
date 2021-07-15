@@ -22,7 +22,7 @@ namespace vecmem {
  * is state-free (on the relevant levels of abstraction).
  */
 class host_memory_resource : public vecmem::memory_resource {
-    private:
+private:
     virtual void* do_allocate(std::size_t, std::size_t) override;
 
     virtual void do_deallocate(void* p, std::size_t, std::size_t) override;

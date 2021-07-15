@@ -23,7 +23,7 @@ namespace vecmem::details {
 ///
 class deallocator {
 
-    public:
+public:
     /// Constructor
     deallocator(std::size_t bytes, memory_resource& resource);
 
@@ -39,7 +39,7 @@ class deallocator {
     /// Operator performing the deletion of the object.
     void operator()(void* ptr);
 
-    private:
+private:
     /// The number of bytes allocated for the memory block
     std::size_t m_bytes;
     /// The memory resource used for deleting the memory block

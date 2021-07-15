@@ -19,15 +19,15 @@ namespace vecmem::sycl::details {
 ///
 class memory_resource_base : public memory_resource {
 
-    public:
+public:
     /// Constructor on top of a user-provided queue
     memory_resource_base(const queue_wrapper& queue = {""});
 
-    protected:
+protected:
     /// The queue that the allocations are made for/on
     queue_wrapper m_queue;
 
-    private:
+private:
     /// Function performing the memory de-allocation
     void do_deallocate(void* ptr, std::size_t nbytes,
                        std::size_t alignment) override final;

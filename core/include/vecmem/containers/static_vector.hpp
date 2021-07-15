@@ -28,7 +28,7 @@ namespace vecmem {
 template <typename TYPE, std::size_t MAX_SIZE>
 class static_vector {
 
-    public:
+public:
     /// @name Type definitions, mimicking @c std::vector
     /// @{
 
@@ -295,7 +295,7 @@ class static_vector {
 
     /// @}
 
-    private:
+private:
     /// Construct a new vector element
     VECMEM_HOST_AND_DEVICE
     void construct(size_type pos, const_reference value);

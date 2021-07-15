@@ -87,7 +87,7 @@ bool almost_equal<TestType>(const TestType& value1, const TestType& value2) {
 class cuda_host_accessible_memory_resource_test
     : public cuda_memory_resource_test {
 
-    protected:
+protected:
     /// Function performing some basic tests using @c vecmem::vector
     template <typename T>
     void test_host_accessible_resource(vecmem::vector<T>& test_vector) {

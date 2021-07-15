@@ -17,14 +17,14 @@ namespace vecmem::sycl {
 /// Device selector used by the VecMem SYCL library by default
 class device_selector : public cl::sycl::device_selector {
 
-    public:
+public:
     /// Constructor, with an optional device name
     device_selector(const std::string& deviceName = "");
 
     /// Operator used to "grade" the available devices
     int operator()(const cl::sycl::device& device) const override;
 
-    private:
+private:
     /// Default device selector used internally
     cl::sycl::default_selector m_defaultSelector;
 

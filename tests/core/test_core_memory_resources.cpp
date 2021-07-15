@@ -56,7 +56,7 @@ bool almost_equal<TestType>(const TestType& value1, const TestType& value2) {
 class core_memory_resource_test
     : public testing::TestWithParam<vecmem::memory_resource*> {
 
-    protected:
+protected:
     /// Function performing some basic tests using @c vecmem::vector
     template <typename T>
     void test_resource(vecmem::vector<T>& test_vector) {

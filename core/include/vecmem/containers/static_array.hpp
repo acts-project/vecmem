@@ -31,7 +31,7 @@ namespace vecmem {
  */
 template <typename T, std::size_t N>
 class static_array {
-    public:
+public:
     /// @name Type definitions, mimicking @c std::array
     /// @{
 
@@ -278,7 +278,7 @@ class static_array {
 
     /// @}
 
-    private:
+private:
     /**
      * @brief Private helper-constructor for the parameter pack constructor.
      */

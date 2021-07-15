@@ -24,7 +24,7 @@ class opaque_queue;
 ///
 class queue_wrapper {
 
-    public:
+public:
     /// Construct a queue for a device with a specific name
     queue_wrapper(const std::string& deviceName = "");
     /// Wrap an existing @c cl::sycl::queue object
@@ -51,7 +51,7 @@ class queue_wrapper {
     /// Access a typeless pointer to the managed @c cl::sycl::queue object
     const void* queue() const;
 
-    private:
+private:
     /// Bare pointer to the wrapped @c cl::sycl::queue object
     void* m_queue;
     /// Smart pointer to the managed @c cl::sycl::queue object

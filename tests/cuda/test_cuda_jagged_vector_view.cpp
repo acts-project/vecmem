@@ -21,7 +21,7 @@
 #include "vecmem/utils/cuda/copy.hpp"
 
 class cuda_jagged_vector_view_test : public testing::Test {
-    protected:
+protected:
     vecmem::cuda::managed_memory_resource m_mem;
     vecmem::jagged_vector<int> m_vec;
     vecmem::array<int, 2> m_constants;

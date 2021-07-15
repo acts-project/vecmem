@@ -28,7 +28,7 @@ namespace vecmem {
 template <typename T>
 class atomic {
 
-    public:
+public:
     /// @name Type definitions
     /// @{
 
@@ -97,7 +97,7 @@ class atomic {
 
     /// @}
 
-    private:
+private:
     /// Pointer to the value to perform atomic operations on
     pointer m_ptr;
 

@@ -13,7 +13,7 @@ namespace vecmem::sycl::details {
 
 /// Helper class for managing queue objects in memory
 class opaque_queue : public cl::sycl::queue {
-    public:
+public:
     using cl::sycl::queue::queue;
 };
 

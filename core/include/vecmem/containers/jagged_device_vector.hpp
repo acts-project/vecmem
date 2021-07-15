@@ -46,7 +46,7 @@ namespace vecmem {
 template <typename T>
 class jagged_device_vector {
 
-    public:
+public:
     /// @name Type definitions, mimicking @c std::vector
     /// @{
 
@@ -205,7 +205,7 @@ class jagged_device_vector {
 
     /// @}
 
-    private:
+private:
     /**
      * The number of rows in this jagged vector.
      */

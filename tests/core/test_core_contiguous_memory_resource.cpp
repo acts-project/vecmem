@@ -19,7 +19,7 @@
 /// Test case for @c vecmem::contiguous_memory_resource
 class core_contiguous_memory_resource_test : public testing::Test {
 
-    protected:
+protected:
     /// The base memory resource
     vecmem::host_memory_resource m_upstream;
     /// The contiguous memory resource

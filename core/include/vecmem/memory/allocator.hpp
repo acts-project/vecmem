@@ -31,7 +31,7 @@ namespace vecmem {
  * avoided.
  */
 class allocator {
-    public:
+public:
     /**
      * @brief Construct an allocator.
      *
@@ -127,7 +127,7 @@ class allocator {
     template <typename T>
     void delete_object(T* p);
 
-    private:
+private:
     memory_resource& m_mem;
 };
 }  // namespace vecmem
