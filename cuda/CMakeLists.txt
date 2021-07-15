@@ -34,7 +34,11 @@ vecmem_add_library( vecmem_cuda cuda SHARED
    "src/utils/cuda_wrappers.hpp"
    "src/utils/cuda_wrappers.cpp"
    "src/utils/select_device.hpp"
-   "src/utils/select_device.cpp" )
+   "src/utils/select_device.cpp"
+   # not-cub caching allocator
+   "src/memory/cuda/notcub/allocate_device.cpp"
+   "src/memory/cuda/notcub/allocate_host.cpp"
+   )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )
