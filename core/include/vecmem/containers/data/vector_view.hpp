@@ -30,7 +30,7 @@ namespace data {
 template <typename TYPE>
 class vector_view {
 
-    public:
+public:
     /// Size type used in the class
     typedef unsigned int size_type;
     /// Pointer type to the size of the array
@@ -88,7 +88,7 @@ class vector_view {
     VECMEM_HOST_AND_DEVICE
     const_pointer ptr() const;
 
-    protected:
+protected:
     /// Maximum capacity of the array
     size_type m_capacity;
     /// Pointer to the size of the array in memory

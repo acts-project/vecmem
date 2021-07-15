@@ -19,7 +19,7 @@
 /// Test fixture for the on-device vecmem container tests
 class hip_containers_test : public testing::Test {
 
-    protected:
+protected:
     /// Helper object for performing memory copies
     vecmem::hip::copy m_copy;
 

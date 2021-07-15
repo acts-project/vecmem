@@ -27,7 +27,7 @@ namespace vecmem {
 template <typename T, std::size_t N>
 class device_array {
 
-    public:
+public:
     /// @name Type definitions, mimicking @c std::array
     /// @{
 
@@ -180,7 +180,7 @@ class device_array {
 
     /// @}
 
-    private:
+private:
     /// Pointer to the start of the array
     pointer m_ptr;
 

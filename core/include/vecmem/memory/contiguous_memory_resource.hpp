@@ -29,7 +29,7 @@ namespace vecmem {
  * resource.
  */
 class contiguous_memory_resource : public memory_resource {
-    public:
+public:
     /**
      * @brief Constructs the contiguous memory resource.
      *
@@ -45,7 +45,7 @@ class contiguous_memory_resource : public memory_resource {
      */
     ~contiguous_memory_resource();
 
-    private:
+private:
     virtual void* do_allocate(std::size_t, std::size_t) override;
 
     virtual void do_deallocate(void* p, std::size_t, std::size_t) override;

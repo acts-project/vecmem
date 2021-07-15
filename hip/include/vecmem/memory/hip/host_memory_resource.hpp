@@ -14,7 +14,7 @@ namespace vecmem::hip {
 /// Memory resource for HIP shared host/device memory
 class host_memory_resource final : public memory_resource {
 
-    private:
+private:
     /// Function performing the memory allocation
     void* do_allocate(std::size_t nbytes, std::size_t alignment) override final;
 

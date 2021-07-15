@@ -39,7 +39,7 @@ static constexpr std::size_t array_invalid_size = static_cast<std::size_t>(-1);
 template <typename T, std::size_t N = details::array_invalid_size>
 class array {
 
-    public:
+public:
     /// @name Type definitions, mimicking @c std::array
     /// @{
 
@@ -86,7 +86,7 @@ class array {
     /// Struct used for deleting the allocated memory block
     class deleter {
 
-        public:
+    public:
         /// Constructor
         deleter(size_type size, memory_resource& resource);
 
@@ -102,7 +102,7 @@ class array {
         /// Operator performing the deletion of the object.
         void operator()(void* ptr);
 
-        private:
+    private:
         /// The number of elements in the array
         size_type m_size;
         /// The memory resource used for deleting the memory block
@@ -214,7 +214,7 @@ class array {
 
     /// @}
 
-    private:
+private:
     /// The size of the allocated array
     size_type m_size;
     /// The allocated array

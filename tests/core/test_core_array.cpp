@@ -41,7 +41,7 @@ bool operator==(const TestType1& value1, const TestType1& value2) {
 class core_array_test
     : public testing::TestWithParam<vecmem::memory_resource*> {
 
-    protected:
+protected:
     /// Function testing a particular array object.
     template <typename T, std::size_t N>
     void test_array(vecmem::array<T, N>& a) {

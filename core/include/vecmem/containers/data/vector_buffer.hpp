@@ -27,7 +27,7 @@ namespace data {
 template <typename TYPE>
 class vector_buffer : public vector_view<TYPE> {
 
-    public:
+public:
     /// The base type used by this class
     typedef vector_view<TYPE> base_type;
     /// Size type definition coming from the base class
@@ -53,7 +53,7 @@ class vector_buffer : public vector_view<TYPE> {
     vector_buffer(size_type capacity, size_type size,
                   memory_resource& resource);
 
-    private:
+private:
     /// Data object owning the allocated memory
     std::unique_ptr<char, details::deallocator> m_memory;
 

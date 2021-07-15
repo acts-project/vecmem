@@ -21,7 +21,7 @@
 /// Test case for testing @c vecmem::copy
 class core_copy_test : public testing::Test {
 
-    protected:
+protected:
     /// Memory resource for the test(s)
     vecmem::host_memory_resource m_resource;
     /// Copy object for the test(s)

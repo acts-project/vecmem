@@ -24,7 +24,7 @@ namespace details {
 template <typename Iterator>
 class reverse_iterator {
 
-    public:
+public:
     /// @name Type definitions, mimicking @c std::reverse_iterator
     /// @{
 
@@ -112,7 +112,7 @@ class reverse_iterator {
 
     /// @}
 
-    private:
+private:
     /// Helper function producing a pointer from a forward iterator
     template <typename T>
     VECMEM_HOST_AND_DEVICE static T* to_pointer(T* ptr);

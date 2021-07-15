@@ -22,7 +22,7 @@
 #include <set>
 
 class core_jagged_vector_view_test : public testing::Test {
-    protected:
+protected:
     vecmem::host_memory_resource m_mem;
     vecmem::jagged_vector<int> m_vec;
     vecmem::data::jagged_vector_data<int> m_data;

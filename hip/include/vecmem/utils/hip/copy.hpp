@@ -15,7 +15,7 @@ namespace vecmem::hip {
 /// Specialisation of @c vecmem::copy for HIP
 class copy : public vecmem::copy {
 
-    protected:
+protected:
     /// Perform a memory copy using HIP
     virtual void do_copy(std::size_t size, const void* from, void* to,
                          type::copy_type cptype) override;

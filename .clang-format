@@ -9,5 +9,5 @@ AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 PointerAlignment: Left
 ColumnLimit: 80
-AccessModifierOffset: 0
+AccessModifierOffset: -4
 KeepEmptyLinesAtTheStartOfBlocks: true

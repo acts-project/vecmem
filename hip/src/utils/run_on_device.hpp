@@ -18,7 +18,7 @@ namespace vecmem::hip::details {
 /// Helper functor used for running a piece of code on a given device
 class run_on_device {
 
-    public:
+public:
     /// Constructor, with the device that code should run on
     run_on_device(int device) : m_device(device) {}
 
@@ -33,7 +33,7 @@ class run_on_device {
         exe();
     }
 
-    private:
+private:
     /// The device to run the code on
     const int m_device;
 

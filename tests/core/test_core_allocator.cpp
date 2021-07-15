@@ -16,7 +16,7 @@
 #include "vecmem/memory/host_memory_resource.hpp"
 
 class test_class {
-    public:
+public:
     test_class() : m_int_2(11), m_bool_2(true) {}
     test_class(int n) : m_int_2(n), m_bool_2(false) {}
     test_class(int n, int m) : m_int_2(n), m_bool_2(m > 100) {}
@@ -29,7 +29,7 @@ class test_class {
 };
 
 class core_allocator_test : public testing::Test {
-    protected:
+protected:
     vecmem::host_memory_resource m_upstream;
     vecmem::allocator* m_alloc;
 

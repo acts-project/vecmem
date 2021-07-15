@@ -26,7 +26,7 @@ namespace vecmem::testing {
 ///
 class memory_resource_name_gen {
 
-    public:
+public:
     /// Storage type for the memory resource names
     typedef std::map<memory_resource*, std::string> storage_type;
 
@@ -37,7 +37,7 @@ class memory_resource_name_gen {
     std::string operator()(
         const ::testing::TestParamInfo<memory_resource*>& info);
 
-    private:
+private:
     /// Internal map keeping track of the user readable names of the resources
     storage_type m_names;
     /// Unknown name counter

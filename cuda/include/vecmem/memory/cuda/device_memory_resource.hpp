@@ -19,7 +19,7 @@ namespace vecmem::cuda {
  * for CUDA device memory. Each instance is bound to a specific device.
  */
 class device_memory_resource : public memory_resource {
-    public:
+public:
     /**
      * @brief Construct a CUDA device resource for a specific device.
      *
@@ -33,7 +33,7 @@ class device_memory_resource : public memory_resource {
      */
     device_memory_resource(int device = -1);
 
-    private:
+private:
     virtual void* do_allocate(std::size_t, std::size_t) override;
 
     virtual void do_deallocate(void* p, std::size_t, std::size_t) override;

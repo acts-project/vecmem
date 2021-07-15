@@ -26,7 +26,7 @@
 /// Test case for the custom container types
 class core_container_test : public testing::Test {
 
-    protected:
+protected:
     /// Memory resource to use in the tests
     vecmem::host_memory_resource m_resource;
     /// Test vector used for testing all of the custom containers

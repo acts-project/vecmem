@@ -27,7 +27,7 @@ namespace vecmem {
  * split.
  */
 class binary_page_memory_resource : public memory_resource {
-    public:
+public:
     /**
      * @brief Initialize a binary page memory manager depending on an
      * upstream memory resource.
@@ -40,7 +40,7 @@ class binary_page_memory_resource : public memory_resource {
      */
     ~binary_page_memory_resource();
 
-    private:
+private:
     /**
      * @brief The different possible states a page can be in.
      *

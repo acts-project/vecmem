@@ -29,7 +29,7 @@ namespace vecmem {
 template <typename TYPE>
 class device_vector {
 
-    public:
+public:
     /// @name Type definitions, mimicking @c std::vector
     /// @{
 
@@ -242,7 +242,7 @@ class device_vector {
 
     /// @}
 
-    private:
+private:
     /// Construct a new vector element
     VECMEM_HOST_AND_DEVICE
     void construct(size_type pos, const_reference value);

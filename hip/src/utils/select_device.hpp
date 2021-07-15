@@ -24,7 +24,7 @@ namespace vecmem::hip::details {
  */
 class select_device {
 
-    public:
+public:
     /**
      * @brief Constructs the object, switching the current HIP device
      * to the requested number.
@@ -39,7 +39,7 @@ class select_device {
      */
     ~select_device();
 
-    private:
+private:
     /**
      * @brief The old device number, this is what we restore when the
      * object goes out of scope.
