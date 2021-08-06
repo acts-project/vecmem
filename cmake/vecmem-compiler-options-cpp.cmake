@@ -18,6 +18,8 @@ if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
    foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
       vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wall" )
       vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wextra" )
+      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wshadow" )
+      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wunused-local-typedefs" )
    endforeach()
 
    # More rigorous tests for the Debug builds.

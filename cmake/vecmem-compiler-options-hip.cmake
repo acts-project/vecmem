@@ -16,6 +16,8 @@ if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
    foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
       vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wall" )
       vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wextra" )
+      vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wshadow" )
+      vecmem_add_flag( CMAKE_HIP_FLAGS_${mode} "-Wunused-local-typedefs" )
    endforeach()
 endif()
 
