@@ -15,6 +15,8 @@ foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wall" )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wextra" )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wno-unknown-cuda-version" )
+   vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wshadow" )
+   vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wunused-local-typedefs" )
 endforeach()
 
 # More rigorous tests for the Debug builds.
