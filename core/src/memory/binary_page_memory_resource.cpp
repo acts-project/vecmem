@@ -112,8 +112,8 @@ void binary_page_memory_resource::do_deallocate(void *p, std::size_t,
      */
     std::stack<page *> rem;
 
-    for (std::unique_ptr<page> &p : m_pages) {
-        rem.push(p.get());
+    for (std::unique_ptr<page> &pg : m_pages) {
+        rem.push(pg.get());
     }
 
     /*
