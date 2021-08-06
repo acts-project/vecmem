@@ -16,17 +16,17 @@
 
 namespace vecmem {
 
-void copy::do_copy(std::size_t size, const void* from, void* to,
+void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                    type::copy_type) {
 
     // Perform a simple POSIX memory copy.
-    memcpy(to, from, size);
+    memcpy(to_ptr, from_ptr, size);
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(4,
                      "Performed POSIX memory copy of %lu bytes from %p "
                      "to %p",
-                     size, from, to);
+                     size, from_ptr, to_ptr);
 }
 
 void copy::do_memset(std::size_t size, void* ptr, int value) {

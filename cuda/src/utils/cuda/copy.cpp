@@ -32,7 +32,7 @@ static const std::string copy_type_printer[copy::type::count] = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};
 
-void copy::do_copy(std::size_t size, const void* from, void* to,
+void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                    type::copy_type cptype) {
 
     // Check if anything needs to be done.
@@ -42,20 +42,20 @@ void copy::do_copy(std::size_t size, const void* from, void* to,
     }
 
     // Some sanity checks.
-    assert(from != nullptr);
-    assert(to != nullptr);
+    assert(from_ptr != nullptr);
+    assert(to_ptr != nullptr);
     assert(static_cast<int>(cptype) >= 0);
     assert(static_cast<int>(cptype) < static_cast<int>(copy::type::count));
 
     // Perform the copy.
     VECMEM_CUDA_ERROR_CHECK(
-        cudaMemcpy(to, from, size, copy_type_translator[cptype]));
+        cudaMemcpy(to_ptr, from_ptr, size, copy_type_translator[cptype]));
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(4,
                      "Performed %s memory copy of %lu bytes from %p to "
                      "%p",
-                     copy_type_printer[cptype].c_str(), size, from, to);
+                     copy_type_printer[cptype].c_str(), size, from_ptr, to_ptr);
 }
 
 void copy::do_memset(std::size_t size, void* ptr, int value) {
