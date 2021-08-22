@@ -18,7 +18,7 @@ namespace vecmem::sycl {
 
 copy::copy(const queue_wrapper& queue) : m_queue(queue) {}
 
-void copy::do_copy(std::size_t size, const void* from, void* to,
+void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                    type::copy_type) {
 
     // Check if anything needs to be done.
@@ -28,16 +28,16 @@ void copy::do_copy(std::size_t size, const void* from, void* to,
     }
 
     // Some sanity checks.
-    assert(from != nullptr);
-    assert(to != nullptr);
+    assert(from_ptr != nullptr);
+    assert(to_ptr != nullptr);
 
     // Perform the copy.
-    auto event = details::get_queue(m_queue).memcpy(to, from, size);
+    auto event = details::get_queue(m_queue).memcpy(to_ptr, from_ptr, size);
     event.wait_and_throw();
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(4, "Performed memory copy of %lu bytes from %p to %p",
-                     size, from, to);
+                     size, from_ptr, to_ptr);
 }
 
 void copy::do_memset(std::size_t size, void* ptr, int value) {
