@@ -133,16 +133,16 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
                                            : m_outer_host_memory.get());
 
     // Set up the host accessible memory array.
-    std::ptrdiff_t ptrdiff = 0;
+    std::ptrdiff_t ptrdiff =
+        (capacities.size() * sizeof(typename value_type::size_type));
     for (std::size_t i = 0; i < capacities.size(); ++i) {
-        new (host_ptr() + i) value_type(
-            capacities[i],
-            reinterpret_cast<typename value_type::size_pointer>(
-                m_inner_memory.get() + ptrdiff),
-            reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff +
-                                    sizeof(typename value_type::size_type)));
-        ptrdiff += capacities[i] * sizeof(TYPE) +
-                   sizeof(typename value_type::size_type);
+        new (host_ptr() + i)
+            value_type(capacities[i],
+                       reinterpret_cast<typename value_type::size_pointer>(
+                           m_inner_memory.get() +
+                           i * sizeof(typename value_type::size_type)),
+                       reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff));
+        ptrdiff += capacities[i] * sizeof(TYPE);
     }
 }
 
