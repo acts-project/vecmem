@@ -14,14 +14,14 @@
  * depending on the GCC version used, so we try to unify them by aliassing
  * depending on the compiler feature flags.
  */
-#if __has_include(<memory_resource>)
+#if __cplusplus >= 201703L && __has_include(<memory_resource>)
 #include <memory_resource>
 
 namespace vecmem {
 template <typename T>
 using polymorphic_allocator = std::pmr::polymorphic_allocator<T>;
 }
-#elif __has_include(<experimental/memory_resource>)
+#elif __cplusplus == 201402L || (__cplusplus >= 201703L && __has_include(<experimental/memory_resource>))
 #include <experimental/memory_resource>
 
 namespace vecmem {
