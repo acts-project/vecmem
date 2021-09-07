@@ -9,8 +9,8 @@
 #pragma once
 
 // CUDA include(s).
-#include "cuda.h"
-#include "cuda_runtime.h"
+//#include "cuda.h"
+//#include "cuda_runtime.h"
 
 // System include(s).
 #include <atomic>
@@ -19,26 +19,28 @@
 #include <iostream>
 
 namespace vecmem::cuda {
+namespace arena_details {
+
+// forward declaration of cuda_stream, to not have cuda dependency
+class cuda_stream;
 
 class cuda_stream_view {
   public:
-    constexpr cuda_stream_view()                        = default;
-    constexpr cuda_stream_view(cuda_stream_view const&) = default;
-    constexpr cuda_stream_view(cuda_stream_view&&)      = default;
-    constexpr cuda_stream_view& operator=(cuda_stream_view const&) = default;
-    constexpr cuda_stream_view& operator=(cuda_stream_view&&) = default;
+    cuda_stream_view()                        = default;
+    cuda_stream_view(cuda_stream_view const&) = default;
+    cuda_stream_view(cuda_stream_view&&)      = default;
+    cuda_stream_view& operator=(cuda_stream_view const&) = default;
+    cuda_stream_view& operator=(cuda_stream_view&&) = default;
     ~cuda_stream_view()                                       = default;
 
     // Implicit conversion from cudaStream_t
-    constexpr cuda_stream_view(cudaStream_t stream);
+    cuda_stream_view(void* stream);
 
     // Returns the wrppped stream
-    constexpr cudaStream_t value() const noexcept;
+    //constexpr cuda_stream value() const noexcept;
 
     // Explicit conversion to cudaStream_t
-    explicit constexpr operator cudaStream_t() const noexcept {
-  	  return value();
-  	}
+    //explicit constexpr operator cuda_stream() const noexcept;
 
     // Return true if the wrapped stream is the CUDA per-thread default stream
     bool is_per_thread_default() const noexcept;
@@ -50,23 +52,17 @@ class cuda_stream_view {
     void synchronize() const;
 
     // Synchronize the viewed CUDA stream, don't throw if there is an error
-    /*
-    void synchronize_no_throw() const noexcept {
+    /*void synchronize_no_throw() const noexcept {
     	ACTS_CUDA_ERROR_CHECK(cudaStreamSynchronize(stream_));
-    }
-    */
+    }*/
+    
+    void* stream();
+
+    const void* stream() const;
   private:
-    cudaStream_t stream_{0};
+    void* ptr_cuda_stream;
+    //std::unique_ptr<cuda_stream> stream_;
 }; // class cuda_stream_view
-
-// Static cuda_stream_view of the default stream (stream 0), for convenience
-//static constexpr cuda_stream_view cuda_stream_default{};
-
-// Static cuda_stream_view of cudaStreamLegacy, for convenience
-//static cuda_stream_view cuda_stream_legacy{cudaStreamLegacy};
-
-// Static cuda_stream_view of cudaStreamPerThread, for convenience
-//static cuda_stream_view cuda_stream_per_thread{cudaStreamPerThread};
 
 // Equality ciomparison operator for streams
 // 
@@ -89,4 +85,5 @@ inline bool operator!=(cuda_stream_view lhs, cuda_stream_view rhs);
 // @return std::ostream& the output ostream
 inline std::ostream& operator<<(std::ostream& os, cuda_stream_view sv);
 
-}
+} // namespace arena_details
+} // namespace vecmem::cuda
