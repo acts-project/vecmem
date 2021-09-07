@@ -9,8 +9,17 @@
 // CUDA plugin include(s).
 #include "details.cpp"
 #include "vecmem/memory/cuda/arena_memory_resource/arena_memory_resource.hpp"
+#include "vecmem/memory/memory_resource.hpp"
+
+#include <cstddef>
+#include <utility>
+#include <map>
+#include <shared_mutex>
+#include <memory>
+#include <thread>
 
 namespace vecmem::cuda {
+namespace arena_details {
 
 struct CudaDeviceId {
     using value_type = int;
@@ -24,10 +33,35 @@ struct CudaDeviceId {
 };
 
 template <typename Upstream>
+arena_memory_resource<Upstream>::arena_memory_resource( 
+      Upstream* upstream_memory_resource, 
+      std::size_t initial_size, 
+      std::size_t maximum_size) 
+      : global_arena_(upstream_memory_resource, initial_size, maximum_size) {}
+
+template <typename Upstream>
 bool arena_memory_resource<Upstream>::supports_streams() const noexcept { return true; }
 
 template <typename Upstream>
 bool arena_memory_resource<Upstream>::supports_get_mem_info() const noexcept { return false; }
+
+template <typename Upstream>
+bool arena_memory_resource<Upstream>::do_is_equal(const memory_resource &other) const noexcept { 
+  const arena_memory_resource *c;
+  c = dynamic_cast<const arena_memory_resource *>(&other);
+
+  return c != nullptr;
+}
+
+template <typename Upstream>
+void* arena_memory_resource<Upstream>::do_allocate(std::size_t bytes, std::size_t) {
+  return do_allocate(cuda::align_up(bytes, 8), cuda_stream_view{});
+}
+
+template <typename Upstream>
+void arena_memory_resource<Upstream>::do_deallocate(void* p, std::size_t bytes, std::size_t) {
+  do_deallocate(p, cuda::align_up(bytes, 8), cuda_stream_view{});
+}
 
 template <typename Upstream>
 void* arena_memory_resource<Upstream>::do_allocate(std::size_t bytes, cuda_stream_view stream) {
@@ -86,9 +120,9 @@ arena<Upstream>& arena_memory_resource<Upstream>::get_thread_arena() {
   }
 
   std::lock_guard<std::shared_timed_mutex> lock_write(mtx_);
-  auto a = std::make_shared<arena>(global_arena_);
+  auto a = std::make_shared<arena<Upstream>>(global_arena_);
   thread_arenas_.emplace(id, a);
-  thread_local arena_cleaner<Upstream> cleaner{a};
+  thread_local arena_cleaner<Upstream> cleaner(a);
   return *a;
 }
 
@@ -97,12 +131,12 @@ arena<Upstream>& arena_memory_resource<Upstream>::get_stream_arena(cuda_stream_v
   //if(use_per_thread_arena(stream)){
 
     std::shared_lock<std::shared_timed_mutex> lockRead(mtx_);
-    auto const it = stream_arenas_.find(stream.value());
+    auto const it = stream_arenas_.find(stream.stream());
     if (it != stream_arenas_.end()) { return it->second; }
 
     std::lock_guard<std::shared_timed_mutex> lock_write(mtx_);
-    stream_arenas_.emplace(stream.value(), global_arena_);
-    return stream_arenas_.at(stream.value());
+    stream_arenas_.emplace(stream.stream(), global_arena_);
+    return stream_arenas_.at(stream.stream());
   //}
 }
 
@@ -111,4 +145,5 @@ std::pair<std::size_t, std::size_t> arena_memory_resource<Upstream>::do_get_mem_
   return std::make_pair(0, 0);
 }
 
-}
+} // namespace arena_details
+} // namespace vecmem::cuda

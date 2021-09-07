@@ -19,39 +19,52 @@
 #include <thread>
 
 namespace vecmem::cuda {
+namespace arena_details {
 
 template <typename Upstream>
 class arena_memory_resource : public memory_resource {
   public:
-    explicit arena_memory_resource( Upstream* upstream_memory_resource, 
-                                    std::size_t initial_size = global_arena<Upstream>::default_initial_size, 
-                                    std::size_t maximum_size = global_arena<Upstream>::default_maximum_size)
-                                    : global_arena_{upstream_memory_resource, initial_size, maximum_size}
-                                  {}
+    arena_memory_resource( Upstream* upstream_memory_resource, 
+                          std::size_t initial_size, 
+                          std::size_t maximum_size);
 
     arena_memory_resource(arena_memory_resource const&) = delete;
     arena_memory_resource& operator=(arena_memory_resource const&) = delete;
 
-    bool supports_streams() const noexcept override;
+    ~arena_memory_resource() = default;
 
-    bool supports_get_mem_info() const noexcept override;
+    bool supports_streams() const noexcept;
+
+    bool supports_get_mem_info() const noexcept;
 
   private:
 
+    // Override virtual method do_allocate of memory_resource
+    virtual void* do_allocate(std::size_t, std::size_t) override;
 
-    void* do_allocate(std::size_t bytes, cuda_stream_view stream) override;
+    // Override virtual method do_deallocate of memory_resource
+    virtual void do_deallocate(void*, std::size_t, std::size_t) override;
 
-    void do_deallocate(void* p, std::size_t bytes, cuda_stream_view stream) override;
+    // Override virtual method do_is_equal of memory_resource
+    virtual bool do_is_equal(const memory_resource &other) const noexcept override;
 
-    void deallocate_from_other_arena(void* p, std::size_t bytes, cuda_stream_view stream);
+    // Overload of do_allocate, to add the parameter stream, that is importan to know where allocate
+    void* do_allocate(std::size_t bytes, cuda_stream_view stream);
 
+    // Overload of do_deallocate, to add the parameter stream, that is importan to know where allocate
+    void do_deallocate(void* p, std::size_t bytes, cuda_stream_view stream);
+
+    void deallocate_from_other_arena(void* p, std::size_t bytes, cuda_stream_view stream = cuda_stream_view{});
+
+    // By a stream gives the arena corresponding a that stream
     arena<Upstream>& get_arena(cuda_stream_view stream);
 
+    // Give the arena for the corresponding thread
     arena<Upstream>& get_thread_arena();
-
+  
     arena<Upstream>& get_stream_arena(cuda_stream_view stream);
 
-    std::pair<std::size_t, std::size_t> do_get_mem_info(cuda_stream_view stream) const override;
+    std::pair<std::size_t, std::size_t> do_get_mem_info(cuda_stream_view stream) const;
 
     static bool use_per_thread_arena(cuda_stream_view stream) {
 		  return stream.is_per_thread_default();
@@ -59,10 +72,9 @@ class arena_memory_resource : public memory_resource {
 
     global_arena<Upstream> global_arena_;
     std::map<std::thread::id, std::shared_ptr<arena<Upstream>>> thread_arenas_;
-    std::map<cudaStream_t, arena<Upstream>> stream_arenas_;
+    std::map<void*, arena<Upstream>> stream_arenas_;
     mutable std::shared_timed_mutex mtx_;
 };// class arena_memory_resource
 
-
-
-}
+} // namespace arena_details
+} // namespace vecmem::cuda
