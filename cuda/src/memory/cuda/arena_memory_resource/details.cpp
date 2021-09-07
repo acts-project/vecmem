@@ -7,10 +7,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "../../../utils/cuda/aligment.cpp"
-#include "../../../utils/cuda/cuda_stream_view.cpp"
+#include "cuda_stream_view.cpp"
 #include "vecmem/memory/cuda/arena_memory_resource/details.hpp"
 
 namespace vecmem::cuda {
+namespace arena_details {
 
 constexpr std::size_t minimum_superblock_size = 1u << 18u;
 
@@ -49,11 +50,11 @@ bool block::operator<(block const& b) const { return this->pointer_ < b.pointer_
 constexpr std::size_t allocation_alignment = 256;
 
 constexpr std::size_t align_up(std::size_t value) noexcept {
-  return align_up(value, allocation_alignment);
+  return cuda::align_up(value, allocation_alignment);
 } 
 
 constexpr std::size_t align_down(std::size_t value) noexcept {
-  return align_down(value, allocation_alignment);
+  return cuda::align_down(value, allocation_alignment);
 }
 
 inline block first_fit(std::set<block>& free_blocks, std::size_t size){
@@ -128,13 +129,13 @@ global_arena<Upstream>::global_arena(Upstream* upstream_memory_resource, std::si
     // assert maximum arena size required to be a multiple of 256 bytes
 
     if(initial_size == default_initial_size || maximum_size == default_maximum_size) {
-      std::size_t free{}, total{};
-      cudaMemGetInfo(&free, &total);
+      std::size_t free_{}, total{};
+      cudaMemGetInfo(&free_, &total);
       if(initial_size == default_initial_size) {
-        initial_size = align_up(std::min(free, total / 2));
+        initial_size = align_up(std::min(free_, total / 2));
       }
       if(maximum_size == default_maximum_size) {
-        this->maximum_size_ = align_down(free) - reserverd_size;
+        this->maximum_size_ = align_down(free_) - reserverd_size;
       }
     }
     // initial size exceeds the maxium pool size
@@ -183,17 +184,17 @@ template <typename Upstream>
 constexpr std::size_t global_arena<Upstream>::size_to_grow(std::size_t size) const {
   /*
   case if maximum pool size exceeded
-  if(this->currentSize_ + size > this->maximum_size_) {
+  if(this->current_size_ + size > this->maximum_size_) {
 
   }
   */
-  return this->maximum_size_ - this->currentSize_;
+  return this->maximum_size_ - this->current_size_;
 }
 
 template <typename Upstream>
 block global_arena<Upstream>::expand_arena(std::size_t size) {
   this->upstream_blocks_.push_back({this->upstream_memory_resource_->allocate(size), size});
-  this->currentSize_ += size;
+  this->current_size_ += size;
   return this->upstream_blocks_.back();
 }
 
@@ -299,4 +300,5 @@ arena_cleaner<Upstream>::~arena_cleaner() {
   }
 }
 
-}
+} // namespace arena_details
+} // namespace vecmem::cuda

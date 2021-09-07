@@ -8,10 +8,11 @@
 
 #pragma once
 
-#include "vecmem/utils/cuda/cuda_stream_view.hpp"
+// Local include(s)
+#include "cuda_stream_view.hpp"
 
 // CUDA include(s).
-#include <cuda_runtime_api.h>
+//#include <cuda_runtime_api.h>
 
 // System include(s).
 #include <algorithm>
@@ -23,6 +24,7 @@
 #include <vector>
 
 namespace vecmem::cuda {
+namespace arena_details {
 
 // Minimum size of a Superblock (256 KiB)
 //constexpr std::size_t minimum_superblock_size = 1u << 18u;
@@ -292,5 +294,5 @@ class arena_cleaner {
   std::weak_ptr<arena<Upstream>> arena_;
 };// class arena_cleaner
 
-
-}
+} // namespace arena_details
+} // namespace vecmem::cuda
