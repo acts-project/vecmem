@@ -72,3 +72,37 @@ string( LENGTH "${CMAKE_SOURCE_DIR}/" VECMEM_SOURCE_DIR_LENGTH )
 target_compile_definitions( vecmem_core PUBLIC
    $<BUILD_INTERFACE:VECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}>
    $<BUILD_INTERFACE:VECMEM_SOURCE_DIR_LENGTH=${VECMEM_SOURCE_DIR_LENGTH}> )
+
+# Figure out where to get <memory_resource> from.
+include( CheckCXXSourceCompiles )
+check_cxx_source_compiles( "
+   #include <memory_resource>
+   int main() {
+       std::pmr::memory_resource* mr = nullptr;
+       std::pmr::polymorphic_allocator<int> pa(mr);
+       return 0;
+   }
+   " VECMEM_HAVE_PMR_MEMORY_RESOURCE )
+if( VECMEM_HAVE_PMR_MEMORY_RESOURCE )
+   message( STATUS "Using memory resource types from the std::pmr namespace" )
+   target_compile_definitions( vecmem_core PUBLIC
+      VECMEM_HAVE_PMR_MEMORY_RESOURCE )
+else()
+   check_cxx_source_compiles( "
+      #include <experimental/memory_resource>
+      int main() {
+          std::experimental::pmr::memory_resource* mr = nullptr;
+          std::experimental::pmr::polymorphic_allocator<int> pa(mr);
+          return 0;
+      }
+      " VECMEM_HAVE_EXPERIMENTAL_PMR_MEMORY_RESOURCE )
+   if( VECMEM_HAVE_EXPERIMENTAL_PMR_MEMORY_RESOURCE )
+      message( STATUS "Using memory resource types from the "
+         "std::experimental::pmr namespace" )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_HAVE_EXPERIMENTAL_PMR_MEMORY_RESOURCE )
+   else()
+      message( SEND_ERROR
+         "C++17 LFTS V1 (P0220R1) component memory_resource not found!" )
+   endif()
+endif()
