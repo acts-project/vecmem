@@ -11,7 +11,6 @@
 // Local include(s)
 #include "vecmem/memory/cuda/arena_memory_resource/cuda_stream_view.hpp"
 #include "get_cuda_stream.hpp"
-//#include "cuda_stream.hpp"
 
 // Cuda include(s)
 #include <cuda_runtime_api.h>
