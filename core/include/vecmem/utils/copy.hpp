@@ -82,6 +82,11 @@ public:
                     std::vector<TYPE2, ALLOC>& to,
                     type::copy_type cptype = type::unknown);
 
+    /// Helper function for getting the size of a resizable 1D buffer
+    template <typename TYPE>
+    typename data::vector_view<TYPE>::size_type get_size(
+        const data::vector_view<TYPE>& data);
+
     /// @}
 
     /// @name Jagged vector data handling functions
@@ -141,6 +146,16 @@ public:
                     std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to,
                     type::copy_type cptype = type::unknown);
 
+    /// Helper function for getting the sizes of a resizable jagged vector
+    template <typename TYPE>
+    std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
+        const data::jagged_vector_view<TYPE>& data);
+
+    /// Helper function for getting the sizes of a resizable jagged buffer
+    template <typename TYPE>
+    std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
+        const data::jagged_vector_buffer<TYPE>& data);
+
     /// @}
 
 protected:
@@ -155,10 +170,10 @@ private:
     template <typename TYPE>
     void copy_views(std::size_t size, const data::vector_view<TYPE>* from,
                     data::vector_view<TYPE>* to, type::copy_type cptype);
-    /// Helper function for getting the size of a resizable 1D buffer
+    /// Helper function for getting the sizes of a jagged vector/buffer
     template <typename TYPE>
-    typename data::vector_view<TYPE>::size_type get_size(
-        const data::vector_view<TYPE>& data);
+    std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
+        const data::vector_view<TYPE>* data, std::size_t size);
 
 };  // class copy
 
