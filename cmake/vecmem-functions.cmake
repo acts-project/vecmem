@@ -12,7 +12,8 @@ include( CMakeParseArguments )
 
 # Helper function for setting up the VecMem libraries.
 #
-# Usage: vecmem_add_library( vecmem_core core SHARED
+# Usage: vecmem_add_library( vecmem_core core
+#                            [TYPE SHARED/STATIC]
 #                            include/source1.hpp source2.cpp )
 #
 function( vecmem_add_library fullname basename )
