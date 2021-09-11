@@ -12,7 +12,7 @@ include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-sycl )
 
 # Set up the build of the VecMem SYCL library.
-vecmem_add_library( vecmem_sycl sycl SHARED
+vecmem_add_library( vecmem_sycl sycl
    # Memory management.
    "include/vecmem/memory/sycl/details/memory_resource_base.hpp"
    "src/memory/sycl/details/memory_resource_base.sycl"

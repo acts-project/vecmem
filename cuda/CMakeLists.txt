@@ -18,7 +18,7 @@ include( vecmem-compiler-options-cuda )
 find_package( CUDAToolkit REQUIRED )
 
 # Set up the build of the VecMem CUDA library.
-vecmem_add_library( vecmem_cuda cuda SHARED
+vecmem_add_library( vecmem_cuda cuda
    # Memory resources.
    "include/vecmem/memory/cuda/device_memory_resource.hpp"
    "src/memory/cuda/device_memory_resource.cpp"
