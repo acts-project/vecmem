@@ -10,6 +10,11 @@ include( vecmem-functions )
 # Set up the used C++ standard(s).
 set( CMAKE_CXX_STANDARD 17 CACHE STRING "The (host) C++ standard to use" )
 
+# Turn on the correct setting for the __cplusplus macro with MSVC.
+if( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )
+   vecmem_add_flag( CMAKE_CXX_FLAGS "/Zc:__cplusplus" )
+endif()
+
 # Turn on a number of warnings for the "known compilers".
 if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
     ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) )
