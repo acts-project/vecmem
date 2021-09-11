@@ -12,13 +12,17 @@ include( CMakeParseArguments )
 
 # Helper function for setting up the VecMem libraries.
 #
-# Usage: vecmem_add_library( vecmem_core core SHARED
+# Usage: vecmem_add_library( vecmem_core core
+#                            [TYPE SHARED/STATIC]
 #                            include/source1.hpp source2.cpp )
 #
-function( vecmem_add_library fullname basename type )
+function( vecmem_add_library fullname basename )
+
+   # Parse the function's options.
+   cmake_parse_arguments( ARG "" "TYPE" "" ${ARGN} )
 
    # Create the library.
-   add_library( ${fullname} ${type} ${ARGN} )
+   add_library( ${fullname} ${ARG_TYPE} ${ARG_UNPARSED_ARGUMENTS} )
 
    # Set up how clients should find its headers.
    target_include_directories( ${fullname} PUBLIC

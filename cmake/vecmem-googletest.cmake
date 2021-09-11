@@ -30,6 +30,10 @@ FetchContent_Declare( GoogleTest
 # Options used in the build of GoogleTest.
 set( BUILD_GMOCK FALSE CACHE BOOL "Turn off the build of GMock" )
 set( INSTALL_GTEST FALSE CACHE BOOL "Turn off the installation of GoogleTest" )
+if( WIN32 )
+   set( gtest_force_shared_crt TRUE CACHE BOOL
+      "Use shared (DLL) run-time library, even with static libraries" )
+endif()
 
 # Get it into the current directory.
 FetchContent_Populate( GoogleTest )

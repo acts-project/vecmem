@@ -39,3 +39,12 @@ vecmem_lib_option( SYCL "Build the vecmem::sycl library" )
 # Debug message output level in the code.
 set( VECMEM_DEBUG_MSG_LVL 0 CACHE STRING
    "Debug message output level" )
+
+# Set the default library type, based on the platform.
+set( _sharedLibDefault TRUE )
+if( WIN32 )
+   set( _sharedLibDefault FALSE )
+endif()
+set( BUILD_SHARED_LIBS ${_sharedLibDefault} CACHE BOOL
+   "Flag for building shared/static libraries" )
+unset( _sharedLibDefault )
