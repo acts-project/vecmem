@@ -30,6 +30,12 @@ protected:
 /// Test the dumb allocation of a bunch of vectors
 TEST_F(core_contiguous_memory_resource_test, allocations) {
 
+// Skip this test with MSVC, in debug builds. As MSVC pads vectors in a way
+// that makes this test fail.
+#if defined(_MSC_VER) && defined(_DEBUG)
+    GTEST_SKIP();
+#else
+
     /// Fixed size for the test vectors
     static constexpr std::size_t VECTOR_SIZE = 100;
 
@@ -38,18 +44,20 @@ TEST_F(core_contiguous_memory_resource_test, allocations) {
     vecmem::vector<int> vec1(VECTOR_SIZE, &m_resource);
 
     vecmem::vector<char> vec2(VECTOR_SIZE, &m_resource);
-    EXPECT_TRUE(static_cast<void*>(&*(vec2.begin())) ==
-                static_cast<void*>(&*(vec1.end())));
+    EXPECT_EQ(static_cast<void*>(&*(vec2.begin())),
+              static_cast<void*>(&*(vec1.end())));
 
     vecmem::vector<double> vec3(VECTOR_SIZE, &m_resource);
-    EXPECT_TRUE(static_cast<void*>(&*(vec3.begin())) ==
-                static_cast<void*>(&*(vec2.end())));
+    EXPECT_EQ(static_cast<void*>(&*(vec3.begin())),
+              static_cast<void*>(&*(vec2.end())));
 
     vecmem::vector<float> vec4(VECTOR_SIZE, &m_resource);
-    EXPECT_TRUE(static_cast<void*>(&*(vec4.begin())) ==
-                static_cast<void*>(&*(vec3.end())));
+    EXPECT_EQ(static_cast<void*>(&*(vec4.begin())),
+              static_cast<void*>(&*(vec3.end())));
 
     vecmem::vector<int> vec5(VECTOR_SIZE, &m_resource);
-    EXPECT_TRUE(static_cast<void*>(&*(vec5.begin())) ==
-                static_cast<void*>(&*(vec4.end())));
+    EXPECT_EQ(static_cast<void*>(&*(vec5.begin())),
+              static_cast<void*>(&*(vec4.end())));
+
+#endif // MSVC debug build...
 }

@@ -40,15 +40,17 @@ TEST_F(core_container_test, const_device_vector) {
 
     const vecmem::const_device_vector<int> test_vector(
         vecmem::get_data(m_reference_vector));
-    EXPECT_TRUE(test_vector.size() == m_reference_vector.size());
-    EXPECT_TRUE(test_vector.empty() == m_reference_vector.empty());
+    EXPECT_EQ(test_vector.size(), m_reference_vector.size());
+    EXPECT_EQ(test_vector.empty(), m_reference_vector.empty());
     EXPECT_TRUE(std::equal(m_reference_vector.begin(), m_reference_vector.end(),
                            test_vector.begin()));
-    EXPECT_TRUE(std::accumulate(test_vector.begin(), test_vector.end(), 0) ==
-                std::accumulate(test_vector.rbegin(), test_vector.rend(), 0));
+    EXPECT_EQ(std::accumulate(test_vector.begin(), test_vector.end(), 0),
+              std::accumulate(test_vector.rbegin(), test_vector.rend(), 0));
     for (std::size_t i = 0; i < m_reference_vector.size(); ++i) {
-        EXPECT_TRUE(test_vector.at(i) == m_reference_vector.at(i));
-        EXPECT_TRUE(test_vector[i] == m_reference_vector[i]);
+        const vecmem::const_device_vector<int>::size_type ii =
+            static_cast<vecmem::const_device_vector<int>::size_type>(i);
+        EXPECT_EQ(test_vector.at(ii), m_reference_vector.at(i));
+        EXPECT_EQ(test_vector[ii], m_reference_vector[i]);
     }
 }
 
@@ -57,15 +59,17 @@ TEST_F(core_container_test, device_vector) {
 
     const vecmem::device_vector<int> test_vector(
         vecmem::get_data(m_reference_vector));
-    EXPECT_TRUE(test_vector.size() == m_reference_vector.size());
-    EXPECT_TRUE(test_vector.empty() == m_reference_vector.empty());
+    EXPECT_EQ(test_vector.size(), m_reference_vector.size());
+    EXPECT_EQ(test_vector.empty(), m_reference_vector.empty());
     EXPECT_TRUE(std::equal(m_reference_vector.begin(), m_reference_vector.end(),
                            test_vector.begin()));
-    EXPECT_TRUE(std::accumulate(test_vector.begin(), test_vector.end(), 0) ==
-                std::accumulate(test_vector.rbegin(), test_vector.rend(), 0));
+    EXPECT_EQ(std::accumulate(test_vector.begin(), test_vector.end(), 0),
+              std::accumulate(test_vector.rbegin(), test_vector.rend(), 0));
     for (std::size_t i = 0; i < m_reference_vector.size(); ++i) {
-        EXPECT_TRUE(test_vector.at(i) == m_reference_vector.at(i));
-        EXPECT_TRUE(test_vector[i] == m_reference_vector[i]);
+        const vecmem::const_device_vector<int>::size_type ii =
+            static_cast<vecmem::const_device_vector<int>::size_type>(i);
+        EXPECT_EQ(test_vector.at(ii), m_reference_vector.at(i));
+        EXPECT_EQ(test_vector[ii], m_reference_vector[i]);
     }
 }
 
@@ -95,15 +99,15 @@ TEST_F(core_container_test, const_device_array) {
 
     const vecmem::const_device_array<int, 9> test_array(
         vecmem::get_data(m_reference_vector));
-    EXPECT_TRUE(test_array.size() == m_reference_vector.size());
-    EXPECT_TRUE(test_array.empty() == m_reference_vector.empty());
+    EXPECT_EQ(test_array.size(), m_reference_vector.size());
+    EXPECT_EQ(test_array.empty(), m_reference_vector.empty());
     EXPECT_TRUE(std::equal(m_reference_vector.begin(), m_reference_vector.end(),
                            test_array.begin()));
-    EXPECT_TRUE(std::accumulate(test_array.begin(), test_array.end(), 0) ==
-                std::accumulate(test_array.rbegin(), test_array.rend(), 0));
+    EXPECT_EQ(std::accumulate(test_array.begin(), test_array.end(), 0),
+              std::accumulate(test_array.rbegin(), test_array.rend(), 0));
     for (std::size_t i = 0; i < m_reference_vector.size(); ++i) {
-        EXPECT_TRUE(test_array.at(i) == m_reference_vector.at(i));
-        EXPECT_TRUE(test_array[i] == m_reference_vector[i]);
+        EXPECT_EQ(test_array.at(i), m_reference_vector.at(i));
+        EXPECT_EQ(test_array[i], m_reference_vector[i]);
     }
 }
 
@@ -112,15 +116,15 @@ TEST_F(core_container_test, device_array) {
 
     const vecmem::device_array<int, 9> test_array(
         vecmem::get_data(m_reference_vector));
-    EXPECT_TRUE(test_array.size() == m_reference_vector.size());
-    EXPECT_TRUE(test_array.empty() == m_reference_vector.empty());
+    EXPECT_EQ(test_array.size(), m_reference_vector.size());
+    EXPECT_EQ(test_array.empty(), m_reference_vector.empty());
     EXPECT_TRUE(std::equal(m_reference_vector.begin(), m_reference_vector.end(),
                            test_array.begin()));
-    EXPECT_TRUE(std::accumulate(test_array.begin(), test_array.end(), 0) ==
-                std::accumulate(test_array.rbegin(), test_array.rend(), 0));
+    EXPECT_EQ(std::accumulate(test_array.begin(), test_array.end(), 0),
+              std::accumulate(test_array.rbegin(), test_array.rend(), 0));
     for (std::size_t i = 0; i < m_reference_vector.size(); ++i) {
-        EXPECT_TRUE(test_array.at(i) == m_reference_vector.at(i));
-        EXPECT_TRUE(test_array[i] == m_reference_vector[i]);
+        EXPECT_EQ(test_array.at(i), m_reference_vector.at(i));
+        EXPECT_EQ(test_array[i], m_reference_vector[i]);
     }
 }
 

@@ -43,13 +43,16 @@ TEST_F(core_jagged_vector_view_test, top_level_size) {
     EXPECT_EQ(m_jag.size(), 6);
 }
 
+/// Helper macro
+#define SIZE_VAR(X) static_cast<vecmem::device_vector<int>::size_type>(X)
+
 TEST_F(core_jagged_vector_view_test, row_size) {
-    EXPECT_EQ(m_jag.at(0).size(), 4);
-    EXPECT_EQ(m_jag.at(1).size(), 2);
-    EXPECT_EQ(m_jag.at(2).size(), 4);
-    EXPECT_EQ(m_jag.at(3).size(), 1);
-    EXPECT_EQ(m_jag.at(4).size(), 0);
-    EXPECT_EQ(m_jag.at(5).size(), 5);
+    EXPECT_EQ(m_jag.at(0).size(), SIZE_VAR(4));
+    EXPECT_EQ(m_jag.at(1).size(), SIZE_VAR(2));
+    EXPECT_EQ(m_jag.at(2).size(), SIZE_VAR(4));
+    EXPECT_EQ(m_jag.at(3).size(), SIZE_VAR(1));
+    EXPECT_EQ(m_jag.at(4).size(), SIZE_VAR(0));
+    EXPECT_EQ(m_jag.at(5).size(), SIZE_VAR(5));
 }
 
 TEST_F(core_jagged_vector_view_test, two_d_access) {
