@@ -30,4 +30,15 @@ if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
    # More rigorous tests for the Debug builds.
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-Werror" )
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-pedantic" )
+
+elseif( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )
+
+   # Basic flags for all build modes.
+   foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
+      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "/W4" )
+   endforeach()
+
+   # More rigorous tests for the Debug builds.
+   vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "/WX" )
+
 endif()
