@@ -59,5 +59,5 @@ TEST_F(core_contiguous_memory_resource_test, allocations) {
     EXPECT_EQ(static_cast<void*>(&*(vec5.begin())),
               static_cast<void*>(&*(vec4.end())));
 
-#endif // MSVC debug build...
+#endif  // MSVC debug build...
 }
