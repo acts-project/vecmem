@@ -128,10 +128,16 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
     // Create an input vector in regular host memory.
     std::vector<int> host_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
+    // Helper local type definitions.
+    typedef
+        typename vecmem::data::vector_buffer<int>::size_type buffer_size_type;
+    typedef typename vecmem::device_vector<int>::size_type vector_size_type;
+
     // Create a resizable buffer from that data.
-    static constexpr std::size_t BUFFER_SIZE = 100;
+    static constexpr buffer_size_type BUFFER_SIZE = 100;
     vecmem::data::vector_buffer<int> resizable_buffer(
-        BUFFER_SIZE, host_vector.size(), m_resource);
+        BUFFER_SIZE, static_cast<buffer_size_type>(host_vector.size()),
+        m_resource);
     m_copy.setup(resizable_buffer);
     EXPECT_EQ(resizable_buffer.capacity(), BUFFER_SIZE);
     m_copy(vecmem::get_data(host_vector), resizable_buffer);
@@ -151,45 +157,45 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
     // Modify the device vector in different ways, and check that it would work
     // as expected.
     device_vector.clear();
-    EXPECT_EQ(device_vector.size(), 0);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(0));
 
     device_vector.push_back(10);
-    EXPECT_EQ(device_vector.size(), 1);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(1));
     EXPECT_EQ(device_vector.at(0), 10);
 
     device_vector.emplace_back(15);
-    EXPECT_EQ(device_vector.size(), 2);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(2));
     EXPECT_EQ(device_vector.back(), 15);
 
     device_vector.assign(20, 123);
-    EXPECT_EQ(device_vector.size(), 20);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(20));
     for (int value : device_vector) {
         EXPECT_EQ(value, 123);
     }
 
     device_vector.resize(40, 234);
-    EXPECT_EQ(device_vector.size(), 40);
-    for (std::size_t i = 0; i < 20; ++i) {
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(40));
+    for (vector_size_type i = 0; i < 20; ++i) {
         EXPECT_EQ(device_vector[i], 123);
     }
-    for (std::size_t i = 20; i < 40; ++i) {
+    for (vector_size_type i = 20; i < 40; ++i) {
         EXPECT_EQ(device_vector[i], 234);
     }
     device_vector.resize(25);
-    EXPECT_EQ(device_vector.size(), 25);
-    for (std::size_t i = 0; i < 20; ++i) {
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(25));
+    for (vector_size_type i = 0; i < 20; ++i) {
         EXPECT_EQ(device_vector[i], 123);
     }
-    for (std::size_t i = 20; i < 25; ++i) {
+    for (vector_size_type i = 20; i < 25; ++i) {
         EXPECT_EQ(device_vector[i], 234);
     }
 
     device_vector.pop_back();
-    EXPECT_EQ(device_vector.size(), 24);
-    for (std::size_t i = 0; i < 20; ++i) {
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(24));
+    for (vector_size_type i = 0; i < 20; ++i) {
         EXPECT_EQ(device_vector[i], 123);
     }
-    for (std::size_t i = 20; i < 24; ++i) {
+    for (vector_size_type i = 20; i < 24; ++i) {
         EXPECT_EQ(device_vector[i], 234);
     }
 

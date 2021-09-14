@@ -24,12 +24,14 @@ data::jagged_vector_data<TYPE> get_data(jagged_vector<TYPE>& vec,
         size,
         (resource != nullptr ? *resource : *(vec.get_allocator().resource())));
 
-    // Helper local type definition.
+    // Helper local type definition(s).
     typedef typename data::jagged_vector_data<TYPE>::value_type value_type;
+    typedef typename value_type::size_type size_type;
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] = value_type(vec[i].size(), vec[i].data());
+        result.m_ptr[i] =
+            value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 
     // Return the created object.
@@ -50,12 +52,14 @@ data::jagged_vector_data<TYPE> get_data(
     // Construct the object to be returned.
     data::jagged_vector_data<TYPE> result(size, *resource);
 
-    // Helper local type definition.
+    // Helper local type definition(s).
     typedef typename data::jagged_vector_data<TYPE>::value_type value_type;
+    typedef typename value_type::size_type size_type;
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] = value_type(vec[i].size(), vec[i].data());
+        result.m_ptr[i] =
+            value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 
     // Return the created object.
@@ -74,13 +78,15 @@ data::jagged_vector_data<const TYPE> get_data(const jagged_vector<TYPE>& vec,
         size,
         (resource != nullptr ? *resource : *(vec.get_allocator().resource())));
 
-    // Helper local type definition.
+    // Helper local type definition(s).
     typedef
         typename data::jagged_vector_data<const TYPE>::value_type value_type;
+    typedef typename value_type::size_type size_type;
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] = value_type(vec[i].size(), vec[i].data());
+        result.m_ptr[i] =
+            value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 
     // Return the created object.
@@ -101,13 +107,15 @@ data::jagged_vector_data<const TYPE> get_data(
     // Construct the object to be returned.
     data::jagged_vector_data<const TYPE> result(size, *resource);
 
-    // Helper local type definition.
+    // Helper local type definition(s).
     typedef
         typename data::jagged_vector_data<const TYPE>::value_type value_type;
+    typedef typename value_type::size_type size_type;
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] = value_type(vec[i].size(), vec[i].data());
+        result.m_ptr[i] =
+            value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 
     // Return the created object.
