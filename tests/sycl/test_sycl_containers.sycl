@@ -255,7 +255,7 @@ TEST_F(sycl_containers_test, extendable_memory) {
     copy(output_buffer, output);
 
     // Check its contents.
-    EXPECT_EQ(output.size(), 89);
+    EXPECT_EQ(output.size(), static_cast<vecmem::vector<int>::size_type>(89));
     for (int value : output) {
         EXPECT_LT(10, value);
     }

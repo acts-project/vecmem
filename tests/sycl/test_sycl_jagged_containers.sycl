@@ -379,7 +379,8 @@ TEST_F(sycl_jagged_containers_test, filter) {
     // Check the output. Note that the order of elements in the "inner vectors"
     // is not fixed. And for the single-element and empty vectors I just decided
     // to use the same formalism simply for symmetry...
-    EXPECT_EQ(output.size(), 6);
+    EXPECT_EQ(output.size(),
+              static_cast<vecmem::jagged_vector<int>::size_type>(6));
     EXPECT_EQ(std::set<int>(output[0].begin(), output[0].end()),
               std::set<int>({1, 3}));
     EXPECT_EQ(std::set<int>(output[1].begin(), output[1].end()),

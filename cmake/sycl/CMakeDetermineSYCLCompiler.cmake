@@ -5,10 +5,10 @@
 # Mozilla Public License Version 2.0
 
 # Use the SYCLCXX environment variable preferably as the SYCL compiler.
-if( NOT $ENV{SYCLCXX} STREQUAL "" )
+if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
 
    # Interpret the contents of SYCLCXX.
-   get_filename_component( CMAKE_SYCL_COMPILER_INIT $ENV{SYCLCXX}
+   get_filename_component( CMAKE_SYCL_COMPILER_INIT "$ENV{SYCLCXX}"
       PROGRAM PROGRAM_ARGS CMAKE_SYCL_FLAGS_INIT )
    if( NOT EXISTS ${CMAKE_SYCL_COMPILER_INIT} )
       message( FATAL_ERROR
@@ -16,7 +16,7 @@ if( NOT $ENV{SYCLCXX} STREQUAL "" )
    endif()
 
    # Determine the version of the SYCL compiler.
-   execute_process( COMMAND ${CMAKE_SYCL_COMPILER_INIT} --version
+   execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}" "--version"
       OUTPUT_VARIABLE _syclVersionOutput
       RESULT_VARIABLE _syclVersionResult )
    if( ${_syclVersionResult} EQUAL 0 )
@@ -61,7 +61,9 @@ set( CMAKE_SYCL_HOST_LINKER "${CMAKE_SYCL_COMPILER}" )
 # C++ compiler.)
 set( CMAKE_SYCL_COMPILE_OPTIONS_PIC "${CMAKE_CXX_COMPILE_OPTIONS_PIC}" )
 
-# Default optimisation flags. (The same as those of the C++ compiler.)
+# Default (optimisation) flags. (Heavily based on the C++ compiler.)
+set( CMAKE_SYCL_FLAGS_INIT
+   "${CMAKE_SYCL_FLAGS_INIT} ${CMAKE_CXX_FLAGS_INIT} $ENV{SYCLFLAGS}" )
 set( CMAKE_SYCL_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT}" )
 set( CMAKE_SYCL_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT}" )
 set( CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT

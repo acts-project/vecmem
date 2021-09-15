@@ -109,8 +109,9 @@ protected:
 
         // Remove a couple of elements from the vectors.
         for (int i : {26, 38, 25}) {
-            std::remove(reference_vector.begin(), reference_vector.end(), i);
-            std::remove(test_vector.begin(), test_vector.end(), i);
+            (void)std::remove(reference_vector.begin(), reference_vector.end(),
+                              i);
+            (void)std::remove(test_vector.begin(), test_vector.end(), i);
         }
         // Make sure that they are still the same.
         EXPECT_EQ(reference_vector.size(), test_vector.size());
