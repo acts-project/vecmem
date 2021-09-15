@@ -34,9 +34,9 @@ if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
 elseif( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )
 
    # Basic flags for all build modes.
-   foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
-      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "/W4" )
-   endforeach()
+   string( REGEX REPLACE "/W[0-9]" "" CMAKE_CXX_FLAGS
+      "${CMAKE_CXX_FLAGS}" )
+   vecmem_add_flag( CMAKE_CXX_FLAGS "/W4" )
 
    # More rigorous tests for the Debug builds.
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "/WX" )
