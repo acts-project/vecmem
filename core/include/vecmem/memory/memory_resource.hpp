@@ -41,7 +41,7 @@ using memory_resource = std::experimental::pmr::memory_resource;
 
 #if defined(VECMEM_NOT_HAVE_DEFAULT_RESOURCE)
 
-#include <mutex>
+#include <atomic>
 
 #if defined(VECMEM_HAVE_PMR_MEMORY_RESOURCE)
 namespace std::pmr {
