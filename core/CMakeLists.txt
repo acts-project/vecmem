@@ -83,6 +83,8 @@ check_cxx_source_compiles( "
        return 0;
    }
    " VECMEM_HAVE_PMR_MEMORY_RESOURCE )
+   set(pmr_include "memory_resource")
+   set(pmr_ns "std::pmr")
 if( VECMEM_HAVE_PMR_MEMORY_RESOURCE )
    message( STATUS "Using memory resource types from the std::pmr namespace" )
    target_compile_definitions( vecmem_core PUBLIC
@@ -101,8 +103,24 @@ else()
          "std::experimental::pmr namespace" )
       target_compile_definitions( vecmem_core PUBLIC
          VECMEM_HAVE_EXPERIMENTAL_PMR_MEMORY_RESOURCE )
+
+      set(pmr_include "experimental/memory_resource")
+      set(pmr_ns "std::experimental::pmr")
    else()
       message( SEND_ERROR
          "C++17 LFTS V1 (P0220R1) component memory_resource not found!" )
    endif()
+endif()
+
+check_cxx_source_compiles( "
+  #include <${pmr_include}>
+  int main() {
+      ${pmr_ns}::set_default_resource();
+      ${pmr_ns}::memory_resource* mr = ${pmr_ns}::get_default_resource();
+      return 0;
+  }" VECMEM_HAVE_DEFAULT_RESOURCE)
+
+if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
+    target_compile_definitions( vecmem_core PUBLIC
+        VECMEM_NOT_HAVE_DEFAULT_RESOURCE )
 endif()
