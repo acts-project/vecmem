@@ -14,16 +14,17 @@ on: [ push, pull_request ]
 jobs:
 
   # Native build job on an Ubuntu system.
-  ubuntu-native:
-
-    # The system to run on.
-    runs-on: ubuntu-latest
+  native:
 
     # The different build modes to test.
     strategy:
       matrix:
         BUILD_TYPE: [ "Release", "Debug" ]
         DEBUG_MSG_LVL: [ 0, 5 ]
+        OS: ["ubuntu-latest", "macos-10.15"]
+
+    # The system to run on.
+    runs-on: ${{ matrix.OS }}
 
     # The build/test steps to execute.
     steps:
