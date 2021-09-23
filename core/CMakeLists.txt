@@ -122,6 +122,5 @@ check_cxx_source_compiles( "
   " VECMEM_HAVE_DEFAULT_RESOURCE)
 
 if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
-    target_compile_definitions( vecmem_core PUBLIC
-        VECMEM_NOT_HAVE_DEFAULT_RESOURCE )
+   target_sources(vecmem_core PRIVATE src/memory/default_resource_polyfill.cpp)
 endif()
