@@ -35,6 +35,9 @@ if( WIN32 )
       "Use shared (DLL) run-time library, even with static libraries" )
 endif()
 
+# Silence some warnings with modern versions of CMake on macOS.
+set( CMAKE_MACOSX_RPATH TRUE )
+
 # Get it into the current directory.
 FetchContent_Populate( GoogleTest )
 add_subdirectory( "${googletest_SOURCE_DIR}" "${googletest_BINARY_DIR}"
