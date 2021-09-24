@@ -97,10 +97,10 @@
 ///            [1-5] range.
 /// @param MSG The text message to use, before the variadic arguments
 ///
-#define VECMEM_DEBUG_MSG(LVL, MSG, ...)                                   \
-    __VECMEM_PRINT_##LVL(                                                 \
-        "[vecmem] %s:%i " MSG "\n",                                       \
-        (static_cast<const char*>(__FILE__) + VECMEM_SOURCE_DIR_LENGTH ), \
+#define VECMEM_DEBUG_MSG(LVL, MSG, ...)                                  \
+    __VECMEM_PRINT_##LVL(                                                \
+        "[vecmem] %s:%i " MSG "\n",                                      \
+        (static_cast<const char*>(__FILE__) + VECMEM_SOURCE_DIR_LENGTH), \
         __LINE__, __VA_ARGS__)
 
 #else
@@ -123,4 +123,4 @@
 ///
 #define VECMEM_DEBUG_MSG(LVL, ...) __VECMEM_DEBUG_MSG(LVL, __VA_ARGS__, "")
 
-#endif // MSC
+#endif  // MSC
