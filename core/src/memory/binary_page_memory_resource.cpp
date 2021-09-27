@@ -13,6 +13,7 @@
 #include <stack>
 
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/utils/debug.hpp"
 
 namespace {
 /**
@@ -46,11 +47,13 @@ binary_page_memory_resource::~binary_page_memory_resource() {
 }
 
 void *binary_page_memory_resource::do_allocate(std::size_t size, std::size_t) {
+    VECMEM_DEBUG_MSG(5, "Request received for %ld bytes", size);
     /*
      * First, we round our allocation request up to a power of two, since
      * that is what the sizes of all our pages are.
      */
     std::size_t goal = round_up(size);
+    VECMEM_DEBUG_MSG(5, "Will be allocating %ld bytes instead", goal);
 
     /*
      * Attempt to find a free page that can fit our allocation goal.
@@ -97,11 +100,16 @@ void *binary_page_memory_resource::do_allocate(std::size_t size, std::size_t) {
      */
     cand->state = page_state::OCCUPIED;
 
+    VECMEM_DEBUG_MSG(2, "Allocated %ld (%ld) bytes at %p", size, goal,
+                     cand->addr);
     return cand->addr;
 }
 
 void binary_page_memory_resource::do_deallocate(void *p, std::size_t,
                                                 std::size_t) {
+
+    VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", p);
+
     page *cand = nullptr;
 
     /*
