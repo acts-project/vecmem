@@ -116,7 +116,7 @@ check_cxx_source_compiles( "
    #include <${pmr_include}>
    int main() {
          ${pmr_ns}::set_default_resource(nullptr);
-         ${pmr_ns}::memory_resource* mr = ${pmr_ns}::get_default_resource();
+         (void)${pmr_ns}::get_default_resource();
          return 0;
    }
   " VECMEM_HAVE_DEFAULT_RESOURCE)
