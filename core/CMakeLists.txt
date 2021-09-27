@@ -60,6 +60,8 @@ vecmem_add_library( vecmem_core core
    "src/memory/arena.cpp"
    "src/memory/arena_memory_resource.cpp"
    "include/vecmem/memory/arena_memory_resource.hpp"
+   "src/memory/identity_memory_resource.cpp"
+   "include/vecmem/memory/identity_memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/host_memory_resource.hpp"
    "src/memory/binary_page_memory_resource.cpp"
