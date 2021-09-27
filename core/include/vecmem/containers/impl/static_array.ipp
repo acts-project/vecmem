@@ -15,13 +15,10 @@
 #include "vecmem/utils/types.hpp"
 
 namespace vecmem {
+
 template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE static_array<T, N>::static_array(void) {
-    /*
-     * This function does quite literally nothing, and leaves the array's
-     * contents uninitialized.
-     */
-}
+VECMEM_HOST_AND_DEVICE constexpr static_array<T, N>::static_array(void)
+    : m_array() {}
 
 template <typename T, std::size_t N>
 VECMEM_HOST constexpr auto static_array<T, N>::at(size_type i) -> reference {
@@ -236,9 +233,8 @@ VECMEM_HOST_AND_DEVICE void static_array<T, N>::fill(const_reference value) {
 
 template <typename T, std::size_t N>
 template <typename Tp1, typename... Tp>
-VECMEM_HOST_AND_DEVICE void static_array<T, N>::static_array_impl(size_type i,
-                                                                  Tp1&& a1,
-                                                                  Tp&&... a) {
+VECMEM_HOST_AND_DEVICE constexpr void static_array<T, N>::static_array_impl(
+    size_type i, Tp1&& a1, Tp&&... a) {
 
     m_array[i] = a1;
     static_array_impl(i + 1, std::forward<Tp>(a)...);
@@ -246,8 +242,8 @@ VECMEM_HOST_AND_DEVICE void static_array<T, N>::static_array_impl(size_type i,
 
 template <typename T, std::size_t N>
 template <typename Tp1>
-VECMEM_HOST_AND_DEVICE void static_array<T, N>::static_array_impl(size_type i,
-                                                                  Tp1&& a1) {
+VECMEM_HOST_AND_DEVICE constexpr void static_array<T, N>::static_array_impl(
+    size_type i, Tp1&& a1) {
 
     m_array[i] = a1;
 }

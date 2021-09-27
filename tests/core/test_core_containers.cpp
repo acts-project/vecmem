@@ -156,4 +156,21 @@ TEST_F(core_container_test, static_array) {
     EXPECT_EQ(test_array4.size(), 0);
     EXPECT_EQ(test_array4.max_size(), 0);
     EXPECT_TRUE(test_array4.empty());
+
+    constexpr vecmem::static_array<int, 0> test_array5;
+    constexpr auto test_array5_size = test_array5.size();
+    EXPECT_EQ(test_array5_size, 0);
+    constexpr auto test_array5_max_size = test_array5.max_size();
+    EXPECT_EQ(test_array5_max_size, 0);
+    constexpr bool test_array5_empty = test_array5.empty();
+    EXPECT_TRUE(test_array5_empty);
+
+    constexpr vecmem::static_array<int, ARRAY_SIZE> test_array6 = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    constexpr auto test_array6_size = test_array6.size();
+    EXPECT_EQ(test_array6_size, ARRAY_SIZE);
+    constexpr auto test_array6_max_size = test_array6.max_size();
+    EXPECT_EQ(test_array6_max_size, ARRAY_SIZE);
+    constexpr bool test_array6_empty = test_array6.empty();
+    EXPECT_FALSE(test_array6_empty);
 }
