@@ -123,7 +123,7 @@ void binary_page_memory_resource::do_deallocate(void *p, std::size_t,
         page *c = rem.top();
         rem.pop();
 
-        if (c->addr == p) {
+        if (c->addr == p && c->state != page_state::SPLIT) {
             /*
              * If we have found the target node, we're done.
              */
