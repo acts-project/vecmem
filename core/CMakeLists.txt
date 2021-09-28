@@ -78,6 +78,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/choice_memory_resource.hpp"
    "src/memory/coalescing_memory_resource.cpp"
    "include/vecmem/memory/coalescing_memory_resource.hpp"
+   "src/memory/conditional_memory_resource.cpp"
+   "include/vecmem/memory/conditional_memory_resource.hpp"
    # Utilities.
    "include/vecmem/utils/copy.hpp"
    "include/vecmem/utils/impl/copy.ipp"
