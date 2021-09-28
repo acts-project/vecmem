@@ -9,6 +9,7 @@
 
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_core_export.hpp"
 
 #if defined(VECMEM_HAVE_PMR_MEMORY_RESOURCE)
 namespace std::pmr {
@@ -27,18 +28,19 @@ std::atomic<memory_resource*>& default_resource() noexcept {
 
 }  // namespace
 
-memory_resource* new_delete_resource() noexcept {
+VECMEM_CORE_EXPORT memory_resource* new_delete_resource() noexcept {
     // vecmem::host_memory_resource is not singleton, and does not check
     // equality via pointer equality, but is close enough for our purposes.
     static vecmem::host_memory_resource res{};
     return &res;
 }
 
-memory_resource* get_default_resource() noexcept {
+VECMEM_CORE_EXPORT memory_resource* get_default_resource() noexcept {
     return default_resource();
 }
 
-memory_resource* set_default_resource(memory_resource* res) noexcept {
+VECMEM_CORE_EXPORT memory_resource* set_default_resource(
+    memory_resource* res) noexcept {
 
     memory_resource* new_res = res == nullptr ? new_delete_resource() : res;
 

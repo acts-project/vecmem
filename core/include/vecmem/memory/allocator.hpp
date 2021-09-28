@@ -8,11 +8,15 @@
 
 #pragma once
 
+// Local include(s).
+#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_core_export.hpp"
+
+// System include(s).
 #include <cstddef>
 
-#include "vecmem/memory/memory_resource.hpp"
-
 namespace vecmem {
+
 /**
  * @brief An allocator class that wraps a memory resource.
  *
@@ -30,7 +34,7 @@ namespace vecmem {
  * than the one doing the deallocation is not well-defined and should be
  * avoided.
  */
-class allocator {
+class VECMEM_CORE_EXPORT allocator {
 public:
     /**
      * @brief Construct an allocator.
@@ -129,7 +133,9 @@ public:
 
 private:
     memory_resource& m_mem;
-};
+
+};  // class allocator
+
 }  // namespace vecmem
 
 // Include the implementation.

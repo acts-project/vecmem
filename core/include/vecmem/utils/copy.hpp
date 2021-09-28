@@ -13,6 +13,7 @@
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_core_export.hpp"
 
 // System include(s).
 #include <cstddef>
@@ -31,7 +32,7 @@ namespace vecmem {
 /// Language specific @c copy classes should only need to re-implement the
 /// @c do_copy function, everything else should be provided by this class.
 ///
-class copy {
+class VECMEM_CORE_EXPORT copy {
 
 public:
     /// Wrapper struct around the @c copy_type enumeration
