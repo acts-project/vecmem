@@ -11,12 +11,17 @@ enable_language( HIP )
 include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-hip )
 
+# External dependency/dependencies.
+find_package( HIPToolkit REQUIRED )
+
 # Test all of the HIP library's features.
 vecmem_add_test( hip
    "test_hip_memory_resources.cpp"
    "test_hip_containers.cpp" "test_hip_jagged_containers.cpp"
    "test_hip_containers_kernels.hpp" "test_hip_containers_kernels.hip"
-   LINK_LIBRARIES vecmem::core vecmem::hip GTest::gtest_main
+   "${CMAKE_CURRENT_SOURCE_DIR}/../../hip/src/utils/hip_error_handling.hpp"
+   "${CMAKE_CURRENT_SOURCE_DIR}/../../hip/src/utils/hip_error_handling.cpp"
+   LINK_LIBRARIES HIP::hiprt vecmem::core vecmem::hip GTest::gtest_main
                   vecmem_testing_common )
 
 # The executable's source code needs to be built into position independent
