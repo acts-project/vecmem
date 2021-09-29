@@ -8,9 +8,12 @@
 
 #pragma once
 
+// Local include(s).
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_cuda_export.hpp"
 
 namespace vecmem::cuda {
+
 /**
  * @brief Memory resource that wraps direct allocations on a CUDA device.
  *
@@ -18,7 +21,7 @@ namespace vecmem::cuda {
  * allocates, it does not try to manage memory in a smart way) that works
  * for CUDA device memory. Each instance is bound to a specific device.
  */
-class device_memory_resource : public memory_resource {
+class VECMEM_CUDA_EXPORT device_memory_resource : public memory_resource {
 public:
     /**
      * @brief Construct a CUDA device resource for a specific device.
@@ -41,5 +44,7 @@ private:
     virtual bool do_is_equal(const memory_resource&) const noexcept override;
 
     const int m_device;
-};
+
+}; // class device_memory_resource
+
 }  // namespace vecmem::cuda

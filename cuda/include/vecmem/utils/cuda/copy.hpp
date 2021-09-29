@@ -9,11 +9,12 @@
 
 // VecMem include(s).
 #include "vecmem/utils/copy.hpp"
+#include "vecmem/vecmem_cuda_export.hpp"
 
 namespace vecmem::cuda {
 
 /// Specialisation of @c vecmem::copy for CUDA
-class copy : public vecmem::copy {
+class VECMEM_CUDA_EXPORT copy : public vecmem::copy {
 
 protected:
     /// Perform a memory copy using CUDA
