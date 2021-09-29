@@ -15,8 +15,8 @@
 
 TEST(core_default_resource_test, vector_default_resource) {
     vecmem::vector<float> v;
-    v.emplace_back(1);
-    v.emplace_back(3);
-    v.emplace_back(2);
-    EXPECT_EQ(v.back(), 2);
+    v.emplace_back(1.f);
+    v.emplace_back(3.f);
+    v.emplace_back(2.f);
+    EXPECT_EQ(v.back(), 2.f);
 }

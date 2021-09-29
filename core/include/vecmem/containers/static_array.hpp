@@ -73,7 +73,7 @@ public:
      * uninitialized.
      */
     VECMEM_HOST_AND_DEVICE
-    static_array(void);
+    constexpr static_array(void);
 
     /**
      * @brief Construct an array from a parameter pack of arbitrary size.
@@ -95,7 +95,7 @@ public:
     template <typename... Tp, typename = std::enable_if_t<sizeof...(Tp) == N>,
               typename = std::enable_if_t<
                   details::conjunction_v<std::is_convertible<Tp, T>...> > >
-    VECMEM_HOST_AND_DEVICE static_array(Tp &&... a) {
+    VECMEM_HOST_AND_DEVICE constexpr static_array(Tp &&... a) : m_array() {
 
         static_array_impl(0, std::forward<Tp>(a)...);
     }
@@ -283,13 +283,15 @@ private:
      * @brief Private helper-constructor for the parameter pack constructor.
      */
     template <typename Tp1, typename... Tp>
-    VECMEM_HOST_AND_DEVICE void static_array_impl(size_type i, Tp1 &&a1,
-                                                  Tp &&... a);
+    VECMEM_HOST_AND_DEVICE constexpr void static_array_impl(size_type i,
+                                                            Tp1 &&a1,
+                                                            Tp &&... a);
     /**
      * @brief Private helper-constructor for the parameter pack constructor.
      */
     template <typename Tp1>
-    VECMEM_HOST_AND_DEVICE void static_array_impl(size_type i, Tp1 &&a1);
+    VECMEM_HOST_AND_DEVICE constexpr void static_array_impl(size_type i,
+                                                            Tp1 &&a1);
 
     /// Array holding the container's data
     typename details::array_type<T, N>::type m_array;
