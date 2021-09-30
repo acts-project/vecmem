@@ -4,23 +4,12 @@
 #
 # Mozilla Public License Version 2.0
 
-# Guard against multiple includes.
-include_guard( GLOBAL )
-
-# Look for GoogleTest.
-find_package( GTest )
-
-# If it was found, then we're finished.
-if( GTest_FOUND )
-   return()
-endif()
-
 # CMake include(s).
 cmake_minimum_required( VERSION 3.11 )
 include( FetchContent )
 
 # Tell the user what's happening.
-message( STATUS "Building GoogleTest as part of the project" )
+message( STATUS "Building GoogleTest as part of the VecMem project" )
 
 # Declare where to get GoogleTest from.
 FetchContent_Declare( GoogleTest

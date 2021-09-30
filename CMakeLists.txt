@@ -42,8 +42,9 @@ if( VECMEM_BUILD_SYCL_LIBRARY )
 endif()
 
 # Set up the test(s).
+option( VECMEM_BUILD_TESTING "Build the unit tests of VecMem" ON )
 include( CTest )
-if( BUILD_TESTING )
+if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
   add_subdirectory( tests )
 endif()
 
