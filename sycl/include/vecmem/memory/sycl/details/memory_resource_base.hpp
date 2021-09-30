@@ -9,6 +9,7 @@
 // Local include(s).
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/utils/sycl/queue_wrapper.hpp"
+#include "vecmem/vecmem_sycl_export.hpp"
 
 namespace vecmem::sycl::details {
 
@@ -17,7 +18,7 @@ namespace vecmem::sycl::details {
 /// This class is used as base by all of the oneAPI/SYCL memory resource
 /// classes. It holds functionality that those classes all need.
 ///
-class memory_resource_base : public memory_resource {
+class VECMEM_SYCL_EXPORT memory_resource_base : public memory_resource {
 
 public:
     /// Constructor on top of a user-provided queue

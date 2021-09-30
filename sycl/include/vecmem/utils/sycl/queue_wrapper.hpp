@@ -6,6 +6,9 @@
  */
 #pragma once
 
+// Local include(s).
+#include "vecmem/vecmem_sycl_export.hpp"
+
 // System include(s).
 #include <memory>
 #include <string>
@@ -22,7 +25,7 @@ class opaque_queue;
 /// It is necessary for passing around SYCL queue objects in code that should
 /// not be directly exposed to the SYCL headers.
 ///
-class queue_wrapper {
+class VECMEM_SYCL_EXPORT queue_wrapper {
 
 public:
     /// Construct a queue for a device with a specific name
