@@ -38,3 +38,8 @@ vecmem_add_library( vecmem_cuda cuda
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )
+
+# Hide the library's symbols by default.
+set_target_properties( vecmem_cuda PROPERTIES
+   CXX_VISIBILITY_PRESET  "hidden"
+   CUDA_VISIBILITY_PRESET "hidden" )
