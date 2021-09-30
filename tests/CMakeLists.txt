@@ -5,8 +5,21 @@
 # Mozilla Public License Version 2.0
 
 # Project include(s).
-include( vecmem-googletest )
 include( vecmem-compiler-options-cpp )
+
+# Set up GoogleTest.
+option( VECMEM_SETUP_GOOGLETEST "Set up the GoogleTest targets explicitly"
+   TRUE )
+option( VECMEM_USE_SYSTEM_GOOGLETEST
+   "Pick up an existing installation of GoogleTest from the build environment"
+   FALSE )
+if( VECMEM_SETUP_GOOGLETEST )
+   if( VECMEM_USE_SYSTEM_GOOGLETEST )
+      find_package( GTest REQUIRED )
+   else()
+      add_subdirectory( googletest )
+   endif()
+endif()
 
 # Build a common, helper library.
 add_library( vecmem_testing_common STATIC
