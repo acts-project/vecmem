@@ -28,6 +28,6 @@ private:
 
     virtual bool do_is_equal(const memory_resource&) const noexcept override;
 
-}; // class managed_memory_resource
+};  // class managed_memory_resource
 
 }  // namespace vecmem::cuda

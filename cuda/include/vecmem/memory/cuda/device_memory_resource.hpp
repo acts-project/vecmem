@@ -45,6 +45,6 @@ private:
 
     const int m_device;
 
-}; // class device_memory_resource
+};  // class device_memory_resource
 
 }  // namespace vecmem::cuda
