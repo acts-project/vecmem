@@ -27,5 +27,9 @@ set( CMAKE_SYCL_FLAGS_RELEASE_INIT "@CMAKE_SYCL_FLAGS_RELEASE_INIT@" )
 set( CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT
    "@CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT@" )
 
+# Save the C++ compiler version. This is needed for Platform/Windows-MSVC to
+# work correctly. (As that one knows nothing about SYCL.)
+set( CMAKE_CXX_COMPILER_VERSION "@CMAKE_CXX_COMPILER_VERSION@" )
+
 # Mark the SYCL compiler as "loaded".
 set( CMAKE_SYCL_COMPILER_LOADED TRUE )
