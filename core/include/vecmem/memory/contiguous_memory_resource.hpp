@@ -15,6 +15,13 @@
 // System include(s).
 #include <cstddef>
 
+// Disable the warning(s) about inheriting from/using standard library types
+// with an exported class.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4275)
+#endif  // MSVC
+
 namespace vecmem {
 
 /**
@@ -64,3 +71,8 @@ private:
 };  // class contiguous_memory_resource
 
 }  // namespace vecmem
+
+// Re-enable the warning(s).
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // MSVC
