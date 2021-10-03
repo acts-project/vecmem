@@ -20,6 +20,13 @@ namespace details {
 class opaque_queue;
 }
 
+// Disable the warning(s) about inheriting from/using standard library types
+// with an exported class.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif  // MSVC
+
 /// Wrapper class for @c cl::sycl::queue
 ///
 /// It is necessary for passing around SYCL queue objects in code that should
@@ -63,3 +70,8 @@ private:
 };  // class queue_wrapper
 
 }  // namespace vecmem::sycl
+
+// Re-enable the warning(s).
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // MSVC
