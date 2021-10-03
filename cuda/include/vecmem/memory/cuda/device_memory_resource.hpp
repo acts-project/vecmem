@@ -12,6 +12,13 @@
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/vecmem_cuda_export.hpp"
 
+// Disable the warning(s) about inheriting from/using standard library types
+// with an exported class.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4275)
+#endif  // MSVC
+
 namespace vecmem::cuda {
 
 /**
@@ -48,3 +55,8 @@ private:
 };  // class device_memory_resource
 
 }  // namespace vecmem::cuda
+
+// Re-enable the warning(s).
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // MSVC
