@@ -4,6 +4,14 @@
 #
 # Mozilla Public License Version 2.0
 
+# The SYCL language code only works with the Ninja, and the different kinds
+# of Makefile generators.
+if( NOT ( ( "${CMAKE_GENERATOR}" MATCHES "Make" ) OR
+          ( "${CMAKE_GENERATOR}" MATCHES "Ninja" ) ) )
+   message( FATAL_ERROR "SYCL language not currently supported by "
+      "\"${CMAKE_GENERATOR}\" generator" )
+endif()
+
 # Use the SYCLCXX environment variable preferably as the SYCL compiler.
 if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
 
@@ -68,10 +76,6 @@ set( CMAKE_SYCL_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT}" )
 set( CMAKE_SYCL_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT}" )
 set( CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT
    "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" )
-
-# Tell CMake what compiler standards it may use with SYCL.
-set( CMAKE_SYCL17_STANDARD_COMPILE_OPTION "-std=c++17" )
-set( CMAKE_SYCL17_EXTENSION_COMPILE_OPTION "-std=c++17" )
 
 # Set up C++17 by default.
 set( CMAKE_SYCL_STANDARD 17 CACHE STRING "C++ standard to use with SYCL" )
