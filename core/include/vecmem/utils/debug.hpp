@@ -86,7 +86,7 @@
 // the macro to receive 0 or more arguments just confuses MSVC. And the MSVC
 // variadic macro handling can deal with 0 or more arguments out of the box
 // anyway.
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (!defined(__clang__))
 
 /// Helper macro for printing debug messages from "any" code
 ///

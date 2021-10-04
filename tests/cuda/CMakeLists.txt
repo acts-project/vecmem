@@ -11,6 +11,9 @@ enable_language( CUDA )
 include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-cuda )
 
+# External dependency/dependencies.
+find_package( CUDAToolkit REQUIRED )
+
 # Test all of the CUDA library's features.
 vecmem_add_test( cuda
    "test_cuda_memory_resources.cpp"
@@ -19,5 +22,7 @@ vecmem_add_test( cuda
    "test_cuda_jagged_vector_view.cpp"
    "test_cuda_jagged_vector_view_kernels.cu"
    "test_cuda_jagged_vector_view_kernels.cuh"
-   LINK_LIBRARIES vecmem::core vecmem::cuda GTest::gtest_main
+   "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_error_handling.hpp"
+   "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_error_handling.cpp"
+   LINK_LIBRARIES CUDA::cudart vecmem::core vecmem::cuda GTest::gtest_main
                   vecmem_testing_common )

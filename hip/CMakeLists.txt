@@ -34,3 +34,8 @@ vecmem_add_library( vecmem_hip hip
 target_link_libraries( vecmem_hip
    PUBLIC vecmem::core
    PRIVATE HIP::hiprt )
+
+# Hide the library's symbols by default.
+set_target_properties( vecmem_hip PROPERTIES
+   CXX_VISIBILITY_PRESET "hidden"
+   HIP_VISIBILITY_PRESET "hidden" )

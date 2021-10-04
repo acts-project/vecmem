@@ -8,13 +8,17 @@
 
 #pragma once
 
+// Local include(s).
+#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_core_export.hpp"
+
+// System include(s).
 #include <cstddef>
 #include <memory>
 #include <vector>
 
-#include "vecmem/memory/memory_resource.hpp"
-
 namespace vecmem {
+
 /**
  * @brief A memory manager using power-of-two pages that can be split to
  * deal with allocation requests of various sizes.
@@ -26,7 +30,7 @@ namespace vecmem {
  * creates a binary tree of pages which can be either vacant, occupied, or
  * split.
  */
-class binary_page_memory_resource : public memory_resource {
+class VECMEM_CORE_EXPORT binary_page_memory_resource : public memory_resource {
 public:
     /**
      * @brief Initialize a binary page memory manager depending on an
@@ -139,5 +143,7 @@ private:
 
     memory_resource &m_upstream;
     std::vector<std::unique_ptr<page>> m_pages;
-};
+
+};  // class binary_page_memory_resource
+
 }  // namespace vecmem

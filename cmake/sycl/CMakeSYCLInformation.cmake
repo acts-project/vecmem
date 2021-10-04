@@ -4,23 +4,11 @@
 #
 # Mozilla Public License Version 2.0
 
-# Tweak the linker flags on Windows, to make them compatible with DPC++.
-if( WIN32 )
-   if( ${CMAKE_VERSION} VERSION_LESS 3.21 )
-      set( CMAKE_CREATE_WIN32_EXE "-Xlinker /subsystem:windows" )
-      set( CMAKE_CREATE_CONSOLE_EXE "-Xlinker /subsystem:console" )
-   else()
-      set( CMAKE_SYCL_CREATE_WIN32_EXE "-Xlinker /subsystem:windows" )
-      set( CMAKE_SYCL_CREATE_CONSOLE_EXE "-Xlinker /subsystem:console" )
-   endif()
-   foreach( _type EXE SHARED MODULE )
-      string( REGEX REPLACE "(/machine:[a-zA-Z0-9]+)" "-Xlinker \\1"
-         CMAKE_${_type}_LINKER_FLAGS "${CMAKE_${_type}_LINKER_FLAGS}" )
-   endforeach()
-endif()
-
 # Common CMake include(s).
 include( CMakeCommonLanguageInclude )
+
+# Set up platform specific flags.
+include( Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-IntelLLVM-SYCL OPTIONAL )
 
 # Set up how SYCL object file compilation should go.
 set( CMAKE_SYCL_COMPILE_OBJECT

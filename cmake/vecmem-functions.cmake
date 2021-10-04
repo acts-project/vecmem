@@ -9,6 +9,7 @@ include_guard( GLOBAL )
 
 # CMake include(s).
 include( CMakeParseArguments )
+include( GenerateExportHeader )
 
 # Helper function for setting up the VecMem libraries.
 #
@@ -23,6 +24,16 @@ function( vecmem_add_library fullname basename )
 
    # Create the library.
    add_library( ${fullname} ${ARG_TYPE} ${ARG_UNPARSED_ARGUMENTS} )
+
+   # Set up symbol exports for the library.
+   set( export_header_filename
+      "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/vecmem/${fullname}_export.hpp" )
+   generate_export_header( ${fullname}
+      EXPORT_FILE_NAME "${export_header_filename}" )
+   install( FILES "${export_header_filename}"
+      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/vecmem" )
+   target_include_directories( ${fullname} PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}> )
 
    # Set up how clients should find its headers.
    target_include_directories( ${fullname} PUBLIC

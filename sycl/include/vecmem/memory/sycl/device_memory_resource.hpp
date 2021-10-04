@@ -8,11 +8,13 @@
 
 // Local include(s).
 #include "vecmem/memory/sycl/details/memory_resource_base.hpp"
+#include "vecmem/vecmem_sycl_export.hpp"
 
 namespace vecmem::sycl {
 
 /// Memory resource for a specific SYCL device
-class device_memory_resource final : public details::memory_resource_base {
+class VECMEM_SYCL_EXPORT device_memory_resource final
+    : public details::memory_resource_base {
 
 public:
     // Inherit the base class's constructor(s).

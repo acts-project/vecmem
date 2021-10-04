@@ -10,6 +10,7 @@
 // VecMem include(s).
 #include "vecmem/utils/copy.hpp"
 #include "vecmem/utils/sycl/queue_wrapper.hpp"
+#include "vecmem/vecmem_sycl_export.hpp"
 
 namespace vecmem::sycl {
 
@@ -20,7 +21,7 @@ namespace vecmem::sycl {
 /// @c cl::sycl::queue object. So this object needs to point to a valid
 /// queue object itself.
 ///
-class copy : public vecmem::copy {
+class VECMEM_SYCL_EXPORT copy : public vecmem::copy {
 
 public:
     /// Constructor on top of a user-provided queue

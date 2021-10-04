@@ -8,6 +8,7 @@
 
 // Local include(s).
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_core_export.hpp"
 
 // System include(s).
 #include <cstddef>
@@ -21,7 +22,7 @@ namespace vecmem::details {
 /// type. It *does not* call any custom destructors. It merely de-allocates
 /// a memory block.
 ///
-class deallocator {
+class VECMEM_CORE_EXPORT deallocator {
 
 public:
     /// Constructor

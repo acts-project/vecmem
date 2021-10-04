@@ -33,3 +33,8 @@ vecmem_add_library( vecmem_sycl sycl
    "src/utils/sycl/get_queue.sycl"
    "src/utils/sycl/opaque_queue.hpp" )
 target_link_libraries( vecmem_sycl PUBLIC vecmem::core )
+
+# Hide the library's symbols by default.
+set_target_properties( vecmem_sycl PROPERTIES
+   CXX_VISIBILITY_PRESET  "hidden"
+   SYCL_VISIBILITY_PRESET "hidden" )
