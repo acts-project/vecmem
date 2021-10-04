@@ -21,7 +21,7 @@ namespace vecmem::cuda {
  * allocates, it does not try to manage memory in a smart way) that works
  * for CUDA device memory. Each instance is bound to a specific device.
  */
-class VECMEM_CUDA_EXPORT device_memory_resource
+class VECMEM_CUDA_EXPORT device_memory_resource final
     : public vecmem::details::memory_resource_base {
 
 public:

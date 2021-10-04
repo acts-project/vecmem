@@ -21,7 +21,7 @@ namespace vecmem::cuda {
  * memory, which is page-locked by default to allow faster transfer to the
  * CUDA devices.
  */
-class VECMEM_CUDA_EXPORT host_memory_resource
+class VECMEM_CUDA_EXPORT host_memory_resource final
     : public vecmem::details::memory_resource_base {
 
 private:

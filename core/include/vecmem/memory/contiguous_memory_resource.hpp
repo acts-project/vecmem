@@ -32,7 +32,7 @@ namespace vecmem {
  * amount of memory that can be allocated from the contiguous memory
  * resource.
  */
-class VECMEM_CORE_EXPORT contiguous_memory_resource
+class VECMEM_CORE_EXPORT contiguous_memory_resource final
     : public details::memory_resource_base {
 
 public:

@@ -20,7 +20,7 @@ namespace vecmem::cuda {
  * This is an allocator-type memory resource that allocates managed CUDA
  * memory, which is accessible directly to devices as well as to the host.
  */
-class VECMEM_CUDA_EXPORT managed_memory_resource
+class VECMEM_CUDA_EXPORT managed_memory_resource final
     : public vecmem::details::memory_resource_base {
 
 private:

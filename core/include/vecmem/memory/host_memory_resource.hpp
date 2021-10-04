@@ -21,7 +21,7 @@ namespace vecmem {
  * is a terminal resource which does nothing but wrap malloc and free. It
  * is state-free (on the relevant levels of abstraction).
  */
-class VECMEM_CORE_EXPORT host_memory_resource
+class VECMEM_CORE_EXPORT host_memory_resource final
     : public details::memory_resource_base {
 
 private:
