@@ -21,8 +21,13 @@ public:
     using details::memory_resource_base::memory_resource_base;
 
 private:
+    /// @name Function(s) implemented from @c vecmem::memory_resource
+    /// @{
+
     /// Function performing the memory allocation
     void* do_allocate(std::size_t nbytes, std::size_t alignment) override final;
+
+    /// @}
 
 };  // host_memory_resource
 
