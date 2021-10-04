@@ -8,6 +8,7 @@
 // Local include(s).
 #include "../common/memory_resource_name_gen.hpp"
 #include "vecmem/containers/vector.hpp"
+#include "vecmem/memory/arena_memory_resource.hpp"
 #include "vecmem/memory/binary_page_memory_resource.hpp"
 #include "vecmem/memory/contiguous_memory_resource.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
@@ -115,12 +116,15 @@ static vecmem::host_memory_resource host_resource;
 static vecmem::binary_page_memory_resource binary_resource(host_resource);
 static vecmem::contiguous_memory_resource contiguous_resource(host_resource,
                                                               20000);
+static vecmem::arena_memory_resource arena_resource(host_resource,
+                                                              20000, 10000000);
 
 // Instantiate the test suite.
 INSTANTIATE_TEST_SUITE_P(core_memory_resource_tests, core_memory_resource_test,
                          testing::Values(&host_resource, &binary_resource,
-                                         &contiguous_resource),
+                                         &contiguous_resource, &arena_resource),
                          vecmem::testing::memory_resource_name_gen(
                              {{&host_resource, "host_resource"},
                               {&binary_resource, "binary_resource"},
-                              {&contiguous_resource, "contiguous_resource"}}));
+                              {&contiguous_resource, "contiguous_resource"},
+                              {&arena_resource, "arena_resource"}}));
