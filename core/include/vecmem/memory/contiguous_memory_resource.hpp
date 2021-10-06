@@ -8,11 +8,15 @@
 
 #pragma once
 
+// Local include(s).
+#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_core_export.hpp"
+
+// System include(s).
 #include <cstddef>
 
-#include "vecmem/memory/memory_resource.hpp"
-
 namespace vecmem {
+
 /**
  * @brief Downstream allocator that ensures that allocations are contiguous.
  *
@@ -28,7 +32,7 @@ namespace vecmem {
  * amount of memory that can be allocated from the contiguous memory
  * resource.
  */
-class contiguous_memory_resource : public memory_resource {
+class VECMEM_CORE_EXPORT contiguous_memory_resource : public memory_resource {
 public:
     /**
      * @brief Constructs the contiguous memory resource.
@@ -56,5 +60,7 @@ private:
     const std::size_t m_size;
     void* const m_begin;
     void* m_next;
-};
+
+};  // class contiguous_memory_resource
+
 }  // namespace vecmem

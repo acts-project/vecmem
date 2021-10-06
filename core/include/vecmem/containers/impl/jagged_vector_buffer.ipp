@@ -55,7 +55,9 @@ allocate_jagged_buffer_inner_memory(const std::vector<std::size_t>& sizes,
                                     bool isResizable) {
 
     typename vecmem::data::jagged_vector_buffer<TYPE>::size_type byteSize =
-        std::accumulate(sizes.begin(), sizes.end(), 0) * sizeof(TYPE);
+        std::accumulate(sizes.begin(), sizes.end(),
+                        static_cast<std::size_t>(0)) *
+        sizeof(TYPE);
     if (isResizable) {
         byteSize +=
             sizes.size() * sizeof(typename vecmem::data::jagged_vector_buffer<
@@ -103,8 +105,9 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     // Set up the host accessible memory array.
     std::ptrdiff_t ptrdiff = 0;
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        new (host_ptr() + i) value_type(
-            sizes[i], reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff));
+        new (host_ptr() + i)
+            value_type(static_cast<typename value_type::size_type>(sizes[i]),
+                       reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff));
         ptrdiff += sizes[i] * sizeof(TYPE);
     }
 }
@@ -133,16 +136,16 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
                                            : m_outer_host_memory.get());
 
     // Set up the host accessible memory array.
-    std::ptrdiff_t ptrdiff = 0;
+    std::ptrdiff_t ptrdiff =
+        (capacities.size() * sizeof(typename value_type::size_type));
     for (std::size_t i = 0; i < capacities.size(); ++i) {
         new (host_ptr() + i) value_type(
-            capacities[i],
+            static_cast<typename value_type::size_type>(capacities[i]),
             reinterpret_cast<typename value_type::size_pointer>(
-                m_inner_memory.get() + ptrdiff),
-            reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff +
-                                    sizeof(typename value_type::size_type)));
-        ptrdiff += capacities[i] * sizeof(TYPE) +
-                   sizeof(typename value_type::size_type);
+                m_inner_memory.get() +
+                i * sizeof(typename value_type::size_type)),
+            reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff));
+        ptrdiff += capacities[i] * sizeof(TYPE);
     }
 }
 

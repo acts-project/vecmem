@@ -13,5 +13,5 @@ vecmem_add_test( core
    "test_core_contiguous_memory_resource.cpp" "test_core_copy.cpp"
    "test_core_device_containers.cpp" "test_core_memory_resources.cpp"
    "test_core_static_vector.cpp" "test_core_vector.cpp"
-   "test_core_jagged_vector_view.cpp" "test_core_static_array.cpp"
+   "test_core_jagged_vector_view.cpp" "test_core_static_array.cpp" "test_core_default_resource.cpp"
    LINK_LIBRARIES vecmem::core GTest::gtest_main vecmem_testing_common )

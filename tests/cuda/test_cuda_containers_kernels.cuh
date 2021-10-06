@@ -20,7 +20,7 @@ void linearTransform(vecmem::data::vector_view<const int> constants,
                      vecmem::data::vector_view<int> output);
 
 /// Function incrementing the elements of the received vector using atomics
-void atomicTransform(std::size_t iterations,
+void atomicTransform(unsigned int iterations,
                      vecmem::data::vector_view<int> vec);
 
 /// Function filtering elements of an input vector into an output vector
@@ -29,5 +29,5 @@ void filterTransform(vecmem::data::vector_view<const int> input,
 
 /// Function filtering elements of an input vector into an output vector
 void filterTransform(vecmem::data::jagged_vector_view<const int> input,
-                     std::size_t max_vec_size,
+                     unsigned int max_vec_size,
                      vecmem::data::jagged_vector_view<int> output);

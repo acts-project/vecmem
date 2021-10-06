@@ -18,7 +18,12 @@ endif()
 file( WRITE
    "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.sycl"
    "#include <CL/sycl.hpp>\n"
-   "int main() { return 0; }\n" )
+   "int main() {\n"
+   "#if (!defined(CL_SYCL_LANGUAGE_VERSION)) &&"
+   "    (!defined(SYCL_LANGUAGE_VERSION))\n"
+   "#error \"SYCL language is not available!\"\n"
+   "#endif\n"
+   "return 0; }\n" )
 try_compile( CMAKE_SYCL_COMPILER_WORKS "${CMAKE_BINARY_DIR}"
    "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.sycl"
    OUTPUT_VARIABLE __CMAKE_SYCL_COMPILER_OUTPUT )

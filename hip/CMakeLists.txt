@@ -15,7 +15,7 @@ include( vecmem-compiler-options-hip )
 find_package( HIPToolkit REQUIRED )
 
 # Set up the build of the VecMem HIP library.
-vecmem_add_library( vecmem_hip hip SHARED
+vecmem_add_library( vecmem_hip hip
    # Memory management.
    "include/vecmem/memory/hip/device_memory_resource.hpp"
    "src/memory/hip/device_memory_resource.cpp"
@@ -34,3 +34,8 @@ vecmem_add_library( vecmem_hip hip SHARED
 target_link_libraries( vecmem_hip
    PUBLIC vecmem::core
    PRIVATE HIP::hiprt )
+
+# Hide the library's symbols by default.
+set_target_properties( vecmem_hip PROPERTIES
+   CXX_VISIBILITY_PRESET "hidden"
+   HIP_VISIBILITY_PRESET "hidden" )

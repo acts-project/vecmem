@@ -18,7 +18,7 @@ include( vecmem-compiler-options-cuda )
 find_package( CUDAToolkit REQUIRED )
 
 # Set up the build of the VecMem CUDA library.
-vecmem_add_library( vecmem_cuda cuda SHARED
+vecmem_add_library( vecmem_cuda cuda
    # Memory resources.
    "include/vecmem/memory/cuda/device_memory_resource.hpp"
    "src/memory/cuda/device_memory_resource.cpp"
@@ -38,3 +38,8 @@ vecmem_add_library( vecmem_cuda cuda SHARED
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )
+
+# Hide the library's symbols by default.
+set_target_properties( vecmem_cuda PROPERTIES
+   CXX_VISIBILITY_PRESET  "hidden"
+   CUDA_VISIBILITY_PRESET "hidden" )

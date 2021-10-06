@@ -6,7 +6,7 @@
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
-project( vecmem VERSION 0.3.0 LANGUAGES CXX )
+project( vecmem VERSION 0.4.0 LANGUAGES CXX )
 
 # Standard CMake include(s).
 include( GNUInstallDirs )
@@ -42,8 +42,9 @@ if( VECMEM_BUILD_SYCL_LIBRARY )
 endif()
 
 # Set up the test(s).
+option( VECMEM_BUILD_TESTING "Build the unit tests of VecMem" ON )
 include( CTest )
-if( BUILD_TESTING )
+if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
   add_subdirectory( tests )
 endif()
 

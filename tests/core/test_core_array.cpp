@@ -47,32 +47,33 @@ protected:
     void test_array(vecmem::array<T, N>& a) {
 
         // Fill the array with some simple values.
-        for (std::size_t i = 0; i < a.size(); ++i) {
+        for (int i = 0; i < static_cast<int>(a.size()); ++i) {
             a.at(i) = T(i);
         }
 
         // Check the contents using iterator based loops.
         {
             auto itr = a.begin();
-            for (std::size_t i = 0; itr != a.end(); ++itr, ++i) {
+            for (int i = 0; itr != a.end(); ++itr, ++i) {
                 EXPECT_EQ(*itr, T(i));
             }
             auto ritr = a.rbegin();
-            for (std::size_t i = a.size() - 1; ritr != a.rend(); ++ritr, --i) {
+            for (int i = static_cast<int>(a.size() - 1); ritr != a.rend();
+                 ++ritr, --i) {
                 EXPECT_EQ(*ritr, T(i));
             }
         }
 
         // Check its contents using a range based loop.
         {
-            std::size_t i = 0;
+            int i = 0;
             for (T value : a) {
                 EXPECT_EQ(value, T(i++));
             }
         }
 
         // Fill the array with a constant value.
-        static constexpr std::size_t VALUE = 123;
+        static constexpr int VALUE = 123;
         a.fill(T(VALUE));
         for (T value : a) {
             EXPECT_EQ(value, T(VALUE));

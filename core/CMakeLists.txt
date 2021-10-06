@@ -8,7 +8,7 @@
 include( vecmem-compiler-options-cpp )
 
 # Set up the build of the VecMem core library.
-vecmem_add_library( vecmem_core core SHARED
+vecmem_add_library( vecmem_core core
    # STL mimicking containers.
    "include/vecmem/containers/array.hpp"
    "include/vecmem/containers/impl/array.ipp"
@@ -69,8 +69,64 @@ vecmem_add_library( vecmem_core core SHARED
    "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )
 
+# Hide the library's symbols by default.
+set_target_properties( vecmem_core PROPERTIES
+   CXX_VISIBILITY_PRESET "hidden" )
+
 # Add definitions necessary for the correct functioning of VECMEM_DEBUG_MSG.
 string( LENGTH "${CMAKE_SOURCE_DIR}/" VECMEM_SOURCE_DIR_LENGTH )
 target_compile_definitions( vecmem_core PUBLIC
    $<BUILD_INTERFACE:VECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}>
    $<BUILD_INTERFACE:VECMEM_SOURCE_DIR_LENGTH=${VECMEM_SOURCE_DIR_LENGTH}> )
+
+# Figure out where to get <memory_resource> from.
+include( CheckCXXSourceCompiles )
+check_cxx_source_compiles( "
+   #include <memory_resource>
+   int main() {
+       std::pmr::memory_resource* mr = nullptr;
+       std::pmr::polymorphic_allocator<int> pa(mr);
+       return 0;
+   }
+   " VECMEM_HAVE_PMR_MEMORY_RESOURCE )
+   set(pmr_include "memory_resource")
+   set(pmr_ns "std::pmr")
+if( VECMEM_HAVE_PMR_MEMORY_RESOURCE )
+   message( STATUS "Using memory resource types from the std::pmr namespace" )
+   target_compile_definitions( vecmem_core PUBLIC
+      VECMEM_HAVE_PMR_MEMORY_RESOURCE )
+else()
+   check_cxx_source_compiles( "
+      #include <experimental/memory_resource>
+      int main() {
+          std::experimental::pmr::memory_resource* mr = nullptr;
+          std::experimental::pmr::polymorphic_allocator<int> pa(mr);
+          return 0;
+      }
+      " VECMEM_HAVE_EXPERIMENTAL_PMR_MEMORY_RESOURCE )
+   if( VECMEM_HAVE_EXPERIMENTAL_PMR_MEMORY_RESOURCE )
+      message( STATUS "Using memory resource types from the "
+         "std::experimental::pmr namespace" )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_HAVE_EXPERIMENTAL_PMR_MEMORY_RESOURCE )
+
+      set(pmr_include "experimental/memory_resource")
+      set(pmr_ns "std::experimental::pmr")
+   else()
+      message( SEND_ERROR
+         "C++17 LFTS V1 (P0220R1) component memory_resource not found!" )
+   endif()
+endif()
+
+check_cxx_source_compiles( "
+   #include <${pmr_include}>
+   int main() {
+         ${pmr_ns}::set_default_resource(nullptr);
+         (void)${pmr_ns}::get_default_resource();
+         return 0;
+   }
+  " VECMEM_HAVE_DEFAULT_RESOURCE)
+
+if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
+   target_sources(vecmem_core PRIVATE src/memory/default_resource_polyfill.cpp)
+endif()

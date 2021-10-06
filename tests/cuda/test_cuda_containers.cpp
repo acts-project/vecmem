@@ -70,8 +70,10 @@ TEST_F(cuda_containers_test, explicit_memory) {
 
     // Allocate a device memory block for the output container.
     auto outputvechost = vecmem::get_data(outputvec);
-    vecmem::data::vector_buffer<int> outputvecdevice(outputvec.size(),
-                                                     device_resource);
+    vecmem::data::vector_buffer<int> outputvecdevice(
+        static_cast<vecmem::data::vector_buffer<int>::size_type>(
+            outputvec.size()),
+        device_resource);
 
     // Create the array that is used in the linear transformation.
     vecmem::array<int, 2> constants(host_resource);
@@ -107,7 +109,7 @@ TEST_F(cuda_containers_test, atomic_memory) {
     auto vec_on_device = m_copy.to(vecmem::get_data(vec), device_resource);
 
     // Give it to the test function.
-    static constexpr int ITERATIONS = 100;
+    static constexpr unsigned int ITERATIONS = 100;
     atomicTransform(ITERATIONS, vec_on_device);
 
     // Copy it back to the host.
@@ -115,7 +117,7 @@ TEST_F(cuda_containers_test, atomic_memory) {
 
     // Check the output.
     for (int value : vec) {
-        EXPECT_EQ(value, 2 * ITERATIONS);
+        EXPECT_EQ(static_cast<unsigned int>(value), 2 * ITERATIONS);
     }
 }
 
@@ -134,8 +136,9 @@ TEST_F(cuda_containers_test, extendable_memory) {
     }
 
     // Create a buffer that will hold the filtered elements of the input vector.
-    vecmem::data::vector_buffer<int> output_buffer(input.size(), 0,
-                                                   device_resource);
+    vecmem::data::vector_buffer<int> output_buffer(
+        static_cast<vecmem::data::vector_buffer<int>::size_type>(input.size()),
+        0, device_resource);
     m_copy.setup(output_buffer);
 
     // Run the filtering kernel.

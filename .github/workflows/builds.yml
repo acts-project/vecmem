@@ -13,27 +13,37 @@ on: [ push, pull_request ]
 # All the different build/test jobs.
 jobs:
 
-  # Native build job on an Ubuntu system.
-  ubuntu-native:
-
-    # The system to run on.
-    runs-on: ubuntu-latest
+  # Native build job
+  native:
 
     # The different build modes to test.
     strategy:
       matrix:
         BUILD_TYPE: [ "Release", "Debug" ]
         DEBUG_MSG_LVL: [ 0, 5 ]
+        OS: ["ubuntu-latest", "macos-10.15", "windows-latest"]
+
+    # The system to run on.
+    runs-on: ${{ matrix.OS }}
 
     # The build/test steps to execute.
     steps:
     # Use a standard checkout of the code.
     - uses: actions/checkout@v2
+    # Set up the build environment.
+    - uses: ilammy/msvc-dev-cmd@v1.9.0
     # Run the CMake configuration.
     - name: Configure
+      if: "!startsWith(matrix.os, 'windows')"
       run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }}
                  -DVECMEM_DEBUG_MSG_LVL=${{ matrix.DEBUG_MSG_LVL }}
-                 -S $GITHUB_WORKSPACE -B build
+                 -S ${{ github.workspace }} -B build
+    - name: Configure-Windows
+      if: "startsWith(matrix.os, 'windows')"
+      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }}
+                 -DVECMEM_DEBUG_MSG_LVL=${{ matrix.DEBUG_MSG_LVL }}
+                 -S ${{ github.workspace }} -B build
+                 -G "NMake Makefiles"
     # Perform the build.
     - name: Build
       run: cmake --build build

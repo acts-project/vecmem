@@ -8,11 +8,12 @@
 
 // Local include(s).
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/vecmem_hip_export.hpp"
 
 namespace vecmem::hip {
 
 /// Memory resource for HIP shared host/device memory
-class host_memory_resource final : public memory_resource {
+class VECMEM_HIP_EXPORT host_memory_resource final : public memory_resource {
 
 private:
     /// Function performing the memory allocation

@@ -9,11 +9,12 @@
 
 // VecMem include(s).
 #include "vecmem/utils/copy.hpp"
+#include "vecmem/vecmem_hip_export.hpp"
 
 namespace vecmem::hip {
 
 /// Specialisation of @c vecmem::copy for HIP
-class copy : public vecmem::copy {
+class VECMEM_HIP_EXPORT copy : public vecmem::copy {
 
 protected:
     /// Perform a memory copy using HIP

@@ -19,6 +19,7 @@
 // System include(s).
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <vector>
 
 namespace {
@@ -79,8 +80,9 @@ protected:
 
         // Remove a couple of elements from the vectors.
         for (int i : {26, 38, 25}) {
-            std::remove(reference_vector.begin(), reference_vector.end(), i);
-            std::remove(test_vector.begin(), test_vector.end(), i);
+            (void)std::remove(reference_vector.begin(), reference_vector.end(),
+                              i);
+            (void)std::remove(test_vector.begin(), test_vector.end(), i);
         }
         // Make sure that they are still the same.
         EXPECT_EQ(reference_vector.size(), test_vector.size());
@@ -111,15 +113,51 @@ TEST_P(core_memory_resource_test, custom_value) {
     test_resource(test_vector);
 }
 
+/// Test case for the "stress tests"
+class core_memory_resource_stress_test
+    : public testing::TestWithParam<vecmem::memory_resource*> {};
+
+/// Test that the memory resource would behave correctly with a large number
+/// of allocations/de-allocations.
+TEST_P(core_memory_resource_stress_test, stress_test) {
+
+    // Repeat the allocations multiple times.
+    for (int i = 0; i < 100; ++i) {
+
+        // Create an object that would hold on to the allocated memory
+        // "for one iteration".
+        std::vector<vecmem::vector<int> > vectors;
+
+        // Fill a random number of vectors.
+        const int n_vectors = std::rand() % 100;
+        for (int j = 0; j < n_vectors; ++j) {
+
+            // Fill them with a random number of "constant" elements.
+            vectors.emplace_back(GetParam());
+            const int n_elements = std::rand() % 100;
+            for (int k = 0; k < n_elements; ++k) {
+                vectors.back().push_back(j);
+            }
+        }
+
+        // Check that all vectors have the intended content after all of this.
+        for (int j = 0; j < n_vectors; ++j) {
+            for (int value : vectors.at(j)) {
+                EXPECT_EQ(value, j);
+            }
+        }
+    }
+}
+
 // Memory resources to use in the test.
 static vecmem::host_memory_resource host_resource;
 static vecmem::binary_page_memory_resource binary_resource(host_resource);
 static vecmem::contiguous_memory_resource contiguous_resource(host_resource,
                                                               20000);
 static vecmem::arena_memory_resource arena_resource(host_resource,
-                                                              20000, 10000000);
+                                                    20000, 10000000);
 
-// Instantiate the test suite.
+// Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(core_memory_resource_tests, core_memory_resource_test,
                          testing::Values(&host_resource, &binary_resource,
                                          &contiguous_resource, &arena_resource),
@@ -128,3 +166,10 @@ INSTANTIATE_TEST_SUITE_P(core_memory_resource_tests, core_memory_resource_test,
                               {&binary_resource, "binary_resource"},
                               {&contiguous_resource, "contiguous_resource"},
                               {&arena_resource, "arena_resource"}}));
+
+INSTANTIATE_TEST_SUITE_P(core_memory_resource_stress_tests,
+                         core_memory_resource_stress_test,
+                         testing::Values(&host_resource, &binary_resource),
+                         vecmem::testing::memory_resource_name_gen(
+                             {{&host_resource, "host_resource"},
+                              {&binary_resource, "binary_resource"}}));

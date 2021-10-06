@@ -159,12 +159,12 @@ TYPED_TEST(core_static_vector_test, element_access) {
 
     // Modify its elements.
     for (std::size_t i = 0; i < v.size(); ++i) {
-        v.at(i) = TypeParam(i);
+        v.at(i) = TypeParam(static_cast<int>(i));
     }
 
     // Check that the settings "took".
     for (std::size_t i = 0; i < v.size(); ++i) {
-        EXPECT_EQ(v[i], TypeParam(i));
+        EXPECT_EQ(v[i], TypeParam(static_cast<int>(i)));
     }
 
     // Test the front() and back() functions.
@@ -187,8 +187,8 @@ TYPED_TEST(core_static_vector_test, modifications) {
     vecmem::static_vector<TypeParam, 100> test(50);
     EXPECT_EQ_VEC(ref, test);
     for (std::size_t i = 0; i < ref.size(); ++i) {
-        ref[i] = TypeParam(i);
-        test[i] = TypeParam(i);
+        ref[i] = TypeParam(static_cast<int>(i));
+        test[i] = TypeParam(static_cast<int>(i));
     }
     EXPECT_EQ_VEC(ref, test);
 
@@ -198,8 +198,8 @@ TYPED_TEST(core_static_vector_test, modifications) {
     EXPECT_EQ_VEC(ref, test);
 
     // Do the same, just in a slightly different colour.
-    ref.emplace_back(70);
-    test.emplace_back(70);
+    ref.emplace_back(TypeParam(70));
+    test.emplace_back(TypeParam(70));
     EXPECT_EQ_VEC(ref, test);
 
     // Insert a single element in the middle of them.
@@ -208,8 +208,8 @@ TYPED_TEST(core_static_vector_test, modifications) {
     EXPECT_EQ_VEC(ref, test);
 
     // Emplace a single element in the middle of them.
-    ref.emplace(ref.begin() + 15, 55);
-    test.emplace(test.begin() + 15, 55);
+    ref.emplace(ref.begin() + 15, TypeParam(55));
+    test.emplace(test.begin() + 15, TypeParam(55));
     EXPECT_EQ_VEC(ref, test);
 
     // Remove one element from them.

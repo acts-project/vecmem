@@ -12,7 +12,7 @@ include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-sycl )
 
 # Set up the build of the VecMem SYCL library.
-vecmem_add_library( vecmem_sycl sycl SHARED
+vecmem_add_library( vecmem_sycl sycl
    # Memory management.
    "include/vecmem/memory/sycl/details/memory_resource_base.hpp"
    "src/memory/sycl/details/memory_resource_base.sycl"
@@ -33,3 +33,8 @@ vecmem_add_library( vecmem_sycl sycl SHARED
    "src/utils/sycl/get_queue.sycl"
    "src/utils/sycl/opaque_queue.hpp" )
 target_link_libraries( vecmem_sycl PUBLIC vecmem::core )
+
+# Hide the library's symbols by default.
+set_target_properties( vecmem_sycl PROPERTIES
+   CXX_VISIBILITY_PRESET  "hidden"
+   SYCL_VISIBILITY_PRESET "hidden" )

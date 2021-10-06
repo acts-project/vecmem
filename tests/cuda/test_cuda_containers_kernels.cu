@@ -74,7 +74,7 @@ __global__ void atomicTransformKernel(std::size_t iterations,
     return;
 }
 
-void atomicTransform(std::size_t iterations,
+void atomicTransform(unsigned int iterations,
                      vecmem::data::vector_view<int> vec) {
 
     // Launch the kernel.
@@ -145,12 +145,12 @@ __global__ void filterTransformKernel(
 }
 
 void filterTransform(vecmem::data::jagged_vector_view<const int> input,
-                     std::size_t max_vec_size,
+                     unsigned int max_vec_size,
                      vecmem::data::jagged_vector_view<int> output) {
 
     // Launch the kernel.
-    filterTransformKernel<<<1, dim3(input.m_size, max_vec_size)>>>(input,
-                                                                   output);
+    dim3 dimensions(static_cast<unsigned int>(input.m_size), max_vec_size);
+    filterTransformKernel<<<1, dimensions>>>(input, output);
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
