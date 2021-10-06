@@ -154,8 +154,8 @@ static vecmem::host_memory_resource host_resource;
 static vecmem::binary_page_memory_resource binary_resource(host_resource);
 static vecmem::contiguous_memory_resource contiguous_resource(host_resource,
                                                               20000);
-static vecmem::arena_memory_resource arena_resource(host_resource,
-                                                    20000, 10000000);
+static vecmem::arena_memory_resource arena_resource(host_resource, 20000,
+                                                    10000000);
 
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(core_memory_resource_tests, core_memory_resource_test,
