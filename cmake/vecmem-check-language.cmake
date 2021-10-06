@@ -11,10 +11,9 @@ include_guard( GLOBAL )
 include( CheckLanguage )
 
 # Teach CMake about VecMem's custom language files.
-if( "${CMAKE_VERSION}" VERSION_LESS "3.21" )
-   list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/hip" )
-endif()
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/sycl" )
+list( INSERT CMAKE_MODULE_PATH 0
+   "${CMAKE_CURRENT_LIST_DIR}/hip"
+   "${CMAKE_CURRENT_LIST_DIR}/sycl" )
 
 # Code mimicking CMake's CheckLanguage.cmake module. But making sure that the
 # VecMem specific code is used while looking for the non-standard languages.
@@ -25,8 +24,7 @@ macro( vecmem_check_language lang )
    if( NOT DEFINED CMAKE_${lang}_COMPILER )
 
       # Handle the HIP and SYCL cases.
-      if( ( ( "${CMAKE_VERSION}" VERSION_LESS "3.21" ) AND
-            ( "${lang}" STREQUAL "HIP" ) ) OR
+      if( ( "${lang}" STREQUAL "HIP" ) OR
           ( "${lang}" STREQUAL "SYCL" ) )
 
          # Greet the user.
