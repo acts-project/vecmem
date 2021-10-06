@@ -6,35 +6,30 @@
  * Mozilla Public License Version 2.0
  */
 
-#include "vecmem/memory/details_arena.hpp"
+// Local include(s).
+#include "arena.hpp"
 
+#include "alignment.hpp"
+
+// System include(s).
 #include <algorithm>
-#include <limits>
-#include <memory>
-#include <mutex>
-#include <set>
-#include <unordered_map>
-#include <vector>
 
-#include "../utils/alignment.cpp"
-#include "vecmem/memory/memory_resource.hpp"
-
-namespace vecmem {
+namespace vecmem::details {
 
 block::block(void* pointer, std::size_t size)
-    : pointer_(static_cast<char*>(pointer)), size_(size){};
+    : pointer_(static_cast<char*>(pointer)), size_(size) {}
 
 void* block::pointer() const {
     return this->pointer_;
-};
+}
 
 std::size_t block::size() const {
     return this->size_;
-};
+}
 
 bool block::is_valid() const {
     return this->pointer_ != nullptr;
-};
+}
 
 bool block::is_superblock() const {
     return this->size_ >= minimum_superblock_size;
@@ -145,7 +140,7 @@ inline block coalesce_block(std::set<block>& free_blocks, block const& b) {
 
 arena::arena(std::size_t initial_size, std::size_t maximum_size,
              memory_resource& mm)
-    : maximum_size_{maximum_size}, mm_(mm) {
+    : mm_(mm), maximum_size_{maximum_size} {
     // assert unexpected null upstream pointer
     // assert initial arena size required to be a multiple of 256 bytes
     // assert maximum arena size required to be a multiple of 256 bytes
@@ -213,7 +208,7 @@ block arena::get_block(std::size_t size) {
     return first_fit(this->free_blocks_, size);
 }
 
-constexpr std::size_t arena::size_to_grow(std::size_t size) const {
+constexpr std::size_t arena::size_to_grow(std::size_t /*size*/) const {
     /*
     case if maximum pool size exceeded
     if(this->current_size_ + size > this->maximum_size_) {
@@ -229,7 +224,7 @@ block arena::expand_arena(std::size_t size) {
     return *(ret.first);
 }
 
-block arena::free_block(void* p, std::size_t size) noexcept {
+block arena::free_block(void* p, std::size_t /*size*/) noexcept {
     auto const i = this->allocated_blocks_.find(p);
 
     if (i == this->allocated_blocks_.end()) {
@@ -243,4 +238,4 @@ block arena::free_block(void* p, std::size_t size) noexcept {
     return found;
 }
 
-}  // namespace vecmem
+}  // namespace vecmem::details

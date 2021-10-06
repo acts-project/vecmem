@@ -6,46 +6,51 @@
  * Mozilla Public License Version 2.0
  */
 
-#include <assert.h>
+#pragma once
 
+// Local include(s).
 #include "vecmem/memory/memory_resource.hpp"
+
+// System include(s).
+#include <cassert>
 
 namespace vecmem {
 namespace alignment {
 
-static constexpr std::size_t NMM_DEFAULT_HOST_ALIGNMENT{
+inline static constexpr std::size_t NMM_DEFAULT_HOST_ALIGNMENT{
     alignof(std::max_align_t)};
 
-constexpr bool is_pow_2(std::size_t n) {
+inline constexpr bool is_pow_2(std::size_t n) {
     return (0 == (n & (n - 1)));
 }
 
-constexpr bool is_supported_alignment(std::size_t alignment) {
+inline constexpr bool is_supported_alignment(std::size_t alignment) {
     return is_pow_2(alignment);
 }
 
-constexpr std::size_t align_up(std::size_t v,
-                               std::size_t align_bytes) noexcept {
+inline constexpr std::size_t align_up(std::size_t v,
+                                      std::size_t align_bytes) noexcept {
     // if the alignment is not support, the program will end
     assert(is_supported_alignment(align_bytes));
     return (v + (align_bytes - 1)) & ~(align_bytes - 1);
 }
 
-constexpr std::size_t align_down(std::size_t v,
-                                 std::size_t align_bytes) noexcept {
+inline constexpr std::size_t align_down(std::size_t v,
+                                        std::size_t align_bytes) noexcept {
     // if the alignment is not support, the program will end
     assert(is_supported_alignment(align_bytes));
     return v & ~(align_bytes - 1);
 }
 
-constexpr bool is_aligned(std::size_t v, std::size_t align_bytes) noexcept {
+inline constexpr bool is_aligned(std::size_t v,
+                                 std::size_t align_bytes) noexcept {
     // if the alignment is not support, the program will end
     assert(is_supported_alignment(align_bytes));
     return v == align_down(v, align_bytes);
 }
 
-void *alignedAllocate(std::size_t bytes, std::size_t alignment,
-                      memory_resource &mm) {
+inline void *alignedAllocate(std::size_t bytes, std::size_t alignment,
+                             memory_resource &mm) {
     assert(is_pow_2(alignment));
 
     std::size_t padded_allocation_size{bytes + alignment +
@@ -61,8 +66,8 @@ void *alignedAllocate(std::size_t bytes, std::size_t alignment,
     return aligned;
 }
 
-void aligned_deallocate(void *p, std::size_t bytes, std::size_t alignment,
-                        memory_resource &mm) {
+inline void aligned_deallocate(void *p, std::size_t bytes,
+                               std::size_t alignment, memory_resource &mm) {
     (void)alignment;
 
     std::ptrdiff_t const offset = *(reinterpret_cast<std::ptrdiff_t *>(p) - 1);

@@ -169,7 +169,9 @@ INSTANTIATE_TEST_SUITE_P(core_memory_resource_tests, core_memory_resource_test,
 
 INSTANTIATE_TEST_SUITE_P(core_memory_resource_stress_tests,
                          core_memory_resource_stress_test,
-                         testing::Values(&host_resource, &binary_resource),
+                         testing::Values(&host_resource, &binary_resource,
+                                         &arena_resource),
                          vecmem::testing::memory_resource_name_gen(
                              {{&host_resource, "host_resource"},
-                              {&binary_resource, "binary_resource"}}));
+                              {&binary_resource, "binary_resource"},
+                              {&arena_resource, "arena_resource"}}));

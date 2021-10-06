@@ -8,17 +8,14 @@
 
 #pragma once
 
-#include <algorithm>
-#include <limits>
-#include <memory>
-#include <mutex>
+// Local include(s).
+#include "vecmem/memory/memory_resource.hpp"
+
+// System include(s).
 #include <set>
 #include <unordered_map>
-#include <vector>
 
-#include "vecmem/memory/arena_memory_resource.hpp"
-
-namespace vecmem {
+namespace vecmem::details {
 
 constexpr std::size_t minimum_superblock_size = 1u << 18u;
 
@@ -156,4 +153,4 @@ private:
     std::unordered_map<void*, block> allocated_blocks_;
 };  // class arena
 
-}  // namespace vecmem
+}  // namespace vecmem::details
