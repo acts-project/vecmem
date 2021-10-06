@@ -5,7 +5,7 @@
 # Mozilla Public License Version 2.0
 
 # Use the HIPCXX environment variable preferably as the HIP compiler.
-if( NOT $ENV{HIPCXX} STREQUAL "" )
+if( NOT "$ENV{HIPCXX}" STREQUAL "" )
    # Interpret the contents of HIPCXX.
    get_filename_component( CMAKE_HIP_COMPILER_INIT $ENV{HIPCXX}
       PROGRAM PROGRAM_ARGS CMAKE_HIP_FLAGS_INIT )
@@ -51,6 +51,19 @@ if( CMAKE_HIP_COMPILER )
    unset( _hipVersionResult )
 endif()
 
+# Look for the ROCm/HIP header(s).
+find_path( HIP_INCLUDE_DIR
+   NAMES "hip/hip_runtime.h"
+         "hip/hip_runtime_api.h"
+   PATHS "${HIP_ROOT_DIR}"
+         ENV ROCM_PATH
+         ENV HIP_PATH
+         "/opt/rocm"
+         "/opt/rocm/hip"
+   PATH_SUFFIXES "include"
+   DOC "ROCm/HIP include directory" )
+mark_as_advanced( HIP_INCLUDE_DIR )
+
 # Find the amdhip64 shared library.
 find_library( HIP_amdhip64_LIBRARY NAMES amdhip64
    PATHS "${HIP_ROOT_DIR}"
@@ -91,6 +104,7 @@ if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
 endif()
 
 # Decide how to do the build for the AMD (hcc) and NVidia (nvcc) backends.
+set( CMAKE_HIP_FLAGS_INIT "${CMAKE_INCLUDE_SYSTEM_FLAG_HIP}${HIP_INCLUDE_DIR}" )
 if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
     ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
    if( CMAKE_HIP_VERSION VERSION_LESS "3.7" )
