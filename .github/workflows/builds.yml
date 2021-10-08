@@ -13,18 +13,27 @@ on: [ push, pull_request ]
 # All the different build/test jobs.
 jobs:
 
-  # Native build job
+  # Native build jobs.
   native:
 
     # The different build modes to test.
     strategy:
       matrix:
-        BUILD_TYPE: [ "Release", "Debug" ]
-        DEBUG_MSG_LVL: [ 0, 5 ]
-        OS: ["ubuntu-latest", "macos-10.15", "windows-latest"]
+        BUILD:
+          - TYPE: "Release"
+            MSG_LVL: 0
+          - TYPE: "Debug"
+            MSG_LVL: 5
+        PLATFORM:
+          - OS: "ubuntu-latest"
+            GENERATOR: "Unix Makefiles"
+          - OS: "macos-latest"
+            GENERATOR: "Xcode"
+          - OS: "windows-latest"
+            GENERATOR: "NMake Makefiles"
 
     # The system to run on.
-    runs-on: ${{ matrix.OS }}
+    runs-on: ${{ matrix.PLATFORM.OS }}
 
     # The build/test steps to execute.
     steps:
@@ -34,65 +43,41 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1.9.0
     # Run the CMake configuration.
     - name: Configure
-      if: "!startsWith(matrix.os, 'windows')"
-      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }}
-                 -DVECMEM_DEBUG_MSG_LVL=${{ matrix.DEBUG_MSG_LVL }}
+      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }}
+                 -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }}
                  -S ${{ github.workspace }} -B build
-    - name: Configure-Windows
-      if: "startsWith(matrix.os, 'windows')"
-      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }}
-                 -DVECMEM_DEBUG_MSG_LVL=${{ matrix.DEBUG_MSG_LVL }}
-                 -S ${{ github.workspace }} -B build
-                 -G "NMake Makefiles"
+                 -G "${{ matrix.PLATFORM.GENERATOR }}"
     # Perform the build.
     - name: Build
-      run: cmake --build build
+      run: cmake --build build --config ${{ matrix.BUILD.TYPE }}
     # Run the unit test(s).
     - name: Test
       run: |
         cd build
-        ctest --output-on-failure
+        ctest --output-on-failure -C ${{ matrix.BUILD.TYPE }}
 
-  # Builds inside of a CUDA or ROCm/HIP Docker image.
-  cuda-and-hip:
-
-    # The different build modes to test.
-    strategy:
-      matrix:
-        CONTAINER: [ "ghcr.io/acts-project/ubuntu1804_cuda:v11",
-                     "ghcr.io/acts-project/ubuntu1804_rocm:v11" ]
-        BUILD_TYPE: [ "Release", "Debug" ]
-        DEBUG_MSG_LVL: [ 0, 5 ]
-
-    # The system to run on.
-    runs-on: ubuntu-latest
-    container: ${{ matrix.CONTAINER }}
-
-    # The build/test steps to execute.
-    steps:
-    # Use a standard checkout of the code.
-    - uses: actions/checkout@v2
-    # Run the CMake configuration.
-    - name: Configure
-      run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }}
-                 -DVECMEM_DEBUG_MSG_LVL=${{ matrix.DEBUG_MSG_LVL }}
-                 -S $GITHUB_WORKSPACE -B build
-    # Perform the build.
-    - name: Build
-      run: cmake --build build
-
-  # Build inside of a SYCL capable Docker image.
-  sycl:
-
-    # The system to run on.
-    runs-on: ubuntu-latest
-    container: ghcr.io/acts-project/ubuntu2004_oneapi:v12
+  # Containerised build jobs.
+  container:
 
     # The different build modes to test.
     strategy:
       matrix:
-        BUILD_TYPE: [ "Release", "Debug" ]
-        DEBUG_MSG_LVL: [ 0, 5 ]
+        BUILD:
+          - TYPE: "Release"
+            MSG_LVL: 0
+          - TYPE: "Debug"
+            MSG_LVL: 5
+        PLATFORM:
+          - NAME: "CUDA"
+            CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda:v11"
+          - NAME: "HIP"
+            CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm:v11"
+          - NAME: "SYCL"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_oneapi:v12"
+
+    # The system to run on.
+    runs-on: ubuntu-latest
+    container: ${{ matrix.PLATFORM.CONTAINER }}
 
     # Use BASH as the shell from the image.
     defaults:
@@ -106,18 +91,17 @@ jobs:
     # Run the CMake configuration.
     - name: Configure
       run: |
-        source /opt/intel/oneapi/setvars.sh
-        export CXX=`which clang++`
-        cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.DEBUG_MSG_LVL }} -S $GITHUB_WORKSPACE -B build
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
+        cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE -S ${GITHUB_WORKSPACE} -B build
     # Perform the build.
     - name: Build
       run: |
-        source /opt/intel/oneapi/setvars.sh
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
         cmake --build build
     # Run the unit test(s).
     - name: Test
+      if: "matrix.PLATFORM.NAME == 'SYCL'"
       run: |
         cd build
-        source /opt/intel/oneapi/setvars.sh
-        export SYCL_DEVICE_FILTER=level_zero:gpu,host
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
         ctest --output-on-failure
