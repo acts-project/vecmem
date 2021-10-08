@@ -21,7 +21,9 @@ endforeach()
 
 # More rigorous tests for the Debug builds.
 vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-Werror" )
-vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-pedantic" )
+if( NOT WIN32 )
+   vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-pedantic" )
+endif()
 
 # Avoid issues coming from MSVC<->DPC++ argument differences.
 if( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )

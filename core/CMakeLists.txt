@@ -49,6 +49,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/deallocator.hpp"
    "src/memory/deallocator.cpp"
    # Memory management.
+   "include/vecmem/memory/details/memory_resource_base.hpp"
+   "src/memory/details/memory_resource_base.cpp"
    "include/vecmem/memory/atomic.hpp"
    "include/vecmem/memory/impl/atomic.ipp"
    "include/vecmem/memory/polymorphic_allocator.hpp"
@@ -61,6 +63,8 @@ vecmem_add_library( vecmem_core core
    "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/host_memory_resource.hpp"
    "src/memory/binary_page_memory_resource.cpp"
+   "src/memory/binary_page_memory_resource_impl.hpp"
+   "src/memory/binary_page_memory_resource_impl.cpp"
    "include/vecmem/memory/binary_page_memory_resource.hpp"
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"

@@ -21,9 +21,7 @@ void* shared_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
     void* result = cl::sycl::malloc_shared(nbytes, details::get_queue(m_queue));
 
     // Let the user know what's happening.
-    VECMEM_DEBUG_MSG(5,
-                     "Allocated %ld bytes of shared memory on \"%s\" "
-                     "at %p",
+    VECMEM_DEBUG_MSG(5, "Allocated %ld bytes of shared memory on \"%s\" at %p",
                      nbytes,
                      details::get_queue(m_queue)
                          .get_device()

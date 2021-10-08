@@ -7,11 +7,15 @@
 # Guard against multiple includes.
 include_guard( GLOBAL )
 
-# Look for the supported GPU languages.
+# Look for the supported GPU languages. But only if the user didn't specify
+# explicitly if (s)he wants them used. If they are turned on/off through
+# cache variables explicitly, then skip looking for them at this point.
 include( vecmem-check-language )
-vecmem_check_language( CUDA )
-vecmem_check_language( HIP )
-vecmem_check_language( SYCL )
+foreach( lang CUDA HIP SYCL )
+   if( NOT DEFINED VECMEM_BUILD_${lang}_LIBRARY )
+      vecmem_check_language( ${lang} )
+   endif()
+endforeach()
 
 # Helper function for setting up the library building flags.
 function( vecmem_lib_option language descr )
@@ -40,11 +44,6 @@ vecmem_lib_option( SYCL "Build the vecmem::sycl library" )
 set( VECMEM_DEBUG_MSG_LVL 0 CACHE STRING
    "Debug message output level" )
 
-# Set the default library type, based on the platform.
-set( _sharedLibDefault TRUE )
-if( WIN32 )
-   set( _sharedLibDefault FALSE )
-endif()
-set( BUILD_SHARED_LIBS ${_sharedLibDefault} CACHE BOOL
+# Set the default library type to build.
+set( BUILD_SHARED_LIBS TRUE CACHE BOOL
    "Flag for building shared/static libraries" )
-unset( _sharedLibDefault )

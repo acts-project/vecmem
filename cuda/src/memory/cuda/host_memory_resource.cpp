@@ -6,21 +6,30 @@
  * Mozilla Public License Version 2.0
  */
 
+// Local include(s).
 #include "vecmem/memory/cuda/host_memory_resource.hpp"
 
+#include "../../utils/cuda_error_handling.hpp"
+#include "vecmem/utils/debug.hpp"
+
+// CUDA include(s).
 #include <cuda_runtime_api.h>
 
-#include "../../utils/cuda_error_handling.hpp"
-#include "vecmem/memory/memory_resource.hpp"
-
 namespace vecmem::cuda {
+
 void *host_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
-    void *res;
+
+    // Allocate the memory.
+    void *res = nullptr;
     VECMEM_CUDA_ERROR_CHECK(cudaMallocHost(&res, bytes));
+    VECMEM_DEBUG_MSG(4, "Allocated %ld bytes at %p", bytes, res);
     return res;
 }
 
 void host_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
+
+    // Free the memory.
+    VECMEM_DEBUG_MSG(4, "De-allocating memory at %p", p);
     VECMEM_CUDA_ERROR_CHECK(cudaFreeHost(p));
 }
 
@@ -31,4 +40,5 @@ bool host_memory_resource::do_is_equal(
 
     return c != nullptr;
 }
+
 }  // namespace vecmem::cuda

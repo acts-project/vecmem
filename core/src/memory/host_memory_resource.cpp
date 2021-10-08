@@ -6,19 +6,27 @@
  * Mozilla Public License Version 2.0
  */
 
+// Local include(s).
 #include "vecmem/memory/host_memory_resource.hpp"
 
-#include <memory>
+#include "vecmem/utils/debug.hpp"
 
-#include "vecmem/memory/memory_resource.hpp"
+// System include(s).
+#include <cstdlib>
 
 namespace vecmem {
+
 void *host_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
-    return malloc(bytes);
+
+    void *ptr = std::malloc(bytes);
+    VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", bytes, ptr);
+    return ptr;
 }
 
 void host_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
-    free(p);
+
+    VECMEM_DEBUG_MSG(4, "De-allocating memory at %p", p);
+    std::free(p);
 }
 
 bool host_memory_resource::do_is_equal(
@@ -34,4 +42,5 @@ bool host_memory_resource::do_is_equal(
 
     return c != nullptr;
 }
+
 }  // namespace vecmem
