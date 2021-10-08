@@ -37,12 +37,4 @@ void arena_memory_resource::do_deallocate(void* p, std::size_t bytes,
     m_arena->deallocate(p, alignment::align_up(bytes, 8));
 }
 
-bool arena_memory_resource::do_is_equal(
-    const memory_resource& other) const noexcept {
-    const arena_memory_resource* c;
-    c = dynamic_cast<const arena_memory_resource*>(&other);
-
-    return c != nullptr;
-}
-
 }  // namespace vecmem
