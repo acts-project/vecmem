@@ -30,7 +30,7 @@ jobs:
           - OS: "macos-latest"
             GENERATOR: "Xcode"
           - OS: "windows-latest"
-            GENERATOR: "NMake Makefiles"
+            GENERATOR: "Visual Studio 16 2019"
 
     # The system to run on.
     runs-on: ${{ matrix.PLATFORM.OS }}
@@ -39,8 +39,6 @@ jobs:
     steps:
     # Use a standard checkout of the code.
     - uses: actions/checkout@v2
-    # Set up the build environment.
-    - uses: ilammy/msvc-dev-cmd@v1.9.0
     # Run the CMake configuration.
     - name: Configure
       run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }}
