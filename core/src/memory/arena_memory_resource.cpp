@@ -25,7 +25,7 @@ arena_memory_resource::~arena_memory_resource() {}
 
 void* arena_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 
-    void* ptr = m_arena->allocate(alignment::align_up(bytes, 8));
+    void* ptr = m_arena->allocate(details::align_up(bytes));
     VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", bytes, ptr);
     return ptr;
 }
@@ -34,7 +34,7 @@ void arena_memory_resource::do_deallocate(void* p, std::size_t bytes,
                                           std::size_t) {
 
     VECMEM_DEBUG_MSG(4, "De-allocating memory at %p", p);
-    m_arena->deallocate(p, alignment::align_up(bytes, 8));
+    m_arena->deallocate(p, details::align_up(bytes));
 }
 
 bool arena_memory_resource::do_is_equal(

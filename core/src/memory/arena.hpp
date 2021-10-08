@@ -13,7 +13,7 @@
 
 // System include(s).
 #include <set>
-#include <unordered_map>
+#include <unordered_set>
 
 namespace vecmem::details {
 
@@ -73,7 +73,7 @@ public:
     bool operator<(block const& b) const;
 
 private:
-    char* pointer_;       // raw memory pointer
+    char* pointer_{};       // raw memory pointer
     std::size_t size_{};  // size in bytes
 };                        // class block
 
@@ -89,10 +89,10 @@ inline block coalesce_block(std::set<block>& free_blocks, block const& b);
 
 class arena {
 public:
-    // default initial size for the global arena
+    // default initial size for the arena
     static constexpr std::size_t default_initial_size =
         std::numeric_limits<std::size_t>::max();
-    // default maximum size for the global arena
+    // default maximum size for the arena
     static constexpr std::size_t default_maximum_size =
         std::numeric_limits<std::size_t>::max();
     // reserved memory that should not be allocated (64 MiB)
@@ -100,7 +100,7 @@ public:
 
     // Construct an `arena`
     //
-    // @param[in] global_arena the global arena from withc to allocate
+    // @param[in] arena the arena from withc to allocate
     // superblocks
     explicit arena(std::size_t initial_size, std::size_t maximum_size,
                    memory_resource& mm);
@@ -144,13 +144,13 @@ private:
     block free_block(void* p, std::size_t size) noexcept;
 
     memory_resource& mm_;
-    // The maximum size of the global arena
+    // The maximum size of the arena
     std::size_t maximum_size_;
-    // The current size of the global arena
+    // The current size of the arena
     std::size_t current_size_{};
     // Address-ordered set of free blocks
     std::set<block> free_blocks_;
-    std::unordered_map<void*, block> allocated_blocks_;
+    std::set<block> allocated_blocks_;
 };  // class arena
 
 }  // namespace vecmem::details

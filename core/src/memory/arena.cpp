@@ -55,7 +55,7 @@ std::pair<block, block> block::split(std::size_t size) const {
 
 block block::merge(block const& b) const {
     // assert condition is_contiguous_before(b)
-    return {this->pointer_, this->size_ + b.size_};
+    return {this->pointer(), this->size_ + b.size_};
 }
 
 bool block::operator<(block const& b) const {
@@ -101,7 +101,7 @@ inline block coalesce_block(std::set<block>& free_blocks, block const& b) {
 
     // find the right place (in ascending address order) to insert the block
     auto const next = free_blocks.lower_bound(b);
-    auto const previous = next == free_blocks.cend() ? next : std::prev(next);
+    auto const previous = next == free_blocks.cbegin() ? next : std::prev(next);
 
     // coalesce with neighboring blocks
     bool const merge_prev = previous->is_contiguous_before(b);
@@ -121,7 +121,7 @@ inline block coalesce_block(std::set<block>& free_blocks, block const& b) {
         // if only can merge with prev neighbor
         merged = previous->merge(b);
 
-        auto const i = free_blocks.erase(next);
+        auto const i = free_blocks.erase(previous);
         free_blocks.insert(i, merged);
     } else if (merge_next) {
         // if only can merge with next neighbor
@@ -155,32 +155,29 @@ arena::arena(std::size_t initial_size, std::size_t maximum_size,
         }
     }
     // initial size exceeds the maxium pool size
-    this->free_blocks_.emplace(expand_arena(initial_size));
+    this->free_blocks_.emplace(this->expand_arena(initial_size));
 }
 
 arena::~arena() {
+
     for (auto b : free_blocks_) {
         void* p = b.pointer();
         std::size_t size = b.size();
         mm_.deallocate(p, size);
     }
 
-    free_blocks_.clear();
-
-    for (auto itr : allocated_blocks_) {
-        void* p = itr.first;
-        block b = itr.second;
-
-        mm_.deallocate(p, b.size());
+    for (auto b : allocated_blocks_) {
+        void* p = b.pointer();
+        std::size_t size = b.size();
+        mm_.deallocate(p, size);
     }
 
-    allocated_blocks_.clear();
 }
 
 void* arena::allocate(std::size_t bytes) {
 
     auto const b = get_block(bytes);
-    this->allocated_blocks_.emplace(b.pointer(), b);
+    this->allocated_blocks_.emplace(b);
 
     return b.pointer();
 }
@@ -218,21 +215,25 @@ constexpr std::size_t arena::size_to_grow(std::size_t /*size*/) const {
 }
 
 block arena::expand_arena(std::size_t size) {
+    size = std::max(size, minimum_superblock_size);
     std::pair<std::set<block>::iterator, bool> ret =
         free_blocks_.insert({mm_.allocate(size), size});
+
     current_size_ += size;
     return *(ret.first);
 }
 
 block arena::free_block(void* p, std::size_t /*size*/) noexcept {
-    auto const i = this->allocated_blocks_.find(p);
+    auto const i =
+        std::find_if(allocated_blocks_.cbegin(), allocated_blocks_.cend(),
+                     [p](auto const& b) { return b.pointer() == p; });
 
     if (i == this->allocated_blocks_.end()) {
         return {};
     }
 
-    auto const found = i->second;
-    // assert if found.size == size
+    auto const found = *i;
+
     this->allocated_blocks_.erase(i);
 
     return found;
