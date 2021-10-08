@@ -9,11 +9,18 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/details/memory_resource_base.hpp"
 #include "vecmem/vecmem_core_export.hpp"
 
 // System include(s).
 #include <memory>
+
+// Disable the warning(s) about inheriting from/using standard library types
+// with an exported class.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif  // MSVC
 
 namespace vecmem {
 
@@ -23,7 +30,8 @@ class arena;
 }
 
 /// Memory resource implementing an arena allocation scheme
-class VECMEM_CORE_EXPORT arena_memory_resource final : public memory_resource {
+class VECMEM_CORE_EXPORT arena_memory_resource final
+    : public details::memory_resource_base {
 
 public:
     /// Construct the memory resource on top of an upstream memory resource
@@ -49,9 +57,6 @@ private:
     /// De-allocate a previously allocated memory block
     virtual void do_deallocate(void* p, std::size_t bytes,
                                std::size_t) override;
-    /// Compares @c *this for equality with @c other
-    virtual bool do_is_equal(
-        const memory_resource& other) const noexcept override;
 
     /// @}
 
@@ -61,3 +66,8 @@ private:
 };  // class arena_memory_resource
 
 }  // namespace vecmem
+
+// Re-enable the warning(s).
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // MSVC
