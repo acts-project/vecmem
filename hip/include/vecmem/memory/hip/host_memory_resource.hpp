@@ -7,15 +7,19 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/details/memory_resource_base.hpp"
 #include "vecmem/vecmem_hip_export.hpp"
 
 namespace vecmem::hip {
 
 /// Memory resource for HIP shared host/device memory
-class VECMEM_HIP_EXPORT host_memory_resource final : public memory_resource {
+class VECMEM_HIP_EXPORT host_memory_resource final
+    : public vecmem::details::memory_resource_base {
 
 private:
+    /// @name Function(s) implemented from @c vecmem::memory_resource
+    /// @{
+
     /// Function performing the memory allocation
     void* do_allocate(std::size_t nbytes, std::size_t alignment) override final;
 
@@ -26,6 +30,8 @@ private:
     /// Function comparing two memory resource instances
     bool do_is_equal(
         const memory_resource& other) const noexcept override final;
+
+    /// @}
 
 };  // class host_memory_resource
 

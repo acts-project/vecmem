@@ -6,27 +6,36 @@
  * Mozilla Public License Version 2.0
  */
 
+// Local include(s).
 #include "vecmem/memory/contiguous_memory_resource.hpp"
 
-#include <cstddef>
-#include <memory>
+#include "vecmem/utils/debug.hpp"
+
+// System include(s).
 #include <stdexcept>
 
-#include "vecmem/memory/memory_resource.hpp"
-
 namespace vecmem {
+
 contiguous_memory_resource::contiguous_memory_resource(
     memory_resource &upstream, std::size_t size)
     : m_upstream(upstream),
       m_size(size),
       m_begin(m_upstream.allocate(m_size)),
-      m_next(m_begin) {}
+      m_next(m_begin) {
+
+    VECMEM_DEBUG_MSG(
+        2, "Allocated %lu bytes at %p from the upstream memory resource",
+        m_size, m_begin);
+}
 
 contiguous_memory_resource::~contiguous_memory_resource() {
     /*
      * Deallocate our memory arena upstream.
      */
     m_upstream.deallocate(m_begin, m_size);
+    VECMEM_DEBUG_MSG(
+        2, "De-allocated %lu bytes at %p using the upstream memory resource",
+        m_size, m_begin);
 }
 
 void *contiguous_memory_resource::do_allocate(std::size_t size, std::size_t) {
@@ -54,6 +63,7 @@ void *contiguous_memory_resource::do_allocate(std::size_t size, std::size_t) {
      */
     m_next = next;
 
+    VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", size, curr);
     return curr;
 }
 
@@ -63,15 +73,6 @@ void contiguous_memory_resource::do_deallocate(void *, std::size_t,
      * Deallocation is a no-op for this memory resource, so we do nothing.
      */
     return;
-}
-
-bool contiguous_memory_resource::do_is_equal(
-    const memory_resource &other) const noexcept {
-    /*
-     * These memory resources are equal if and only if they are the same
-     * object.
-     */
-    return this == &other;
 }
 
 }  // namespace vecmem

@@ -156,15 +156,6 @@ void binary_page_memory_resource::do_deallocate(void *p, std::size_t,
     }
 }
 
-bool binary_page_memory_resource::do_is_equal(
-    const memory_resource &other) const noexcept {
-    /*
-     * These memory resources are only equal if they are actually the same
-     * object.
-     */
-    return this == &other;
-}
-
 binary_page_memory_resource::page *binary_page_memory_resource::find_free_page(
     std::size_t size) {
     page *cand = nullptr;
