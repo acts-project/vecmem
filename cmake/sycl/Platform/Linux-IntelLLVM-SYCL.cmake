@@ -22,10 +22,9 @@ else()
    endif()
 endif()
 
-# Tweak the compiler command, to let the compiler explicitly know that it is
-# receiving C++ source code with the provided .sycl file(s).
-string( REPLACE "<SOURCE>" "-x c++ <SOURCE>" CMAKE_SYCL_COMPILE_OBJECT
-   "${CMAKE_SYCL_COMPILE_OBJECT}" )
+# Set a compiler command from scratch for this platform.
+set( CMAKE_SYCL_COMPILE_OBJECT
+   "<CMAKE_SYCL_COMPILER> -x c++ <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>" )
 
 # Set the flags controlling the C++ standard used by the SYCL compiler.
 set( CMAKE_SYCL17_STANDARD_COMPILE_OPTION "-std=c++17" )
