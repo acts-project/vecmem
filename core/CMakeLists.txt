@@ -68,6 +68,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/binary_page_memory_resource.hpp"
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
+   "src/memory/instrumenting_memory_resource.cpp"
+   "include/vecmem/memory/instrumenting_memory_resource.hpp"
    # Utilities.
    "include/vecmem/utils/copy.hpp"
    "include/vecmem/utils/impl/copy.ipp"
