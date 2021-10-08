@@ -21,3 +21,11 @@ else()
       __linux_compiler_intel( SYCL )
    endif()
 endif()
+
+# Set a compiler command from scratch for this platform.
+set( CMAKE_SYCL_COMPILE_OBJECT
+   "<CMAKE_SYCL_COMPILER> -x c++ <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>" )
+
+# Set the flags controlling the C++ standard used by the SYCL compiler.
+set( CMAKE_SYCL17_STANDARD_COMPILE_OPTION "-std=c++17" )
+set( CMAKE_SYCL17_EXTENSION_COMPILE_OPTION "-std=c++17" )

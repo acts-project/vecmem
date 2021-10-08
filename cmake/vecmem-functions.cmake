@@ -54,7 +54,8 @@ function( vecmem_add_library fullname basename )
    install( TARGETS ${fullname}
       EXPORT vecmem-exports
       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-      ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" )
+      ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+      RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" )
    install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" )
 
@@ -76,10 +77,6 @@ function( vecmem_add_test name )
    if( ARG_LINK_LIBRARIES )
       target_link_libraries( ${test_exe_name} PRIVATE ${ARG_LINK_LIBRARIES} )
    endif()
-   foreach( _config "" "_DEBUG" "_RELEASE" "_MINSIZEREL" "_RELWITHDEBINFO" )
-      set_property( TARGET ${test_exe_name} PROPERTY
-         RUNTIME_OUTPUT_DIRECTORY${_config} "${CMAKE_BINARY_DIR}/test-bin" )
-   endforeach()
 
    # Run the executable as the test.
    add_test( NAME ${test_exe_name}
