@@ -9,7 +9,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/details/memory_resource_base.hpp"
 #include "vecmem/vecmem_core_export.hpp"
 
 // System include(s).
@@ -41,8 +41,8 @@ struct binary_page_memory_resource_impl;
  * creates a binary tree of pages which can be either vacant, occupied, or
  * split.
  */
-class VECMEM_CORE_EXPORT binary_page_memory_resource : public memory_resource {
-
+class VECMEM_CORE_EXPORT binary_page_memory_resource
+    : public details::memory_resource_base {
 public:
     /**
      * @brief Initialize a binary page memory manager depending on an
@@ -68,8 +68,6 @@ private:
     virtual void *do_allocate(std::size_t, std::size_t) override;
     /// De-allocate a previously allocated memory blob
     virtual void do_deallocate(void *p, std::size_t, std::size_t) override;
-    /// Check the equivalence of two memory resource objects
-    virtual bool do_is_equal(const memory_resource &) const noexcept override;
 
     /// @}
 

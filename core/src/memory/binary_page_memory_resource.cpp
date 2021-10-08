@@ -32,13 +32,4 @@ void binary_page_memory_resource::do_deallocate(void *p, std::size_t size,
     m_impl->do_deallocate(p, size, align);
 }
 
-bool binary_page_memory_resource::do_is_equal(
-    const memory_resource &other) const noexcept {
-    /*
-     * These memory resources are only equal if they are actually the same
-     * object.
-     */
-    return this == &other;
-}
-
 }  // namespace vecmem
