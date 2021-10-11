@@ -75,6 +75,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/utils/impl/copy.ipp"
    "src/utils/copy.cpp"
    "include/vecmem/utils/debug.hpp"
+   "src/utils/memory_monitor.cpp"
+   "include/vecmem/utils/memory_monitor.hpp"
    "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )
 
