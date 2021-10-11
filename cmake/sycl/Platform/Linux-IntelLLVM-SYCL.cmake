@@ -26,6 +26,10 @@ endif()
 set( CMAKE_SYCL_COMPILE_OBJECT
    "<CMAKE_SYCL_COMPILER> -x c++ <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>" )
 
+# Set an archive (static library) creation command explicitly for this platform.
+set( CMAKE_SYCL_CREATE_STATIC_LIBRARY
+   "<CMAKE_AR> qc <TARGET> <LINK_FLAGS> <OBJECTS>" )
+
 # Set the flags controlling the C++ standard used by the SYCL compiler.
 set( CMAKE_SYCL17_STANDARD_COMPILE_OPTION "-std=c++17" )
 set( CMAKE_SYCL17_EXTENSION_COMPILE_OPTION "-std=c++17" )
