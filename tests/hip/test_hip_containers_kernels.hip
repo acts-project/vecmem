@@ -217,3 +217,32 @@ void filterTransform(vecmem::data::jagged_vector_view<const int> input,
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
 }
+
+/// Kernel filling a jagged vector to its capacity
+__global__ void fillTransformKernel(
+    vecmem::data::jagged_vector_view<int> vec_data) {
+
+    // Find the current index.
+    const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+    if (i >= vec_data.m_size) {
+        return;
+    }
+
+    // Create a device vector on top of the view.
+    vecmem::jagged_device_vector<int> vec(vec_data);
+
+    // Fill the vectors to their capacity.
+    while (vec[i].size() < vec[i].capacity()) {
+        vec[i].push_back(1);
+    }
+}
+
+void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
+
+    // Launch the kernel
+    hipLaunchKernelGGL(fillTransformKernel, vec.m_size, 1, 0, nullptr, vec);
+
+    // Check whether it succeeded to run.
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+}
