@@ -31,3 +31,6 @@ void filterTransform(vecmem::data::vector_view<const int> input,
 void filterTransform(vecmem::data::jagged_vector_view<const int> input,
                      unsigned int max_vec_size,
                      vecmem::data::jagged_vector_view<int> output);
+
+/// Function filling the jagged vector to its capacity
+void fillTransform(vecmem::data::jagged_vector_view<int> vec);

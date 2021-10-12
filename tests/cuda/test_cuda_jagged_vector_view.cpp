@@ -195,3 +195,54 @@ TEST_F(cuda_jagged_vector_view_test, filter) {
     EXPECT_EQ(std::set<int>(output[5].begin(), output[5].end()),
               std::set<int>({13, 15}));
 }
+
+/// Test filling a resizable jagged vector
+TEST_F(cuda_jagged_vector_view_test, zero_capacity) {
+
+    // Helper object for performing memory copies.
+    vecmem::cuda::copy copy;
+
+    // Dedicated device memory resource.
+    vecmem::cuda::device_memory_resource device_resource;
+
+    // Create the jagged vector buffer in managed memory.
+    vecmem::data::jagged_vector_buffer<int> managed_data(
+        {0, 0, 0, 0, 0, 0}, {0, 1, 200, 1, 100, 2}, m_mem);
+    copy.setup(managed_data);
+
+    // Run the vector filling.
+    fillTransform(managed_data);
+
+    // Get the data into a host vector.
+    vecmem::jagged_vector<int> host_vector(&m_mem);
+    copy(managed_data, host_vector);
+
+    // Check the contents of the vector.
+    EXPECT_EQ(host_vector.size(), 6);
+    EXPECT_EQ(host_vector.at(0).size(), 0);
+    EXPECT_EQ(host_vector.at(1).size(), 1);
+    EXPECT_EQ(host_vector.at(2).size(), 200);
+    EXPECT_EQ(host_vector.at(3).size(), 1);
+    EXPECT_EQ(host_vector.at(4).size(), 100);
+    EXPECT_EQ(host_vector.at(5).size(), 2);
+
+    // Create the jagged vector buffer in device memory.
+    vecmem::data::jagged_vector_buffer<int> device_data(
+        {0, 0, 0, 0, 0, 0}, {0, 1, 200, 1, 100, 2}, device_resource, &m_mem);
+    copy.setup(device_data);
+
+    // Run the vector filling.
+    fillTransform(device_data);
+
+    // Get the data into the host vector.
+    copy(device_data, host_vector);
+
+    // Check the contents of the vector.
+    EXPECT_EQ(host_vector.size(), 6);
+    EXPECT_EQ(host_vector.at(0).size(), 0);
+    EXPECT_EQ(host_vector.at(1).size(), 1);
+    EXPECT_EQ(host_vector.at(2).size(), 200);
+    EXPECT_EQ(host_vector.at(3).size(), 1);
+    EXPECT_EQ(host_vector.at(4).size(), 100);
+    EXPECT_EQ(host_vector.at(5).size(), 2);
+}
