@@ -16,10 +16,6 @@ instrumenting_memory_resource::instrumenting_memory_resource(
     memory_resource &upstream)
     : m_upstream(upstream) {}
 
-std::size_t instrumenting_memory_resource::get_outstanding(void) const {
-    return m_outstanding;
-}
-
 const std::vector<instrumenting_memory_resource::memory_event>
     &instrumenting_memory_resource::get_events(void) const {
     return m_events;
@@ -103,12 +99,6 @@ void *instrumenting_memory_resource::do_allocate(std::size_t size,
      */
     if (ptr == nullptr) {
         throw std::bad_alloc();
-    } else {
-        /*
-         * If the allocation was a success, add the size to the total
-         * outstanding memory pool.
-         */
-        m_outstanding += size;
     }
 
     return ptr;
@@ -123,14 +113,6 @@ void instrumenting_memory_resource::do_deallocate(void *ptr, std::size_t size,
          m_pre_deallocate_hooks) {
         f(ptr, size, align);
     }
-
-    /*
-     * Now, remove the requested amount of memory from the outstanding pool. We
-     * don't really have a notion of deallocation failing, so we always assume
-     * that it succeeds. Calling deallocate on memory that was not succesfully
-     * allocated is UB anyway.
-     */
-    m_outstanding -= size;
 
     /*
      * As with allocation, we calculate the time taken to process this

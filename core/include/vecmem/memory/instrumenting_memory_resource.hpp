@@ -73,11 +73,6 @@ public:
     instrumenting_memory_resource(memory_resource& upstream);
 
     /**
-     * @brief Get the total size of outstanding requests.
-     */
-    std::size_t get_outstanding(void) const;
-
-    /**
      * @brief Return a list of memory allocation and deallocation events in
      * chronological order.
      */
@@ -131,11 +126,6 @@ private:
      * deallocation will be forwarded.
      */
     memory_resource& m_upstream;
-
-    /*
-     * This variable tracks the total size of outstanding allocations.
-     */
-    std::size_t m_outstanding = 0;
 
     /*
      * This list stores a chronological set of requests that were passed to

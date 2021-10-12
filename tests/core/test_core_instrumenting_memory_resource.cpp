@@ -12,6 +12,7 @@
 
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/memory/instrumenting_memory_resource.hpp"
+#include "vecmem/utils/memory_monitor.hpp"
 
 class core_instrumenting_memory_resource_test : public testing::Test {
 protected:
@@ -136,44 +137,6 @@ TEST_F(core_instrumenting_memory_resource_test, pre_deallocate_hook) {
     EXPECT_EQ(total_size, 152);
 }
 
-TEST_F(core_instrumenting_memory_resource_test, outstanding) {
-    vecmem::instrumenting_memory_resource res(m_upstream);
-
-    EXPECT_EQ(res.get_outstanding(), 0);
-
-    void* ptr1 = res.allocate(100);
-
-    EXPECT_EQ(res.get_outstanding(), 100);
-
-    void* ptr2 = res.allocate(50);
-
-    EXPECT_EQ(res.get_outstanding(), 150);
-
-    void* ptr3 = res.allocate(2);
-
-    EXPECT_EQ(res.get_outstanding(), 152);
-
-    res.deallocate(ptr2, 50);
-
-    EXPECT_EQ(res.get_outstanding(), 102);
-
-    res.deallocate(ptr3, 2);
-
-    EXPECT_EQ(res.get_outstanding(), 100);
-
-    void* ptr4 = res.allocate(32);
-
-    EXPECT_EQ(res.get_outstanding(), 132);
-
-    res.deallocate(ptr1, 100);
-
-    EXPECT_EQ(res.get_outstanding(), 32);
-
-    res.deallocate(ptr4, 32);
-
-    EXPECT_EQ(res.get_outstanding(), 0);
-}
-
 TEST_F(core_instrumenting_memory_resource_test, events) {
     vecmem::instrumenting_memory_resource res(m_upstream);
 
@@ -218,4 +181,32 @@ TEST_F(core_instrumenting_memory_resource_test, events) {
     EXPECT_EQ(events[4].m_ptr, ptr1);
 
     res.deallocate(ptr3, 2, 8);
+}
+
+TEST_F(core_instrumenting_memory_resource_test, memory_monitor) {
+
+    // Set up the memory resource
+    vecmem::instrumenting_memory_resource res(m_upstream);
+
+    // Set up the memory monitor
+    vecmem::memory_monitor monitor(res);
+
+    // Perform some allocations and de-allocations
+    void* ptr1 = res.allocate(200);
+    void* ptr2 = res.allocate(500);
+    res.deallocate(ptr1, 200);
+    ptr1 = res.allocate(600);
+    void* ptr3 = res.allocate(100);
+    res.deallocate(ptr1, 600);
+    res.deallocate(ptr2, 500);
+
+    // Check the statistics.
+    EXPECT_EQ(monitor.total_allocation(), 1400);
+    EXPECT_EQ(monitor.outstanding_allocation(), 100);
+    EXPECT_EQ(monitor.average_allocation(), 350);
+    EXPECT_EQ(monitor.maximal_allocation(), 1200);
+
+    // Clean up.
+    res.deallocate(ptr3, 100);
+    EXPECT_EQ(monitor.outstanding_allocation(), 0);
 }
