@@ -14,6 +14,7 @@
 #include "vecmem/memory/coalescing_memory_resource.hpp"
 #include "vecmem/memory/conditional_memory_resource.hpp"
 #include "vecmem/memory/contiguous_memory_resource.hpp"
+#include "vecmem/memory/debug_memory_resource.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/memory/identity_memory_resource.hpp"
 #include "vecmem/memory/instrumenting_memory_resource.hpp"
@@ -179,6 +180,10 @@ static vecmem::choice_memory_resource choice_resource(
         return host_resource;
     });
 
+static vecmem::debug_memory_resource debug_host_resource(host_resource);
+static vecmem::debug_memory_resource debug_binary_resource(binary_resource);
+static vecmem::debug_memory_resource debug_arena_resource(arena_resource);
+
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_tests, core_memory_resource_test,
@@ -186,7 +191,8 @@ INSTANTIATE_TEST_SUITE_P(
                     &arena_resource, &instrumenting_resource,
                     &identity_resource, &conditional_resource,
                     &coalescing_resource_1, &coalescing_resource_2,
-                    &choice_resource),
+                    &choice_resource, &debug_host_resource,
+                    &debug_binary_resource, &debug_arena_resource),
     vecmem::testing::memory_resource_name_gen(
         {{&host_resource, "host_resource"},
          {&binary_resource, "binary_resource"},
@@ -197,14 +203,19 @@ INSTANTIATE_TEST_SUITE_P(
          {&conditional_resource, "conditional_resource"},
          {&coalescing_resource_1, "coalescing_resource_1"},
          {&coalescing_resource_2, "coalescing_resource_2"},
-         {&choice_resource, "choice_resource"}}));
+         {&choice_resource, "choice_resource"},
+         {&debug_host_resource, "debug_host_resource"},
+         {&debug_binary_resource, "debug_binary_resource"},
+         {&debug_arena_resource, "debug_arena_resource"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_stress_tests, core_memory_resource_stress_test,
     testing::Values(&host_resource, &binary_resource, &arena_resource,
                     &instrumenting_resource, &identity_resource,
                     &conditional_resource, &coalescing_resource_1,
-                    &coalescing_resource_2, &choice_resource),
+                    &coalescing_resource_2, &choice_resource,
+                    &debug_host_resource, &debug_binary_resource,
+                    &debug_arena_resource),
     vecmem::testing::memory_resource_name_gen(
         {{&host_resource, "host_resource"},
          {&binary_resource, "binary_resource"},
@@ -214,4 +225,7 @@ INSTANTIATE_TEST_SUITE_P(
          {&conditional_resource, "conditional_resource"},
          {&coalescing_resource_1, "coalescing_resource_1"},
          {&coalescing_resource_2, "coalescing_resource_2"},
-         {&choice_resource, "choice_resource"}}));
+         {&choice_resource, "choice_resource"},
+         {&debug_host_resource, "debug_host_resource"},
+         {&debug_binary_resource, "debug_binary_resource"},
+         {&debug_arena_resource, "debug_arena_resource"}}));
