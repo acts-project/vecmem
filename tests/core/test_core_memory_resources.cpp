@@ -10,9 +10,14 @@
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/arena_memory_resource.hpp"
 #include "vecmem/memory/binary_page_memory_resource.hpp"
+#include "vecmem/memory/choice_memory_resource.hpp"
+#include "vecmem/memory/coalescing_memory_resource.hpp"
+#include "vecmem/memory/conditional_memory_resource.hpp"
 #include "vecmem/memory/contiguous_memory_resource.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
+#include "vecmem/memory/identity_memory_resource.hpp"
 #include "vecmem/memory/instrumenting_memory_resource.hpp"
+#include "vecmem/memory/terminal_memory_resource.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
@@ -150,6 +155,9 @@ TEST_P(core_memory_resource_stress_test, stress_test) {
     }
 }
 
+// Utility memory resource used to define others.
+static vecmem::terminal_memory_resource terminal_resource;
+
 // Memory resources to use in the test.
 static vecmem::host_memory_resource host_resource;
 static vecmem::binary_page_memory_resource binary_resource(host_resource);
@@ -159,25 +167,51 @@ static vecmem::arena_memory_resource arena_resource(host_resource, 20000,
                                                     10000000);
 static vecmem::instrumenting_memory_resource instrumenting_resource(
     host_resource);
+static vecmem::identity_memory_resource identity_resource(host_resource);
+static vecmem::conditional_memory_resource conditional_resource(
+    host_resource, [](std::size_t, std::size_t) { return true; });
+static vecmem::coalescing_memory_resource coalescing_resource_1(
+    {host_resource});
+static vecmem::coalescing_memory_resource coalescing_resource_2(
+    {terminal_resource, terminal_resource, host_resource, terminal_resource});
+static vecmem::choice_memory_resource choice_resource(
+    [](std::size_t, std::size_t) -> vecmem::memory_resource& {
+        return host_resource;
+    });
 
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_tests, core_memory_resource_test,
     testing::Values(&host_resource, &binary_resource, &contiguous_resource,
-                    &arena_resource, &instrumenting_resource),
+                    &arena_resource, &instrumenting_resource,
+                    &identity_resource, &conditional_resource,
+                    &coalescing_resource_1, &coalescing_resource_2,
+                    &choice_resource),
     vecmem::testing::memory_resource_name_gen(
         {{&host_resource, "host_resource"},
          {&binary_resource, "binary_resource"},
          {&contiguous_resource, "contiguous_resource"},
          {&arena_resource, "arena_resource"},
-         {&instrumenting_resource, "instrumenting_resource"}}));
+         {&instrumenting_resource, "instrumenting_resource"},
+         {&identity_resource, "identity_resource"},
+         {&conditional_resource, "conditional_resource"},
+         {&coalescing_resource_1, "coalescing_resource_1"},
+         {&coalescing_resource_2, "coalescing_resource_2"},
+         {&choice_resource, "choice_resource"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_stress_tests, core_memory_resource_stress_test,
     testing::Values(&host_resource, &binary_resource, &arena_resource,
-                    &instrumenting_resource),
+                    &instrumenting_resource, &identity_resource,
+                    &conditional_resource, &coalescing_resource_1,
+                    &coalescing_resource_2, &choice_resource),
     vecmem::testing::memory_resource_name_gen(
         {{&host_resource, "host_resource"},
          {&binary_resource, "binary_resource"},
          {&arena_resource, "arena_resource"},
-         {&instrumenting_resource, "instrumenting_resource"}}));
+         {&instrumenting_resource, "instrumenting_resource"},
+         {&identity_resource, "identity_resource"},
+         {&conditional_resource, "conditional_resource"},
+         {&coalescing_resource_1, "coalescing_resource_1"},
+         {&coalescing_resource_2, "coalescing_resource_2"},
+         {&choice_resource, "choice_resource"}}));
