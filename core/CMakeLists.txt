@@ -6,6 +6,7 @@
 
 # Project include(s).
 include( vecmem-compiler-options-cpp )
+include( vecmem-check-sycl-code-compiles )
 
 # Set up the build of the VecMem core library.
 vecmem_add_library( vecmem_core core
@@ -152,4 +153,28 @@ check_cxx_source_compiles( "
 
 if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
    target_sources(vecmem_core PRIVATE src/memory/default_resource_polyfill.cpp)
+endif()
+
+# Figure out how to produce SYCL debug printouts.
+if( VECMEM_BUILD_SYCL_LIBRARY )
+
+   # Test which printf function(s) is/are available.
+   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ext_oneapi_printf_test.sycl" )
+   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ONEAPI_PRINTF
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/oneapi_printf_test.sycl" )
+
+   # Set up the appropriate flag with its help.
+   if( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ext::oneapi::experimental::printf )
+   elseif( VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ONEAPI::experimental::printf )
+   else()
+      message( WARNING "No valid printf function found for SYCL."
+         " Enabling debug messages will likely not work." )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_ONEAPI_PRINTF_FUNCTION=printf )
+   endif()
 endif()
