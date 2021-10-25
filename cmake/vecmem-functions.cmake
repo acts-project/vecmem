@@ -7,9 +7,13 @@
 # Guard against multiple includes.
 include_guard( GLOBAL )
 
+# CMake version requirement.
+cmake_minimum_required( VERSION 3.10 )
+
 # CMake include(s).
 include( CMakeParseArguments )
 include( GenerateExportHeader )
+include( GoogleTest )
 
 # Helper function for setting up the VecMem libraries.
 #
@@ -79,8 +83,7 @@ function( vecmem_add_test name )
    endif()
 
    # Run the executable as the test.
-   add_test( NAME ${test_exe_name}
-      COMMAND $<TARGET_FILE:${test_exe_name}> )
+   gtest_add_tests( TARGET ${test_exe_name} SOURCES ${ARG_UNPARSED_ARGUMENTS} )
 
 endfunction( vecmem_add_test )
 
