@@ -9,7 +9,7 @@
 /// Function name to use for printout operations
 #ifndef VECMEM_PRINTF
 #if defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)
-#define VECMEM_PRINTF cl::sycl::ONEAPI::experimental::printf
+#define VECMEM_PRINTF VECMEM_SYCL_PRINTF_FUNCTION
 #else
 #define VECMEM_PRINTF printf
 #endif

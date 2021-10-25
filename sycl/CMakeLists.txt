@@ -10,6 +10,7 @@ enable_language( SYCL )
 # Project include(s).
 include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-sycl )
+include( vecmem-check-sycl-code-compiles )
 
 # Set up the build of the VecMem SYCL library.
 vecmem_add_library( vecmem_sycl sycl
@@ -39,45 +40,16 @@ set_target_properties( vecmem_sycl PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden"
    SYCL_VISIBILITY_PRESET "hidden" )
 
-# Helper function for checking if some SYCL files can be built into an
-# executable.
-function( check_sycl_code_compiles _variable )
-   if( DEFINED ${_variable} )
-      return()
-   endif()
-   if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
-      message( STATUS "Performing Test ${_variable}" )
-   else()
-      message( CHECK_START "Performing Test ${_variable}" )
-   endif()
-   try_compile( ${_variable}
-      "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_variable}"
-      SOURCES ${ARGN} )
-   if( ${_variable} )
-      if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
-         message( STATUS "Performing Test ${_variable} - Success" )
-      else()
-         message( CHECK_PASS "Success" )
-      endif()
-   else()
-      if( ${CMAKE_VERSION} VERSION_LESS 3.17 )
-         message( STATUS "Performing Test ${_variable} - Failed" )
-      else()
-         message( CHECK_FAIL "Failed" )
-      endif()
-   endif()
-endfunction( check_sycl_code_compiles )
-
 # Check if assertions work out of the box in the build.
-check_sycl_code_compiles( VECMEM_SYCL_HAVE_ASSERT
+vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ASSERT
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/assert_test.sycl" )
 
 # If not, check if it can be solved as described in:
 #   https://github.com/intel/llvm/issues/3385
-if( NOT VECMEM_SYCL_HAVE_ASSERT )
+if( NOT VECMEM_HAVE_SYCL_ASSERT )
 
    # Check if the "CUDA polyfill" can make the test work.
-   check_sycl_code_compiles( VECMEM_SYCL_HAVE_ASSERT_POLYFILL
+   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_CUDA_ASSERT_POLYFILL
       "${CMAKE_CURRENT_SOURCE_DIR}/cmake/assert_test.sycl"
       "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/sycl/cuda_assert_polyfill.sycl" )
 
@@ -86,7 +58,7 @@ if( NOT VECMEM_SYCL_HAVE_ASSERT )
    # Device code just does not work across binary boundaries. So we can't just
    # put the code into vecmem::sycl. Instead let's add a separate STATIC
    # library, which vecmem::sycl would depend on.
-   if( VECMEM_SYCL_HAVE_ASSERT_POLYFILL )
+   if( VECMEM_HAVE_SYCL_CUDA_ASSERT_POLYFILL )
 
       # Set up the vecmem::sycl_polyfill library.
       vecmem_add_library( vecmem_sycl_polyfill sycl_polyfill TYPE STATIC
@@ -96,6 +68,6 @@ if( NOT VECMEM_SYCL_HAVE_ASSERT )
    else()
       # If not even this worked, then warn the user, and see what happens...
       message( WARNING "Assertions are not available for SYCL device code."
-         "The build will likely fail." )
+         " Debug builds will likely fail." )
    endif()
 endif()
