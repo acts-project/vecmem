@@ -7,9 +7,9 @@
 
 // Local include(s).
 #include "../common/memory_resource_name_gen.hpp"
-#include "../common/tests/test_generic_basic.hpp"
-#include "../common/tests/test_generic_host_accessible.hpp"
-#include "../common/tests/test_generic_stress.hpp"
+#include "../common/memory_resource_test_basic.hpp"
+#include "../common/memory_resource_test_host_accessible.hpp"
+#include "../common/memory_resource_test_stress.hpp"
 #include "vecmem/memory/arena_memory_resource.hpp"
 #include "vecmem/memory/binary_page_memory_resource.hpp"
 #include "vecmem/memory/choice_memory_resource.hpp"

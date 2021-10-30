@@ -5,18 +5,14 @@
  *
  * Mozilla Public License Version 2.0
  */
-#pragma once
 
-#include <gtest/gtest.h>
-
-#include <vector>
+// Local include(s).
+#include "memory_resource_test_stress.hpp"
 
 #include "vecmem/containers/vector.hpp"
-#include "vecmem/memory/memory_resource.hpp"
 
-/// Test case for the "stress tests"
-class memory_resource_test_stress
-    : public testing::TestWithParam<vecmem::memory_resource*> {};
+// System include(s).
+#include <vector>
 
 /// Test that the memory resource would behave correctly with a large number
 /// of allocations/de-allocations.
