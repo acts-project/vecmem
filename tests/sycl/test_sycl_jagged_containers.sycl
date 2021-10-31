@@ -454,13 +454,13 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
     copy(managed_data, host_vector);
 
     // Check the contents of the vector.
-    EXPECT_EQ(host_vector.size(), 6);
-    EXPECT_EQ(host_vector.at(0).size(), 0);
-    EXPECT_EQ(host_vector.at(1).size(), 1);
-    EXPECT_EQ(host_vector.at(2).size(), 200);
-    EXPECT_EQ(host_vector.at(3).size(), 1);
-    EXPECT_EQ(host_vector.at(4).size(), 100);
-    EXPECT_EQ(host_vector.at(5).size(), 2);
+    EXPECT_EQ(host_vector.size(), 6u);
+    EXPECT_EQ(host_vector.at(0).size(), 0u);
+    EXPECT_EQ(host_vector.at(1).size(), 1u);
+    EXPECT_EQ(host_vector.at(2).size(), 200u);
+    EXPECT_EQ(host_vector.at(3).size(), 1u);
+    EXPECT_EQ(host_vector.at(4).size(), 100u);
+    EXPECT_EQ(host_vector.at(5).size(), 2u);
 
     // Create the jagged vector buffer in device memory.
     vecmem::data::jagged_vector_buffer<int> device_data(
@@ -481,11 +481,11 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
     copy(device_data, host_vector);
 
     // Check the contents of the vector.
-    EXPECT_EQ(host_vector.size(), 6);
-    EXPECT_EQ(host_vector.at(0).size(), 0);
-    EXPECT_EQ(host_vector.at(1).size(), 1);
-    EXPECT_EQ(host_vector.at(2).size(), 200);
-    EXPECT_EQ(host_vector.at(3).size(), 1);
-    EXPECT_EQ(host_vector.at(4).size(), 100);
-    EXPECT_EQ(host_vector.at(5).size(), 2);
+    EXPECT_EQ(host_vector.size(), 6u);
+    EXPECT_EQ(host_vector.at(0).size(), 0u);
+    EXPECT_EQ(host_vector.at(1).size(), 1u);
+    EXPECT_EQ(host_vector.at(2).size(), 200u);
+    EXPECT_EQ(host_vector.at(3).size(), 1u);
+    EXPECT_EQ(host_vector.at(4).size(), 100u);
+    EXPECT_EQ(host_vector.at(5).size(), 2u);
 }
