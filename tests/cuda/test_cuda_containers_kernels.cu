@@ -178,7 +178,7 @@ __global__ void fillTransformKernel(
 void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
 
     // Launch the kernel
-    fillTransformKernel<<<vec.m_size, 1>>>(vec);
+    fillTransformKernel<<<static_cast<unsigned int>(vec.m_size), 1>>>(vec);
 
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
