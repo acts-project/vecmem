@@ -7,8 +7,8 @@
 
 // Local include(s).
 #include "../common/memory_resource_name_gen.hpp"
-#include "../common/tests/test_generic_basic.hpp"
-#include "../common/tests/test_generic_host_accessible.hpp"
+#include "../common/memory_resource_test_basic.hpp"
+#include "../common/memory_resource_test_host_accessible.hpp"
 #include "vecmem/memory/hip/device_memory_resource.hpp"
 #include "vecmem/memory/hip/host_memory_resource.hpp"
 

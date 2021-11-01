@@ -5,19 +5,9 @@
  *
  * Mozilla Public License Version 2.0
  */
-#pragma once
 
-#include <gtest/gtest.h>
-
-#include "vecmem/memory/memory_resource.hpp"
-
-/// Base test case for the CUDA memory resources
-///
-/// This just makes sure that the memory resources defined in the
-/// @c vecmem::cuda library are more-or-less functional.
-///
-class memory_resource_test_basic
-    : public testing::TestWithParam<vecmem::memory_resource*> {};
+// Local include(s).
+#include "memory_resource_test_basic.hpp"
 
 /// Perform some very basic tests that do not need host accessibility
 TEST_P(memory_resource_test_basic, allocations) {
@@ -28,5 +18,3 @@ TEST_P(memory_resource_test_basic, allocations) {
         resource->deallocate(ptr, size);
     }
 }
-
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(memory_resource_test_basic);
