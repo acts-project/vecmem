@@ -133,7 +133,7 @@ TEST_F(core_static_array_test, get) {
 
     constexpr vecmem::static_array<int, 3> a{5, 20, 22};
     constexpr int a0 = vecmem::get<0>(a);
-    constexpr int a1 = std::get<1>(a);
+    constexpr int a1 = vecmem::get<1>(a);
     EXPECT_EQ(a0, 5);
     EXPECT_EQ(a1, 20);
 }

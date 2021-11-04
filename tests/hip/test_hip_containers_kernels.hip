@@ -40,7 +40,7 @@ __global__ void linearTransformKernel(
 
     // Perform the linear transformation.
     outputvec.at(i) =
-        inputvec.at(i) * constantarray1.at(0) + std::get<1>(constantarray2);
+        inputvec.at(i) * constantarray1.at(0) + vecmem::get<1>(constantarray2);
     return;
 }
 

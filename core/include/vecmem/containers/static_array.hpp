@@ -318,12 +318,5 @@ template <std::size_t I, class T, std::size_t N,
 
 }  // namespace vecmem
 
-namespace std {
-
-/// Make the @c vecmem::get functions available in the @c std namespace as well
-using vecmem::get;
-
-}  // namespace std
-
 // Include the implementation.
 #include "impl/static_array.ipp"
