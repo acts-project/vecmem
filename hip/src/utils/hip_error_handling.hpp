@@ -23,7 +23,7 @@
 /// results
 #define VECMEM_HIP_ERROR_IGNORE(EXP) \
     do {                             \
-        EXP;                         \
+        (void)EXP;                   \
     } while (false)
 
 namespace vecmem {
