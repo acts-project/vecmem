@@ -35,7 +35,8 @@ __global__ void linearTransformKernel(
     vecmem::device_vector<int> outputvec(output);
 
     // Perform the linear transformation.
-    outputvec.at(i) = inputvec.at(i) * constantarray1.at(0) + constantarray2[1];
+    outputvec.at(i) =
+        inputvec.at(i) * constantarray1.at(0) + std::get<1>(constantarray2);
     return;
 }
 

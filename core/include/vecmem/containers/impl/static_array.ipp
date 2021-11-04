@@ -287,4 +287,20 @@ VECMEM_HOST_AND_DEVICE bool operator!=(const static_array<T, N>& lhs,
      */
     return false;
 }
+
+template <std::size_t I, class T, std::size_t N,
+          std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr T& get(
+              static_array<T, N>& a) noexcept {
+
+    return a[I];
+}
+
+template <
+    std::size_t I, class T, std::size_t N,
+    std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr const T& get(
+        const static_array<T, N>& a) noexcept {
+
+    return a[I];
+}
+
 }  // namespace vecmem

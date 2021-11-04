@@ -297,13 +297,33 @@ private:
     typename details::array_type<T, N>::type m_array;
 };
 
+/// Equality check on two arrays
 template <typename T, std::size_t N>
 VECMEM_HOST_AND_DEVICE bool operator==(const static_array<T, N> &lhs,
                                        const static_array<T, N> &rhs);
-
+/// Non-equality check on two arrays
 template <typename T, std::size_t N>
 VECMEM_HOST_AND_DEVICE bool operator!=(const static_array<T, N> &lhs,
                                        const static_array<T, N> &rhs);
+
+/// Get one element from a @c vecmem::static_array
+template <std::size_t I, class T, std::size_t N,
+          std::enable_if_t<I<N, bool> = true> VECMEM_HOST_AND_DEVICE constexpr T
+              &get(static_array<T, N> &a) noexcept;
+/// Get one element from a @c vecmem::static_array
+template <std::size_t I, class T, std::size_t N,
+          std::enable_if_t<I<N, bool> = true>
+              VECMEM_HOST_AND_DEVICE constexpr const T &get(
+                  const static_array<T, N> &a) noexcept;
+
 }  // namespace vecmem
 
+namespace std {
+
+/// Make the @c vecmem::get functions available in the @c std namespace as well
+using vecmem::get;
+
+}  // namespace std
+
+// Include the implementation.
 #include "impl/static_array.ipp"
