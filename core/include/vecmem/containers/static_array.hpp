@@ -156,6 +156,27 @@ public:
     constexpr const_reference operator[](size_type i) const;
 
     /**
+     * @brief Compile-time bounds-checked accessor method
+     *
+     * @tparam I The index to access
+     * @return A non-const reference to the value at @c I
+     */
+    template <std::size_t I,
+              std::enable_if_t<I<N, bool> = true>
+                  VECMEM_HOST_AND_DEVICE constexpr reference get() noexcept;
+
+    /**
+     * @brief Compile-time bounds-checked constant accessor method
+     *
+     * @tparam I The index to access
+     * @return A constant reference to the value at @c I
+     */
+    template <std::size_t I,
+              std::enable_if_t<I<N, bool> = true>
+                  VECMEM_HOST_AND_DEVICE constexpr const_reference get()
+                      const noexcept;
+
+    /**
      * @brief Access the front element of the array.
      *
      * @return The first element of the array.
@@ -297,13 +318,26 @@ private:
     typename details::array_type<T, N>::type m_array;
 };
 
+/// Equality check on two arrays
 template <typename T, std::size_t N>
 VECMEM_HOST_AND_DEVICE bool operator==(const static_array<T, N> &lhs,
                                        const static_array<T, N> &rhs);
-
+/// Non-equality check on two arrays
 template <typename T, std::size_t N>
 VECMEM_HOST_AND_DEVICE bool operator!=(const static_array<T, N> &lhs,
                                        const static_array<T, N> &rhs);
+
+/// Get one element from a @c vecmem::static_array
+template <std::size_t I, class T, std::size_t N,
+          std::enable_if_t<I<N, bool> = true> VECMEM_HOST_AND_DEVICE constexpr T
+              &get(static_array<T, N> &a) noexcept;
+/// Get one element from a @c vecmem::static_array
+template <std::size_t I, class T, std::size_t N,
+          std::enable_if_t<I<N, bool> = true>
+              VECMEM_HOST_AND_DEVICE constexpr const T &get(
+                  const static_array<T, N> &a) noexcept;
+
 }  // namespace vecmem
 
+// Include the implementation.
 #include "impl/static_array.ipp"

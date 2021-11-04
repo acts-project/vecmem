@@ -69,8 +69,8 @@ TEST_F(sycl_containers_test, shared_memory) {
                 vecmem::device_vector<int> outputvec(output);
 
                 // Perform the linear transformation.
-                outputvec.at(id) =
-                    inputvec.at(id) * constantarray1.at(0) + constantarray2[1];
+                outputvec.at(id) = inputvec.at(id) * constantarray1.at(0) +
+                                   vecmem::get<1>(constantarray2);
                 return;
             });
     });
