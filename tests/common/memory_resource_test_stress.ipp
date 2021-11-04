@@ -6,9 +6,9 @@
  * Mozilla Public License Version 2.0
  */
 
-// Local include(s).
-#include "memory_resource_test_stress.hpp"
+#pragma once
 
+// Local include(s).
 #include "vecmem/containers/vector.hpp"
 
 // System include(s).

@@ -26,11 +26,11 @@ add_library( vecmem_testing_common STATIC
    "common/memory_resource_name_gen.hpp"
    "common/memory_resource_name_gen.cpp"
    "common/memory_resource_test_basic.hpp"
-   "common/memory_resource_test_basic.cpp"
+   "common/memory_resource_test_basic.ipp"
    "common/memory_resource_test_host_accessible.hpp"
-   "common/memory_resource_test_host_accessible.cpp"
+   "common/memory_resource_test_host_accessible.ipp"
    "common/memory_resource_test_stress.hpp"
-   "common/memory_resource_test_stress.cpp" )
+   "common/memory_resource_test_stress.ipp" )
 target_link_libraries( vecmem_testing_common
    PUBLIC vecmem::core GTest::gtest )
 

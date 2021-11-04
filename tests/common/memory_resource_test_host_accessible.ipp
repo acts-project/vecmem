@@ -6,8 +6,7 @@
  * Mozilla Public License Version 2.0
  */
 
-// Local include(s).
-#include "memory_resource_test_host_accessible.hpp"
+#pragma once
 
 // System include(s).
 #include <algorithm>

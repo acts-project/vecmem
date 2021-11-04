@@ -20,5 +20,5 @@
 class memory_resource_test_basic
     : public testing::TestWithParam<vecmem::memory_resource*> {};
 
-// Allow the test(s) to be used in different compilation units
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(memory_resource_test_basic);
+// Include the implementation.
+#include "memory_resource_test_basic.ipp"
