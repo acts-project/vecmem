@@ -6,8 +6,7 @@
  * Mozilla Public License Version 2.0
  */
 
-// Local include(s).
-#include "memory_resource_test_basic.hpp"
+#pragma once
 
 /// Perform some very basic tests that do not need host accessibility
 TEST_P(memory_resource_test_basic, allocations) {

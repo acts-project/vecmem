@@ -28,3 +28,6 @@ protected:
     void test_host_accessible_resource(vecmem::vector<T>& test_vector);
 
 };  // class memory_resource_test_host_accessible
+
+// Include the implementation.
+#include "memory_resource_test_host_accessible.ipp"

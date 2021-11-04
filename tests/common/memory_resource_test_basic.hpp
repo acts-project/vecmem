@@ -19,3 +19,6 @@
 ///
 class memory_resource_test_basic
     : public testing::TestWithParam<vecmem::memory_resource*> {};
+
+// Include the implementation.
+#include "memory_resource_test_basic.ipp"

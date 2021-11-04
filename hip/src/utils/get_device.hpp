@@ -9,6 +9,10 @@
 namespace vecmem::hip::details {
 
 /// Helper function for determining the "currently active device"
+///
+/// Note that calling the function on a machine with no HIP device does not
+/// result in an error, the function just returns 0 in that case.
+///
 int get_device();
 
 }  // namespace vecmem::hip::details

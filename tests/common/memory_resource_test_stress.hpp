@@ -16,3 +16,6 @@
 /// Test case for the "stress tests"
 class memory_resource_test_stress
     : public testing::TestWithParam<vecmem::memory_resource*> {};
+
+// Include the implementation.
+#include "memory_resource_test_stress.ipp"
