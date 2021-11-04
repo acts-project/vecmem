@@ -26,6 +26,9 @@ function( vecmem_add_library fullname basename )
    # Parse the function's options.
    cmake_parse_arguments( ARG "" "TYPE" "" ${ARGN} )
 
+   # Group the source files.
+   vecmem_group_source_files( ${ARG_UNPARSED_ARGUMENTS} )
+
    # Create the library.
    add_library( ${fullname} ${ARG_TYPE} ${ARG_UNPARSED_ARGUMENTS} )
 
@@ -75,6 +78,9 @@ function( vecmem_add_test name )
    # Parse the function's options.
    cmake_parse_arguments( ARG "" "" "LINK_LIBRARIES" ${ARGN} )
 
+   # Group the source files.
+   vecmem_group_source_files( ${ARG_UNPARSED_ARGUMENTS} )
+
    # Create the test executable.
    set( test_exe_name "vecmem_test_${name}" )
    add_executable( ${test_exe_name} ${ARG_UNPARSED_ARGUMENTS} )
@@ -109,3 +115,28 @@ function( vecmem_add_flag name value )
    set( ${name} "${${name}} ${value}" PARENT_SCOPE )
 
 endfunction( vecmem_add_flag )
+
+# Function used internally to describe to IDEs how they should group source
+# files of libraries and executables in their interface.
+#
+# Usage: vecmem_group_source_files( ${_sources} )
+#
+function( vecmem_group_source_files )
+
+   # Collect all the passed file names:
+   cmake_parse_arguments( ARG "" "" "" ${ARGN} )
+
+   # Loop over all of them:
+   foreach( f ${ARG_UNPARSED_ARGUMENTS} )
+      # Ignore absolute path names.
+      if( NOT IS_ABSOLUTE "${f}" )
+         # Get the file's path:
+         get_filename_component( _path "${f}" PATH )
+         # Replace the forward slashes with double backward slashes:
+         string( REPLACE "/" "\\\\" _group "${_path}" )
+         # Put the file into the right group:
+         source_group( "${_group}" FILES "${f}" )
+      endif()
+   endforeach()
+
+endfunction( vecmem_group_source_files )

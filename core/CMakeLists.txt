@@ -152,7 +152,10 @@ check_cxx_source_compiles( "
   " VECMEM_HAVE_DEFAULT_RESOURCE)
 
 if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
-   target_sources(vecmem_core PRIVATE src/memory/default_resource_polyfill.cpp)
+   target_sources( vecmem_core
+      PRIVATE "src/memory/default_resource_polyfill.cpp" )
+   source_group( "src\\\\memory"
+      FILES "src/memory/default_resource_polyfill.cpp" )
 endif()
 
 # Figure out how to produce SYCL debug printouts.
