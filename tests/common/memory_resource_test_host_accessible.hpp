@@ -28,3 +28,7 @@ protected:
     void test_host_accessible_resource(vecmem::vector<T>& test_vector);
 
 };  // class memory_resource_test_host_accessible
+
+// Allow the test(s) to be used in different compilation units
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(
+    memory_resource_test_host_accessible);

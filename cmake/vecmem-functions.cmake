@@ -82,8 +82,9 @@ function( vecmem_add_test name )
       target_link_libraries( ${test_exe_name} PRIVATE ${ARG_LINK_LIBRARIES} )
    endif()
 
-   # Run the executable as the test.
-   gtest_add_tests( TARGET ${test_exe_name} SOURCES ${ARG_UNPARSED_ARGUMENTS} )
+   # Discover all of the tests from the execuable, and set them up as individual
+   # CTest tests.
+   gtest_discover_tests( ${test_exe_name} )
 
 endfunction( vecmem_add_test )
 
