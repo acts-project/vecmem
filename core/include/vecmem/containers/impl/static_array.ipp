@@ -68,6 +68,22 @@ VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::operator[](
 }
 
 template <typename T, std::size_t N>
+template <std::size_t I,
+          std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr auto
+              static_array<T, N>::get() noexcept->reference {
+
+    return m_array[I];
+}
+
+template <typename T, std::size_t N>
+template <std::size_t I,
+          std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr auto
+              static_array<T, N>::get() const noexcept->const_reference {
+
+    return m_array[I];
+}
+
+template <typename T, std::size_t N>
 VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::front(void)
     -> reference {
     /*
@@ -292,7 +308,7 @@ template <std::size_t I, class T, std::size_t N,
           std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr T& get(
               static_array<T, N>& a) noexcept {
 
-    return a[I];
+    return a.template get<I>();
 }
 
 template <
@@ -300,7 +316,7 @@ template <
     std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr const T& get(
         const static_array<T, N>& a) noexcept {
 
-    return a[I];
+    return a.template get<I>();
 }
 
 }  // namespace vecmem

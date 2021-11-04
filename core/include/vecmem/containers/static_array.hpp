@@ -156,6 +156,27 @@ public:
     constexpr const_reference operator[](size_type i) const;
 
     /**
+     * @brief Compile-time bounds-checked accessor method
+     *
+     * @tparam I The index to access
+     * @return A non-const reference to the value at @c I
+     */
+    template <std::size_t I,
+              std::enable_if_t<I<N, bool> = true>
+                  VECMEM_HOST_AND_DEVICE constexpr reference get() noexcept;
+
+    /**
+     * @brief Compile-time bounds-checked constant accessor method
+     *
+     * @tparam I The index to access
+     * @return A constant reference to the value at @c I
+     */
+    template <std::size_t I,
+              std::enable_if_t<I<N, bool> = true>
+                  VECMEM_HOST_AND_DEVICE constexpr const_reference get()
+                      const noexcept;
+
+    /**
      * @brief Access the front element of the array.
      *
      * @return The first element of the array.
