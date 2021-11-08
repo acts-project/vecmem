@@ -29,3 +29,13 @@ install( FILES
    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/vecmem-config.cmake"
    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/vecmem-config-version.cmake"
    DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
+
+# Install the "language helper" files.
+install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-language.cmake"
+   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
+install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/hip"
+                   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sycl"
+   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
+
+# Clean up.
+unset( CMAKE_INSTALL_CMAKEDIR )

@@ -13,11 +13,50 @@ set_and_check( vecmem_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@" )
 set_and_check( vecmem_LIBRARY_DIR "@PACKAGE_CMAKE_INSTALL_LIBDIR@" )
 set_and_check( vecmem_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_CMAKEDIR@" )
 
+# Include the file listing all the imported targets and options.
+include( "${vecmem_CMAKE_DIR}/vecmem-config-targets.cmake" )
+
+# Set up additional variables, based on the imported targets. These are mostly
+# just here for handling COMPONENT arguments for find_package(...).
+set( vecmem_CORE_LIBRARY vecmem::core )
+if( TARGET vecmem::cuda )
+   set( vecmem_CUDA_LIBRARY vecmem::cuda )
+else()
+   set( vecmem_CUDA_LIBRARY vecmem::cuda-NOTFOUND )
+endif()
+if( TARGET vecmem::hip )
+   set( vecmem_HIP_LIBRARY vecmem::hip )
+else()
+   set( vecmem_HIP_LIBRARY vecmem::hip-NOTFOUND )
+endif()
+if( TARGET vecmem::sycl )
+   set( vecmem_SYCL_LIBRARY vecmem::sycl )
+else()
+   set( vecmem_SYCL_LIBRARY vecmem::sycl-NOTFOUND )
+endif()
+
+# If the user asked for the CUDA/HIP/SYCL components explicitly, make
+# sure that they would exist in the installation.
+set( vecmem_REQUIRED_LIBS vecmem_CORE_LIBRARY )
+foreach( comp "CUDA" "HIP" "SYCL" )
+   if( "${vecmem_FIND_COMPONENTS}" MATCHES "${comp}" )
+      list( APPEND vecmem_REQUIRED_LIBS vecmem_${comp}_LIBRARY )
+   endif()
+endforeach()
+
 # Print a standard information message about the package being found.
 include( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( vecmem REQUIRED_VARS
-   CMAKE_CURRENT_LIST_FILE
+   CMAKE_CURRENT_LIST_FILE ${vecmem_REQUIRED_LIBS}
    VERSION_VAR vecmem_VERSION )
 
-# Include the file listing all the imported targets and options.
-include( "${vecmem_CMAKE_DIR}/vecmem-config-targets.cmake" )
+# Clean up.
+unset( vecmem_REQUIRED_LIBS )
+
+# Set up the "language helper code" coming with the installation, if the
+# user asks for it.
+set_and_check( vecmem_LANGUAGE_FILE
+   "${vecmem_CMAKE_DIR}/vecmem-check-language.cmake" )
+if( "${vecmem_FIND_COMPONENTS}" MATCHES "LANGUAGE" )
+   include( "${vecmem_LANGUAGE_FILE}" )
+endif()

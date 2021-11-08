@@ -4,16 +4,18 @@
 #
 # Mozilla Public License Version 2.0
 
-# Make sure that the code is not included more than once.
-include_guard( GLOBAL )
-
 # CMake include(s).
 include( CheckLanguage )
 
+# Cache the location of this directory.
+set( VECMEM_LANGUAGE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE PATH
+   "Directory holding the VecMem language files" )
+mark_as_advanced( VECMEM_LANGUAGE_DIR )
+
 # Teach CMake about VecMem's custom language files.
 list( INSERT CMAKE_MODULE_PATH 0
-   "${CMAKE_CURRENT_LIST_DIR}/hip"
-   "${CMAKE_CURRENT_LIST_DIR}/sycl" )
+   "${VECMEM_LANGUAGE_DIR}/hip"
+   "${VECMEM_LANGUAGE_DIR}/sycl" )
 
 # Code mimicking CMake's CheckLanguage.cmake module. But making sure that the
 # VecMem specific code is used while looking for the non-standard languages.
@@ -46,8 +48,8 @@ macro( vecmem_check_language lang )
             "cmake_minimum_required( VERSION ${CMAKE_VERSION} )\n"
             "project( Check${lang} LANGUAGES CXX )\n"
             "list( INSERT CMAKE_MODULE_PATH 0 "
-            "      \"${CMAKE_CURRENT_LIST_DIR}/hip\" "
-            "      \"${CMAKE_CURRENT_LIST_DIR}/sycl\" )\n"
+            "      \"${VECMEM_LANGUAGE_DIR}/hip\" "
+            "      \"${VECMEM_LANGUAGE_DIR}/sycl\" )\n"
             "enable_language( ${lang} )\n"
             "file( WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"\n"
             "   \"set( CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\" )\" )" )
