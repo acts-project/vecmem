@@ -186,22 +186,25 @@ TEST_F(sycl_jagged_containers_test, mutate_in_kernel) {
     auto vec_data = vecmem::get_data(m_vec);
 
     // Run the linear transformation.
-    m_queue.submit([&const_data, &vec_data](cl::sycl::handler& h) {
-        // Create the kernel functor.
-        LinearTransformKernel kernel(const_data, vec_data, vec_data);
-        // Execute this kernel.
-        h.parallel_for<LinearTransformKernel>(
-            cl::sycl::range<1>(vec_data.m_size), kernel);
-    });
+    m_queue
+        .submit([&const_data, &vec_data](cl::sycl::handler& h) {
+            // Create the kernel functor.
+            LinearTransformKernel kernel(const_data, vec_data, vec_data);
+            // Execute this kernel.
+            h.parallel_for<LinearTransformKernel>(
+                cl::sycl::range<1>(vec_data.m_size), kernel);
+        })
+        .wait_and_throw();
     // Run the summation.
-    m_queue.submit([&vec_data](cl::sycl::handler& h) {
-        // Create the kernel functor.
-        SummationKernel kernel(vec_data);
-        // Execute this kernel.
-        h.parallel_for<SummationKernel>(cl::sycl::range<1>(vec_data.m_size),
-                                        kernel);
-    });
-    m_queue.wait_and_throw();
+    m_queue
+        .submit([&vec_data](cl::sycl::handler& h) {
+            // Create the kernel functor.
+            SummationKernel kernel(vec_data);
+            // Execute this kernel.
+            h.parallel_for<SummationKernel>(cl::sycl::range<1>(vec_data.m_size),
+                                            kernel);
+        })
+        .wait_and_throw();
 
     // Check the results.
     EXPECT_EQ(m_vec.at(0).at(0), 214);
@@ -240,30 +243,33 @@ TEST_F(sycl_jagged_containers_test, set_in_kernel) {
     auto output_data_host = vecmem::get_data(output);
 
     // Create the output data on the device.
-    vecmem::sycl::device_memory_resource device_resource;
+    vecmem::sycl::device_memory_resource device_resource(&m_queue);
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         output_data_host, device_resource, &host_resource);
     copy.setup(output_data_device);
 
     // Run the linear transformation.
-    m_queue.submit(
-        [&const_data, &input_data, &output_data_device](cl::sycl::handler& h) {
+    m_queue
+        .submit([&const_data, &input_data,
+                 &output_data_device](cl::sycl::handler& h) {
             // Create the kernel functor.
             LinearTransformKernel kernel(const_data, input_data,
                                          output_data_device);
             // Execute this kernel.
             h.parallel_for<LinearTransformKernel>(
                 cl::sycl::range<1>(input_data.m_size), kernel);
-        });
+        })
+        .wait_and_throw();
     // Run the summation.
-    m_queue.submit([&output_data_device](cl::sycl::handler& h) {
-        // Create the kernel functor.
-        SummationKernel kernel(output_data_device);
-        // Execute this kernel.
-        h.parallel_for<SummationKernel>(
-            cl::sycl::range<1>(output_data_device.m_size), kernel);
-    });
-    m_queue.wait_and_throw();
+    m_queue
+        .submit([&output_data_device](cl::sycl::handler& h) {
+            // Create the kernel functor.
+            SummationKernel kernel(output_data_device);
+            // Execute this kernel.
+            h.parallel_for<SummationKernel>(
+                cl::sycl::range<1>(output_data_device.m_size), kernel);
+        })
+        .wait_and_throw();
 
     // Copy the data back to the host.
     copy(output_data_device, output_data_host,
@@ -311,30 +317,33 @@ TEST_F(sycl_jagged_containers_test, set_in_contiguous_kernel) {
     auto output_data_host = vecmem::get_data(output);
 
     // Create the output data on the device.
-    vecmem::sycl::device_memory_resource device_resource;
+    vecmem::sycl::device_memory_resource device_resource(&m_queue);
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         output_data_host, device_resource, &m_mem);
     copy.setup(output_data_device);
 
     // Run the linear transformation.
-    m_queue.submit(
-        [&const_data, &input_data, &output_data_device](cl::sycl::handler& h) {
+    m_queue
+        .submit([&const_data, &input_data,
+                 &output_data_device](cl::sycl::handler& h) {
             // Create the kernel functor.
             LinearTransformKernel kernel(const_data, input_data,
                                          output_data_device);
             // Execute this kernel.
             h.parallel_for<LinearTransformKernel>(
                 cl::sycl::range<1>(input_data.m_size), kernel);
-        });
+        })
+        .wait_and_throw();
     // Run the summation.
-    m_queue.submit([&output_data_device](cl::sycl::handler& h) {
-        // Create the kernel functor.
-        SummationKernel kernel(output_data_device);
-        // Execute this kernel.
-        h.parallel_for<SummationKernel>(
-            cl::sycl::range<1>(output_data_device.m_size), kernel);
-    });
-    m_queue.wait_and_throw();
+    m_queue
+        .submit([&output_data_device](cl::sycl::handler& h) {
+            // Create the kernel functor.
+            SummationKernel kernel(output_data_device);
+            // Execute this kernel.
+            h.parallel_for<SummationKernel>(
+                cl::sycl::range<1>(output_data_device.m_size), kernel);
+        })
+        .wait_and_throw();
 
     // Copy the data back to the host.
     copy(output_data_device, output_data_host,
@@ -376,31 +385,34 @@ TEST_F(sycl_jagged_containers_test, filter) {
     auto input_data = vecmem::get_data(m_vec);
 
     // Run the filtering.
-    m_queue.submit([&input_data, &output_data_device](cl::sycl::handler& h) {
-        h.parallel_for<class FilterKernel>(
-            cl::sycl::range<2>(input_data.m_size, 5),
-            [input = vecmem::get_data(input_data),
-             output =
-                 vecmem::get_data(output_data_device)](cl::sycl::item<2> id) {
-                // Skip invalid indices.
-                if (id[0] >= input.m_size) {
-                    return;
-                }
-                if (id[1] >= input.m_ptr[id[0]].size()) {
-                    return;
-                }
+    m_queue
+        .submit([&input_data, &output_data_device](cl::sycl::handler& h) {
+            h.parallel_for<class FilterKernel>(
+                cl::sycl::range<2>(input_data.m_size, 5),
+                [input = vecmem::get_data(input_data),
+                 output = vecmem::get_data(output_data_device)](
+                    cl::sycl::item<2> id) {
+                    // Skip invalid indices.
+                    if (id[0] >= input.m_size) {
+                        return;
+                    }
+                    if (id[1] >= input.m_ptr[id[0]].size()) {
+                        return;
+                    }
 
-                // Set up the vector objects.
-                const vecmem::jagged_device_vector<const int> inputvec(input);
-                vecmem::jagged_device_vector<int> outputvec(output);
+                    // Set up the vector objects.
+                    const vecmem::jagged_device_vector<const int> inputvec(
+                        input);
+                    vecmem::jagged_device_vector<int> outputvec(output);
 
-                // Keep just the odd elements.
-                const int value = inputvec[id[0]][id[1]];
-                if ((value % 2) != 0) {
-                    outputvec.at(id[0]).push_back(value);
-                }
-            });
-    });
+                    // Keep just the odd elements.
+                    const int value = inputvec[id[0]][id[1]];
+                    if ((value % 2) != 0) {
+                        outputvec.at(id[0]).push_back(value);
+                    }
+                });
+        })
+        .wait_and_throw();
 
     // Copy the filtered output back into the host's memory.
     vecmem::jagged_vector<int> output(&m_mem);
@@ -429,7 +441,7 @@ TEST_F(sycl_jagged_containers_test, filter) {
 TEST_F(sycl_jagged_containers_test, zero_capacity) {
 
     // Helper object for performing memory copies.
-    vecmem::sycl::copy copy;
+    vecmem::sycl::copy copy(&m_queue);
 
     // Dedicated device memory resource.
     vecmem::sycl::device_memory_resource device_resource(&m_queue);
@@ -440,14 +452,15 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
     copy.setup(managed_data);
 
     // Run the vector filling.
-    m_queue.submit([&managed_data](cl::sycl::handler& h) {
-        // Create the kernel functor.
-        FillKernel kernel(managed_data);
-        // Execute this kernel.
-        h.parallel_for<FillKernel>(cl::sycl::range<1>(managed_data.m_size),
-                                   kernel);
-    });
-    m_queue.wait_and_throw();
+    m_queue
+        .submit([&managed_data](cl::sycl::handler& h) {
+            // Create the kernel functor.
+            FillKernel kernel(managed_data);
+            // Execute this kernel.
+            h.parallel_for<FillKernel>(cl::sycl::range<1>(managed_data.m_size),
+                                       kernel);
+        })
+        .wait_and_throw();
 
     // Get the data into a host vector.
     vecmem::jagged_vector<int> host_vector(&m_mem);
@@ -468,14 +481,15 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
     copy.setup(device_data);
 
     // Run the vector filling.
-    m_queue.submit([&device_data](cl::sycl::handler& h) {
-        // Create the kernel functor.
-        FillKernel kernel(device_data);
-        // Execute this kernel.
-        h.parallel_for<FillKernel>(cl::sycl::range<1>(device_data.m_size),
-                                   kernel);
-    });
-    m_queue.wait_and_throw();
+    m_queue
+        .submit([&device_data](cl::sycl::handler& h) {
+            // Create the kernel functor.
+            FillKernel kernel(device_data);
+            // Execute this kernel.
+            h.parallel_for<FillKernel>(cl::sycl::range<1>(device_data.m_size),
+                                       kernel);
+        })
+        .wait_and_throw();
 
     // Get the data into the host vector.
     copy(device_data, host_vector);
