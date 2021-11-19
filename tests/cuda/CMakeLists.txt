@@ -26,3 +26,13 @@ vecmem_add_test( cuda
    "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_error_handling.cpp"
    LINK_LIBRARIES CUDA::cudart vecmem::core vecmem::cuda GTest::gtest_main
                   vecmem_testing_common )
+
+# Set up a separate test that would ensure a C++17 standard. But only with
+# CUDA 11+.
+if( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "11.0" )
+   vecmem_add_test( cuda_cxx17
+      "test_cuda_memory_resources.cu"
+      LINK_LIBRARIES vecmem::cuda GTest::gtest_main vecmem_testing_common )
+   set_target_properties( vecmem_test_cuda_cxx17 PROPERTIES
+      CUDA_STANDARD 17 )
+endif()
