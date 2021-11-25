@@ -17,6 +17,10 @@
 #pragma warning(push)
 #pragma warning(disable : 4275)
 #endif  // MSVC
+#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
+#pragma nv_diagnostic push
+#pragma nv_diag_suppress 1388
+#endif  // CUDA disgnostics
 
 namespace vecmem::details {
 
@@ -51,3 +55,6 @@ protected:
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif  // MSVC
+#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
+#pragma nv_diagnostic pop
+#endif  // CUDA disgnostics

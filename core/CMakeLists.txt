@@ -103,6 +103,13 @@ target_compile_definitions( vecmem_core PUBLIC
    $<BUILD_INTERFACE:VECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}>
    $<BUILD_INTERFACE:VECMEM_SOURCE_DIR_LENGTH=${VECMEM_SOURCE_DIR_LENGTH}> )
 
+# The library headers make checks on the value of the __cplusplus macro. So we
+# need to make sure that MSVC would always set that macro up when using this
+# library.
+target_compile_options( vecmem_core PUBLIC
+   $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CXX>>:/Zc:__cplusplus>
+   $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler /Zc:__cplusplus> )
+
 # Figure out where to get <memory_resource> from.
 include( CheckCXXSourceCompiles )
 check_cxx_source_compiles( "
