@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "../../cuda/src/utils/cuda_error_handling.hpp"
+#include "../../cuda/src/utils/cuda_wrappers.hpp"
 #include "test_cuda_containers_kernels.cuh"
 #include "vecmem/containers/const_device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
@@ -49,6 +50,19 @@ void linearTransform(vecmem::data::vector_view<const int> constants,
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
+
+void linearTransform(vecmem::data::vector_view<const int> constants,
+                     vecmem::data::vector_view<const int> input,
+                     vecmem::data::vector_view<int> output,
+                     const vecmem::cuda::stream_wrapper& stream) {
+
+    // Launch the kernel.
+    linearTransformKernel<<<1, input.size(), 0,
+                            vecmem::cuda::details::get_stream(stream)>>>(
+        constants, input, output);
+    // Check whether it succeeded to launch.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
 }
 
 /// Kernel performing some basic atomic operations.
