@@ -13,7 +13,8 @@
 #include <memory>
 #include <string>
 
-namespace vecmem::cuda {
+namespace vecmem {
+namespace cuda {
 
 // Forward declaration(s).
 namespace details {
@@ -73,7 +74,8 @@ private:
 
 };  // class stream_wrapper
 
-}  // namespace vecmem::cuda
+}  // namespace cuda
+}  // namespace vecmem
 
 // Re-enable the warning(s).
 #ifdef _MSC_VER

@@ -56,11 +56,10 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                                             details::get_stream(m_stream)));
 
     // Let the user know what happened.
-    VECMEM_DEBUG_MSG(
-        4,
-        "Initiated asynchronous %s memory copy of %lu bytes from %p to "
-        "%p",
-        copy_type_printer[cptype].c_str(), size, from_ptr, to_ptr);
+    VECMEM_DEBUG_MSG(4,
+                     "Initiated asynchronous %s memory copy of %lu bytes "
+                     "from %p to %p",
+                     copy_type_printer[cptype].c_str(), size, from_ptr, to_ptr);
 }
 
 void async_copy::do_memset(std::size_t size, void* ptr, int value) {
