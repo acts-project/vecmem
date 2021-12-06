@@ -83,6 +83,11 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/conditional_memory_resource.hpp"
    "src/memory/debug_memory_resource.cpp"
    "include/vecmem/memory/debug_memory_resource.hpp"
+   "src/memory/details/unique_alloc_deleter_impl.cpp"
+   "include/vecmem/memory/details/unique_alloc_deleter_impl.hpp"
+   "include/vecmem/memory/details/unique_alloc_deleter.hpp"
+   "include/vecmem/memory/details/unique_obj_deleter.hpp"
+   "include/vecmem/memory/unique_ptr.hpp"
    # Utilities.
    "include/vecmem/utils/copy.hpp"
    "include/vecmem/utils/impl/copy.ipp"
