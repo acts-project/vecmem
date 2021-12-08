@@ -12,6 +12,7 @@
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
 #include "vecmem/memory/cuda/host_memory_resource.hpp"
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
+#include "vecmem/utils/cuda/async_copy.hpp"
 #include "vecmem/utils/cuda/copy.hpp"
 
 // GoogleTest include(s).
@@ -86,6 +87,52 @@ TEST_F(cuda_containers_test, explicit_memory) {
                     m_copy.to(vecmem::get_data(inputvec), device_resource),
                     outputvecdevice);
     m_copy(outputvecdevice, outputvechost, vecmem::copy::type::device_to_host);
+
+    // Check the output.
+    EXPECT_EQ(inputvec.size(), outputvec.size());
+    for (std::size_t i = 0; i < outputvec.size(); ++i) {
+        EXPECT_EQ(outputvec.at(i),
+                  inputvec.at(i) * constants[0] + constants[1]);
+    }
+}
+
+/// Test a linear transformation while hand-managing the asynchronous memory
+/// copies
+TEST_F(cuda_containers_test, async_memory) {
+
+    // The host/device memory resources.
+    vecmem::cuda::device_memory_resource device_resource;
+    vecmem::cuda::host_memory_resource host_resource;
+
+    // The copy utility.
+    vecmem::cuda::stream_wrapper stream;
+    vecmem::cuda::async_copy copy(stream);
+
+    // Create input/output vectors on the host.
+    vecmem::vector<int> inputvec({1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+                                 &host_resource);
+    vecmem::vector<int> outputvec(inputvec.size(), &host_resource);
+    EXPECT_EQ(inputvec.size(), outputvec.size());
+
+    // Allocate a device memory block for the output container.
+    auto outputvechost = vecmem::get_data(outputvec);
+    vecmem::data::vector_buffer<int> outputvecdevice(
+        static_cast<vecmem::data::vector_buffer<int>::size_type>(
+            outputvec.size()),
+        device_resource);
+
+    // Create the array that is used in the linear transformation.
+    vecmem::array<int, 2> constants(host_resource);
+    constants[0] = 2;
+    constants[1] = 3;
+
+    // Perform a linear transformation with explicit memory copies.
+    linearTransform(copy.to(vecmem::get_data(constants), device_resource,
+                            vecmem::copy::type::host_to_device),
+                    copy.to(vecmem::get_data(inputvec), device_resource),
+                    outputvecdevice, stream);
+    copy(outputvecdevice, outputvechost, vecmem::copy::type::device_to_host);
+    stream.synchronize();
 
     // Check the output.
     EXPECT_EQ(inputvec.size(), outputvec.size());
