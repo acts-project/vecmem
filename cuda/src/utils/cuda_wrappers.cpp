@@ -14,6 +14,9 @@
 // CUDA include(s).
 #include <cuda_runtime_api.h>
 
+// System include(s).
+#include <cassert>
+
 namespace vecmem::cuda::details {
 
 int get_device() {
@@ -21,6 +24,12 @@ int get_device() {
     int d = 0;
     VECMEM_CUDA_ERROR_IGNORE(cudaGetDevice(&d));
     return d;
+}
+
+cudaStream_t get_stream(const stream_wrapper& stream) {
+
+    assert(stream.stream() != nullptr);
+    return reinterpret_cast<cudaStream_t>(stream.stream());
 }
 
 }  // namespace vecmem::cuda::details

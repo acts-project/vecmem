@@ -10,6 +10,7 @@
 // Local include(s).
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/utils/cuda/stream_wrapper.hpp"
 
 // System include(s).
 #include <cstddef>
@@ -18,6 +19,12 @@
 void linearTransform(vecmem::data::vector_view<const int> constants,
                      vecmem::data::vector_view<const int> input,
                      vecmem::data::vector_view<int> output);
+
+/// Perform an asynchronous linear transformation using the received vectors
+void linearTransform(vecmem::data::vector_view<const int> constants,
+                     vecmem::data::vector_view<const int> input,
+                     vecmem::data::vector_view<int> output,
+                     const vecmem::cuda::stream_wrapper& stream);
 
 /// Function incrementing the elements of the received vector using atomics
 void atomicTransform(unsigned int iterations,

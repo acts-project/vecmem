@@ -6,7 +6,16 @@
  * Mozilla Public License Version 2.0
  */
 
-namespace vecmem::cuda::details {
+// Local include(s).
+#include "vecmem/utils/cuda/stream_wrapper.hpp"
+
+// CUDA include(s).
+#include <cuda_runtime_api.h>
+
+namespace vecmem {
+namespace cuda {
+namespace details {
+
 /**
  * @brief Get current CUDA device number.
  *
@@ -17,4 +26,10 @@ namespace vecmem::cuda::details {
  * result in an error, the function just returns 0 in that case.
  */
 int get_device();
-}  // namespace vecmem::cuda::details
+
+/// Get concrete @c cudaStream_t object out of our wrapper
+cudaStream_t get_stream(const stream_wrapper& stream);
+
+}  // namespace details
+}  // namespace cuda
+}  // namespace vecmem
