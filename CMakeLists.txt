@@ -48,5 +48,11 @@ if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
   add_subdirectory( tests )
 endif()
 
+# Set up the benchmarks.
+option(VECMEM_BUILD_BENCHMARKING "Build the benchmarks of VecMem" OFF)
+if(VECMEM_BUILD_BENCHMARKING)
+   add_subdirectory(benchmarks)
+endif()
+
 # Set up the packaging of the project.
 include( vecmem-packaging )
