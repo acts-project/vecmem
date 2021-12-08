@@ -15,12 +15,10 @@ if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
     ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) )
 
    # Basic flags for all build modes.
-   foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
-      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wall" )
-      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wextra" )
-      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wshadow" )
-      vecmem_add_flag( CMAKE_CXX_FLAGS_${mode} "-Wunused-local-typedefs" )
-   endforeach()
+   vecmem_add_flag( CMAKE_CXX_FLAGS "-Wall" )
+   vecmem_add_flag( CMAKE_CXX_FLAGS "-Wextra" )
+   vecmem_add_flag( CMAKE_CXX_FLAGS "-Wshadow" )
+   vecmem_add_flag( CMAKE_CXX_FLAGS "-Wunused-local-typedefs" )
 
    # More rigorous tests for the Debug builds.
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-Werror" )
@@ -36,4 +34,12 @@ elseif( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )
    # More rigorous tests for the Debug builds.
    vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "/WX" )
 
+endif()
+
+# Do not allow symbols to be missing from shared libraries.
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" )
+   vecmem_add_flag( CMAKE_SHARED_LINKER_FLAGS "-Wl,-undefined,error" )
+elseif( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
+        ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) )
+   vecmem_add_flag( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined" )
 endif()
