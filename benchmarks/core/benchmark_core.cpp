@@ -1,15 +1,23 @@
-#include <benchmark/benchmark.h>
+/** VecMem project, part of the ACTS project (R&D line)
+ *
+ * (c) 2021 CERN for the benefit of the ACTS project
+ *
+ * Mozilla Public License Version 2.0
+ */
 
+// VecMem include(s).
 #include <vecmem/memory/host_memory_resource.hpp>
 
-#include "../common/benchmark_memory_resource.hpp"
+// Google benchmark include(s).
+#include <benchmark/benchmark.h>
 
-static void BenchmarkHost(benchmark::State& state) {
-    vecmem::host_memory_resource r;
+/// The (host) memory resource to use in the benchmark(s)
+static vecmem::host_memory_resource host_mr;
 
+void BenchmarkHost(benchmark::State& state) {
     for (auto _ : state) {
-        void* p = r.allocate(state.range(0));
-        r.deallocate(p, state.range(0));
+        void* p = host_mr.allocate(state.range(0));
+        host_mr.deallocate(p, state.range(0));
     }
 }
 

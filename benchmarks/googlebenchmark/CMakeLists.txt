@@ -6,7 +6,6 @@
 
 # CMake include(s).
 cmake_minimum_required( VERSION 3.11 )
-
 include( FetchContent )
 
 # Tell the user what's happening.
@@ -17,15 +16,11 @@ FetchContent_Declare( googlebenchmark
    URL "https://github.com/google/benchmark/archive/refs/tags/v1.6.0.tar.gz"
    URL_MD5 "a7cb118b00430e22cb16774a28fce7ec" )
 
-set(BENCHMARK_ENABLE_GTEST_TESTS Off)
-set(BENCHMARK_ENABLE_TESTING Off)
+# Option(s) used in the build of Google Benchmark.
+set( BENCHMARK_ENABLE_TESTING OFF CACHE BOOL
+   "Enable/disable testing of the benchmark library" )
 
 # Get it into the current directory.
 FetchContent_Populate( googlebenchmark )
-add_subdirectory( "${googlebenchmark_SOURCE_DIR}" "${googlebenchmark_BINARY_DIR}"
-   EXCLUDE_FROM_ALL )
-
-# Set up aliases for the GTest targets with the same name that they have
-# when we find GTest pre-installed.
-# add_library( benchmark::benchmark ALIAS benchmark_benchmark )
-# add_library( benchmark::benchmark_main ALIAS benchmark_benchmark_main )
+add_subdirectory( "${googlebenchmark_SOURCE_DIR}"
+   "${googlebenchmark_BINARY_DIR}" EXCLUDE_FROM_ALL )
