@@ -8,6 +8,7 @@
 
 // Local include(s).
 #include "vecmem/containers/details/reverse_iterator.hpp"
+#include "vecmem/containers/details/static_vector_traits.hpp"
 #include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -44,9 +45,8 @@ public:
     /// The size of the vector elements
     static constexpr size_type value_size = sizeof(value_type);
     /// Type of the array holding the payload of the vector elements
-    typedef
-        typename details::array_type<char, array_max_size * value_size>::type
-            array_type;
+    typedef typename details::static_vector_type<
+        char, array_max_size * value_size>::type array_type;
 
     /// Value reference type
     typedef value_type& reference;

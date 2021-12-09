@@ -8,17 +8,15 @@
 
 #pragma once
 
+// Local include(s).
+#include "vecmem/utils/types.hpp"
+
+// System include(s).
 #include <cstddef>
 #include <stdexcept>
 #include <type_traits>
 
-#include "vecmem/utils/types.hpp"
-
 namespace vecmem {
-
-template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr static_array<T, N>::static_array(void)
-    : m_array() {}
 
 template <typename T, std::size_t N>
 VECMEM_HOST constexpr auto static_array<T, N>::at(size_type i) -> reference {
@@ -245,23 +243,6 @@ VECMEM_HOST_AND_DEVICE void static_array<T, N>::fill(const_reference value) {
     for (std::size_t i = 0; i < N; ++i) {
         m_array[i] = value;
     }
-}
-
-template <typename T, std::size_t N>
-template <typename Tp1, typename... Tp>
-VECMEM_HOST_AND_DEVICE constexpr void static_array<T, N>::static_array_impl(
-    size_type i, Tp1&& a1, Tp&&... a) {
-
-    m_array[i] = a1;
-    static_array_impl(i + 1, std::forward<Tp>(a)...);
-}
-
-template <typename T, std::size_t N>
-template <typename Tp1>
-VECMEM_HOST_AND_DEVICE constexpr void static_array<T, N>::static_array_impl(
-    size_type i, Tp1&& a1) {
-
-    m_array[i] = a1;
 }
 
 template <typename T, std::size_t N>
