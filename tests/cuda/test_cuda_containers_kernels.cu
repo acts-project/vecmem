@@ -199,3 +199,25 @@ void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
 }
+
+__global__ void readArrayKernel(
+    vecmem::static_array<vecmem::data::vector_view<int>, 3> arr_vec) {
+
+    vecmem::device_vector<int> vec(arr_vec[0]);
+
+    // It's OK
+    printf("%d", vec.size());
+
+    // this doesn't work
+    printf("%d", vec[0]);
+}
+
+void readArray(
+    vecmem::static_array<vecmem::data::vector_view<int>, 3> arr_vec) {
+
+    readArrayKernel<<<1, 1>>>(arr_vec);
+
+    // Check whether it succeeded to run.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}

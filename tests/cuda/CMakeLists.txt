@@ -22,6 +22,7 @@ vecmem_add_test( cuda
    "test_cuda_jagged_vector_view.cpp"
    "test_cuda_jagged_vector_view_kernels.cu"
    "test_cuda_jagged_vector_view_kernels.cuh"
+   "test_cuda_array_of_vector.cpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_error_handling.hpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_error_handling.cpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_wrappers.hpp"
