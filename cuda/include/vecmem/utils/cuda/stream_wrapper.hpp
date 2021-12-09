@@ -27,6 +27,10 @@ class opaque_stream;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 #endif  // MSVC
+#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
+#pragma nv_diagnostic push
+#pragma nv_diag_suppress 1394
+#endif  // CUDA disgnostics
 
 /// Wrapper class for @c cudaStream_t
 ///
@@ -81,3 +85,6 @@ private:
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif  // MSVC
+#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
+#pragma nv_diagnostic pop
+#endif  // CUDA disgnostics
