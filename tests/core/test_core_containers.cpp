@@ -152,12 +152,12 @@ TEST_F(core_container_test, static_array) {
     for (int i = 0; i < ARRAY_SIZE; ++i) {
         EXPECT_EQ(test_array3.at(i), 12);
     }
-    const vecmem::static_array<int, 0> test_array4;
+    const vecmem::static_array<int, 0> test_array4{};
     EXPECT_EQ(test_array4.size(), 0);
     EXPECT_EQ(test_array4.max_size(), 0);
     EXPECT_TRUE(test_array4.empty());
 
-    constexpr vecmem::static_array<int, 0> test_array5;
+    constexpr vecmem::static_array<int, 0> test_array5{};
     constexpr auto test_array5_size = test_array5.size();
     EXPECT_EQ(test_array5_size, 0);
     constexpr auto test_array5_max_size = test_array5.max_size();

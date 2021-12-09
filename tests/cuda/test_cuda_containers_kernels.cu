@@ -199,3 +199,37 @@ void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
 }
+
+/// Kernel multiplying each element of the received structure by 2.
+__global__ void arrayTransformKernel(
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> data) {
+
+    // Find the current indices,
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    const std::size_t j = blockIdx.y * blockDim.y + threadIdx.y;
+    if (i >= data.size()) {
+        return;
+    }
+    if (j >= data[i].size()) {
+        return;
+    }
+
+    // Create the "device type".
+    vecmem::static_array<vecmem::device_vector<int>, 4> vec{data[0], data[1],
+                                                            data[2], data[3]};
+
+    // Perform the transformation.
+    vec[i][j] *= 2;
+}
+
+void arrayTransform(
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> data) {
+
+    // Launch the kernel.
+    const dim3 dimensions(4u, 4u);
+    arrayTransformKernel<<<1, dimensions>>>(data);
+
+    // Check whether it succeeded to run.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
