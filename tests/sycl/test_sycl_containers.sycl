@@ -260,3 +260,62 @@ TEST_F(sycl_containers_test, extendable_memory) {
         EXPECT_LT(10, value);
     }
 }
+
+/// Test the usage of an @c array<vector<...>> construct
+TEST_F(sycl_containers_test, array_memory) {
+
+    // Create the SYCL queue that we'll be using in the test.
+    cl::sycl::queue queue{vecmem::sycl::device_selector()};
+
+    // The memory resource(s).
+    vecmem::sycl::shared_memory_resource shared_resource(&queue);
+
+    // Create an array of vectors.
+    vecmem::static_array<vecmem::vector<int>, 4> vec_array{
+        vecmem::vector<int>{{1, 2, 3, 4}, &shared_resource},
+        vecmem::vector<int>{{5, 6}, &shared_resource},
+        vecmem::vector<int>{{7, 8, 9}, &shared_resource},
+        vecmem::vector<int>{&shared_resource}};
+
+    // Create an appropriate data object out of it.
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> vec_data{
+        vecmem::get_data(vec_array[0]), vecmem::get_data(vec_array[1]),
+        vecmem::get_data(vec_array[2]), vecmem::get_data(vec_array[3])};
+
+    // Run a kernel on it that multiplies each element in the array of vectors
+    // by 2.
+    queue
+        .submit([&vec_data](cl::sycl::handler& h) {
+            h.parallel_for<class ArrayVecTest>(
+                cl::sycl::range<2>(4, 4),
+                [data = vec_data](cl::sycl::item<2> id) {
+                    // Check if anything needs to be done.
+                    if (id[0] >= data.size()) {
+                        return;
+                    }
+                    if (id[1] >= data[id[0]].size()) {
+                        return;
+                    }
+
+                    // Create the "device type".
+                    vecmem::static_array<vecmem::device_vector<int>, 4> vec{
+                        data[0], data[1], data[2], data[3]};
+
+                    // Perform the transformation.
+                    vec[id[0]][id[1]] *= 2;
+                });
+        })
+        .wait_and_throw();
+
+    // Check its contents.
+    EXPECT_EQ(vec_array.at(0).at(0), 2);
+    EXPECT_EQ(vec_array.at(0).at(1), 4);
+    EXPECT_EQ(vec_array.at(0).at(2), 6);
+    EXPECT_EQ(vec_array.at(0).at(3), 8);
+    EXPECT_EQ(vec_array.at(1).at(0), 10);
+    EXPECT_EQ(vec_array.at(1).at(1), 12);
+    EXPECT_EQ(vec_array.at(2).at(0), 14);
+    EXPECT_EQ(vec_array.at(2).at(1), 16);
+    EXPECT_EQ(vec_array.at(2).at(2), 18);
+    EXPECT_EQ(vec_array.at(3).size(), 0u);
+}

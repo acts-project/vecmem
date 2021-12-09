@@ -34,7 +34,7 @@ TEST_F(core_static_array_test, bounds_check_exception) {
 }
 
 TEST_F(core_static_array_test, initializer) {
-    vecmem::static_array<int, 3> arr(4, 76, 1);
+    vecmem::static_array<int, 3> arr{4, 76, 1};
 
     EXPECT_EQ(arr[0], 4);
     EXPECT_EQ(arr[1], 76);
@@ -50,7 +50,7 @@ TEST_F(core_static_array_test, bracket_initializer) {
 }
 
 TEST_F(core_static_array_test, assignment) {
-    vecmem::static_array<int, 3> proto(4, 76, 1);
+    vecmem::static_array<int, 3> proto{4, 76, 1};
     vecmem::static_array<int, 3> arr = proto;
 
     EXPECT_EQ(arr[0], 4);
@@ -59,7 +59,7 @@ TEST_F(core_static_array_test, assignment) {
 }
 
 TEST_F(core_static_array_test, copy) {
-    vecmem::static_array<int, 3> proto(4, 76, 1);
+    vecmem::static_array<int, 3> proto{4, 76, 1};
     vecmem::static_array<int, 3> arr(proto);
 
     EXPECT_EQ(arr[0], 4);
@@ -68,9 +68,9 @@ TEST_F(core_static_array_test, copy) {
 }
 
 TEST_F(core_static_array_test, equality) {
-    vecmem::static_array<int, 3> a1(4, 76, 1);
-    vecmem::static_array<int, 3> a2(4, 76, 1);
-    vecmem::static_array<int, 3> a3(4, 76, 2);
+    vecmem::static_array<int, 3> a1{4, 76, 1};
+    vecmem::static_array<int, 3> a2{4, 76, 1};
+    vecmem::static_array<int, 3> a3{4, 76, 2};
 
     EXPECT_TRUE(a1 == a1);
     EXPECT_TRUE(a2 == a2);
@@ -84,9 +84,9 @@ TEST_F(core_static_array_test, equality) {
 }
 
 TEST_F(core_static_array_test, inequality) {
-    vecmem::static_array<int, 3> a1(4, 76, 1);
-    vecmem::static_array<int, 3> a2(4, 76, 1);
-    vecmem::static_array<int, 3> a3(4, 76, 2);
+    vecmem::static_array<int, 3> a1{4, 76, 1};
+    vecmem::static_array<int, 3> a2{4, 76, 1};
+    vecmem::static_array<int, 3> a3{4, 76, 2};
 
     EXPECT_FALSE(a1 != a1);
     EXPECT_FALSE(a2 != a2);
@@ -100,16 +100,16 @@ TEST_F(core_static_array_test, inequality) {
 }
 
 TEST_F(core_static_array_test, front) {
-    vecmem::static_array<int, 3> arr1(4, 76, 1);
-    vecmem::static_array<int, 1> arr2(7);
+    vecmem::static_array<int, 3> arr1{4, 76, 1};
+    vecmem::static_array<int, 1> arr2{7};
 
     EXPECT_EQ(arr1.front(), 4);
     EXPECT_EQ(arr2.front(), 7);
 }
 
 TEST_F(core_static_array_test, back) {
-    vecmem::static_array<int, 3> arr1(4, 76, 1);
-    vecmem::static_array<int, 1> arr2(7);
+    vecmem::static_array<int, 3> arr1{4, 76, 1};
+    vecmem::static_array<int, 1> arr2{7};
 
     EXPECT_EQ(arr1.back(), 1);
     EXPECT_EQ(arr2.back(), 7);

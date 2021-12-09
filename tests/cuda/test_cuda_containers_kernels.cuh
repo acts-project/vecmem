@@ -10,6 +10,7 @@
 // Local include(s).
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/containers/static_array.hpp"
 #include "vecmem/utils/cuda/stream_wrapper.hpp"
 
 // System include(s).
@@ -41,3 +42,7 @@ void filterTransform(vecmem::data::jagged_vector_view<const int> input,
 
 /// Function filling the jagged vector to its capacity
 void fillTransform(vecmem::data::jagged_vector_view<int> vec);
+
+/// Function transforming the elements of an array of vectors
+void arrayTransform(
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> data);

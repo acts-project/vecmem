@@ -10,7 +10,7 @@
 
 // Local include(s).
 #include "vecmem/containers/details/reverse_iterator.hpp"
-#include "vecmem/utils/type_traits.hpp"
+#include "vecmem/containers/details/static_array_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
 // System include(s).
@@ -30,8 +30,8 @@ namespace vecmem {
  * @tparam N The size of the array.
  */
 template <typename T, std::size_t N>
-class static_array {
-public:
+struct static_array {
+
     /// @name Type definitions, mimicking @c std::array
     /// @{
 
@@ -60,45 +60,6 @@ public:
     /// Constant reverse iterator type
     using const_reverse_iterator =
         vecmem::details::reverse_iterator<const_iterator>;
-
-    /// @}
-
-    /// @name Constructors
-    /// @{
-
-    /**
-     * @brief Trivial constructor.
-     *
-     * This constructor does nothing, and leaves the inner array
-     * uninitialized.
-     */
-    VECMEM_HOST_AND_DEVICE
-    constexpr static_array(void);
-
-    /**
-     * @brief Construct an array from a parameter pack of arbitrary size.
-     *
-     * This constructor is of arbitrary arity, and inserts those elements in
-     * order into the array.
-     *
-     * @tparam Tp The parameter pack for the arguments.
-     *
-     * @warning The std::array implementation of this constructor requires
-     * the parameter list to be of size equal to or less than the array
-     * itself. This class is slightly different, as it requires the argument
-     * list to be exactly the same length. This protects the user from
-     * accidentally initializing an array with fewer values than necessary.
-     *
-     * @note All parameters passed to this function must be convertible to
-     * the array value type, but the values do not need to be homogeneous.
-     */
-    template <typename... Tp, typename = std::enable_if_t<sizeof...(Tp) == N>,
-              typename = std::enable_if_t<
-                  details::conjunction_v<std::is_convertible<Tp, T>...> > >
-    VECMEM_HOST_AND_DEVICE constexpr static_array(Tp &&... a) : m_array() {
-
-        static_array_impl(0, std::forward<Tp>(a)...);
-    }
 
     /// @}
 
@@ -299,24 +260,10 @@ public:
 
     /// @}
 
-private:
-    /**
-     * @brief Private helper-constructor for the parameter pack constructor.
-     */
-    template <typename Tp1, typename... Tp>
-    VECMEM_HOST_AND_DEVICE constexpr void static_array_impl(size_type i,
-                                                            Tp1 &&a1,
-                                                            Tp &&... a);
-    /**
-     * @brief Private helper-constructor for the parameter pack constructor.
-     */
-    template <typename Tp1>
-    VECMEM_HOST_AND_DEVICE constexpr void static_array_impl(size_type i,
-                                                            Tp1 &&a1);
-
     /// Array holding the container's data
-    typename details::array_type<T, N>::type m_array;
-};
+    typename details::static_array_type<T, N>::type m_array;
+
+};  // struct static_array
 
 /// Equality check on two arrays
 template <typename T, std::size_t N>

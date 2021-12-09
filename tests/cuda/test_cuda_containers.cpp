@@ -8,6 +8,7 @@
 // Local include(s).
 #include "test_cuda_containers_kernels.cuh"
 #include "vecmem/containers/array.hpp"
+#include "vecmem/containers/static_array.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
 #include "vecmem/memory/cuda/host_memory_resource.hpp"
@@ -200,4 +201,38 @@ TEST_F(cuda_containers_test, extendable_memory) {
     for (int value : output) {
         EXPECT_LT(10, value);
     }
+}
+
+/// Test the usage of an @c array<vector<...>> construct
+TEST_F(cuda_containers_test, array_memory) {
+
+    // The memory resource(s).
+    vecmem::cuda::managed_memory_resource managed_resource;
+
+    // Create an array of vectors.
+    vecmem::static_array<vecmem::vector<int>, 4> vec_array{
+        vecmem::vector<int>{{1, 2, 3, 4}, &managed_resource},
+        vecmem::vector<int>{{5, 6}, &managed_resource},
+        vecmem::vector<int>{{7, 8, 9}, &managed_resource},
+        vecmem::vector<int>{&managed_resource}};
+
+    // Create an appropriate data object out of it.
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> vec_data{
+        vecmem::get_data(vec_array[0]), vecmem::get_data(vec_array[1]),
+        vecmem::get_data(vec_array[2]), vecmem::get_data(vec_array[3])};
+
+    // Run a kernel on it.
+    arrayTransform(vec_data);
+
+    // Check its contents.
+    EXPECT_EQ(vec_array.at(0).at(0), 2);
+    EXPECT_EQ(vec_array.at(0).at(1), 4);
+    EXPECT_EQ(vec_array.at(0).at(2), 6);
+    EXPECT_EQ(vec_array.at(0).at(3), 8);
+    EXPECT_EQ(vec_array.at(1).at(0), 10);
+    EXPECT_EQ(vec_array.at(1).at(1), 12);
+    EXPECT_EQ(vec_array.at(2).at(0), 14);
+    EXPECT_EQ(vec_array.at(2).at(1), 16);
+    EXPECT_EQ(vec_array.at(2).at(2), 18);
+    EXPECT_EQ(vec_array.at(3).size(), 0u);
 }
