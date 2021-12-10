@@ -144,6 +144,8 @@ private:
     block free_block(void* p, std::size_t size) noexcept;
 
     memory_resource& mm_;
+    // The size of superblocks to allocate in case of is necessarry
+    std::size_t size_superblocks_{};
     // The maximum size of the arena
     std::size_t maximum_size_;
     // The current size of the arena
