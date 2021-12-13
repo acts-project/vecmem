@@ -8,8 +8,8 @@
 
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
-#include "vecmem/memory/deallocator.hpp"
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/unique_ptr.hpp"
 
 // System include(s).
 #include <cstddef>
@@ -55,7 +55,7 @@ public:
 
 private:
     /// Data object owning the allocated memory
-    std::unique_ptr<char, details::deallocator> m_memory;
+    vecmem::unique_alloc_ptr<char[]> m_memory;
 
 };  // class vector_buffer
 

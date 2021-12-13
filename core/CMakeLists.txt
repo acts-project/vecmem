@@ -47,8 +47,6 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/allocator.hpp"
    "include/vecmem/memory/impl/allocator.ipp"
    "src/memory/allocator.cpp"
-   "include/vecmem/memory/deallocator.hpp"
-   "src/memory/deallocator.cpp"
    # Memory management.
    "include/vecmem/memory/details/memory_resource_base.hpp"
    "src/memory/details/memory_resource_base.cpp"

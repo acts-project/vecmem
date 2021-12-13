@@ -9,8 +9,8 @@
 
 // Local include(s).
 #include "vecmem/containers/data/jagged_vector_view.hpp"
-#include "vecmem/memory/deallocator.hpp"
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/unique_ptr.hpp"
 
 // System include(s).
 #include <cstddef>
@@ -109,11 +109,11 @@ public:
 
 private:
     /// Data object for the @c vecmem::data::vector_view array
-    std::unique_ptr<value_type, details::deallocator> m_outer_memory;
+    vecmem::unique_alloc_ptr<value_type[]> m_outer_memory;
     /// Data object for the @c vecmem::data::vector_view array on the host
-    std::unique_ptr<value_type, details::deallocator> m_outer_host_memory;
+    vecmem::unique_alloc_ptr<value_type[]> m_outer_host_memory;
     /// Data object owning the memory of the "inner vectors"
-    std::unique_ptr<char, details::deallocator> m_inner_memory;
+    vecmem::unique_alloc_ptr<char[]> m_inner_memory;
 
 };  // class jagged_vector_buffer
 

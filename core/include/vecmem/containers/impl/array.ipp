@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include "vecmem/memory/unique_ptr.hpp"
+
 // System include(s).
 #include <algorithm>
 #include <memory>
@@ -13,66 +15,9 @@
 #include <string>
 
 namespace vecmem {
-
-namespace details {
-
-/// Helper function used in the @c vecmem::array constructors
-template <typename T, std::size_t N>
-std::unique_ptr<typename vecmem::array<T, N>::value_type,
-                typename vecmem::array<T, N>::deleter>
-allocate_array_memory(vecmem::memory_resource& resource,
-                      typename vecmem::array<T, N>::size_type size) {
-
-    return {
-        size == 0
-            ? nullptr
-            : static_cast<typename vecmem::array<T, N>::pointer>(
-                  resource.allocate(
-                      size * sizeof(typename vecmem::array<T, N>::value_type))),
-        {size, resource}};
-}
-
-/// Helper function used in the @c vecmem::array constructors
-template <typename T, std::size_t N>
-auto initialize_array_memory(
-    std::unique_ptr<typename vecmem::array<T, N>::value_type,
-                    typename vecmem::array<T, N>::deleter>
-        memory,
-    typename vecmem::array<T, N>::size_type size) {
-
-    typename vecmem::array<T, N>::size_type i = 0;
-    for (typename vecmem::array<T, N>::pointer ptr = memory.get(); i < size;
-         ++i, ++ptr) {
-        new (ptr) typename vecmem::array<T, N>::value_type();
-    }
-    return memory;
-}
-
-}  // namespace details
-
-template <typename T, std::size_t N>
-array<T, N>::deleter::deleter(size_type size, memory_resource& resource)
-    : m_size(size), m_resource(&resource) {}
-
-template <typename T, std::size_t N>
-void array<T, N>::deleter::operator()(void* ptr) {
-
-    // Call the destructor on all objects.
-    size_type i = 0;
-    for (pointer p = reinterpret_cast<pointer>(ptr); i < m_size; ++i, ++p) {
-        p->~value_type();
-    }
-    // De-allocate the array's memory.
-    if ((m_size != 0) && (ptr != nullptr)) {
-        m_resource->deallocate(ptr, m_size * sizeof(value_type));
-    }
-}
-
 template <typename T, std::size_t N>
 array<T, N>::array(memory_resource& resource)
-    : m_size(N),
-      m_memory(details::initialize_array_memory<T, N>(
-          details::allocate_array_memory<T, N>(resource, m_size), m_size)) {
+    : m_size(N), m_memory(vecmem::make_unique_obj<T[]>(resource, m_size)) {
 
     static_assert(N != details::array_invalid_size,
                   "Can only use the 'compile time constructor' if a size "
@@ -81,9 +26,7 @@ array<T, N>::array(memory_resource& resource)
 
 template <typename T, std::size_t N>
 array<T, N>::array(memory_resource& resource, size_type size)
-    : m_size(size),
-      m_memory(details::initialize_array_memory<T, N>(
-          details::allocate_array_memory<T, N>(resource, m_size), m_size)) {
+    : m_size(size), m_memory(vecmem::make_unique_obj<T[]>(resource, m_size)) {
 
     static_assert(N == details::array_invalid_size,
                   "Can only use the 'runtime constructor' if a size was not "
@@ -132,7 +75,7 @@ auto array<T, N>::front() -> reference {
             "Called vecmem::array::front() on an empty "
             "array");
     }
-    return (*m_memory);
+    return (m_memory[0]);
 }
 
 template <typename T, std::size_t N>

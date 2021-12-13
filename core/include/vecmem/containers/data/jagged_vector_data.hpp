@@ -10,8 +10,8 @@
 
 // Local include(s).
 #include "vecmem/containers/data/jagged_vector_view.hpp"
-#include "vecmem/memory/deallocator.hpp"
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/unique_ptr.hpp"
 
 // System include(s).
 #include <memory>
@@ -50,7 +50,7 @@ public:
 
 private:
     /// Data object owning the allocated memory
-    std::unique_ptr<value_type, details::deallocator> m_memory;
+    vecmem::unique_alloc_ptr<value_type[]> m_memory;
 
 };  // class jagged_vector_data
 
