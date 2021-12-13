@@ -20,4 +20,6 @@ vecmem_add_test( core
    "test_core_choice_memory_resource.cpp"
    "test_core_coalescing_memory_resource.cpp"
    "test_core_debug_memory_resource.cpp"
+   "test_core_unique_alloc_ptr.cpp"
+   "test_core_unique_obj_ptr.cpp"
    LINK_LIBRARIES vecmem::core GTest::gtest_main vecmem_testing_common )
