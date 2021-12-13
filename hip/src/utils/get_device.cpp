@@ -18,7 +18,7 @@ namespace vecmem::hip::details {
 int get_device() {
 
     int result = 0;
-    VECMEM_HIP_ERROR_CHECK(hipGetDevice(&result));
+    VECMEM_HIP_ERROR_IGNORE(hipGetDevice(&result));
     return result;
 }
 

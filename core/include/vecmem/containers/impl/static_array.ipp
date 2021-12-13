@@ -8,17 +8,15 @@
 
 #pragma once
 
+// Local include(s).
+#include "vecmem/utils/types.hpp"
+
+// System include(s).
 #include <cstddef>
 #include <stdexcept>
 #include <type_traits>
 
-#include "vecmem/utils/types.hpp"
-
 namespace vecmem {
-
-template <typename T, std::size_t N>
-VECMEM_HOST_AND_DEVICE constexpr static_array<T, N>::static_array(void)
-    : m_array() {}
 
 template <typename T, std::size_t N>
 VECMEM_HOST constexpr auto static_array<T, N>::at(size_type i) -> reference {
@@ -65,6 +63,22 @@ VECMEM_HOST_AND_DEVICE constexpr auto static_array<T, N>::operator[](
      * Return an element as constant.
      */
     return m_array[i];
+}
+
+template <typename T, std::size_t N>
+template <std::size_t I,
+          std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr auto
+              static_array<T, N>::get() noexcept->reference {
+
+    return m_array[I];
+}
+
+template <typename T, std::size_t N>
+template <std::size_t I,
+          std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr auto
+              static_array<T, N>::get() const noexcept->const_reference {
+
+    return m_array[I];
 }
 
 template <typename T, std::size_t N>
@@ -232,23 +246,6 @@ VECMEM_HOST_AND_DEVICE void static_array<T, N>::fill(const_reference value) {
 }
 
 template <typename T, std::size_t N>
-template <typename Tp1, typename... Tp>
-VECMEM_HOST_AND_DEVICE constexpr void static_array<T, N>::static_array_impl(
-    size_type i, Tp1&& a1, Tp&&... a) {
-
-    m_array[i] = a1;
-    static_array_impl(i + 1, std::forward<Tp>(a)...);
-}
-
-template <typename T, std::size_t N>
-template <typename Tp1>
-VECMEM_HOST_AND_DEVICE constexpr void static_array<T, N>::static_array_impl(
-    size_type i, Tp1&& a1) {
-
-    m_array[i] = a1;
-}
-
-template <typename T, std::size_t N>
 VECMEM_HOST_AND_DEVICE bool operator==(const static_array<T, N>& lhs,
                                        const static_array<T, N>& rhs) {
     /*
@@ -287,4 +284,20 @@ VECMEM_HOST_AND_DEVICE bool operator!=(const static_array<T, N>& lhs,
      */
     return false;
 }
+
+template <std::size_t I, class T, std::size_t N,
+          std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr T& get(
+              static_array<T, N>& a) noexcept {
+
+    return a.template get<I>();
+}
+
+template <
+    std::size_t I, class T, std::size_t N,
+    std::enable_if_t<I<N, bool> > VECMEM_HOST_AND_DEVICE constexpr const T& get(
+        const static_array<T, N>& a) noexcept {
+
+    return a.template get<I>();
+}
+
 }  // namespace vecmem

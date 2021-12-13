@@ -73,19 +73,19 @@ public:
     bool operator<(block const& b) const;
 
 private:
-    char* pointer_{};       // raw memory pointer
+    char* pointer_{};     // raw memory pointer
     std::size_t size_{};  // size in bytes
 };                        // class block
 
 constexpr std::size_t allocation_alignment = 256;
 
-constexpr std::size_t align_up(std::size_t value) noexcept;
+std::size_t align_up(std::size_t value) noexcept;
 
-constexpr std::size_t align_down(std::size_t value) noexcept;
+std::size_t align_down(std::size_t value) noexcept;
 
-inline block first_fit(std::set<block>& free_blocks, std::size_t size);
+block first_fit(std::set<block>& free_blocks, std::size_t size);
 
-inline block coalesce_block(std::set<block>& free_blocks, block const& b);
+block coalesce_block(std::set<block>& free_blocks, block const& b);
 
 class arena {
 public:

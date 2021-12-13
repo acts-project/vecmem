@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "../../cuda/src/utils/cuda_error_handling.hpp"
+#include "../../cuda/src/utils/cuda_wrappers.hpp"
 #include "test_cuda_containers_kernels.cuh"
 #include "vecmem/containers/const_device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
@@ -35,7 +36,8 @@ __global__ void linearTransformKernel(
     vecmem::device_vector<int> outputvec(output);
 
     // Perform the linear transformation.
-    outputvec.at(i) = inputvec.at(i) * constantarray1.at(0) + constantarray2[1];
+    outputvec.at(i) =
+        inputvec.at(i) * constantarray1.at(0) + vecmem::get<1>(constantarray2);
     return;
 }
 
@@ -48,6 +50,19 @@ void linearTransform(vecmem::data::vector_view<const int> constants,
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
+
+void linearTransform(vecmem::data::vector_view<const int> constants,
+                     vecmem::data::vector_view<const int> input,
+                     vecmem::data::vector_view<int> output,
+                     const vecmem::cuda::stream_wrapper& stream) {
+
+    // Launch the kernel.
+    linearTransformKernel<<<1, input.size(), 0,
+                            vecmem::cuda::details::get_stream(stream)>>>(
+        constants, input, output);
+    // Check whether it succeeded to launch.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
 }
 
 /// Kernel performing some basic atomic operations.
@@ -151,6 +166,69 @@ void filterTransform(vecmem::data::jagged_vector_view<const int> input,
     // Launch the kernel.
     dim3 dimensions(static_cast<unsigned int>(input.m_size), max_vec_size);
     filterTransformKernel<<<1, dimensions>>>(input, output);
+    // Check whether it succeeded to run.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
+
+/// Kernel filling a jagged vector to its capacity
+__global__ void fillTransformKernel(
+    vecmem::data::jagged_vector_view<int> vec_data) {
+
+    // Find the current index.
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= vec_data.m_size) {
+        return;
+    }
+
+    // Create a device vector on top of the view.
+    vecmem::jagged_device_vector<int> vec(vec_data);
+
+    // Fill the vectors to their capacity.
+    while (vec[i].size() < vec[i].capacity()) {
+        vec[i].push_back(1);
+    }
+}
+
+void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
+
+    // Launch the kernel
+    fillTransformKernel<<<static_cast<unsigned int>(vec.m_size), 1>>>(vec);
+
+    // Check whether it succeeded to run.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
+
+/// Kernel multiplying each element of the received structure by 2.
+__global__ void arrayTransformKernel(
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> data) {
+
+    // Find the current indices,
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    const std::size_t j = blockIdx.y * blockDim.y + threadIdx.y;
+    if (i >= data.size()) {
+        return;
+    }
+    if (j >= data[i].size()) {
+        return;
+    }
+
+    // Create the "device type".
+    vecmem::static_array<vecmem::device_vector<int>, 4> vec{data[0], data[1],
+                                                            data[2], data[3]};
+
+    // Perform the transformation.
+    vec[i][j] *= 2;
+}
+
+void arrayTransform(
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> data) {
+
+    // Launch the kernel.
+    const dim3 dimensions(4u, 4u);
+    arrayTransformKernel<<<1, dimensions>>>(data);
+
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());

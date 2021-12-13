@@ -39,7 +39,8 @@ __global__ void linearTransformKernel(
     vecmem::device_vector<int> outputvec(output);
 
     // Perform the linear transformation.
-    outputvec.at(i) = inputvec.at(i) * constantarray1.at(0) + constantarray2[1];
+    outputvec.at(i) =
+        inputvec.at(i) * constantarray1.at(0) + vecmem::get<1>(constantarray2);
     return;
 }
 
@@ -213,6 +214,69 @@ void filterTransform(vecmem::data::jagged_vector_view<const int> input,
     hipLaunchKernelGGL(filterTransformKernel, 1,
                        dim3(input.m_size, max_vec_size), 0, nullptr, input,
                        output);
+    // Check whether it succeeded to run.
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+}
+
+/// Kernel filling a jagged vector to its capacity
+__global__ void fillTransformKernel(
+    vecmem::data::jagged_vector_view<int> vec_data) {
+
+    // Find the current index.
+    const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+    if (i >= vec_data.m_size) {
+        return;
+    }
+
+    // Create a device vector on top of the view.
+    vecmem::jagged_device_vector<int> vec(vec_data);
+
+    // Fill the vectors to their capacity.
+    while (vec[i].size() < vec[i].capacity()) {
+        vec[i].push_back(1);
+    }
+}
+
+void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
+
+    // Launch the kernel
+    hipLaunchKernelGGL(fillTransformKernel, vec.m_size, 1, 0, nullptr, vec);
+
+    // Check whether it succeeded to run.
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+}
+
+/// Kernel multiplying each element of the received structure by 2.
+__global__ void arrayTransformKernel(
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> data) {
+
+    // Find the current indices,
+    const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
+    const std::size_t j = hipBlockIdx_y * hipBlockDim_y + hipThreadIdx_y;
+    if (i >= data.size()) {
+        return;
+    }
+    if (j >= data[i].size()) {
+        return;
+    }
+
+    // Create the "device type".
+    vecmem::static_array<vecmem::device_vector<int>, 4> vec{data[0], data[1],
+                                                            data[2], data[3]};
+
+    // Perform the transformation.
+    vec[i][j] *= 2;
+}
+
+void arrayTransform(
+    vecmem::static_array<vecmem::data::vector_view<int>, 4> data) {
+
+    // Launch the kernel.
+    const dim3 dimensions(4u, 4u);
+    hipLaunchKernelGGL(arrayTransformKernel, 1, dimensions, 0, nullptr, data);
+
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());

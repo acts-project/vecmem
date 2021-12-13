@@ -6,7 +6,7 @@
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
-project( vecmem VERSION 0.4.0 LANGUAGES CXX )
+project( vecmem VERSION 0.8.0 LANGUAGES CXX )
 
 # Standard CMake include(s).
 include( GNUInstallDirs )
@@ -46,6 +46,12 @@ option( VECMEM_BUILD_TESTING "Build the unit tests of VecMem" ON )
 include( CTest )
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
   add_subdirectory( tests )
+endif()
+
+# Set up the benchmarks.
+option(VECMEM_BUILD_BENCHMARKING "Build the benchmarks of VecMem" OFF)
+if(VECMEM_BUILD_BENCHMARKING)
+   add_subdirectory(benchmarks)
 endif()
 
 # Set up the packaging of the project.

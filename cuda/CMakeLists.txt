@@ -29,12 +29,18 @@ vecmem_add_library( vecmem_cuda cuda
    # Utilities.
    "include/vecmem/utils/cuda/copy.hpp"
    "src/utils/cuda/copy.cpp"
+   "include/vecmem/utils/cuda/async_copy.hpp"
+   "src/utils/cuda/async_copy.cpp"
    "src/utils/cuda_error_handling.hpp"
    "src/utils/cuda_error_handling.cpp"
    "src/utils/cuda_wrappers.hpp"
    "src/utils/cuda_wrappers.cpp"
    "src/utils/select_device.hpp"
-   "src/utils/select_device.cpp" )
+   "src/utils/select_device.cpp"
+   "include/vecmem/utils/cuda/stream_wrapper.hpp"
+   "src/utils/stream_wrapper.cpp"
+   "src/utils/opaque_stream.hpp"
+   "src/utils/opaque_stream.cpp" )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )

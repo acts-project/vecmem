@@ -62,15 +62,15 @@ bool block::operator<(block const& b) const {
     return this->pointer_ < b.pointer_;
 }
 
-constexpr std::size_t align_up(std::size_t value) noexcept {
+std::size_t align_up(std::size_t value) noexcept {
     return alignment::align_up(value, allocation_alignment);
 }
 
-constexpr std::size_t align_down(std::size_t value) noexcept {
+std::size_t align_down(std::size_t value) noexcept {
     return alignment::align_down(value, allocation_alignment);
 }
 
-inline block first_fit(std::set<block>& free_blocks, std::size_t size) {
+block first_fit(std::set<block>& free_blocks, std::size_t size) {
     auto const iter =
         std::find_if(free_blocks.cbegin(), free_blocks.cend(),
                      [size](auto const& b) { return b.fits(size); });
@@ -94,7 +94,7 @@ inline block first_fit(std::set<block>& free_blocks, std::size_t size) {
     }
 }
 
-inline block coalesce_block(std::set<block>& free_blocks, block const& b) {
+block coalesce_block(std::set<block>& free_blocks, block const& b) {
     // return the given block in case is not valid
     if (!b.is_valid())
         return b;
@@ -159,7 +159,6 @@ arena::arena(std::size_t initial_size, std::size_t maximum_size,
 }
 
 arena::~arena() {
-
     for(auto itr = allocated_blocks_.begin(); itr != allocated_blocks_.end();){
         auto aux = itr++;
         deallocate(aux->pointer(), aux->size());
@@ -219,7 +218,6 @@ block arena::expand_arena(std::size_t size) {
     else{
         size = size_superblocks_;
     }
-
     std::pair<std::set<block>::iterator, bool> ret =
         free_blocks_.insert({mm_.allocate(size), size});
 

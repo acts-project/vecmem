@@ -6,6 +6,7 @@
 
 # Project include(s).
 include( vecmem-compiler-options-cpp )
+include( vecmem-check-sycl-code-compiles )
 
 # Set up the build of the VecMem core library.
 vecmem_add_library( vecmem_core core
@@ -60,6 +61,13 @@ vecmem_add_library( vecmem_core core
    "src/memory/arena.cpp"
    "src/memory/arena_memory_resource.cpp"
    "include/vecmem/memory/arena_memory_resource.hpp"
+<<<<<<< HEAD
+=======
+   "src/memory/identity_memory_resource.cpp"
+   "include/vecmem/memory/identity_memory_resource.hpp"
+   "src/memory/terminal_memory_resource.cpp"
+   "include/vecmem/memory/terminal_memory_resource.hpp"
+>>>>>>> upstream/main
    "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/host_memory_resource.hpp"
    "src/memory/binary_page_memory_resource.cpp"
@@ -68,11 +76,23 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/binary_page_memory_resource.hpp"
    "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
+   "src/memory/instrumenting_memory_resource.cpp"
+   "include/vecmem/memory/instrumenting_memory_resource.hpp"
+   "src/memory/choice_memory_resource.cpp"
+   "include/vecmem/memory/choice_memory_resource.hpp"
+   "src/memory/coalescing_memory_resource.cpp"
+   "include/vecmem/memory/coalescing_memory_resource.hpp"
+   "src/memory/conditional_memory_resource.cpp"
+   "include/vecmem/memory/conditional_memory_resource.hpp"
+   "src/memory/debug_memory_resource.cpp"
+   "include/vecmem/memory/debug_memory_resource.hpp"
    # Utilities.
    "include/vecmem/utils/copy.hpp"
    "include/vecmem/utils/impl/copy.ipp"
    "src/utils/copy.cpp"
    "include/vecmem/utils/debug.hpp"
+   "src/utils/memory_monitor.cpp"
+   "include/vecmem/utils/memory_monitor.hpp"
    "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )
 
@@ -85,6 +105,13 @@ string( LENGTH "${CMAKE_SOURCE_DIR}/" VECMEM_SOURCE_DIR_LENGTH )
 target_compile_definitions( vecmem_core PUBLIC
    $<BUILD_INTERFACE:VECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}>
    $<BUILD_INTERFACE:VECMEM_SOURCE_DIR_LENGTH=${VECMEM_SOURCE_DIR_LENGTH}> )
+
+# The library headers make checks on the value of the __cplusplus macro. So we
+# need to make sure that MSVC would always set that macro up when using this
+# library.
+target_compile_options( vecmem_core PUBLIC
+   $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CXX>>:/Zc:__cplusplus>
+   $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler /Zc:__cplusplus> )
 
 # Figure out where to get <memory_resource> from.
 include( CheckCXXSourceCompiles )
@@ -135,5 +162,32 @@ check_cxx_source_compiles( "
   " VECMEM_HAVE_DEFAULT_RESOURCE)
 
 if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
-   target_sources(vecmem_core PRIVATE src/memory/default_resource_polyfill.cpp)
+   target_sources( vecmem_core
+      PRIVATE "src/memory/default_resource_polyfill.cpp" )
+   source_group( "src\\\\memory"
+      FILES "src/memory/default_resource_polyfill.cpp" )
+endif()
+
+# Figure out how to produce SYCL debug printouts.
+if( VECMEM_BUILD_SYCL_LIBRARY )
+
+   # Test which printf function(s) is/are available.
+   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ext_oneapi_printf_test.sycl" )
+   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ONEAPI_PRINTF
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/oneapi_printf_test.sycl" )
+
+   # Set up the appropriate flag with its help.
+   if( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ext::oneapi::experimental::printf )
+   elseif( VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ONEAPI::experimental::printf )
+   else()
+      message( WARNING "No valid printf function found for SYCL."
+         " Enabling debug messages will likely not work." )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_ONEAPI_PRINTF_FUNCTION=printf )
+   endif()
 endif()

@@ -30,7 +30,7 @@ jobs:
           - OS: "macos-latest"
             GENERATOR: "Xcode"
           - OS: "windows-latest"
-            GENERATOR: "NMake Makefiles"
+            GENERATOR: "Visual Studio 16 2019"
 
     # The system to run on.
     runs-on: ${{ matrix.PLATFORM.OS }}
@@ -39,12 +39,11 @@ jobs:
     steps:
     # Use a standard checkout of the code.
     - uses: actions/checkout@v2
-    # Set up the build environment.
-    - uses: ilammy/msvc-dev-cmd@v1.9.0
     # Run the CMake configuration.
     - name: Configure
       run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }}
                  -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }}
+                 -DVECMEM_BUILD_BENCHMARKING=TRUE
                  -S ${{ github.workspace }} -B build
                  -G "${{ matrix.PLATFORM.GENERATOR }}"
     # Perform the build.
@@ -70,6 +69,8 @@ jobs:
         PLATFORM:
           - NAME: "CUDA"
             CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda:v11"
+          - NAME: "CUDA"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:v13"
           - NAME: "HIP"
             CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm:v11"
           - NAME: "SYCL"
@@ -92,7 +93,7 @@ jobs:
     - name: Configure
       run: |
         source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
-        cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE -S ${GITHUB_WORKSPACE} -B build
+        cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE -DVECMEM_BUILD_BENCHMARKING=TRUE -S ${GITHUB_WORKSPACE} -B build
     # Perform the build.
     - name: Build
       run: |
