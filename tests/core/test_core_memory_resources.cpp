@@ -7,13 +7,9 @@
 
 // Local include(s).
 #include "../common/memory_resource_name_gen.hpp"
-<<<<<<< HEAD
-#include "vecmem/containers/vector.hpp"
-=======
 #include "../common/memory_resource_test_basic.hpp"
 #include "../common/memory_resource_test_host_accessible.hpp"
 #include "../common/memory_resource_test_stress.hpp"
->>>>>>> upstream/main
 #include "vecmem/memory/arena_memory_resource.hpp"
 #include "vecmem/memory/binary_page_memory_resource.hpp"
 #include "vecmem/memory/choice_memory_resource.hpp"
