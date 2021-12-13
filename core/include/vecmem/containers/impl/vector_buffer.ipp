@@ -13,7 +13,7 @@ namespace {
 
 /// Function creating the smart pointer for @c vecmem::data::vector_buffer
 template <typename TYPE>
-std::unique_ptr<char, vecmem::details::deallocator> allocate_buffer_memory(
+vecmem::unique_alloc_ptr<char[]> allocate_buffer_memory(
     typename vecmem::data::vector_buffer<TYPE>::size_type capacity,
     typename vecmem::data::vector_buffer<TYPE>::size_type size,
     vecmem::memory_resource& resource) {
@@ -28,10 +28,11 @@ std::unique_ptr<char, vecmem::details::deallocator> allocate_buffer_memory(
              : (sizeof(typename vecmem::data::vector_buffer<TYPE>::size_type) +
                 capacity * sizeof(TYPE)));
 
-    // Return the appropriate smart pointer.
-    return {capacity == 0 ? nullptr
-                          : static_cast<char*>(resource.allocate(byteSize)),
-            {byteSize, resource}};
+    if (capacity == 0) {
+        return nullptr;
+    } else {
+        return vecmem::make_unique_alloc<char[]>(resource, byteSize);
+    }
 }
 
 }  // namespace

@@ -29,31 +29,26 @@ std::vector<std::size_t> get_sizes(
 
 /// Function allocating memory for @c vecmem::data::jagged_vector_buffer
 template <typename TYPE>
-std::unique_ptr<typename vecmem::data::jagged_vector_buffer<TYPE>::value_type,
-                vecmem::details::deallocator>
+vecmem::unique_alloc_ptr<
+    typename vecmem::data::jagged_vector_buffer<TYPE>::value_type[]>
 allocate_jagged_buffer_outer_memory(
     typename vecmem::data::jagged_vector_buffer<TYPE>::size_type size,
     vecmem::memory_resource& resource) {
 
-    const std::size_t byteSize =
-        size *
-        sizeof(typename vecmem::data::jagged_vector_buffer<TYPE>::value_type);
-    return {
-        size == 0
-            ? nullptr
-            : static_cast<
-                  typename vecmem::data::jagged_vector_buffer<TYPE>::pointer>(
-                  resource.allocate(byteSize)),
-        {byteSize, resource}};
+    if (size == 0) {
+        return nullptr;
+    } else {
+        return vecmem::make_unique_alloc<
+            typename vecmem::data::jagged_vector_buffer<TYPE>::value_type[]>(
+            resource, size);
+    }
 }
 
 /// Function allocating memory for @c vecmem::data::jagged_vector_buffer
 template <typename TYPE>
-std::unique_ptr<char, vecmem::details::deallocator>
-allocate_jagged_buffer_inner_memory(const std::vector<std::size_t>& sizes,
-                                    vecmem::memory_resource& resource,
-                                    bool isResizable) {
-
+vecmem::unique_alloc_ptr<char[]> allocate_jagged_buffer_inner_memory(
+    const std::vector<std::size_t>& sizes, vecmem::memory_resource& resource,
+    bool isResizable) {
     typename vecmem::data::jagged_vector_buffer<TYPE>::size_type byteSize =
         std::accumulate(sizes.begin(), sizes.end(),
                         static_cast<std::size_t>(0)) *
@@ -63,9 +58,8 @@ allocate_jagged_buffer_inner_memory(const std::vector<std::size_t>& sizes,
             sizes.size() * sizeof(typename vecmem::data::jagged_vector_buffer<
                                   TYPE>::value_type::size_type);
     }
-    return {byteSize == 0 ? nullptr
-                          : static_cast<char*>(resource.allocate(byteSize)),
-            {byteSize, resource}};
+
+    return vecmem::make_unique_alloc<char[]>(resource, byteSize);
 }
 
 }  // namespace

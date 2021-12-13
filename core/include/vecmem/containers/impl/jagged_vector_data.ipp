@@ -15,21 +15,19 @@ namespace {
 
 /// Function creating the smart pointer for @c vecmem::data::jagged_vector_data
 template <typename TYPE>
-std::unique_ptr<typename vecmem::data::jagged_vector_view<TYPE>::value_type,
-                vecmem::details::deallocator>
+vecmem::unique_alloc_ptr<
+    typename vecmem::data::jagged_vector_view<TYPE>::value_type[]>
 allocate_jagged_memory(
     typename vecmem::data::jagged_vector_view<TYPE>::size_type size,
     vecmem::memory_resource& resource) {
 
-    const std::size_t byteSize =
-        size *
-        sizeof(typename vecmem::data::jagged_vector_view<TYPE>::value_type);
-    return {size == 0
-                ? nullptr
-                : static_cast<
-                      typename vecmem::data::jagged_vector_view<TYPE>::pointer>(
-                      resource.allocate(byteSize)),
-            {byteSize, resource}};
+    if (size == 0) {
+        return nullptr;
+    } else {
+        return vecmem::make_unique_alloc<
+            typename vecmem::data::jagged_vector_view<TYPE>::value_type[]>(
+            resource, size);
+    }
 }
 
 }  // namespace
