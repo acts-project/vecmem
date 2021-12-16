@@ -140,7 +140,7 @@ block coalesce_block(std::set<block>& free_blocks, block const& b) {
 
 arena::arena(std::size_t initial_size, std::size_t maximum_size,
              memory_resource& mm)
-    : mm_(mm), maximum_size_{maximum_size} {
+    : mm_(mm), size_superblocks_{initial_size}, maximum_size_{maximum_size} {
     // assert unexpected null upstream pointer
     // assert initial arena size required to be a multiple of 256 bytes
     // assert maximum arena size required to be a multiple of 256 bytes
@@ -160,15 +160,16 @@ arena::arena(std::size_t initial_size, std::size_t maximum_size,
 
 arena::~arena() {
 
-    for (auto b : free_blocks_) {
-        void* p = b.pointer();
-        std::size_t size = b.size();
-        mm_.deallocate(p, size);
+    for (auto itr = allocated_blocks_.begin();
+         itr != allocated_blocks_.end();) {
+        auto aux = itr++;
+        deallocate(aux->pointer(), aux->size());
     }
 
-    for (auto b : allocated_blocks_) {
-        void* p = b.pointer();
-        std::size_t size = b.size();
+    for (auto itr = free_blocks_.begin(); itr != free_blocks_.end();) {
+        auto aux = itr++;
+        void* p = aux->pointer();
+        std::size_t size = aux->size();
         mm_.deallocate(p, size);
     }
 }
@@ -214,7 +215,11 @@ constexpr std::size_t arena::size_to_grow(std::size_t /*size*/) const {
 }
 
 block arena::expand_arena(std::size_t size) {
-    size = std::max(size, minimum_superblock_size);
+    if (size > this->size_superblocks_)
+        size = minimum_superblock_size;
+    else {
+        size = size_superblocks_;
+    }
     std::pair<std::set<block>::iterator, bool> ret =
         free_blocks_.insert({mm_.allocate(size), size});
 
