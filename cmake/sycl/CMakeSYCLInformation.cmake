@@ -14,7 +14,7 @@ include( Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-${CMAKE_SYCL_COMPILER_ID}-SYCL
 # Set up how SYCL object file compilation should go.
 if( NOT DEFINED CMAKE_SYCL_COMPILE_OBJECT )
    set( CMAKE_SYCL_COMPILE_OBJECT
-      "<CMAKE_SYCL_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>" )
+      "<CMAKE_SYCL_COMPILER> -x c++ <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>" )
 endif()
 
 # Set up how shared library building should go.
