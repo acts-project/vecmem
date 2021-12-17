@@ -23,21 +23,40 @@ if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
          "Could not find compiler set in environment variable SYCLCXX:\n$ENV{SYCLCXX}.\n${CMAKE_SYCL_COMPILER_INIT}")
    endif()
 
-   # Determine the version of the SYCL compiler.
+   # Determine the type and version of the SYCL compiler.
    execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}" "--version"
       OUTPUT_VARIABLE _syclVersionOutput
       RESULT_VARIABLE _syclVersionResult )
    if( ${_syclVersionResult} EQUAL 0 )
+      if( "${_syclVersionOutput}" MATCHES "ComputeCpp" )
+         set( CMAKE_SYCL_COMPILER_ID "ComputeCpp" CACHE STRING
+            "Identifier for the SYCL compiler in use" )
+         set( _syclVersionRegex "([0-9\.]+) Device Compiler" )
+      elseif( "${_syclVersionOutput}" MATCHES "oneAPI" )
+         set( CMAKE_SYCL_COMPILER_ID "IntelLLVM" CACHE STRING
+         "Identifier for the SYCL compiler in use" )
+         set( _syclVersionRegex "DPC\+\+/C\+\+ Compiler ([0-9\.]+)" )
+      elseif( "${_syclVersionOutput}" MATCHES "intel/llvm" )
+         set( CMAKE_SYCL_COMPILER_ID "IntelLLVM" CACHE STRING
+         "Identifier for the SYCL compiler in use" )
+         set( _syclVersionRegex "clang version ([0-9\.]+)" )
+      else()
+         set( CMAKE_SYCL_COMPILER_ID "Unknown" CACHE STRING
+         "Identifier for the SYCL compiler in use" )
+         set( _syclVersionRegex "[a-zA-Z]+ version ([0-9\.]+)" )
+      endif()
       string( REPLACE "\n" ";" _syclVersionOutputList "${_syclVersionOutput}" )
       foreach( _line ${_syclVersionOutputList} )
-         if( "${_line}" MATCHES "[a-zA-Z]+ version ([0-9\.]+)" )
+         if( "${_line}" MATCHES "${_syclVersionRegex}" )
             set( CMAKE_SYCL_COMPILER_VERSION "${CMAKE_MATCH_1}" )
             break()
          endif()
       endforeach()
       unset( _syclVersionOutputList )
+      unset( _syclVersionRegex )
    else()
-      message( WARNING "Failed to execute: ${CMAKE_SYCL_COMPILER_INIT} --version" )
+      message( WARNING
+         "Failed to execute: ${CMAKE_SYCL_COMPILER_INIT} --version" )
       set( CMAKE_SYCL_COMPILER_VERSION "Unknown" )
    endif()
    unset( _syclVersionOutput )
@@ -52,6 +71,10 @@ endif()
 # Set up the compiler with cache variables.
 set( CMAKE_SYCL_COMPILER "${CMAKE_SYCL_COMPILER_INIT}" CACHE FILEPATH
    "The SYCL compiler to use. Normally the same as the C++ compiler." )
+
+# Tell the user what was found for the SYCL compiler.
+message( STATUS "The SYCL compiler identification is "
+   "${CMAKE_SYCL_COMPILER_ID} ${CMAKE_SYCL_COMPILER_VERSION}" )
 
 # Set up what source/object file names to use.
 set( CMAKE_SYCL_SOURCE_FILE_EXTENSIONS "sycl" )
