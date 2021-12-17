@@ -14,6 +14,9 @@
 #include "vecmem/utils/debug.hpp"
 #include "vecmem/utils/sycl/copy.hpp"
 
+// System include(s).
+#include <vector>
+
 namespace vecmem::sycl {
 
 copy::copy(const queue_wrapper& queue) : m_queue(queue) {}
@@ -52,7 +55,12 @@ void copy::do_memset(std::size_t size, void* ptr, int value) {
     assert(ptr != nullptr);
 
     // Perform the operation.
+#if defined(VECMEM_HAVE_SYCL_MEMSET)
     auto event = details::get_queue(m_queue).memset(ptr, value, size);
+#else
+    const std::vector<int> dummy(size / sizeof(int) + 1, value);
+    auto event = details::get_queue(m_queue).memcpy(ptr, dummy.data(), size);
+#endif  // VECMEM_HAVE_SYCL_MEMSET
     event.wait_and_throw();
 
     // Let the user know what happened.
