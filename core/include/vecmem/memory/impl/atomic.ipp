@@ -9,7 +9,7 @@
 
 // SYCL include(s).
 #if defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
-#include <CL/sycl/atomic.hpp>
+#include <CL/sycl.hpp>
 #endif
 
 /// Helpers for explicit calls to the SYCL atomic functions

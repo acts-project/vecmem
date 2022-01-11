@@ -15,12 +15,13 @@ device_selector::device_selector(const std::string& deviceName)
 
 int device_selector::operator()(const cl::sycl::device& device) const {
 
-    // Under no circumstances do we accept any NVidia OpenCL devices.
+    // Under no circumstances do we accept any NVidia or AMD OpenCL devices.
     const std::string vendor =
         device.get_info<cl::sycl::info::device::vendor>();
     const std::string version =
         device.get_info<cl::sycl::info::device::version>();
-    if ((vendor.find("NVIDIA") != std::string::npos) &&
+    if (((vendor.find("NVIDIA") != std::string::npos) ||
+         (vendor.find("Advanced Micro Devices") != std::string::npos)) &&
         (version.find("OpenCL") != std::string::npos)) {
         return -1;
     }

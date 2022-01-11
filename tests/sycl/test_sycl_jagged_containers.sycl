@@ -78,7 +78,8 @@ public:
     void operator()(cl::sycl::id<1> id) const {
 
         // Check if anything needs to be done.
-        if (id >= m_input.m_size) {
+        const std::size_t i = id[0];
+        if (i >= m_input.m_size) {
             return;
         }
 
@@ -88,12 +89,12 @@ public:
         vecmem::jagged_device_vector<int> output(m_output);
 
         // A little sanity check.
-        assert(input.at(id).size() == output.at(id).size());
+        assert(input.at(i).size() == output.at(i).size());
 
         // Perform the requested linear transformation on all elements of a
         // given "internal vector".
-        for (std::size_t j = 0; j < input[id].size(); ++j) {
-            output[id][j] = input[id][j] * constants[0] + constants[1];
+        for (std::size_t j = 0; j < input[i].size(); ++j) {
+            output[i][j] = input[i][j] * constants[0] + constants[1];
         }
     }
 
@@ -119,7 +120,8 @@ public:
     void operator()(cl::sycl::id<1> id) const {
 
         // Check if anything needs to be done.
-        if (id >= m_data.m_size) {
+        const std::size_t i = id[0];
+        if (i >= m_data.m_size) {
             return;
         }
 
@@ -129,13 +131,13 @@ public:
         // Exercise the jagged vector iterators in a bit of an elaborate
         // operation.
         for (auto itr1 = data.rbegin(); itr1 != data.rend(); ++itr1) {
-            if ((data[id].size() > 0) && (itr1->size() > 1)) {
+            if ((data[i].size() > 0) && (itr1->size() > 1)) {
                 // Iterate over all inner vectors, skipping the first elements.
                 // Since those are being updated at the same time, by other
                 // threads.
                 for (auto itr2 = itr1->rbegin(); itr2 != (itr1->rend() - 1);
                      ++itr2) {
-                    data[id].front() += *itr2;
+                    data[i].front() += *itr2;
                 }
             }
         }
@@ -158,7 +160,8 @@ public:
     void operator()(cl::sycl::id<1> id) const {
 
         // Check if anything needs to be done.
-        if (id >= m_view.m_size) {
+        const std::size_t i = id[0];
+        if (i >= m_view.m_size) {
             return;
         }
 
@@ -166,8 +169,8 @@ public:
         vecmem::jagged_device_vector<int> vec(m_view);
 
         // Fill the vectors to their capacity.
-        while (vec[id].size() < vec[id].capacity()) {
-            vec[id].push_back(1);
+        while (vec[i].size() < vec[i].capacity()) {
+            vec[i].push_back(1);
         }
     }
 

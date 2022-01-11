@@ -8,12 +8,13 @@
 include( CMakeCommonLanguageInclude )
 
 # Set up platform specific flags.
-include( Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-IntelLLVM-SYCL OPTIONAL )
+include( Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-${CMAKE_SYCL_COMPILER_ID}-SYCL
+   OPTIONAL )
 
 # Set up how SYCL object file compilation should go.
 if( NOT DEFINED CMAKE_SYCL_COMPILE_OBJECT )
    set( CMAKE_SYCL_COMPILE_OBJECT
-      "<CMAKE_SYCL_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>" )
+      "<CMAKE_SYCL_COMPILER> -x c++ <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>" )
 endif()
 
 # Set up how shared library building should go.
@@ -122,6 +123,8 @@ endif()
 # Set up the default flags for the SYCL build.
 cmake_initialize_per_config_variable( CMAKE_SYCL_FLAGS
    "Flags used by the SYCL compiler" )
+set( CMAKE_SYCL_FLAGS
+   "${CMAKE_SYCL_FLAGS} ${CMAKE_SYCL${CMAKE_SYCL_STANDARD}_STANDARD_COMPILE_OPTION}" )
 
 # Tell CMake that the information was loaded.
 set( CMAKE_SYCL_INFORMATION_LOADED TRUE )
