@@ -71,3 +71,11 @@ if( NOT VECMEM_HAVE_SYCL_ASSERT )
          " Debug builds will likely fail." )
    endif()
 endif()
+
+# Check if sycl::queue::memset is available, and set a compiler option
+# accordingly.
+vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_MEMSET
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/memset_test.sycl" )
+if( VECMEM_HAVE_SYCL_MEMSET )
+   target_compile_definitions( vecmem_sycl PRIVATE VECMEM_HAVE_SYCL_MEMSET )
+endif()

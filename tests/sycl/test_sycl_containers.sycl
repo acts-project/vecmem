@@ -56,7 +56,8 @@ TEST_F(sycl_containers_test, shared_memory) {
              input = vecmem::get_data(inputvec),
              output = vecmem::get_data(outputvec)](cl::sycl::id<1> id) {
                 // Skip invalid indices.
-                if (id >= input.size()) {
+                const std::size_t i = id[0];
+                if (i >= input.size()) {
                     return;
                 }
 
@@ -69,8 +70,8 @@ TEST_F(sycl_containers_test, shared_memory) {
                 vecmem::device_vector<int> outputvec(output);
 
                 // Perform the linear transformation.
-                outputvec.at(id) = inputvec.at(id) * constantarray1.at(0) +
-                                   vecmem::get<1>(constantarray2);
+                outputvec.at(i) = inputvec.at(i) * constantarray1.at(0) +
+                                  vecmem::get<1>(constantarray2);
                 return;
             });
     });
@@ -129,7 +130,8 @@ TEST_F(sycl_containers_test, device_memory) {
              input = vecmem::get_data(input_data),
              output = vecmem::get_data(outputvecdevice)](cl::sycl::id<1> id) {
                 // Skip invalid indices.
-                if (id >= input.size()) {
+                const std::size_t i = id[0];
+                if (i >= input.size()) {
                     return;
                 }
 
@@ -140,8 +142,8 @@ TEST_F(sycl_containers_test, device_memory) {
                 vecmem::device_vector<int> outputvec(output);
 
                 // Perform the linear transformation.
-                outputvec.at(id) =
-                    inputvec.at(id) * constantarray.at(0) + constantarray.at(1);
+                outputvec.at(i) =
+                    inputvec.at(i) * constantarray.at(0) + constantarray.at(1);
                 return;
             });
     });
@@ -177,12 +179,13 @@ TEST_F(sycl_containers_test, atomic_memory) {
             cl::sycl::range<1>(buffer.size() * ITERATIONS),
             [buffer = vecmem::get_data(buffer)](cl::sycl::item<1> id) {
                 // Check if anything needs to be done.
-                if (id >= buffer.size() * ITERATIONS) {
+                const std::size_t i = id[0];
+                if (i >= buffer.size() * ITERATIONS) {
                     return;
                 }
 
                 // Index/pointer to modify.
-                const std::size_t index = id % buffer.size();
+                const std::size_t index = i % buffer.size();
                 int* ptr = buffer.ptr() + index;
 
                 // Do some simple stuff with it.
@@ -233,7 +236,8 @@ TEST_F(sycl_containers_test, extendable_memory) {
             [input = vecmem::get_data(input),
              output = vecmem::get_data(output_buffer)](cl::sycl::item<1> id) {
                 // Check if anything needs to be done.
-                if (id >= input.size()) {
+                const std::size_t i = id[0];
+                if (i >= input.size()) {
                     return;
                 }
 
@@ -242,7 +246,7 @@ TEST_F(sycl_containers_test, extendable_memory) {
                 vecmem::device_vector<int> outputvec(output);
 
                 // Add this thread's element, if it passes the selection.
-                const int element = inputvec.at(id);
+                const int element = inputvec.at(i);
                 if (element > 10) {
                     outputvec.push_back(element);
                 }
