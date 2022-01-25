@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -8,6 +8,8 @@
 // Local include(s).
 #include "test_cuda_containers_kernels.cuh"
 #include "vecmem/containers/array.hpp"
+#include "vecmem/containers/data/jagged_vector_buffer.hpp"
+#include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/static_array.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
@@ -235,4 +237,24 @@ TEST_F(cuda_containers_test, array_memory) {
     EXPECT_EQ(vec_array.at(2).at(1), 16);
     EXPECT_EQ(vec_array.at(2).at(2), 18);
     EXPECT_EQ(vec_array.at(3).size(), 0u);
+}
+
+/// Test buffers with "large" elements (for which alignment becomes important)
+TEST_F(cuda_containers_test, large_buffer) {
+
+    // The memory resource(s).
+    vecmem::cuda::managed_memory_resource managed_resource;
+
+    // Test a (1D) vector.
+    vecmem::data::vector_buffer<unsigned long> buffer1(3, 0, managed_resource);
+    m_copy.setup(buffer1);
+    largeBufferTransform(buffer1);
+    EXPECT_EQ(m_copy.get_size(buffer1), 1u);
+
+    // Test a (2D) jagged vector.
+    vecmem::data::jagged_vector_buffer<unsigned long> buffer2(
+        {0, 0, 0}, {3, 3, 3}, managed_resource);
+    m_copy.setup(buffer2);
+    largeBufferTransform(buffer2);
+    EXPECT_EQ(m_copy.get_sizes(buffer2), std::vector<unsigned int>({0, 1u, 0}));
 }

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -25,6 +25,18 @@ std::vector<std::size_t> get_sizes(
         result[i] = jvv.m_ptr[i].size();
     }
     return result;
+}
+
+/// Get the padding needed after the size array for correct alignment
+template <typename TYPE>
+std::size_t get_buffer_alignment_padding(std::size_t size) {
+
+    // Total size of the size array.
+    const std::size_t size_size =
+        size * sizeof(typename vecmem::data::jagged_vector_buffer<
+                      TYPE>::value_type::size_type);
+    // Return the padding needed after the size array.
+    return (alignof(TYPE) - (size_size % alignof(TYPE)));
 }
 
 /// Function allocating memory for @c vecmem::data::jagged_vector_buffer
@@ -56,7 +68,8 @@ vecmem::unique_alloc_ptr<char[]> allocate_jagged_buffer_inner_memory(
     if (isResizable) {
         byteSize +=
             sizes.size() * sizeof(typename vecmem::data::jagged_vector_buffer<
-                                  TYPE>::value_type::size_type);
+                                  TYPE>::value_type::size_type) +
+            get_buffer_alignment_padding<TYPE>(sizes.size());
     }
 
     return vecmem::make_unique_alloc<char[]>(resource, byteSize);
@@ -131,7 +144,8 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 
     // Set up the host accessible memory array.
     std::ptrdiff_t ptrdiff =
-        (capacities.size() * sizeof(typename value_type::size_type));
+        (capacities.size() * sizeof(typename value_type::size_type)) +
+        get_buffer_alignment_padding<TYPE>(capacities.size());
     for (std::size_t i = 0; i < capacities.size(); ++i) {
         new (host_ptr() + i) value_type(
             static_cast<typename value_type::size_type>(capacities[i]),

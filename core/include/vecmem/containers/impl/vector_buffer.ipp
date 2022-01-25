@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -10,6 +10,40 @@
 #include <cassert>
 
 namespace {
+
+/// @name Buffer alignment helper(s)
+/// @{
+
+/// Trait for determining a possible padding between the vector size variable
+/// and the vector payload.
+template <typename TYPE, typename VALID = void>
+struct buffer_alignment_padding;
+
+/// Specialisation of the trait for "small" vector types
+template <typename TYPE>
+struct buffer_alignment_padding<
+    TYPE,
+    typename std::enable_if_t<(
+        alignof(TYPE) <=
+        alignof(typename vecmem::data::vector_buffer<TYPE>::size_type))> > {
+    /// Alignment padding value
+    static constexpr std::size_t value = 0;
+};
+
+/// Specialisation of the trait for "large" vector types
+template <typename TYPE>
+struct buffer_alignment_padding<
+    TYPE,
+    typename std::enable_if_t<(
+        alignof(TYPE) >
+        alignof(typename vecmem::data::vector_buffer<TYPE>::size_type))> > {
+    /// Alignment padding value
+    static constexpr std::size_t value =
+        alignof(TYPE) -
+        alignof(typename vecmem::data::vector_buffer<TYPE>::size_type);
+};
+
+/// @}
 
 /// Function creating the smart pointer for @c vecmem::data::vector_buffer
 template <typename TYPE>
@@ -26,7 +60,8 @@ vecmem::unique_alloc_ptr<char[]> allocate_buffer_memory(
         ((capacity == size)
              ? (capacity * sizeof(TYPE))
              : (sizeof(typename vecmem::data::vector_buffer<TYPE>::size_type) +
-                capacity * sizeof(TYPE)));
+                capacity * sizeof(TYPE) +
+                buffer_alignment_padding<TYPE>::value));
 
     if (capacity == 0) {
         return nullptr;
@@ -56,8 +91,9 @@ vector_buffer<TYPE>::vector_buffer(size_type capacity, size_type size,
             base_type::m_ptr = reinterpret_cast<pointer>(m_memory.get());
         } else {
             base_type::m_size = reinterpret_cast<size_pointer>(m_memory.get());
-            base_type::m_ptr =
-                reinterpret_cast<pointer>(m_memory.get() + sizeof(size_type));
+            base_type::m_ptr = reinterpret_cast<pointer>(
+                m_memory.get() + sizeof(size_type) +
+                buffer_alignment_padding<TYPE>::value);
         }
     }
 }
