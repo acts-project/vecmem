@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -46,3 +46,9 @@ void fillTransform(vecmem::data::jagged_vector_view<int> vec);
 /// Function transforming the elements of an array of vectors
 void arrayTransform(
     vecmem::static_array<vecmem::data::vector_view<int>, 4> data);
+
+/// Function performing a trivial operation on a "large" vector buffer
+void largeBufferTransform(vecmem::data::vector_view<unsigned long> data);
+
+/// Function performing a trivial operation on a "large" jagged vector buffer
+void largeBufferTransform(vecmem::data::jagged_vector_view<unsigned long> data);

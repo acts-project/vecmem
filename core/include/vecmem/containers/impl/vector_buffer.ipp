@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -8,34 +8,7 @@
 
 // System include(s).
 #include <cassert>
-
-namespace {
-
-/// Function creating the smart pointer for @c vecmem::data::vector_buffer
-template <typename TYPE>
-vecmem::unique_alloc_ptr<char[]> allocate_buffer_memory(
-    typename vecmem::data::vector_buffer<TYPE>::size_type capacity,
-    typename vecmem::data::vector_buffer<TYPE>::size_type size,
-    vecmem::memory_resource& resource) {
-
-    // A sanity check.
-    assert(capacity >= size);
-
-    // Decide how many bytes to allocate.
-    const std::size_t byteSize =
-        ((capacity == size)
-             ? (capacity * sizeof(TYPE))
-             : (sizeof(typename vecmem::data::vector_buffer<TYPE>::size_type) +
-                capacity * sizeof(TYPE)));
-
-    if (capacity == 0) {
-        return nullptr;
-    } else {
-        return vecmem::make_unique_alloc<char[]>(resource, byteSize);
-    }
-}
-
-}  // namespace
+#include <memory>
 
 namespace vecmem {
 namespace data {
@@ -47,18 +20,43 @@ vector_buffer<TYPE>::vector_buffer(size_type size, memory_resource& resource)
 template <typename TYPE>
 vector_buffer<TYPE>::vector_buffer(size_type capacity, size_type size,
                                    memory_resource& resource)
-    : base_type(capacity, nullptr, nullptr),
-      m_memory(::allocate_buffer_memory<TYPE>(capacity, size, resource)) {
+    : base_type(capacity, nullptr, nullptr), m_memory() {
+
+    // A sanity check.
+    assert(capacity >= size);
+
+    // Exit early for null-capacity buffers.
+    if (capacity == 0) {
+        return;
+    }
+
+    // Alignment for the vector elements.
+    static constexpr std::size_t alignment = alignof(TYPE);
+
+    // Decide how many bytes we need to allocate.
+    std::size_t byteSize = capacity * sizeof(TYPE);
+
+    // Increase this size if the buffer describes a resizable vector.
+    if (capacity != size) {
+        byteSize +=
+            sizeof(typename vecmem::data::vector_buffer<TYPE>::size_type);
+        // Further increase this size so that we could for sure align the
+        // payload data correctly.
+        byteSize = ((byteSize + alignment - 1) / alignment) * alignment;
+    }
+
+    // Allocate the memory.
+    m_memory = vecmem::make_unique_alloc<char[]>(resource, byteSize);
 
     // Set the base class's pointers correctly.
-    if (capacity > 0) {
-        if (size == capacity) {
-            base_type::m_ptr = reinterpret_cast<pointer>(m_memory.get());
-        } else {
-            base_type::m_size = reinterpret_cast<size_pointer>(m_memory.get());
-            base_type::m_ptr =
-                reinterpret_cast<pointer>(m_memory.get() + sizeof(size_type));
-        }
+    if (size == capacity) {
+        base_type::m_ptr = reinterpret_cast<pointer>(m_memory.get());
+    } else {
+        base_type::m_size = reinterpret_cast<size_pointer>(m_memory.get());
+        void* ptr = m_memory.get() + sizeof(size_type);
+        std::size_t space = byteSize - sizeof(size_type);
+        base_type::m_ptr = reinterpret_cast<pointer>(
+            std::align(alignof(TYPE), capacity * sizeof(TYPE), ptr, space));
     }
 }
 

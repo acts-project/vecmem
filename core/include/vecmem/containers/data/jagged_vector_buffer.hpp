@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -112,6 +112,8 @@ private:
     vecmem::unique_alloc_ptr<value_type[]> m_outer_memory;
     /// Data object for the @c vecmem::data::vector_view array on the host
     vecmem::unique_alloc_ptr<value_type[]> m_outer_host_memory;
+    /// Size of the buffer held by @c m_inner_memory;
+    std::size_t m_inner_memory_size;
     /// Data object owning the memory of the "inner vectors"
     vecmem::unique_alloc_ptr<char[]> m_inner_memory;
 

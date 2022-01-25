@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,6 +15,9 @@
 #include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/containers/static_array.hpp"
 #include "vecmem/memory/atomic.hpp"
+
+// System include(s).
+#include <cassert>
 
 /// Kernel performing a linear transformation using the vector helper types
 __global__ void linearTransformKernel(
@@ -228,6 +231,56 @@ void arrayTransform(
     // Launch the kernel.
     const dim3 dimensions(4u, 4u);
     arrayTransformKernel<<<1, dimensions>>>(data);
+
+    // Check whether it succeeded to run.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
+
+/// Kernel making a trivial use of the resizable vector that it receives
+__global__ void largeBufferTransformKernel(
+    vecmem::data::vector_view<unsigned long> data) {
+
+    // Add one element to the vector in just the first thread
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i != 0) {
+        return;
+    }
+    vecmem::device_vector<unsigned long> vec(data);
+    assert(vec.size() == 0);
+    vec.push_back(0);
+}
+
+void largeBufferTransform(vecmem::data::vector_view<unsigned long> data) {
+
+    // Launch the kernel.
+    largeBufferTransformKernel<<<1, 1>>>(data);
+
+    // Check whether it succeeded to run.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
+
+/// Kernel making a trivial use of the resizable jagged vector that it receives
+__global__ void largeBufferTransformKernel(
+    vecmem::data::jagged_vector_view<unsigned long> data) {
+
+    // Add one element to the vector in just the first thread
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i != 0) {
+        return;
+    }
+    vecmem::jagged_device_vector<unsigned long> vec(data);
+    assert(vec.size() == 3);
+    assert(vec.at(1).size() == 0);
+    vec.at(1).push_back(0);
+}
+
+void largeBufferTransform(
+    vecmem::data::jagged_vector_view<unsigned long> data) {
+
+    // Launch the kernel.
+    largeBufferTransformKernel<<<1, 1>>>(data);
 
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
