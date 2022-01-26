@@ -112,8 +112,6 @@ private:
     vecmem::unique_alloc_ptr<value_type[]> m_outer_memory;
     /// Data object for the @c vecmem::data::vector_view array on the host
     vecmem::unique_alloc_ptr<value_type[]> m_outer_host_memory;
-    /// Size of the buffer held by @c m_inner_memory;
-    std::size_t m_inner_memory_size;
     /// Data object owning the memory of the "inner vectors"
     vecmem::unique_alloc_ptr<char[]> m_inner_memory;
 
