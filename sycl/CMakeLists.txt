@@ -63,6 +63,8 @@ if( NOT VECMEM_HAVE_SYCL_ASSERT )
       # Set up the vecmem::sycl_polyfill library.
       vecmem_add_library( vecmem_sycl_polyfill sycl_polyfill TYPE STATIC
          "src/utils/sycl/cuda_assert_polyfill.sycl" )
+      set_target_properties( vecmem_sycl_polyfill PROPERTIES
+         POSITION_INDEPENDENT_CODE ON )
       target_link_libraries( vecmem_sycl INTERFACE vecmem::sycl_polyfill )
 
    else()
