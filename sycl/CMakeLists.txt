@@ -79,3 +79,12 @@ vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_MEMSET
 if( VECMEM_HAVE_SYCL_MEMSET )
    target_compile_definitions( vecmem_sycl PRIVATE VECMEM_HAVE_SYCL_MEMSET )
 endif()
+
+# Check if a definitely error-free source file can be compiled successfully with
+# -Werror, and only add it to the debug builds if it can be.
+vecmem_check_sycl_code_compiles( VECMEM_SYCL_WERROR_USABLE
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/warning_test.sycl"
+   COMPILE_DEFINITIONS "-Werror" )
+if( VECMEM_SYCL_WERROR_USABLE )
+   vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-Werror" )
+endif()

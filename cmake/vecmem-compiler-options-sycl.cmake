@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -20,7 +20,6 @@ foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
 endforeach()
 
 # More rigorous tests for the Debug builds.
-vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-Werror" )
 if( NOT WIN32 )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-pedantic" )
 endif()
