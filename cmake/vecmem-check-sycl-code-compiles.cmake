@@ -1,12 +1,21 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
+
+# CMake version requirement.
+cmake_minimum_required( VERSION 3.14 )
+
+# CMake include(s).
+include( CMakeParseArguments )
 
 # Helper function for checking if some SYCL files can be built into an
 # executable.
 function( vecmem_check_sycl_code_compiles _variable )
+
+   # Parse the optional function arguments.
+   cmake_parse_arguments( ARG "" "" "COMPILE_DEFINITIONS" ${ARGN} )
 
    # Enable the SYCL language.
    enable_language( SYCL )
@@ -26,7 +35,8 @@ function( vecmem_check_sycl_code_compiles _variable )
    # Perform the build attempt.
    try_compile( ${_variable}
       "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_variable}"
-      SOURCES ${ARGN} )
+      SOURCES ${ARG_UNPARSED_ARGUMENTS}
+      COMPILE_DEFINITIONS ${ARG_COMPILE_DEFINITIONS} )
 
    # Print a result message.
    if( ${_variable} )

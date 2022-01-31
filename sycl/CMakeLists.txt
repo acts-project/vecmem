@@ -63,6 +63,8 @@ if( NOT VECMEM_HAVE_SYCL_ASSERT )
       # Set up the vecmem::sycl_polyfill library.
       vecmem_add_library( vecmem_sycl_polyfill sycl_polyfill TYPE STATIC
          "src/utils/sycl/cuda_assert_polyfill.sycl" )
+      set_target_properties( vecmem_sycl_polyfill PROPERTIES
+         POSITION_INDEPENDENT_CODE ON )
       target_link_libraries( vecmem_sycl INTERFACE vecmem::sycl_polyfill )
 
    else()
@@ -78,4 +80,13 @@ vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_MEMSET
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/memset_test.sycl" )
 if( VECMEM_HAVE_SYCL_MEMSET )
    target_compile_definitions( vecmem_sycl PRIVATE VECMEM_HAVE_SYCL_MEMSET )
+endif()
+
+# Check if a definitely error-free source file can be compiled successfully with
+# -Werror, and only add it to the debug builds if it can be.
+vecmem_check_sycl_code_compiles( VECMEM_SYCL_WERROR_USABLE
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/warning_test.sycl"
+   COMPILE_DEFINITIONS "-Werror" )
+if( VECMEM_SYCL_WERROR_USABLE )
+   vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-Werror" )
 endif()
