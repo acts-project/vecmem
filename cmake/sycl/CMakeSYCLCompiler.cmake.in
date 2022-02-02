@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -18,6 +18,13 @@ set( CMAKE_SYCL_COMPILE_OPTIONS_PIC @CMAKE_SYCL_COMPILE_OPTIONS_PIC@ )
 set( CMAKE_SYCL_FLAGS "@CMAKE_SYCL_FLAGS_INIT@" )
 set( CMAKE_SYCL_LINKER_PREFERENCE 50 )
 set( CMAKE_SYCL_LINKER_PREFERENCE_PROPAGATES 1 )
+
+# Do not let CMake specify "system/implicit directories" for the SYCL compiler.
+set( CMAKE_SYCL_IMPLICIT_INCLUDE_DIRECTORIES
+   "@CMAKE_SYCL_IMPLICIT_INCLUDE_DIRECTORIES@" )
+set( CMAKE_SYCL_IMPLICIT_LINK_LIBRARIES "@CMAKE_SYCL_IMPLICIT_LINK_LIBRARIES@" )
+set( CMAKE_SYCL_IMPLICIT_LINK_DIRECTORIES
+   "@CMAKE_SYCL_IMPLICIT_LINK_DIRECTORIES@" )
 
 # Set up the optimisation flags for the SYCL compiler.
 set( CMAKE_SYCL_FLAGS_INIT " " )

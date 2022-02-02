@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -78,7 +78,11 @@ message( STATUS "The SYCL compiler identification is "
 
 # Set up what source/object file names to use.
 set( CMAKE_SYCL_SOURCE_FILE_EXTENSIONS "sycl" )
-set( CMAKE_SYCL_OUTPUT_EXTENSION ".o" )
+if( UNIX )
+   set( CMAKE_SYCL_OUTPUT_EXTENSION ".o" )
+else()
+   set( CMAKE_SYCL_OUTPUT_EXTENSION ".obj" )
+endif()
 set( CMAKE_SYCL_COMPILER_ENV_VAR "SYCLCXX" )
 
 # Set how the compiler should pass include directories to the SYCL compiler.
@@ -99,6 +103,13 @@ set( CMAKE_SYCL_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT}" )
 set( CMAKE_SYCL_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT}" )
 set( CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT
    "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" )
+
+# Implicit include paths and libraries, based on the C++ compiler in use.
+set( CMAKE_SYCL_IMPLICIT_INCLUDE_DIRECTORIES
+   "${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}" )
+set( CMAKE_SYCL_IMPLICIT_LINK_LIBRARIES "${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}" )
+set( CMAKE_SYCL_IMPLICIT_LINK_DIRECTORIES
+   "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}" )
 
 # Set up C++17 by default.
 set( CMAKE_SYCL_STANDARD 17 CACHE STRING "C++ standard to use with SYCL" )
