@@ -4,6 +4,9 @@
 #
 # Mozilla Public License Version 2.0
 
+# CUDAToolkit requires CMake 3.17.
+cmake_minimum_required( VERSION 3.17 )
+
 # Include the helper function(s).
 include( vecmem-functions )
 
@@ -16,6 +19,10 @@ set( CMAKE_CUDA_STANDARD 14 CACHE STRING "The (CUDA) C++ standard to use" )
 # Set the architecture to build code for.
 set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
    "CUDA architectures to build device code for" )
+
+# Link against the dynamic CUDA runtime library by default.
+set( CMAKE_CUDA_RUNTIME_LIBRARY "dynamic" CACHE STRING
+   "Choice for the CUDA runtime library to use" )
 
 # Make CUDA generate debug symbols for the device code as well in a debug
 # build.
