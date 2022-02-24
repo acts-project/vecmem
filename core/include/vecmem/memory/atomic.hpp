@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,6 +12,53 @@
 
 // System include(s).
 #include <type_traits>
+
+// Provide a different implementation for modern SYCL and everything else
+#if (defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)) && \
+    defined(VECMEM_HAVE_SYCL_ATOMIC_REF)
+
+namespace vecmem {
+
+/// In modern SYCL code @c vecmem::atomic is an alias for @c sycl::atomic_ref
+///
+/// It has to be an actual class and not just a typedef, because
+/// @c sycl::atomic_ref, as the name implies, is created on top of references,
+/// and not on top of pointers.
+///
+template <typename T>
+class atomic
+    : public ::sycl::atomic_ref<T, ::sycl::memory_order::relaxed,
+                                ::sycl::memory_scope::device,
+                                ::sycl::access::address_space::global_space> {
+
+public:
+    /// @name Type definitions
+    /// @{
+
+    /// Type managed by the object
+    typedef T value_type;
+    /// Difference between two objects
+    typedef value_type difference_type;
+    /// Pointer to the value in global memory
+    typedef value_type* pointer;
+    /// Reference to a value given by the user
+    typedef value_type& reference;
+
+    /// @}
+
+    /// Constructor, with a pointer to the managed variable
+    VECMEM_HOST_AND_DEVICE
+    atomic(pointer ptr)
+        : ::sycl::atomic_ref<T, ::sycl::memory_order::relaxed,
+                             ::sycl::memory_scope::device,
+                             ::sycl::access::address_space::global_space>(
+              *ptr) {}
+
+};  // class atomic
+
+}  // namespace vecmem
+
+#else
 
 namespace vecmem {
 
@@ -107,3 +154,5 @@ private:
 
 // Include the implementation.
 #include "vecmem/memory/impl/atomic.ipp"
+
+#endif  // sycl::atomic_ref
