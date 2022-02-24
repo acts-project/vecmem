@@ -168,7 +168,7 @@ if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
       FILES "src/memory/default_resource_polyfill.cpp" )
 endif()
 
-# Figure out how to produce SYCL debug printouts.
+# Figure out how to use various SYCL features.
 if( VECMEM_BUILD_SYCL_LIBRARY )
 
    # Test which printf function(s) is/are available.
@@ -189,5 +189,13 @@ if( VECMEM_BUILD_SYCL_LIBRARY )
          " Enabling debug messages will likely not work." )
       target_compile_definitions( vecmem_core PUBLIC
          VECMEM_ONEAPI_PRINTF_FUNCTION=printf )
+   endif()
+
+   # Test whether sycl::atomic_ref is available.
+   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ATOMIC_REF
+      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/atomic_ref_test.sycl" )
+   if( VECMEM_HAVE_SYCL_ATOMIC_REF )
+      target_compile_definitions( vecmem_core PUBLIC
+         VECMEM_HAVE_SYCL_ATOMIC_REF )
    endif()
 endif()
