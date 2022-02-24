@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -30,7 +30,7 @@ jobs:
           - OS: "macos-latest"
             GENERATOR: "Xcode"
           - OS: "windows-latest"
-            GENERATOR: "Visual Studio 16 2019"
+            GENERATOR: "Visual Studio 17 2022"
 
     # The system to run on.
     runs-on: ${{ matrix.PLATFORM.OS }}
