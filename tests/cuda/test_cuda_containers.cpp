@@ -167,7 +167,7 @@ TEST_F(cuda_containers_test, atomic_memory) {
 
     // Check the output.
     for (int value : vec) {
-        EXPECT_EQ(static_cast<unsigned int>(value), 2 * ITERATIONS);
+        EXPECT_EQ(static_cast<unsigned int>(value), 4 * ITERATIONS);
     }
 }
 

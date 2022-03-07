@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -9,7 +9,7 @@
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/containers/details/reverse_iterator.hpp"
-#include "vecmem/memory/atomic.hpp"
+#include "vecmem/memory/atomic_ref.hpp"
 #include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -145,7 +145,7 @@ public:
         // Create copies of all of the elements one-by-one. It's very
         // inefficient, but we can't make any assumptions about the type of the
         // input iterator received by this function.
-        atomic<size_type> asize(m_size);
+        atomic_ref<size_type> asize(*m_size);
         for (InputIt itr = other_begin; itr != other_end; ++itr) {
             construct(asize.fetch_add(1), *itr);
         }

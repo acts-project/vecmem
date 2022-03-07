@@ -52,6 +52,8 @@ vecmem_add_library( vecmem_core core
    "src/memory/details/memory_resource_base.cpp"
    "include/vecmem/memory/atomic.hpp"
    "include/vecmem/memory/impl/atomic.ipp"
+   "include/vecmem/memory/atomic_ref.hpp"
+   "include/vecmem/memory/impl/atomic_ref.ipp"
    "include/vecmem/memory/polymorphic_allocator.hpp"
    "include/vecmem/memory/memory_resource.hpp"
    "src/memory/alignment.hpp"
