@@ -33,10 +33,23 @@ template <typename T>
 VECMEM_HOST_AND_DEVICE atomic_ref<T>::atomic_ref(reference ref) : m_ptr(&ref) {}
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE void atomic_ref<T>::store(value_type data) {
+VECMEM_HOST_AND_DEVICE atomic_ref<T>::atomic_ref(const atomic_ref& parent)
+    : m_ptr(parent.m_ptr) {}
+
+template <typename T>
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::operator=(value_type data) const
+    -> value_type {
+
+    store(data);
+    return load();
+}
+
+template <typename T>
+VECMEM_HOST_AND_DEVICE void atomic_ref<T>::store(value_type data,
+                                                 memory_order) const {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     volatile pointer addr = m_ptr;
     __threadfence();
     *addr = data;
@@ -48,10 +61,11 @@ VECMEM_HOST_AND_DEVICE void atomic_ref<T>::store(value_type data) {
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::load() const -> value_type {
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::load(memory_order) const
+    -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     volatile pointer addr = m_ptr;
     __threadfence();
     const value_type value = *addr;
@@ -65,11 +79,12 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::load() const -> value_type {
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::exchange(value_type data)
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::exchange(value_type data,
+                                                    memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     return atomicExch(m_ptr, data);
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
     return __VECMEM_SYCL_ATOMIC_CALL1(exchange, m_ptr, data);
@@ -82,10 +97,17 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::exchange(value_type data)
 
 template <typename T>
 VECMEM_HOST_AND_DEVICE bool atomic_ref<T>::compare_exchange_strong(
-    reference expected, value_type desired) {
+    reference expected, value_type desired, memory_order, memory_order) const {
+
+    return compare_exchange_strong(expected, desired);
+}
+
+template <typename T>
+VECMEM_HOST_AND_DEVICE bool atomic_ref<T>::compare_exchange_strong(
+    reference expected, value_type desired, memory_order) const {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     return atomicCAS(m_ptr, expected, desired);
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
     return __VECMEM_SYCL_ATOMIC_CALL2(compare_exchange_strong, m_ptr, expected,
@@ -102,11 +124,12 @@ VECMEM_HOST_AND_DEVICE bool atomic_ref<T>::compare_exchange_strong(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_add(value_type data)
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_add(value_type data,
+                                                     memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     return atomicAdd(m_ptr, data);
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_add, m_ptr, data);
@@ -118,11 +141,12 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_add(value_type data)
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_sub(value_type data)
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_sub(value_type data,
+                                                     memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     return atomicSub(m_ptr, data);
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_sub, m_ptr, data);
@@ -134,11 +158,12 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_sub(value_type data)
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_and(value_type data)
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_and(value_type data,
+                                                     memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     return atomicAnd(m_ptr, data);
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_and, m_ptr, data);
@@ -150,11 +175,12 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_and(value_type data)
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_or(value_type data)
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_or(value_type data,
+                                                    memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     return atomicOr(m_ptr, data);
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_or, m_ptr, data);
@@ -166,11 +192,12 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_or(value_type data)
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_xor(value_type data)
+VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_xor(value_type data,
+                                                     memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
+    (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
     return atomicXor(m_ptr, data);
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_xor, m_ptr, data);
@@ -182,3 +209,10 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_xor(value_type data)
 }
 
 }  // namespace vecmem
+
+// Clean up after the SYCL macros.
+#if defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
+#undef __VECMEM_SYCL_ATOMIC_CALL0
+#undef __VECMEM_SYCL_ATOMIC_CALL1
+#undef __VECMEM_SYCL_ATOMIC_CALL2
+#endif
