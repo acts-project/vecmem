@@ -23,7 +23,7 @@ using memory_order = ::sycl::memory_order;
 
 /// @c vecmem::atomic_ref equals @c sycl::atomic_ref with "modern SYCL"
 template <typename T>
-using atomic_ref =
+using device_atomic_ref =
     ::sycl::atomic_ref<T, ::sycl::memory_order::relaxed,
                        ::sycl::memory_scope::device,
                        ::sycl::access::address_space::global_space>;
@@ -41,7 +41,7 @@ using memory_order = std::memory_order;
 
 /// @c vecmem::atomic_ref equals @c std::atomic_ref in host code with C++20
 template <typename T>
-using atomic_ref = std::atomic_ref<T>;
+using device_atomic_ref = std::atomic_ref<T>;
 
 }  // namespace vecmem
 
@@ -75,7 +75,7 @@ enum class memory_order {
 /// operations in host code are performed as "regular" operations.
 ///
 template <typename T>
-class atomic_ref {
+class device_atomic_ref {
 
 public:
     /// @name Type definitions
@@ -102,20 +102,20 @@ public:
 
     /// Constructor, with a pointer to the managed variable
     VECMEM_HOST_AND_DEVICE
-    atomic_ref(reference ref);
+    device_atomic_ref(reference ref);
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE
-    atomic_ref(const atomic_ref& parent);
+    device_atomic_ref(const device_atomic_ref& parent);
 
     /// Disable the assignment operator
-    atomic_ref& operator=(const atomic_ref&) = delete;
+    device_atomic_ref& operator=(const device_atomic_ref&) = delete;
 
     /// @name Value setter/getter functions
     /// @{
 
     /// Assigns a value desired to the referenced object
     ///
-    /// @see vecmem::atomic_ref::store
+    /// @see vecmem::device_atomic_ref::store
     ///
     VECMEM_HOST_AND_DEVICE
     value_type operator=(value_type data) const;
@@ -177,11 +177,11 @@ private:
     /// Pointer to the value to perform atomic operations on
     pointer m_ptr;
 
-};  // class atomic_ref
+};  // class device_atomic_ref
 
 }  // namespace vecmem
 
 // Include the implementation.
-#include "vecmem/memory/impl/atomic_ref.ipp"
+#include "vecmem/memory/impl/device_atomic_ref.ipp"
 
 #endif  // Platform selection

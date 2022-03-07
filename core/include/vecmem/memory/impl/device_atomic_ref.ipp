@@ -30,23 +30,25 @@
 namespace vecmem {
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE atomic_ref<T>::atomic_ref(reference ref) : m_ptr(&ref) {}
+VECMEM_HOST_AND_DEVICE device_atomic_ref<T>::device_atomic_ref(reference ref)
+    : m_ptr(&ref) {}
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE atomic_ref<T>::atomic_ref(const atomic_ref& parent)
+VECMEM_HOST_AND_DEVICE device_atomic_ref<T>::device_atomic_ref(
+    const device_atomic_ref& parent)
     : m_ptr(parent.m_ptr) {}
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::operator=(value_type data) const
-    -> value_type {
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::operator=(
+    value_type data) const -> value_type {
 
     store(data);
     return load();
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE void atomic_ref<T>::store(value_type data,
-                                                 memory_order) const {
+VECMEM_HOST_AND_DEVICE void device_atomic_ref<T>::store(value_type data,
+                                                        memory_order) const {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -61,7 +63,7 @@ VECMEM_HOST_AND_DEVICE void atomic_ref<T>::store(value_type data,
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::load(memory_order) const
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::load(memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
@@ -79,8 +81,8 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::load(memory_order) const
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::exchange(value_type data,
-                                                    memory_order) const
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::exchange(value_type data,
+                                                           memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
@@ -96,14 +98,14 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::exchange(value_type data,
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE bool atomic_ref<T>::compare_exchange_strong(
+VECMEM_HOST_AND_DEVICE bool device_atomic_ref<T>::compare_exchange_strong(
     reference expected, value_type desired, memory_order, memory_order) const {
 
     return compare_exchange_strong(expected, desired);
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE bool atomic_ref<T>::compare_exchange_strong(
+VECMEM_HOST_AND_DEVICE bool device_atomic_ref<T>::compare_exchange_strong(
     reference expected, value_type desired, memory_order) const {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
@@ -124,8 +126,8 @@ VECMEM_HOST_AND_DEVICE bool atomic_ref<T>::compare_exchange_strong(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_add(value_type data,
-                                                     memory_order) const
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_add(value_type data,
+                                                            memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
@@ -141,8 +143,8 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_add(value_type data,
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_sub(value_type data,
-                                                     memory_order) const
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_sub(value_type data,
+                                                            memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
@@ -158,8 +160,8 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_sub(value_type data,
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_and(value_type data,
-                                                     memory_order) const
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_and(value_type data,
+                                                            memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
@@ -175,8 +177,8 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_and(value_type data,
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_or(value_type data,
-                                                    memory_order) const
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_or(value_type data,
+                                                           memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
@@ -192,8 +194,8 @@ VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_or(value_type data,
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic_ref<T>::fetch_xor(value_type data,
-                                                     memory_order) const
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_xor(value_type data,
+                                                            memory_order) const
     -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \

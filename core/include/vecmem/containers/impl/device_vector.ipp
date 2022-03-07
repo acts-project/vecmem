@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -175,7 +175,7 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::assign(size_type count,
     // Remove all previous elements.
     clear();
     // Set the assigned size of the vector.
-    atomic_ref<size_type> asize(*m_size);
+    device_atomic_ref<size_type> asize(*m_size);
     asize.store(count);
 
     // Create the required number of identical elements.
@@ -194,7 +194,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::emplace_back(Args&&... args)
 
     // Increment the size of the vector at first. So that we would "claim" the
     // index from other threads.
-    atomic_ref<size_type> asize(*m_size);
+    device_atomic_ref<size_type> asize(*m_size);
     const size_type index = asize.fetch_add(1);
     assert(index < m_capacity);
 
@@ -214,7 +214,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::push_back(
 
     // Increment the size of the vector at first. So that we would "claim" the
     // index from other threads.
-    atomic_ref<size_type> asize(*m_size);
+    device_atomic_ref<size_type> asize(*m_size);
     const size_type index = asize.fetch_add(1);
     assert(index < m_capacity);
 
@@ -232,7 +232,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::pop_back() -> size_type {
     assert(m_size != nullptr);
 
     // Decrement the size of the vector, and remember this new size.
-    atomic_ref<size_type> asize(*m_size);
+    device_atomic_ref<size_type> asize(*m_size);
     const size_type new_size = asize.fetch_sub(1) - 1;
 
     // Remove the last element.
@@ -249,7 +249,7 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::clear() {
     assert(m_size != nullptr);
 
     // Destruct all of the elements that the vector has "at the moment".
-    atomic_ref<size_type> asize(*m_size);
+    device_atomic_ref<size_type> asize(*m_size);
     const size_type current_size = asize.load();
     for (size_type i = 0; i < current_size; ++i) {
         destruct(i);
@@ -273,7 +273,7 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize(size_type new_size,
     assert(m_size != nullptr);
 
     // Get the current size of the vector.
-    atomic_ref<size_type> asize(*m_size);
+    device_atomic_ref<size_type> asize(*m_size);
     const size_type current_size = asize.load();
 
     // Check if anything needs to be done.
@@ -395,7 +395,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::size() const -> size_type {
         // SYCL we must pass a non-const pointer to the sycl::atomic object
         // that performs the load operation. And for that we need a non-const
         // pointer...
-        atomic_ref<size_type> asize(*(const_cast<size_type*>(m_size)));
+        device_atomic_ref<size_type> asize(*(const_cast<size_type*>(m_size)));
         return asize.load();
     }
 }
