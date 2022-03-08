@@ -15,6 +15,7 @@
 #include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/containers/static_array.hpp"
 #include "vecmem/memory/atomic.hpp"
+#include "vecmem/memory/device_atomic_ref.hpp"
 
 // System include(s).
 #include <cassert>
@@ -83,12 +84,19 @@ __global__ void atomicTransformKernel(std::size_t iterations,
     assert(array_index < data.size());
     int* ptr = data.ptr() + array_index;
 
-    // Do some simple stuff with it.
+    // Do some simple stuff with it using vecmem::atomic.
     vecmem::atomic<int> a(ptr);
     a.fetch_add(4);
     a.fetch_sub(2);
     a.fetch_and(0xffffffff);
     a.fetch_or(0x00000000);
+
+    // Do the same simple stuff with it using vecmem::atomic_ref.
+    vecmem::device_atomic_ref<int> a2(*ptr);
+    a2.fetch_add(4);
+    a2.fetch_sub(2);
+    a2.fetch_and(0xffffffff);
+    a2.fetch_or(0x00000000);
     return;
 }
 
