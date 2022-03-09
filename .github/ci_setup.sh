@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 #
@@ -15,8 +15,8 @@ PLATFORM_NAME=$1
 
 # Set up the correct environment for the SYCL tests.
 if [ "${PLATFORM_NAME}" = "SYCL" ]; then
-   source /opt/intel/oneapi/setvars.sh
-   export CXX=`which clang++`
-   export SYCLCXX=`which dpcpp`
+   if [ -f "/opt/intel/oneapi/setvars.sh" ]; then
+      source /opt/intel/oneapi/setvars.sh
+   fi
    export SYCL_DEVICE_FILTER=host
 fi
