@@ -69,16 +69,27 @@ jobs:
         PLATFORM:
           - NAME: "CUDA"
             CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda:v11"
+            OPTIONS:
           - NAME: "CUDA"
             CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:v13"
+            OPTIONS:
           - NAME: "HIP"
             CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm:v11"
+            OPTIONS:
           - NAME: "SYCL"
             CONTAINER: "ghcr.io/acts-project/ubuntu2004_oneapi:v20"
+            OPTIONS:
           - NAME: "SYCL"
             CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda_oneapi:v20"
-          - NAME: "SYCL"
-            CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm_oneapi:v20"
+            OPTIONS: -DVECMEM_BUILD_CUDA_LIBRARY=FALSE
+        include:
+          - BUILD:
+              TYPE: "Release"
+              MSG_LVL: 0
+            PLATFORM:
+              NAME: "SYCL"
+              CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm_oneapi:v20"
+              OPTIONS: -DVECMEM_BUILD_HIP_LIBRARY=FALSE
 
     # The system to run on.
     runs-on: ubuntu-latest
@@ -97,7 +108,7 @@ jobs:
     - name: Configure
       run: |
         source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
-        cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE -DVECMEM_BUILD_BENCHMARKING=TRUE -S ${GITHUB_WORKSPACE} -B build
+        cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE -DVECMEM_BUILD_BENCHMARKING=TRUE ${{ matrix.PLATFORM.OPTIONS }} -S ${GITHUB_WORKSPACE} -B build
     # Perform the build.
     - name: Build
       run: |
