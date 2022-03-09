@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -13,12 +13,14 @@ message( STATUS "Building Google Benchmark as part of the VecMem project" )
 
 # Declare where to get googlebenchmark from.
 FetchContent_Declare( googlebenchmark
-   URL "https://github.com/google/benchmark/archive/refs/tags/v1.6.0.tar.gz"
-   URL_MD5 "a7cb118b00430e22cb16774a28fce7ec" )
+   URL "https://github.com/google/benchmark/archive/refs/tags/v1.6.1.tar.gz"
+   URL_MD5 "8c33c51f9b7154e6c290df3750081c87" )
 
 # Option(s) used in the build of Google Benchmark.
 set( BENCHMARK_ENABLE_TESTING OFF CACHE BOOL
    "Enable/disable testing of the benchmark library" )
+set( BENCHMARK_ENABLE_WERROR OFF CACHE BOOL
+   "Enable/disable using -Werror in the build of Google Benchmark" )
 
 # Get it into the current directory.
 FetchContent_Populate( googlebenchmark )
