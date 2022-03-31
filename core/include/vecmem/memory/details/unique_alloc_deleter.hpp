@@ -31,15 +31,6 @@ namespace vecmem::details {
 template <typename T>
 struct unique_alloc_deleter {
     /*
-     * When an allocation happens on a device, we are not guaranteed to be able
-     * to write to it, so we don't construct any objects in that memory. Thus,
-     * we need to ensure that the memory is in a valid state by requiring that
-     * the types can start their lifetime without construction.
-     */
-    static_assert(std::is_trivially_constructible_v<std::remove_extent_t<T>>,
-                  "Allocation pointer type must be trivially constructible.");
-
-    /*
      * Similarly, we cannot destroy objects, so we need to ensure that
      * deallocation of objects is semantically equivalent to their destruction.
      */

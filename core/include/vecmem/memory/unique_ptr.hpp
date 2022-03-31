@@ -160,6 +160,14 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
     static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
                   "Allocation pointer type cannot be an unbounded array.");
 
+    /*
+     * Since we cannot (in general) construct objects in the memory we are
+     * about to allocate, we need to make sure that "bare", unallocated memory
+     * is semantically compatible with construction of the requested type.
+     */
+    static_assert(std::is_trivially_constructible_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially constructible.");
+
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
 
@@ -199,6 +207,14 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
                   "Allocation pointer type must be an array type.");
     static_assert(std::extent_v<T> == 0,
                   "Allocation pointer type must be unbounded.");
+
+    /*
+     * Since we cannot (in general) construct objects in the memory we are
+     * about to allocate, we need to make sure that "bare", unallocated memory
+     * is semantically compatible with construction of the requested type.
+     */
+    static_assert(std::is_trivially_constructible_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially constructible.");
 
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
@@ -249,6 +265,15 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, const T* f,
      */
     static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
                   "Allocation pointer type cannot be an ubounded array.");
+
+    /*
+     * In this case, we are going to immediately copy some (hopefully) live
+     * objects into our new allocation, so trivial constructability is not a
+     * hard requirement. Rather, we must ensure that a memory copy is a valid
+     * way of constructing types, which we do by checking trivial copyability.
+     */
+    static_assert(std::is_trivially_copyable_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially copyable.");
 
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
@@ -304,6 +329,15 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n,
                   "Allocation pointer type must be an array type.");
     static_assert(std::extent_v<T> == 0,
                   "Allocation pointer type must be unbounded.");
+
+    /*
+     * In this case, we are going to immediately copy some (hopefully) live
+     * objects into our new allocation, so trivial constructability is not a
+     * hard requirement. Rather, we must ensure that a memory copy is a valid
+     * way of constructing types, which we do by checking trivial copyability.
+     */
+    static_assert(std::is_trivially_copyable_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially copyable.");
 
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
