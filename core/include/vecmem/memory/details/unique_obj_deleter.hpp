@@ -35,12 +35,14 @@ namespace vecmem::details {
  * cannot check this at compile-time or at run-time, so it is the
  * responsibility of the user to ensure that this requirement is respected.
  */
-template <typename T,
-          std::enable_if_t<!std::is_array_v<T> ||
-                               (std::is_array_v<T> && std::extent_v<T> == 0),
-                           bool> = true>
+template <typename T>
 struct unique_obj_deleter {
 public:
+    static_assert(!std::is_array_v<T> ||
+                      (std::is_array_v<T> && std::extent_v<T> == 0),
+                  "Pointer type of unique object must be either non-array or "
+                  "unbound array type.");
+
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
     using storage_t = std::remove_pointer_t<pointer_t>;

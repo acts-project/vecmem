@@ -153,9 +153,13 @@ make_unique_obj(memory_resource& m, std::size_t n) {
  * constructible and destructible.
  */
 template <typename T>
-typename std::enable_if_t<!(std::is_array_v<T> && std::extent_v<T> == 0),
-                          unique_alloc_ptr<T>>
-make_unique_alloc(memory_resource& m) {
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
+    /*
+     * This method only works on non-array types and bounded array types.
+     */
+    static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
+                  "Allocation pointer type cannot be an unbounded array.");
+
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
 
@@ -187,9 +191,15 @@ make_unique_alloc(memory_resource& m) {
  * @return A unique allocation pointer to a newly allocated array.
  */
 template <typename T>
-typename std::enable_if_t<std::is_array_v<T> && std::extent_v<T> == 0,
-                          unique_alloc_ptr<T>>
-make_unique_alloc(memory_resource& m, std::size_t n) {
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
+    /*
+     * This overload only works for unbounded array types.
+     */
+    static_assert(std::is_array_v<T>,
+                  "Allocation pointer type must be an array type.");
+    static_assert(std::extent_v<T> == 0,
+                  "Allocation pointer type must be unbounded.");
+
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
 
