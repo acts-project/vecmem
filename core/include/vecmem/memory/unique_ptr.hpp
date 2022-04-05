@@ -151,6 +151,16 @@ make_unique_obj(memory_resource& m, std::size_t n) {
  *
  * @note This function can only be used with types that are trivially
  * constructible and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
  */
 template <typename T>
 unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
@@ -197,6 +207,19 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
  * @param n The number of elements to allocate.
  *
  * @return A unique allocation pointer to a newly allocated array.
+ *
+ * @note This function can only be used with types that are trivially
+ * constructible and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
  */
 template <typename T>
 unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
@@ -256,6 +279,19 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
  *
  * @warning Using this method with a copy helper that cannot write to the type
  * of memory allocated by the given memory resource is undefined behaviour.
+ *
+ * @note This function can only be used with types that are trivially
+ * copyable and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
  */
 template <typename T, typename C>
 unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, const T* f,
@@ -317,6 +353,19 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, const T* f,
  *
  * @warning Using this method with a copy helper that cannot write to the type
  * of memory allocated by the given memory resource is undefined behaviour.
+ *
+ * @note This function can only be used with types that are trivially copyable
+ * and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
  */
 template <typename T, typename C>
 unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n,
