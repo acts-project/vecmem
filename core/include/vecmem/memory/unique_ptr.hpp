@@ -151,11 +151,33 @@ make_unique_obj(memory_resource& m, std::size_t n) {
  *
  * @note This function can only be used with types that are trivially
  * constructible and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
  */
 template <typename T>
-typename std::enable_if_t<!(std::is_array_v<T> && std::extent_v<T> == 0),
-                          unique_alloc_ptr<T>>
-make_unique_alloc(memory_resource& m) {
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
+    /*
+     * This method only works on non-array types and bounded array types.
+     */
+    static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
+                  "Allocation pointer type cannot be an unbounded array.");
+
+    /*
+     * Since we cannot (in general) construct objects in the memory we are
+     * about to allocate, we need to make sure that "bare", unallocated memory
+     * is semantically compatible with construction of the requested type.
+     */
+    static_assert(std::is_trivially_constructible_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially constructible.");
+
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
 
@@ -185,11 +207,38 @@ make_unique_alloc(memory_resource& m) {
  * @param n The number of elements to allocate.
  *
  * @return A unique allocation pointer to a newly allocated array.
+ *
+ * @note This function can only be used with types that are trivially
+ * constructible and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
  */
 template <typename T>
-typename std::enable_if_t<std::is_array_v<T> && std::extent_v<T> == 0,
-                          unique_alloc_ptr<T>>
-make_unique_alloc(memory_resource& m, std::size_t n) {
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
+    /*
+     * This overload only works for unbounded array types.
+     */
+    static_assert(std::is_array_v<T>,
+                  "Allocation pointer type must be an array type.");
+    static_assert(std::extent_v<T> == 0,
+                  "Allocation pointer type must be unbounded.");
+
+    /*
+     * Since we cannot (in general) construct objects in the memory we are
+     * about to allocate, we need to make sure that "bare", unallocated memory
+     * is semantically compatible with construction of the requested type.
+     */
+    static_assert(std::is_trivially_constructible_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially constructible.");
+
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
 
@@ -199,6 +248,157 @@ make_unique_alloc(memory_resource& m, std::size_t n) {
      */
     std::size_t s = n * sizeof(std::remove_extent_t<T>);
     pointer_t p = static_cast<pointer_t>(m.allocate(s));
+
+    /*
+     * Create a new unique_ptr, with its own deleter, and return it.
+     */
+    return unique_alloc_ptr<T>(p, details::unique_alloc_deleter<T>(m, s, 0));
+}
+
+/**
+ * @brief Create a unique allocation pointer to a type, copying some existing
+ * data to it.
+ *
+ * This function creates a unique allocation pointer to an allocation, which
+ * means that the memory is only deallocated, not deconstructed, when it goes
+ * out of scope.
+ *
+ * Also, this method copies data from a host-accessible pointer to the
+ * allocated memory via some copy helper.
+ *
+ * @tparam T The type to allocate.
+ * @tparam C The copy helper, which must have a method with the signature of
+ * `void operator()(T* dst, T* src, std::size_t bytes)`.
+ *
+ * @param m The memory resource to use.
+ * @param f The host-accessible pointer to copy from.
+ * @param c The copy helper callable object.
+ *
+ * @return A unique allocation pointer to the newly allocated and copied
+ * memory.
+ *
+ * @warning Using this method with a copy helper that cannot write to the type
+ * of memory allocated by the given memory resource is undefined behaviour.
+ *
+ * @note This function can only be used with types that are trivially
+ * copyable and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
+ */
+template <typename T, typename C>
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, const T* f,
+                                      const C& c) {
+    /*
+     * This method only works on non-array types and bounded array types.
+     */
+    static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
+                  "Allocation pointer type cannot be an ubounded array.");
+
+    /*
+     * In this case, we are going to immediately copy some (hopefully) live
+     * objects into our new allocation, so trivial constructability is not a
+     * hard requirement. Rather, we must ensure that a memory copy is a valid
+     * way of constructing types, which we do by checking trivial copyability.
+     */
+    static_assert(std::is_trivially_copyable_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially copyable.");
+
+    using pointer_t =
+        std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
+
+    /*
+     * Calculate the size of the allocation and use the memory resource to
+     * perform an allocation of the requested size.
+     */
+    std::size_t s = sizeof(T);
+    pointer_t p = static_cast<pointer_t>(m.allocate(s));
+
+    c(p, f, s);
+
+    /*
+     * Create a new unique_ptr, with its own deleter, and return it.
+     */
+    return unique_alloc_ptr<T>(p, details::unique_alloc_deleter<T>(m, s));
+}
+
+/**
+ * @brief Create a unique allocation pointer to an array type, copying some
+ * existing data to it.
+ *
+ * This function creates a unique allocation pointer to an allocation of an
+ * array type of trivial objects, which is deallocated but not deleted when the
+ * pointer goes out of scope.
+ *
+ * Also, this method copies data from a host-accessible pointer to the
+ * allocated memory via some copy helper.
+ *
+ * @tparam T The type to allocate.
+ * @tparam C The copy helper, which must have a method with the signature of
+ * `void operator()(T* dst, T* src, std::size_t bytes)`.
+ *
+ * @param m The memory resource to use.
+ * @param n The number of elements to allocate.
+ * @param f The host-accessible pointer to copy from.
+ * @param c The copy helper callable object.
+ *
+ * @return A unique allocation pointer to a newly allocated and copied array.
+ *
+ * @warning Using this method with a copy helper that cannot write to the type
+ * of memory allocated by the given memory resource is undefined behaviour.
+ *
+ * @note This function can only be used with types that are trivially copyable
+ * and destructible.
+ *
+ * @warning In a strict sense, this method violates the semantics of C++
+ * standards lower than C++20. This is because in C++17 and lower, object
+ * lifetimes (even for trivially default constructible ones) only starts when
+ * the object is constructed via a new operation or a constructor. We are
+ * technically not doing this, and as such the object is technically
+ * uninitialized and may not be used; it may not even be assigned. In practice,
+ * nobody really cares, but please beware. To learn more, please see the
+ * [basic.object] section of the C++ standard. C++20 resolves this problem by
+ * adding implicit object construction.
+ */
+template <typename T, typename C>
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n,
+                                      const std::remove_extent_t<T>* f,
+                                      const C& c) {
+    /*
+     * This overload only works for unbounded array types.
+     */
+    static_assert(std::is_array_v<T>,
+                  "Allocation pointer type must be an array type.");
+    static_assert(std::extent_v<T> == 0,
+                  "Allocation pointer type must be unbounded.");
+
+    /*
+     * In this case, we are going to immediately copy some (hopefully) live
+     * objects into our new allocation, so trivial constructability is not a
+     * hard requirement. Rather, we must ensure that a memory copy is a valid
+     * way of constructing types, which we do by checking trivial copyability.
+     */
+    static_assert(std::is_trivially_copyable_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially copyable.");
+
+    using pointer_t =
+        std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
+
+    /*
+     * Calculate the size of the allocation and use the memory resource to
+     * perform an allocation of the requested size.
+     */
+    std::size_t s = n * sizeof(std::remove_extent_t<T>);
+    pointer_t p = static_cast<pointer_t>(m.allocate(s));
+
+    c(p, f, s);
 
     /*
      * Create a new unique_ptr, with its own deleter, and return it.
