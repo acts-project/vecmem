@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -130,20 +130,11 @@ void copy::setup(data::jagged_vector_buffer<TYPE>& data) {
     }
 
     // "Set up" the inner vector descriptors, using the host-accessible data.
-    for (typename data::jagged_vector_buffer<TYPE>::size_type i = 0;
-         i < data.m_size; ++i) {
-        // Find the first "inner vector" that has a non-zero capacity, and is
-        // resizable.
-        if ((data.host_ptr()[i].capacity() != 0) &&
-            (data.host_ptr()[i].size_ptr() != nullptr)) {
-            // Initialise the size values using this "inner vector's" pointer.
-            do_memset(sizeof(typename data::vector_buffer<TYPE>::size_type) *
-                          (data.m_size - i),
-                      data.host_ptr()[i].size_ptr(), 0);
-            // This would have initialised all of the "inner vectors" correctly,
-            // we can end the loop.
-            break;
-        }
+    // But only if the jagged vector buffer is resizable.
+    if (data.host_ptr()[0].size_ptr() != nullptr) {
+        do_memset(
+            sizeof(typename data::vector_buffer<TYPE>::size_type) * data.m_size,
+            data.host_ptr()[0].size_ptr(), 0);
     }
 
     // Check if anything else needs to be done.
