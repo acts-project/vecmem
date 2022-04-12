@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -10,8 +10,12 @@
 
 #include "cuda_error_handling.hpp"
 #include "cuda_wrappers.hpp"
+#include "get_device_name.hpp"
 #include "opaque_stream.hpp"
 #include "select_device.hpp"
+
+// VecMem include(s).
+#include "vecmem/utils/debug.hpp"
 
 // CUDA include(s).
 #include <cuda_runtime_api.h>
@@ -28,6 +32,10 @@ stream_wrapper::stream_wrapper(int device)
     // Construct the stream.
     m_managedStream = std::make_shared<details::opaque_stream>();
     m_stream = m_managedStream->m_stream;
+
+    // Tell the user what happened.
+    VECMEM_DEBUG_MSG(2, "Created stream on device: %s",
+                     details::get_device_name(dev_selector.device()).c_str());
 }
 
 stream_wrapper::stream_wrapper(void* stream)
