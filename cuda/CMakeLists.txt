@@ -1,18 +1,14 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
 # CUDAToolkit requires CMake 3.17.
 cmake_minimum_required( VERSION 3.17 )
 
-# Enable CUDA as a language.
-enable_language( CUDA )
-
 # Project include(s).
 include( vecmem-compiler-options-cpp )
-include( vecmem-compiler-options-cuda )
 
 # External dependency/dependencies.
 find_package( CUDAToolkit REQUIRED )
@@ -35,6 +31,8 @@ vecmem_add_library( vecmem_cuda cuda
    "src/utils/cuda_error_handling.cpp"
    "src/utils/cuda_wrappers.hpp"
    "src/utils/cuda_wrappers.cpp"
+   "src/utils/get_device_name.hpp"
+   "src/utils/get_device_name.cpp"
    "src/utils/select_device.hpp"
    "src/utils/select_device.cpp"
    "include/vecmem/utils/cuda/stream_wrapper.hpp"
