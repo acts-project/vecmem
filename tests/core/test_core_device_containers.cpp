@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -11,6 +11,7 @@
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/containers/device_vector.hpp"
+#include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/contiguous_memory_resource.hpp"
@@ -209,4 +210,66 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
     for (std::size_t i = 20; i < 24; ++i) {
         EXPECT_EQ(host_vector[i], 234);
     }
+}
+
+/// Test(s) for a "resizable" @c vecmem::data::jagged_vector_buffer
+TEST_F(core_device_container_test, resizable_jagged_vector_buffer) {
+
+    // Create a buffer with some sufficiently varied capacities.
+    vecmem::data::jagged_vector_buffer<int> jagged_buffer(
+        std::vector<std::size_t>(10, 0),
+        std::vector<std::size_t>({0, 16, 10, 15, 8, 3, 0, 0, 55, 2}),
+        m_resource);
+    m_copy.setup(jagged_buffer);
+
+    // Create a device vector on top of the buffer.
+    vecmem::jagged_device_vector<int> device_vec(jagged_buffer);
+
+    // Do some tests.
+    EXPECT_EQ(device_vec.size(), 10u);
+
+    EXPECT_EQ(device_vec.at(0).size(), 0u);
+    EXPECT_EQ(device_vec.at(0).capacity(), 0u);
+
+    EXPECT_EQ(device_vec.at(1).size(), 0u);
+    EXPECT_EQ(device_vec.at(1).capacity(), 16u);
+    device_vec.at(1).push_back(12);
+    device_vec.at(1).push_back(13);
+    EXPECT_EQ(device_vec.at(1).size(), 2u);
+    EXPECT_EQ(device_vec.at(1).capacity(), 16u);
+
+    EXPECT_EQ(device_vec.at(2).size(), 0u);
+    EXPECT_EQ(device_vec.at(2).capacity(), 10u);
+
+    EXPECT_EQ(device_vec.at(3).size(), 0u);
+    EXPECT_EQ(device_vec.at(3).capacity(), 15u);
+
+    EXPECT_EQ(device_vec.at(4).size(), 0u);
+    EXPECT_EQ(device_vec.at(4).capacity(), 8u);
+
+    EXPECT_EQ(device_vec.at(5).size(), 0u);
+    EXPECT_EQ(device_vec.at(5).capacity(), 3u);
+    device_vec.at(5).push_back(1);
+    device_vec.at(5).push_back(2);
+    device_vec.at(5).push_back(3);
+    EXPECT_EQ(device_vec.at(5).size(), 3u);
+    EXPECT_EQ(device_vec.at(5).capacity(), 3u);
+
+    EXPECT_EQ(device_vec.at(6).size(), 0u);
+    EXPECT_EQ(device_vec.at(6).capacity(), 0u);
+
+    EXPECT_EQ(device_vec.at(7).size(), 0u);
+    EXPECT_EQ(device_vec.at(7).capacity(), 0u);
+
+    EXPECT_EQ(device_vec.at(8).size(), 0u);
+    EXPECT_EQ(device_vec.at(8).capacity(), 55u);
+    device_vec.at(8).push_back(54);
+    EXPECT_EQ(device_vec.at(8).size(), 1u);
+    EXPECT_EQ(device_vec.at(8).capacity(), 55u);
+
+    EXPECT_EQ(device_vec.at(9).size(), 0u);
+    EXPECT_EQ(device_vec.at(9).capacity(), 2u);
+    device_vec.at(9).push_back(321);
+    EXPECT_EQ(device_vec.at(9).size(), 1u);
+    EXPECT_EQ(device_vec.at(9).capacity(), 2u);
 }
