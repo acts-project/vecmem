@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -17,6 +17,9 @@
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
+
+// System include(s).
+#include <tuple>
 
 /// Test case for testing @c vecmem::copy
 class core_copy_test : public testing::Test {
@@ -154,6 +157,55 @@ TEST_F(core_copy_test, const_jagged_vector) {
                (copy_itr2 != copy_itr->end());
              ++reference_itr2, ++copy_itr2) {
             EXPECT_EQ(*reference_itr2, *copy_itr2);
+        }
+    }
+}
+
+/// Tests with @c vecmem::copy::memset
+TEST_F(core_copy_test, memset) {
+
+    // Size for the 1-dimensional buffer(s).
+    static const unsigned int BUFFER1_SIZE = 10;
+
+    // Test(s) with a 1-dimensional buffer.
+    vecmem::data::vector_buffer<int> buffer1(BUFFER1_SIZE, m_resource);
+    m_copy.memset(buffer1, 5);
+    vecmem::vector<int> vector1(&m_resource);
+    m_copy(buffer1, vector1);
+    EXPECT_EQ(vector1.size(), BUFFER1_SIZE);
+    static const int REFERENCE = 0x05050505;
+    for (int value : vector1) {
+        EXPECT_EQ(value, REFERENCE);
+    }
+
+    vecmem::data::vector_buffer<std::tuple<unsigned int, float, double> >
+        buffer2(BUFFER1_SIZE, m_resource);
+    m_copy.memset(buffer2, 0);
+    vecmem::vector<std::tuple<unsigned int, float, double> > vector2(
+        &m_resource);
+    m_copy(buffer2, vector2);
+    EXPECT_EQ(vector2.size(), BUFFER1_SIZE);
+    for (const std::tuple<unsigned int, float, double>& value : vector2) {
+        EXPECT_EQ(std::get<0>(value), 0u);
+        EXPECT_EQ(std::get<1>(value), 0.f);
+        EXPECT_EQ(std::get<2>(value), 0.);
+    }
+
+    // Size(s) for the jagged buffer(s).
+    static const std::vector<std::size_t> BUFFER2_SIZES = {3, 6, 6, 3, 0,
+                                                           2, 7, 2, 4, 0};
+
+    // Test(s) with a jagged buffer.
+    vecmem::data::jagged_vector_buffer<int> buffer3(BUFFER2_SIZES, m_resource);
+    m_copy.setup(buffer3);
+    m_copy.memset(buffer3, 5);
+    vecmem::jagged_vector<int> vector3(&m_resource);
+    m_copy(buffer3, vector3);
+    EXPECT_EQ(vector3.size(), BUFFER2_SIZES.size());
+    for (std::size_t i = 0; i < vector3.size(); ++i) {
+        EXPECT_EQ(vector3.at(i).size(), BUFFER2_SIZES.at(i));
+        for (int value : vector3.at(i)) {
+            EXPECT_EQ(value, REFERENCE);
         }
     }
 }

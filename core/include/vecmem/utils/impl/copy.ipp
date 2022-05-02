@@ -26,12 +26,26 @@ void copy::setup(data::vector_view<TYPE>& data) {
     }
 
     // Initialize the "size variable" correctly on the buffer.
-    do_memset(sizeof(typename data::vector_buffer<TYPE>::size_type),
+    do_memset(sizeof(typename data::vector_view<TYPE>::size_type),
               data.size_ptr(), 0);
     VECMEM_DEBUG_MSG(2,
                      "Prepared a device vector buffer of capacity %u "
                      "for use on a device (ptr: %p)",
                      data.capacity(), static_cast<void*>(data.size_ptr()));
+}
+
+template <typename TYPE>
+void copy::memset(data::vector_view<TYPE>& data, int value) {
+
+    // Check if anything needs to be done.
+    if (data.capacity() == 0) {
+        return;
+    }
+
+    // Call memset with the correct arguments.
+    do_memset(data.capacity() * sizeof(TYPE), data.ptr(), value);
+    VECMEM_DEBUG_MSG(2, "Set %u vector elements to %i at ptr: %p",
+                     data.capacity(), value, static_cast<void*>(data.ptr()));
 }
 
 template <typename TYPE>
@@ -152,6 +166,18 @@ void copy::setup(data::jagged_vector_buffer<TYPE>& data) {
                      "Prepared a jagged device vector buffer of size %lu "
                      "for use on a device",
                      data.m_size);
+}
+
+template <typename TYPE>
+void copy::memset(data::jagged_vector_view<TYPE>& data, int value) {
+
+    memset_impl(data.m_size, data.m_ptr, value);
+}
+
+template <typename TYPE>
+void copy::memset(data::jagged_vector_buffer<TYPE>& data, int value) {
+
+    memset_impl(data.m_size, data.host_ptr(), value);
 }
 
 template <typename TYPE>
@@ -330,6 +356,16 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
 
     // Perform the operation using the private function.
     return get_sizes(data.host_ptr(), data.m_size);
+}
+
+template <typename TYPE>
+void copy::memset_impl(std::size_t size, data::vector_view<TYPE>* data,
+                       int value) {
+
+    // Use a very naive/expensive implementation.
+    for (std::size_t i = 0; i < size; ++i) {
+        memset(data[i], value);
+    }
 }
 
 template <typename TYPE1, typename TYPE2>
