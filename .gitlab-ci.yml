@@ -13,6 +13,7 @@ build_cuda:
   script:
     - echo $LD_LIBRARY_PATH
     - ls -al /opt/nvidia-driver/lib64
+    - find . -type f -name "libnvidia-ml.so"
     - nvidia-smi
 
 
