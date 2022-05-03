@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -66,6 +66,10 @@ public:
     template <typename TYPE>
     void setup(data::vector_view<TYPE>& data);
 
+    /// Set all bytes of the vector to some value
+    template <typename TYPE>
+    void memset(data::vector_view<TYPE>& data, int value);
+
     /// Copy a 1-dimensional vector to the specified memory resource
     template <typename TYPE>
     data::vector_buffer<std::remove_cv_t<TYPE>> to(
@@ -97,6 +101,14 @@ public:
     /// Copy the internal state of a jagged vector buffer to the target device
     template <typename TYPE>
     void setup(data::jagged_vector_buffer<TYPE>& data);
+
+    /// Set all bytes of the jagged vector to some value
+    template <typename TYPE>
+    void memset(data::jagged_vector_view<TYPE>& data, int value);
+
+    /// Set all bytes of the jagged vector to some value
+    template <typename TYPE>
+    void memset(data::jagged_vector_buffer<TYPE>& data, int value);
 
     /// Copy a jagged vector to the specified memory resource
     template <typename TYPE>
@@ -168,6 +180,10 @@ protected:
     virtual void do_memset(std::size_t size, void* ptr, int value);
 
 private:
+    /// Helper function implementing @c memset for jagged vectors
+    template <typename TYPE>
+    void memset_impl(std::size_t size, data::vector_view<TYPE>* data,
+                     int value);
     /// Helper function performing the copy of a jagged array/vector
     template <typename TYPE1, typename TYPE2>
     void copy_views(std::size_t size, const data::vector_view<TYPE1>* from,
