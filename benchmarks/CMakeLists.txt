@@ -23,6 +23,13 @@ if(VECMEM_SETUP_GOOGLEBENCHMARK)
    endif()
 endif()
 
+# Build a common, helper library.
+add_library( vecmem_benchmark_common STATIC
+   "common/make_jagged_vector.hpp"
+   "common/make_jagged_vector.cpp" )
+target_link_libraries( vecmem_benchmark_common
+   PUBLIC vecmem::core )
+
 # Include the library specific tests.
 add_subdirectory(core)
 if(VECMEM_BUILD_CUDA_LIBRARY)

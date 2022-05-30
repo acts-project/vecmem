@@ -9,13 +9,16 @@ include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-cuda )
 
 # Set up the benchmark(s) for the CUDA library.
-add_executable(vecmem_benchmark_cuda "benchmark_cuda.cpp")
+add_executable( vecmem_benchmark_cuda
+    "benchmark_cuda.cpp"
+    "benchmark_copy.cpp" )
 
 target_link_libraries(
     vecmem_benchmark_cuda
 
     PRIVATE
     vecmem::cuda
+    vecmem_benchmark_common
     benchmark::benchmark
     benchmark::benchmark_main
 )
