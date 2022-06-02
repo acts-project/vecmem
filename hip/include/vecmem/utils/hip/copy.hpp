@@ -16,10 +16,6 @@ namespace vecmem::hip {
 /// Specialisation of @c vecmem::copy for HIP
 class VECMEM_HIP_EXPORT copy : public vecmem::copy {
 
-public:
-    /// Virtual destructor
-    virtual ~copy() {}
-
 protected:
     /// Perform a memory copy using HIP
     virtual void do_copy(std::size_t size, const void* from, void* to,

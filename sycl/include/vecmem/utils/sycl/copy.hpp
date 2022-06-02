@@ -27,9 +27,6 @@ public:
     /// Constructor on top of a user-provided queue
     copy(const queue_wrapper& queue = {""});
 
-    /// Virtual destructor
-    virtual ~copy() {}
-
 protected:
     /// Perform a memory copy using SYCL
     virtual void do_copy(std::size_t size, const void* from, void* to,

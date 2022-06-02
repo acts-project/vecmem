@@ -30,9 +30,6 @@ public:
     /// Constructor with the stream to operate on
     async_copy(const stream_wrapper& stream);
 
-    /// Virtual destructor
-    virtual ~async_copy() {}
-
 protected:
     /// Perform an asynchronous memory copy using CUDA
     virtual void do_copy(std::size_t size, const void* from, void* to,
