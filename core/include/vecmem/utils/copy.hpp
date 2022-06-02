@@ -62,6 +62,9 @@ public:
     /// @name 1-dimensional vector data handling functions
     /// @{
 
+    /// Virtual destructor
+    virtual ~copy() {}
+
     /// Set up the internal state of a vector buffer correctly on a device
     template <typename TYPE>
     void setup(data::vector_view<TYPE>& data);
