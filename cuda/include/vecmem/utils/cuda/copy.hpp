@@ -16,6 +16,10 @@ namespace vecmem::cuda {
 /// Specialisation of @c vecmem::copy for CUDA
 class VECMEM_CUDA_EXPORT copy : public vecmem::copy {
 
+public:
+    /// Virtual destructor
+    virtual ~copy() {}
+
 protected:
     /// Perform a memory copy using CUDA
     virtual void do_copy(std::size_t size, const void* from, void* to,
