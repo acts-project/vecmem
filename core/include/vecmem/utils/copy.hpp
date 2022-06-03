@@ -189,8 +189,14 @@ private:
                      int value);
     /// Helper function performing the copy of a jagged array/vector
     template <typename TYPE1, typename TYPE2>
-    void copy_views(std::size_t size, const data::vector_view<TYPE1>* from,
-                    data::vector_view<TYPE2>* to, type::copy_type cptype);
+    void copy_views_impl1(std::size_t size,
+                          const data::vector_view<TYPE1>* from,
+                          data::vector_view<TYPE2>* to, type::copy_type cptype);
+    /// Helper function performing the copy of a jagged array/vector
+    template <typename TYPE1, typename TYPE2>
+    void copy_views_impl2(std::size_t size,
+                          const data::vector_view<TYPE1>* from,
+                          data::vector_view<TYPE2>* to, type::copy_type cptype);
     /// Helper function for getting the sizes of a jagged vector/buffer
     template <typename TYPE>
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
