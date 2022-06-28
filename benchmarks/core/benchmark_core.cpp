@@ -6,6 +6,7 @@
  */
 
 // VecMem include(s).
+#include <vecmem/memory/binary_page_memory_resource.hpp>
 #include <vecmem/memory/host_memory_resource.hpp>
 
 // Google benchmark include(s).
@@ -22,3 +23,16 @@ void BenchmarkHost(benchmark::State& state) {
 }
 
 BENCHMARK(BenchmarkHost)->RangeMultiplier(2)->Range(1, 2UL << 31);
+
+void BenchmarkBinaryPage(benchmark::State& state) {
+    std::size_t size = state.range(0);
+
+    vecmem::binary_page_memory_resource mr(host_mr);
+
+    for (auto _ : state) {
+        void* p = mr.allocate(size);
+        mr.deallocate(p, size);
+    }
+}
+
+BENCHMARK(BenchmarkBinaryPage)->RangeMultiplier(2)->Range(1, 2UL << 31);
