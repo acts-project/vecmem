@@ -12,6 +12,7 @@
 #include "vecmem/utils/debug.hpp"
 
 // System include(s).
+#include <memory>
 #include <stdexcept>
 
 namespace vecmem {
@@ -38,33 +39,36 @@ contiguous_memory_resource::~contiguous_memory_resource() {
         m_size, m_begin);
 }
 
-void *contiguous_memory_resource::do_allocate(std::size_t size, std::size_t) {
+void *contiguous_memory_resource::do_allocate(std::size_t size,
+                                              std::size_t alignment) {
     /*
-     * Calculate where the end of this current allocation would be.
+     * Compute the remaining space, which needs to be an lvalue for standard
+     * library-related reasons.
      */
-    void *next = static_cast<void *>(static_cast<char *>(m_next) + size);
+    std::size_t rem =
+        m_size - (static_cast<char *>(m_next) - static_cast<char *>(m_begin));
 
     /*
-     * The start of this allocation, save it in a temporary variable as we
-     * will override it later before returning.
+     * Employ std::align to find the next properly aligned address.
      */
-    void *curr = m_next;
+    if (std::align(alignment, size, m_next, rem)) {
+        /*
+         * Store the return pointer, update the stored next pointer, then
+         * return.
+         */
+        void *res = m_next;
+        m_next = static_cast<char *>(m_next) + size;
 
-    /*
-     * If the end of this allocation is past the end of our memory space,
-     * we can't allocate, and should throw an error.
-     */
-    if (next >= (static_cast<char *>(m_begin) + m_size)) {
+        VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", size, res);
+
+        return res;
+    } else {
+        /*
+         * If std::align returns a false-like value, the allocation has failed
+         * and we throw an exception.
+         */
         throw std::bad_alloc();
     }
-
-    /*
-     * Update the start of the next allocation and return.
-     */
-    m_next = next;
-
-    VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", size, curr);
-    return curr;
 }
 
 void contiguous_memory_resource::do_deallocate(void *, std::size_t,
