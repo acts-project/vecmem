@@ -46,6 +46,11 @@ jobs:
                  -DVECMEM_BUILD_BENCHMARKING=TRUE
                  -S ${{ github.workspace }} -B build
                  ${{ matrix.PLATFORM.GENERATOR }}
+    # Print the configuration log for debugging
+    - name: Print CMake Configure Output
+      run: cat build/CMakeFiles/CMakeOutput.log
+    - name: Print CMake Configure Errors
+      run: cat build/CMakeFiles/CMakeError.log
     # Perform the build.
     - name: Build
       run: cmake --build build --config ${{ matrix.BUILD.TYPE }}
@@ -109,6 +114,11 @@ jobs:
       run: |
         source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
         cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE -DVECMEM_BUILD_BENCHMARKING=TRUE ${{ matrix.PLATFORM.OPTIONS }} -S ${GITHUB_WORKSPACE} -B build
+    # Print the configuration log for debugging
+    - name: Print CMake Configure Output
+      run: cat build/CMakeFiles/CMakeOutput.log
+    - name: Print CMake Configure Errors
+      run: cat build/CMakeFiles/CMakeError.log
     # Perform the build.
     - name: Build
       run: |
