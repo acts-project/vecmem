@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <type_traits>
 
 #include "vecmem/memory/memory_resource.hpp"
