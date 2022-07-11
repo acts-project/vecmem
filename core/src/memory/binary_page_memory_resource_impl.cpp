@@ -17,7 +17,7 @@
 #include <optional>
 #include <stdexcept>
 
-#ifdef _MSC_VER
+#ifdef VECMEM_HAVE_LZCNT_U64
 #include <intrin.h>
 #endif
 
@@ -36,11 +36,19 @@ std::size_t round_up(std::size_t size) {
     return 0;
 }
 
-std::size_t __inline clzl(std::size_t i) {
-#ifdef _MSC_VER
+inline std::size_t clzl(std::size_t i) {
+#if defined(VECMEM_HAVE_LZCNT_U64)
     return _lzcnt_u64(i);
-#else
+#elif defined(VECMEM_HAVE_BUILTIN_CLZL)
     return __builtin_clzl(i);
+#else
+    std::size_t b;
+    for (b = 0;
+         !((i << b) & (static_cast<std::size_t>(1UL)
+                       << (std::numeric_limits<std::size_t>::digits - 1UL)));
+         ++b)
+        ;
+    return b;
 #endif
 }
 }  // namespace
