@@ -17,6 +17,7 @@ target_link_libraries(
     vecmem_benchmark_cuda
 
     PRIVATE
+    vecmem::core
     vecmem::cuda
     vecmem_benchmark_common
     benchmark::benchmark
