@@ -199,3 +199,33 @@ if( VECMEM_BUILD_SYCL_LIBRARY )
          VECMEM_HAVE_SYCL_ATOMIC_REF )
    endif()
 endif()
+
+# Test whether we have CLZ builtins.
+check_cxx_source_compiles( "
+   #include <intrin.h>
+   #include <cstddef>
+   int main() {
+      (void)_lzcnt_u64(static_cast<std::size_t>(1UL));
+      return 0;
+   }
+   " VECMEM_HAVE_LZCNT_U64 )
+if( VECMEM_HAVE_LZCNT_U64 )
+   target_compile_definitions(
+      vecmem_core
+      PRIVATE VECMEM_HAVE_LZCNT_U64
+   )
+endif()
+
+check_cxx_source_compiles( "
+   #include <cstddef>
+   int main() {
+      (void)__builtin_clzl(static_cast<std::size_t>(1UL));
+      return 0;
+   }
+   " VECMEM_HAVE_BUILTIN_CLZL )
+if( VECMEM_HAVE_BUILTIN_CLZL )
+   target_compile_definitions(
+      vecmem_core
+      PRIVATE VECMEM_HAVE_BUILTIN_CLZL
+   )
+endif()

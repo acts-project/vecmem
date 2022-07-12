@@ -10,22 +10,38 @@
 
 // Local include(s).
 #include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/memory/unique_ptr.hpp"
 
 // System include(s).
 #include <cstddef>
+#include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace vecmem::details {
 
 /// Implementation of @c vecmem::binary_page_memory_resource
 struct binary_page_memory_resource_impl {
+    /**
+     * @brief The minimum size (log_2) of pages in our buddy allocator.
+     *
+     * The default value of 10 indicates that the size is equal to 2^10=1024
+     * bytes.
+     */
+    static constexpr std::size_t min_page_size = 10;
+
+    /**
+     * @brief The minimum size (log_2) of superpages in our buddy allocator.
+     *
+     * The default value of 20 indicates the the default size is equal to
+     * 2^20=1048576 bytes, but is can potentially be higher.
+     *
+     */
+    static constexpr std::size_t new_page_size = 20;
 
     /// Constructor, on top of another memory resource
     binary_page_memory_resource_impl(memory_resource &upstream);
-
-    /// Destructor
-    ~binary_page_memory_resource_impl();
 
     /**
      * @brief The different possible states a page can be in.
@@ -33,69 +49,163 @@ struct binary_page_memory_resource_impl {
      * We define three different page states. An OCCUPIED state is non-free,
      * and used directly (thus it is not split). A VACANT page is not split
      * and unused. A SPLIT page is split in two, and has two children pages.
+     * Non-extant pages do not exist, because their parent is not split.
      */
-    enum class page_state { OCCUPIED, VACANT, SPLIT };
+    enum class page_state { OCCUPIED, VACANT, SPLIT, NON_EXTANT };
 
     /**
-     * @brief Representation of a single page of memory.
+     * @brief Container for superpages in our buddy allocator.
+     *
+     * Super pages are large, contigous allocations, which are split into
+     * smaller pieces.
      */
-    struct page {
+    struct superpage {
         /**
-         * The current state of this page.
+         * @brief Construct a superpage with a given size and upstream
+         * resource.
          */
-        page_state state;
+        superpage(std::size_t, memory_resource &);
 
         /**
-         * The size of this page. This should always be a power of two.
+         * @brief Return the total number of pages in the superpage.
          */
-        std::size_t size;
+        std::size_t total_pages() const;
 
         /**
-         * The starting address of this page. This is not necessarily host
-         * accessible memory.
+         * @brief Size (log_2) of the entire allocation represented by this
+         * superpage.
          */
-        void *addr;
+        std::size_t m_size;
 
         /**
-         * The left and right children of this page. These should be null
-         * for OCCUPIED or VACANT pages, and non-null for SPLIT pages.
+         * @brief Total number of pages in this superpage.
          */
-        std::unique_ptr<page> left = nullptr, right = nullptr;
+        std::size_t m_num_pages;
 
         /**
-         * @brief Determine whether this page is free.
-         *
-         * Note that this does not only include vacant pages, but also
-         * split pages in which both children are recursively also free.
+         * @brief Array of pages, remembering that this always resides in
+         * host-accessible memory.
          */
-        bool is_free();
+        std::unique_ptr<page_state[]> m_pages;
 
         /**
-         * @brief Free the page.
-         *
-         * The behaviour of this method is dependent on the state of the
-         * page. For VACANT pages, this is a no-op. For OCCUPIED pages, this
-         * simply marks the page as VACANT. For SPLIT pages, the page
-         * remains split, but the children are recursively freed according
-         * to a similar method.
+         * @brief The actual allocation, which is just a byte pointer. This
+         * is potentially host-inaccessible.
          */
-        void free();
+        unique_alloc_ptr<std::byte[]> m_memory;
+    };
+
+    /**
+     * @brief Helper class to refer to pages in superpages.
+     *
+     * We identify individual pages as a tuple of the superpage and their index
+     * in that superpage. This class exists to more ergonomically work with
+     * these tuples, providing a variety of helper methods.
+     */
+    struct page_ref {
+    public:
+        /**
+         * @brief Delete the meaningless default constructor.
+         */
+        page_ref() = delete;
 
         /**
-         * @brief Split a page into two equally sized pages.
-         *
-         * This method is used to split a page, and it populates the left
-         * and right children with new pages.
+         * @brief Default implementation of copy constructor.
+         */
+        page_ref(const page_ref &) = default;
+
+        /**
+         * @brief Default implementation of move constructor.
+         */
+        page_ref(page_ref &&) = default;
+
+        /**
+         * @brief Construct a page from a superpage and an index into that
+         * superpage.
+         */
+        page_ref(superpage &, std::size_t);
+
+        /**
+         * @brief Default implementation of move assignment.
+         */
+        page_ref &operator=(page_ref &&) = default;
+
+        /**
+         * @brief Check whether the page actually exists (i.e. it does not go
+         * out of the superpage's bounds).
+         */
+        bool exists() const;
+
+        /**
+         * @brief Return the size (log_2) of the page referenced.
+         */
+        std::size_t get_size() const;
+
+        /**
+         * @brief Return the state of the page referenced.
+         */
+        page_state get_state() const;
+
+        /**
+         * @brief Return the beginning of the address space represented by this
+         * page.
+         */
+        void *get_addr() const;
+
+        /**
+         * @brief Obtain a reference to this page's left child.
+         */
+        page_ref left_child() const;
+
+        /**
+         * @brief Obtain a reference to this page's left child.
+         */
+        page_ref right_child() const;
+
+        /**
+         * @brief Unsplit the current page, potentially unsplitting its
+         * children, too.
+         */
+        void unsplit();
+
+        /**
+         * @brief Split the current page.
          */
         void split();
 
         /**
-         * @brief Unsplit a page, deletings its two children.
-         *
-         * This method only works if the page is split, and if its children
-         * are vacant.
+         * @brief Change page state from vacant to occupied.
          */
-        void unsplit();
+        void change_state_vacant_to_occupied();
+
+        /**
+         * @brief Change page state from occupied to vacant.
+         */
+        void change_state_occupied_to_vacant();
+
+        /**
+         * @brief Change page state from non-extant to vacant.
+         */
+        void change_state_non_extant_to_vacant();
+
+        /**
+         * @brief Change page state from vacant to non-extant.
+         */
+        void change_state_vacant_to_non_extant();
+
+        /**
+         * @brief Change page state from vacant to split.
+         */
+        void change_state_vacant_to_split();
+
+        /**
+         * @brief Change page state from split to vacant.
+         */
+        void change_state_split_to_vacant();
+
+    private:
+        std::reference_wrapper<superpage> m_superpage;
+        std::size_t m_page;
     };
 
     /// @name Functions implementing the @c vecmem::memory_resource interface
@@ -116,7 +226,7 @@ struct binary_page_memory_resource_impl {
      * the returned page might be (significantly) larger than the request,
      * and should be split before allocating.
      */
-    page *find_free_page(std::size_t);
+    std::optional<page_ref> find_free_page(std::size_t);
 
     /**
      * @brief Perform an upstream allocation.
@@ -128,7 +238,7 @@ struct binary_page_memory_resource_impl {
     void allocate_upstream(std::size_t);
 
     memory_resource &m_upstream;
-    std::vector<std::unique_ptr<page> > m_pages;
+    std::vector<superpage> m_superpages;
 
 };  // struct binary_page_memory_resource_impl
 
