@@ -122,6 +122,12 @@ aligned_multiple_placement_helper(void *p, std::size_t q, P n, Ps... ps) {
          */
         return std::make_tuple<std::add_pointer_t<T>>(std::move(beg));
     }
+
+    #if defined(VECMEM_HAVE_BUILTIN_UNREACHABLE)
+    __builtin_unreachable();
+    #elif defined(VECMEM_HAVE_ASSUME)
+    __assume(0);
+    #endif
 }
 
 template <typename... Ts, typename... Ps>
