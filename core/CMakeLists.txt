@@ -229,3 +229,68 @@ if( VECMEM_HAVE_BUILTIN_CLZL )
       PRIVATE VECMEM_HAVE_BUILTIN_CLZL
    )
 endif()
+
+# Test whether we have unreachability builtins.
+check_cxx_source_compiles( "
+   int main() {
+      return 0;
+      __builtin_unreachable();
+   }
+   " VECMEM_CXX_HAVE_BUILTIN_UNREACHABLE )
+if( VECMEM_CXX_HAVE_BUILTIN_UNREACHABLE )
+   target_compile_definitions(
+      vecmem_core
+      PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:VECMEM_HAVE_BUILTIN_UNREACHABLE>
+   )
+endif()
+
+check_cxx_source_compiles( "
+   int main() {
+      return 0;
+      __assume(0);
+   }
+   " VECMEM_CXX_HAVE_ASSUME )
+if( VECMEM_CXX_HAVE_ASSUME )
+   target_compile_definitions(
+      vecmem_core
+      PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:VECMEM_HAVE_ASSUME>
+   )
+endif()
+
+if ( VECMEM_BUILD_CUDA_LIBRARY )
+   enable_language( CUDA )
+
+   cmake_check_source_compiles(
+      CUDA
+      "
+      int main() {
+         return 0;
+         __builtin_unreachable();
+      }
+      " VECMEM_CUDA_HAVE_BUILTIN_UNREACHABLE )
+   if( VECMEM_CUDA_HAVE_BUILTIN_UNREACHABLE )
+      target_compile_definitions(
+         vecmem_core
+         PRIVATE
+         $<$<COMPILE_LANGUAGE:CUDA>:VECMEM_HAVE_BUILTIN_UNREACHABLE>
+      )
+   endif()
+
+   cmake_check_source_compiles(
+      CUDA
+      "
+      int main() {
+         return 0;
+         __assume(0);
+      }
+      " VECMEM_CUDA_HAVE_ASSUME )
+   if( VECMEM_CUDA_HAVE_ASSUME )
+      target_compile_definitions(
+         vecmem_core
+         PRIVATE
+         $<$<COMPILE_LANGUAGE:CUDA>:VECMEM_HAVE_ASSUME>
+      )
+   endif()
+endif()
