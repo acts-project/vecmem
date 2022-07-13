@@ -53,7 +53,17 @@ vecmem_add_test( cuda
 if( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "11.0" )
    vecmem_add_test( cuda_cxx17
       "test_cuda_memory_resources.cu"
-      LINK_LIBRARIES vecmem::cuda vecmem_testing_cuda_main vecmem_testing_common )
+      "test_cuda_containers.cu" "test_cuda_containers_kernels.cuh"
+      "test_cuda_containers_kernels.cu"
+      "test_cuda_jagged_vector_view.cu"
+      "test_cuda_jagged_vector_view_kernels.cu"
+      "test_cuda_jagged_vector_view_kernels.cuh"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_error_handling.hpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_error_handling.cpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_wrappers.hpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_wrappers.cpp"
+      LINK_LIBRARIES vecmem::core vecmem::cuda vecmem_testing_cuda_main
+                     vecmem_testing_common )
    set_target_properties( vecmem_test_cuda_cxx17 PROPERTIES
       CUDA_STANDARD 17 )
 endif()
