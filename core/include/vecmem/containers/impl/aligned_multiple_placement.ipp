@@ -122,6 +122,13 @@ aligned_multiple_placement_helper(void *p, std::size_t q, P n, Ps... ps) {
          */
         return std::make_tuple<std::add_pointer_t<T>>(std::move(beg));
     }
+#ifdef __GNUC__
+    // Certain combinations of CUDA + GCC generate a warning here, thinking
+    // that the code may reach this point in the function. So for just GCC,
+    // let's add some help here. Telling it that this part of the function is
+    // not (meant to be) reachable.
+    __builtin_unreachable();
+#endif  // __GNUC__
 }
 
 template <typename... Ts, typename... Ps>
