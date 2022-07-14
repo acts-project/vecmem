@@ -131,12 +131,6 @@ struct binary_page_memory_resource_impl {
         page_ref &operator=(page_ref &&) = default;
 
         /**
-         * @brief Check whether the page actually exists (i.e. it does not go
-         * out of the superpage's bounds).
-         */
-        bool exists() const;
-
-        /**
          * @brief Return the size (log_2) of the page referenced.
          */
         std::size_t get_size() const;
@@ -202,6 +196,11 @@ struct binary_page_memory_resource_impl {
          * @brief Change page state from split to vacant.
          */
         void change_state_split_to_vacant();
+
+        /**
+         * @brief Get the page index in the superpage.
+         */
+        std::size_t get_index();
 
     private:
         std::reference_wrapper<superpage> m_superpage;
