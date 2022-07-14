@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,19 +15,22 @@
 
 namespace vecmem::sycl {
 
-void* device_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
+void* device_memory_resource::do_allocate(std::size_t nbytes,
+                                          std::size_t alignment) {
 
     // Allocate the memory.
-    void* result = cl::sycl::malloc_device(nbytes, details::get_queue(m_queue));
+    void* result = cl::sycl::aligned_alloc_device(alignment, nbytes,
+                                                  details::get_queue(m_queue));
 
     // Let the user know what's happening.
-    VECMEM_DEBUG_MSG(5, "Allocated %ld bytes of device memory on \"%s\" at %p",
-                     nbytes,
-                     details::get_queue(m_queue)
-                         .get_device()
-                         .get_info<cl::sycl::info::device::name>()
-                         .c_str(),
-                     result);
+    VECMEM_DEBUG_MSG(
+        5, "Allocated %ld bytes of (%ld aligned) device memory on \"%s\" at %p",
+        nbytes, alignment,
+        details::get_queue(m_queue)
+            .get_device()
+            .get_info<cl::sycl::info::device::name>()
+            .c_str(),
+        result);
 
     // Return the allocated block's pointer.
     return result;
