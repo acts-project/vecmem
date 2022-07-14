@@ -330,15 +330,11 @@ binary_page_memory_resource_impl::page_ref::get_state() const {
 }
 
 void *binary_page_memory_resource_impl::page_ref::get_addr() const {
-    page_ref lmn = {m_superpage, 0};
-
-    while (lmn.left_child().m_page < m_page) {
-        lmn = lmn.left_child();
-    }
+    std::size_t d = m_superpage.get().m_size - get_size();
 
     return static_cast<void *>(
         &m_superpage.get()
-             .m_memory[(m_page - lmn.m_page) *
+             .m_memory[(m_page - ((static_cast<std::size_t>(1UL) << d) - 1)) *
                        (static_cast<std::size_t>(1UL) << get_size())]);
 }
 
