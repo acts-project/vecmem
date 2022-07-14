@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,14 +15,17 @@
 
 namespace vecmem::sycl {
 
-void* host_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
+void* host_memory_resource::do_allocate(std::size_t nbytes,
+                                        std::size_t alignment) {
 
     // Allocate the memory.
-    void* result = cl::sycl::malloc_host(nbytes, details::get_queue(m_queue));
+    void* result = cl::sycl::aligned_alloc_host(alignment, nbytes,
+                                                details::get_queue(m_queue));
 
     // Let the user know what's happening.
-    VECMEM_DEBUG_MSG(5, "Allocated %ld bytes of host memory at %p", nbytes,
-                     result);
+    VECMEM_DEBUG_MSG(5,
+                     "Allocated %ld bytes of (%ld aligned) host memory at %p",
+                     nbytes, alignment, result);
 
     // Return the allocated block's pointer.
     return result;
