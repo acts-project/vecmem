@@ -277,9 +277,8 @@ std::size_t binary_page_memory_resource_impl::page_ref::get_size() const {
     /*
      * Calculate the size of allocation represented by this page.
      */
-    return (min_page_size -
-            ((8 * sizeof(std::size_t) - 1) - clzl(m_page + 1))) +
-           min_page_size;
+    return (m_superpage.get().m_size -
+            ((8 * sizeof(std::size_t) - 1) - clzl(m_page + 1)));
 }
 
 void binary_page_memory_resource_impl::page_ref::
