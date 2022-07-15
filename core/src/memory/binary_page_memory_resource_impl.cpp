@@ -13,6 +13,7 @@
 
 // System include(s).
 #include <algorithm>
+#include <cassert>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -61,14 +62,16 @@ binary_page_memory_resource_impl::binary_page_memory_resource_impl(
 
 void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
                                                     std::size_t) {
-    VECMEM_DEBUG_MSG(5, "Request received for %ld bytes", size);
     /*
      * First, we round our allocation request up to a power of two, since
      * that is what the sizes of all our pages are.
      */
     std::size_t goal = std::max(min_page_size, round_up(size));
 
-    VECMEM_DEBUG_MSG(5, "Will be allocating 2^%ld bytes instead", goal);
+    VECMEM_DEBUG_MSG(5,
+                     "Request received to allocate %ld bytes, looking for page "
+                     "of size 2^%ld bytes",
+                     size, goal);
 
     /*
      * Attempt to find a free page that can fit our allocation goal.
@@ -81,6 +84,8 @@ void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
      * allocator, and then look for that new page.
      */
     if (!cand) {
+        VECMEM_DEBUG_MSG(
+            5, "No suitable page found, requesting upstream allocation");
         allocate_upstream(goal);
 
         cand = find_free_page(goal);
@@ -91,6 +96,9 @@ void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
      * cannot recover.
      */
     if (!cand) {
+        VECMEM_DEBUG_MSG(5,
+                         "No suitable page found after upstream allocation, "
+                         "unrecoverable error");
         throw std::bad_alloc();
     }
 
@@ -99,6 +107,7 @@ void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
      * need to unsplit it.
      */
     if (cand->get_state() == page_state::SPLIT) {
+        VECMEM_DEBUG_MSG(5, "Candidate page is split and must be unsplit");
         cand->unsplit();
     }
 
@@ -106,6 +115,8 @@ void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
      * Keep splitting the page until we have reached our target size.
      */
     while (cand->get_size() > goal) {
+        VECMEM_DEBUG_MSG(5, "Candidate page is of size 2^%lu and must be split",
+                         cand->get_size());
         cand->split();
         cand = cand->left_child();
     }
@@ -121,7 +132,10 @@ void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
      */
     void *res = cand->get_addr();
 
-    VECMEM_DEBUG_MSG(2, "Allocated %ld (%ld) bytes at %p", size, goal, res);
+    VECMEM_DEBUG_MSG(2,
+                     "Allocated %ld bytes in a page of size 2^%lu bytes with "
+                     "index %lu and address %p",
+                     size, goal, cand->get_index(), res);
 
     return res;
 }
@@ -277,68 +291,67 @@ std::size_t binary_page_memory_resource_impl::page_ref::get_size() const {
     /*
      * Calculate the size of allocation represented by this page.
      */
-    return (min_page_size -
-            ((8 * sizeof(std::size_t) - 1) - clzl(m_page + 1))) +
-           min_page_size;
+    return (m_superpage.get().m_size -
+            ((8 * sizeof(std::size_t) - 1) - clzl(m_page + 1)));
 }
 
 void binary_page_memory_resource_impl::page_ref::
     change_state_vacant_to_occupied() {
+    assert(m_superpage.get().m_pages[m_page] == page_state::VACANT);
     m_superpage.get().m_pages[m_page] = page_state::OCCUPIED;
 }
 
 void binary_page_memory_resource_impl::page_ref::
     change_state_occupied_to_vacant() {
+    assert(m_superpage.get().m_pages[m_page] == page_state::OCCUPIED);
     m_superpage.get().m_pages[m_page] = page_state::VACANT;
 }
 
 void binary_page_memory_resource_impl::page_ref::
     change_state_non_extant_to_vacant() {
+    assert(m_superpage.get().m_pages[m_page] == page_state::NON_EXTANT);
     m_superpage.get().m_pages[m_page] = page_state::VACANT;
 }
 
 void binary_page_memory_resource_impl::page_ref::
     change_state_vacant_to_non_extant() {
+    assert(m_superpage.get().m_pages[m_page] == page_state::VACANT);
     m_superpage.get().m_pages[m_page] = page_state::NON_EXTANT;
 }
 
 void binary_page_memory_resource_impl::page_ref::
     change_state_vacant_to_split() {
+    assert(m_superpage.get().m_pages[m_page] == page_state::VACANT);
     m_superpage.get().m_pages[m_page] = page_state::SPLIT;
 }
 
 void binary_page_memory_resource_impl::page_ref::
     change_state_split_to_vacant() {
+    assert(m_superpage.get().m_pages[m_page] == page_state::SPLIT);
     m_superpage.get().m_pages[m_page] = page_state::VACANT;
+}
+
+std::size_t binary_page_memory_resource_impl::page_ref::get_index() {
+    return m_page;
 }
 
 binary_page_memory_resource_impl::page_ref::page_ref(superpage &s,
                                                      std::size_t p)
-    : m_superpage(s), m_page(p) {}
-
-bool binary_page_memory_resource_impl::page_ref::exists() const {
-    return m_page < m_superpage.get().total_pages();
+    : m_superpage(s), m_page(p) {
+    assert(m_page < m_superpage.get().total_pages());
 }
 
 binary_page_memory_resource_impl::page_state
 binary_page_memory_resource_impl::page_ref::get_state() const {
-    if (exists()) {
-        return m_superpage.get().m_pages[m_page];
-    } else {
-        return page_state::NON_EXTANT;
-    }
+    return m_superpage.get().m_pages[m_page];
 }
 
 void *binary_page_memory_resource_impl::page_ref::get_addr() const {
-    page_ref lmn = {m_superpage, 0};
-
-    while (lmn.left_child().m_page < m_page) {
-        lmn = lmn.left_child();
-    }
+    std::size_t d = m_superpage.get().m_size - get_size();
 
     return static_cast<void *>(
         &m_superpage.get()
-             .m_memory[(m_page - lmn.m_page) *
+             .m_memory[(m_page - ((static_cast<std::size_t>(1UL) << d) - 1)) *
                        (static_cast<std::size_t>(1UL) << get_size())]);
 }
 
