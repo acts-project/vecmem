@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -25,6 +25,8 @@ endif()
 add_library( vecmem_testing_common STATIC
    "common/memory_resource_name_gen.hpp"
    "common/memory_resource_name_gen.cpp"
+   "common/memory_resource_test_alignment.hpp"
+   "common/memory_resource_test_alignment.ipp"
    "common/memory_resource_test_basic.hpp"
    "common/memory_resource_test_basic.ipp"
    "common/memory_resource_test_host_accessible.hpp"
