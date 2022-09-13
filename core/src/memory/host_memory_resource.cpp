@@ -14,6 +14,7 @@
 // System include(s).
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdlib>
 #include <memory>
 
@@ -30,13 +31,21 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
     const std::size_t align = std::max(alignment, alignof(std::max_align_t));
     const std::size_t size = bytes + (align - (bytes % align));
     void *ptr = std::aligned_alloc(align, size);
+    // If the alignment failed for some reason, throw an exception.
+    if (ptr == nullptr) {
+        throw std::bad_alloc();
+    }
 #else
-    // Ask for enough memory that will allow us to be able to align the
+    // Ask for enough memory that will allow us to be able to align
     // the returned pointer for sure, **and** be able to store the
     // pointer to the beginning of the unaligned memory blob before
     // the aligned pointer.
     std::size_t alloc_bytes = bytes + alignment + sizeof(void *) - 1;
     void *unaligned_ptr = std::malloc(alloc_bytes);
+    // If the alignment failed for some reason, throw an exception.
+    if (unaligned_ptr == nullptr) {
+        throw std::bad_alloc();
+    }
     // Make a pointer that has space "before it" for the
     // pointer to the beginning of the unaligned space.
     void *ptr = static_cast<char *>(unaligned_ptr) + sizeof(void *);
@@ -44,11 +53,12 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
     // allocated.
     std::size_t align_bytes = alloc_bytes - sizeof(void *);
     // Perform the alignment.
-    if (std::align(alignment, bytes, ptr, align_bytes) == nullptr) {
-        // The alignment was meant to succeed. If it didn't, we messed
-        // something up in the code. :-/
-        return nullptr;
-    }
+    void *aligned_ptr = std::align(alignment, bytes, ptr, align_bytes);
+    // The alignment was meant to succeed. If it didn't, we messed
+    // something up in the code. So let's only check for that in Debug
+    // builds.
+    (void)aligned_ptr;
+    assert(aligned_ptr != nullptr);
     // Store the unaligned pointer's value just before the aligned
     // pointer for later use.
     *(reinterpret_cast<void **>(static_cast<char *>(ptr) - sizeof(void *))) =
