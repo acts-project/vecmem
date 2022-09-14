@@ -22,6 +22,11 @@ void* shared_memory_resource::do_allocate(std::size_t nbytes,
     void* result = cl::sycl::aligned_alloc_shared(alignment, nbytes,
                                                   details::get_queue(m_queue));
 
+    // Check that the allocation succeeded.
+    if (result == nullptr) {
+        throw std::bad_alloc();
+    }
+
     // Let the user know what's happening.
     VECMEM_DEBUG_MSG(
         5, "Allocated %ld bytes of (%ld aligned) shared memory on \"%s\" at %p",
