@@ -86,6 +86,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/details/unique_alloc_deleter.hpp"
    "include/vecmem/memory/details/unique_obj_deleter.hpp"
    "include/vecmem/memory/unique_ptr.hpp"
+   "include/vecmem/memory/details/is_aligned.hpp"
+   "src/memory/details/is_aligned.cpp"
    # Utilities.
    "include/vecmem/utils/copy.hpp"
    "include/vecmem/utils/impl/copy.ipp"
@@ -228,4 +230,14 @@ if( VECMEM_HAVE_BUILTIN_CLZL )
       vecmem_core
       PRIVATE VECMEM_HAVE_BUILTIN_CLZL
    )
+endif()
+
+# Check if std::aligned_alloc is available. With MSVC (at the time of writing)
+# it is not.
+include( CheckCXXSymbolExists )
+check_cxx_symbol_exists( "std::aligned_alloc" "cstdlib"
+   VECMEM_HAVE_STD_ALIGNED_ALLOC )
+if( VECMEM_HAVE_STD_ALIGNED_ALLOC )
+   target_compile_definitions( vecmem_core
+      PRIVATE VECMEM_HAVE_STD_ALIGNED_ALLOC )
 endif()
