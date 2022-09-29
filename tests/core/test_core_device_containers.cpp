@@ -107,10 +107,10 @@ TEST_F(core_device_container_test, jagged_vector_buffer) {
                                                          &cresource);
 
     // Test the internal state of the buffer.
-    EXPECT_EQ(device_data1.m_ptr, device_data1.host_ptr());
-    EXPECT_EQ(device_data1.m_size, host_vector.size());
-    EXPECT_NE(device_data2.m_ptr, device_data2.host_ptr());
-    EXPECT_EQ(device_data2.m_size, host_vector.size());
+    EXPECT_EQ(device_data1.ptr(), device_data1.host_ptr());
+    EXPECT_EQ(device_data1.size(), host_vector.size());
+    EXPECT_NE(device_data2.ptr(), device_data2.host_ptr());
+    EXPECT_EQ(device_data2.size(), host_vector.size());
     for (std::size_t i = 0; i < host_vector.size(); ++i) {
         EXPECT_EQ(device_data1.host_ptr()[i].size(), host_vector[i].size());
         EXPECT_EQ(device_data2.host_ptr()[i].size(), host_vector[i].size());

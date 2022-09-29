@@ -150,11 +150,11 @@ __global__ void filterTransformKernel(
 
     // Find the current indices.
     const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= input.m_size) {
+    if (i >= input.size()) {
         return;
     }
     const std::size_t j = blockIdx.y * blockDim.y + threadIdx.y;
-    if (j >= input.m_ptr[i].size()) {
+    if (j >= input.ptr()[i].size()) {
         return;
     }
 
@@ -175,7 +175,7 @@ void filterTransform(vecmem::data::jagged_vector_view<const int> input,
                      vecmem::data::jagged_vector_view<int> output) {
 
     // Launch the kernel.
-    dim3 dimensions(static_cast<unsigned int>(input.m_size), max_vec_size);
+    dim3 dimensions(static_cast<unsigned int>(input.size()), max_vec_size);
     filterTransformKernel<<<1, dimensions>>>(input, output);
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
@@ -188,7 +188,7 @@ __global__ void fillTransformKernel(
 
     // Find the current index.
     const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= vec_data.m_size) {
+    if (i >= vec_data.size()) {
         return;
     }
 
@@ -204,7 +204,7 @@ __global__ void fillTransformKernel(
 void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
 
     // Launch the kernel
-    fillTransformKernel<<<static_cast<unsigned int>(vec.m_size), 1>>>(vec);
+    fillTransformKernel<<<static_cast<unsigned int>(vec.size()), 1>>>(vec);
 
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());

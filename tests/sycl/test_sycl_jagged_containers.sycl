@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -71,7 +71,7 @@ public:
         : m_constants(constants), m_input(input), m_output(output) {
 
         // A little sanity check.
-        assert(m_input.m_size == m_output.m_size);
+        assert(m_input.size() == m_output.size());
     }
 
     /// Operator executing the functor in a single thread
@@ -79,7 +79,7 @@ public:
 
         // Check if anything needs to be done.
         const std::size_t i = id[0];
-        if (i >= m_input.m_size) {
+        if (i >= m_input.size()) {
             return;
         }
 
@@ -121,7 +121,7 @@ public:
 
         // Check if anything needs to be done.
         const std::size_t i = id[0];
-        if (i >= m_data.m_size) {
+        if (i >= m_data.size()) {
             return;
         }
 
@@ -161,7 +161,7 @@ public:
 
         // Check if anything needs to be done.
         const std::size_t i = id[0];
-        if (i >= m_view.m_size) {
+        if (i >= m_view.size()) {
             return;
         }
 
@@ -195,7 +195,7 @@ TEST_F(sycl_jagged_containers_test, mutate_in_kernel) {
             LinearTransformKernel kernel(const_data, vec_data, vec_data);
             // Execute this kernel.
             h.parallel_for<LinearTransformKernel>(
-                cl::sycl::range<1>(vec_data.m_size), kernel);
+                cl::sycl::range<1>(vec_data.size()), kernel);
         })
         .wait_and_throw();
     // Run the summation.
@@ -204,7 +204,7 @@ TEST_F(sycl_jagged_containers_test, mutate_in_kernel) {
             // Create the kernel functor.
             SummationKernel kernel(vec_data);
             // Execute this kernel.
-            h.parallel_for<SummationKernel>(cl::sycl::range<1>(vec_data.m_size),
+            h.parallel_for<SummationKernel>(cl::sycl::range<1>(vec_data.size()),
                                             kernel);
         })
         .wait_and_throw();
@@ -260,7 +260,7 @@ TEST_F(sycl_jagged_containers_test, set_in_kernel) {
                                          output_data_device);
             // Execute this kernel.
             h.parallel_for<LinearTransformKernel>(
-                cl::sycl::range<1>(input_data.m_size), kernel);
+                cl::sycl::range<1>(input_data.size()), kernel);
         })
         .wait_and_throw();
     // Run the summation.
@@ -270,7 +270,7 @@ TEST_F(sycl_jagged_containers_test, set_in_kernel) {
             SummationKernel kernel(output_data_device);
             // Execute this kernel.
             h.parallel_for<SummationKernel>(
-                cl::sycl::range<1>(output_data_device.m_size), kernel);
+                cl::sycl::range<1>(output_data_device.size()), kernel);
         })
         .wait_and_throw();
 
@@ -334,7 +334,7 @@ TEST_F(sycl_jagged_containers_test, set_in_contiguous_kernel) {
                                          output_data_device);
             // Execute this kernel.
             h.parallel_for<LinearTransformKernel>(
-                cl::sycl::range<1>(input_data.m_size), kernel);
+                cl::sycl::range<1>(input_data.size()), kernel);
         })
         .wait_and_throw();
     // Run the summation.
@@ -344,7 +344,7 @@ TEST_F(sycl_jagged_containers_test, set_in_contiguous_kernel) {
             SummationKernel kernel(output_data_device);
             // Execute this kernel.
             h.parallel_for<SummationKernel>(
-                cl::sycl::range<1>(output_data_device.m_size), kernel);
+                cl::sycl::range<1>(output_data_device.size()), kernel);
         })
         .wait_and_throw();
 
@@ -391,15 +391,15 @@ TEST_F(sycl_jagged_containers_test, filter) {
     m_queue
         .submit([&input_data, &output_data_device](cl::sycl::handler& h) {
             h.parallel_for<class FilterKernel>(
-                cl::sycl::range<2>(input_data.m_size, 5),
+                cl::sycl::range<2>(input_data.size(), 5),
                 [input = vecmem::get_data(input_data),
                  output = vecmem::get_data(output_data_device)](
                     cl::sycl::item<2> id) {
                     // Skip invalid indices.
-                    if (id[0] >= input.m_size) {
+                    if (id[0] >= input.size()) {
                         return;
                     }
-                    if (id[1] >= input.m_ptr[id[0]].size()) {
+                    if (id[1] >= input.ptr()[id[0]].size()) {
                         return;
                     }
 
@@ -460,7 +460,7 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
             // Create the kernel functor.
             FillKernel kernel(managed_data);
             // Execute this kernel.
-            h.parallel_for<FillKernel>(cl::sycl::range<1>(managed_data.m_size),
+            h.parallel_for<FillKernel>(cl::sycl::range<1>(managed_data.size()),
                                        kernel);
         })
         .wait_and_throw();
@@ -489,7 +489,7 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
             // Create the kernel functor.
             FillKernel kernel(device_data);
             // Execute this kernel.
-            h.parallel_for<FillKernel>(cl::sycl::range<1>(device_data.m_size),
+            h.parallel_for<FillKernel>(cl::sycl::range<1>(device_data.size()),
                                        kernel);
         })
         .wait_and_throw();
