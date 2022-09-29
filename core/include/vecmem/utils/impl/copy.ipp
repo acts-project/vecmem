@@ -20,7 +20,7 @@
 namespace vecmem {
 
 template <typename TYPE>
-void copy::setup(data::vector_view<TYPE>& data) {
+void copy::setup(data::vector_view<TYPE> data) {
 
     // Check if anything needs to be done.
     if ((data.size_ptr() == nullptr) || (data.capacity() == 0)) {
@@ -37,7 +37,7 @@ void copy::setup(data::vector_view<TYPE>& data) {
 }
 
 template <typename TYPE>
-void copy::memset(data::vector_view<TYPE>& data, int value) {
+void copy::memset(data::vector_view<TYPE> data, int value) {
 
     // Check if anything needs to be done.
     if (data.capacity() == 0) {
@@ -71,7 +71,7 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 
 template <typename TYPE1, typename TYPE2>
 void copy::operator()(const data::vector_view<TYPE1>& from_view,
-                      data::vector_view<TYPE2>& to_view,
+                      data::vector_view<TYPE2> to_view,
                       type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
@@ -138,10 +138,10 @@ typename data::vector_view<TYPE>::size_type copy::get_size(
 }
 
 template <typename TYPE>
-void copy::setup(data::jagged_vector_buffer<TYPE>& data) {
+void copy::setup(data::jagged_vector_view<TYPE> data) {
 
     // Check if anything needs to be done.
-    if (data.m_size == 0) {
+    if (data.size() == 0) {
         return;
     }
 
@@ -149,37 +149,34 @@ void copy::setup(data::jagged_vector_buffer<TYPE>& data) {
     // But only if the jagged vector buffer is resizable.
     if (data.host_ptr()[0].size_ptr() != nullptr) {
         do_memset(
-            sizeof(typename data::vector_buffer<TYPE>::size_type) * data.m_size,
+            sizeof(typename data::vector_buffer<TYPE>::size_type) * data.size(),
             data.host_ptr()[0].size_ptr(), 0);
     }
 
     // Check if anything else needs to be done.
-    if (data.m_ptr == data.host_ptr()) {
+    if (data.ptr() == data.host_ptr()) {
         return;
     }
 
     // Copy the description of the inner vectors of the buffer.
     do_copy(
-        data.m_size *
+        data.size() *
             sizeof(
                 typename vecmem::data::jagged_vector_buffer<TYPE>::value_type),
-        data.host_ptr(), data.m_ptr, type::host_to_device);
+        data.host_ptr(), data.ptr(), type::host_to_device);
     VECMEM_DEBUG_MSG(2,
                      "Prepared a jagged device vector buffer of size %lu "
                      "for use on a device",
-                     data.m_size);
+                     data.size());
 }
 
 template <typename TYPE>
-void copy::memset(data::jagged_vector_view<TYPE>& data, int value) {
+void copy::memset(data::jagged_vector_view<TYPE> data, int value) {
 
-    memset_impl(data.m_size, data.m_ptr, value);
-}
-
-template <typename TYPE>
-void copy::memset(data::jagged_vector_buffer<TYPE>& data, int value) {
-
-    memset_impl(data.m_size, data.host_ptr(), value);
+    // Use a very naive/expensive implementation.
+    for (std::size_t i = 0; i < data.size(); ++i) {
+        this->memset(data.host_ptr()[i], value);
+    }
 }
 
 template <typename TYPE>
@@ -190,33 +187,13 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     // Create the result buffer object.
     data::jagged_vector_buffer<std::remove_cv_t<TYPE>> result(
         data, resource, host_access_resource);
-    assert(result.m_size == data.m_size);
+    assert(result.size() == data.size());
 
     // Copy the description of the "inner vectors" if necessary.
     setup(result);
 
     // Copy the payload of the inner vectors.
-    copy_views_impl1(data.m_size, data.m_ptr, result.host_ptr(), cptype);
-
-    // Return the newly created object.
-    return result;
-}
-
-template <typename TYPE>
-data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
-    const data::jagged_vector_buffer<TYPE>& data, memory_resource& resource,
-    memory_resource* host_access_resource, type::copy_type cptype) {
-
-    // Create the result buffer object.
-    data::jagged_vector_buffer<std::remove_cv_t<TYPE>> result(
-        data, resource, host_access_resource);
-    assert(result.m_size == data.m_size);
-
-    // Copy the description of the "inner vectors" if necessary.
-    setup(result);
-
-    // Copy the payload of the inner vectors.
-    copy_views_impl1(data.m_size, data.host_ptr(), result.host_ptr(), cptype);
+    this->operator()(data, result, cptype);
 
     // Return the newly created object.
     return result;
@@ -224,7 +201,7 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 
 template <typename TYPE1, typename TYPE2>
 void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
-                      data::jagged_vector_view<TYPE2>& to_view,
+                      data::jagged_vector_view<TYPE2> to_view,
                       type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
@@ -234,159 +211,13 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
                   "Can only use compatible types in the copy");
 
     // A sanity check.
-    assert(from_view.m_size == to_view.m_size);
-
-    // Copy the payload of the inner vectors.
-    copy_views_impl1(from_view.m_size, from_view.m_ptr, to_view.m_ptr, cptype);
-}
-
-template <typename TYPE1, typename TYPE2>
-void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
-                      data::jagged_vector_buffer<TYPE2>& to_buffer,
-                      type::copy_type cptype) {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
-
-    // A sanity check.
-    assert(from_view.m_size == to_buffer.m_size);
-
-    // Copy the payload of the inner vectors.
-    copy_views_impl1(from_view.m_size, from_view.m_ptr, to_buffer.host_ptr(),
-                     cptype);
-}
-
-template <typename TYPE1, typename TYPE2>
-void copy::operator()(const data::jagged_vector_buffer<TYPE1>& from_buffer,
-                      data::jagged_vector_view<TYPE2>& to_view,
-                      type::copy_type cptype) {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
-
-    // A sanity check.
-    assert(from_buffer.m_size == to_view.m_size);
-
-    // Copy the payload of the inner vectors.
-    copy_views_impl1(from_buffer.m_size, from_buffer.host_ptr(), to_view.m_ptr,
-                     cptype);
-}
-
-template <typename TYPE1, typename TYPE2>
-void copy::operator()(const data::jagged_vector_buffer<TYPE1>& from_buffer,
-                      data::jagged_vector_buffer<TYPE2>& to_buffer,
-                      type::copy_type cptype) {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
-
-    // A sanity check.
-    assert(from_buffer.m_size == to_buffer.m_size);
-
-    // Copy the payload of the inner vectors.
-    copy_views_impl1(from_buffer.m_size, from_buffer.host_ptr(),
-                     to_buffer.host_ptr(), cptype);
-}
-
-template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
-void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
-                      std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to_vec,
-                      type::copy_type cptype) {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
-
-    // Resize the output object to the correct size.
-    to_vec.resize(from_view.m_size);
-    const auto sizes = get_sizes(from_view);
-    for (typename data::jagged_vector_view<TYPE1>::size_type i = 0;
-         i < from_view.m_size; ++i) {
-        to_vec[i].resize(sizes[i]);
-    }
-
-    // Perform the memory copy.
-    auto helper = vecmem::get_data(to_vec);
-    this->operator()(from_view, helper, cptype);
-}
-
-template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
-void copy::operator()(const data::jagged_vector_buffer<TYPE1>& from_buffer,
-                      std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to_vec,
-                      type::copy_type cptype) {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
-
-    // Resize the output object to the correct size.
-    to_vec.resize(from_buffer.m_size);
-    const auto sizes = get_sizes(from_buffer);
-    for (typename data::jagged_vector_view<TYPE1>::size_type i = 0;
-         i < from_buffer.m_size; ++i) {
-        to_vec[i].resize(sizes[i]);
-    }
-
-    // Perform the memory copy.
-    auto helper = vecmem::get_data(to_vec);
-    this->operator()(from_buffer, helper, cptype);
-}
-
-template <typename TYPE>
-std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
-    const data::jagged_vector_view<TYPE>& data) {
-
-    // Perform the operation using the private function.
-    return get_sizes(data.m_ptr, data.m_size);
-}
-
-template <typename TYPE>
-std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
-    const data::jagged_vector_buffer<TYPE>& data) {
-
-    // Perform the operation using the private function.
-    return get_sizes(data.host_ptr(), data.m_size);
-}
-
-template <typename TYPE>
-void copy::memset_impl(std::size_t size, data::vector_view<TYPE>* data,
-                       int value) {
-
-    // Use a very naive/expensive implementation.
-    for (std::size_t i = 0; i < size; ++i) {
-        memset(data[i], value);
-    }
-}
-
-template <typename TYPE1, typename TYPE2>
-void copy::copy_views_impl1(std::size_t size,
-                            const data::vector_view<TYPE1>* from_view,
-                            data::vector_view<TYPE2>* to_view,
-                            type::copy_type cptype) {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
+    assert(from_view.size() == to_view.size());
 
     // Check if anything needs to be done.
-    if (size == 0) {
+    if (from_view.size() == 0) {
         return;
     }
+    const std::size_t size = from_view.size();
 
     // Helper lambda for figuring out if a set of views is contiguous in
     // memory.
@@ -408,48 +239,88 @@ void copy::copy_views_impl1(std::size_t size,
 
     // Deal with different types of memory configurations.
     if ((cptype == type::host_to_device) &&
-        (is_contiguous(from_view) == false) &&
-        (is_contiguous(to_view) == true)) {
+        (is_contiguous(from_view.host_ptr()) == false) &&
+        (is_contiguous(to_view.host_ptr()) == true)) {
         // Create a contiguous buffer in host memory with the appropriate
         // capacities.
         std::vector<std::size_t> sizes(size);
-        std::transform(from_view, from_view + size, sizes.begin(),
+        std::transform(from_view.host_ptr(), from_view.host_ptr() + size,
+                       sizes.begin(),
                        [](const auto& view) { return view.capacity(); });
         data::jagged_vector_buffer<TYPE2> buffer(sizes, host_mr);
         // Collect the data into this buffer with host-to-host memory copies.
-        host_copy.copy_views_impl2(size, from_view, buffer.host_ptr(), cptype);
+        host_copy.copy_views_impl(size, from_view.host_ptr(), buffer.host_ptr(),
+                                  cptype);
         // Now perform the host-to-device copy in one go.
-        copy_views_impl2(size, buffer.host_ptr(), to_view, cptype);
+        copy_views_impl(size, buffer.host_ptr(), to_view.host_ptr(), cptype);
     } else if ((cptype == type::device_to_host) &&
-               (is_contiguous(from_view) == true) &&
-               (is_contiguous(to_view) == false)) {
+               (is_contiguous(from_view.host_ptr()) == true) &&
+               (is_contiguous(to_view.host_ptr()) == false)) {
         // Create a contiguous buffer in host memory with the appropriate
         // capacities.
         std::vector<std::size_t> sizes(size);
-        std::transform(from_view, from_view + size, sizes.begin(),
+        std::transform(from_view.host_ptr(), from_view.host_ptr() + size,
+                       sizes.begin(),
                        [](const auto& view) { return view.capacity(); });
         data::jagged_vector_buffer<TYPE2> buffer(sizes, host_mr);
         // Perform the device-to-host copy into this contiguous buffer.
-        copy_views_impl2(size, from_view, buffer.host_ptr(), cptype);
+        copy_views_impl(size, from_view.host_ptr(), buffer.host_ptr(), cptype);
         // Now fill the host views with host-to-host memory copies.
-        host_copy.copy_views_impl2(size, buffer.host_ptr(), to_view, cptype);
+        host_copy.copy_views_impl(size, buffer.host_ptr(), to_view.host_ptr(),
+                                  cptype);
     } else {
         // Do the copy as best as we can with the existing views.
-        copy_views_impl2(size, from_view, to_view, cptype);
+        copy_views_impl(size, from_view.host_ptr(), to_view.host_ptr(), cptype);
     }
 }
 
-template <typename TYPE1, typename TYPE2>
-void copy::copy_views_impl2(std::size_t size,
-                            const data::vector_view<TYPE1>* from_view,
-                            data::vector_view<TYPE2>* to_view,
-                            type::copy_type cptype) {
+template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
+void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
+                      std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to_vec,
+                      type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
     static_assert(std::is_same<TYPE1, TYPE2>::value ||
                       details::is_same_nc<TYPE1, TYPE2>::value,
                   "Can only use compatible types in the copy");
+
+    // Resize the output object to the correct size.
+    to_vec.resize(from_view.size());
+    const auto sizes = get_sizes(from_view);
+    for (typename data::jagged_vector_view<TYPE1>::size_type i = 0;
+         i < from_view.size(); ++i) {
+        to_vec[i].resize(sizes[i]);
+    }
+
+    // Perform the memory copy.
+    auto helper = vecmem::get_data(to_vec);
+    this->operator()(from_view, helper, cptype);
+}
+
+template <typename TYPE>
+std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
+    const data::jagged_vector_view<TYPE>& data) {
+
+    // Perform the operation using the private function.
+    return get_sizes_impl(data.host_ptr(), data.size());
+}
+
+template <typename TYPE1, typename TYPE2>
+void copy::copy_views_impl(std::size_t size,
+                           const data::vector_view<TYPE1>* from_view,
+                           data::vector_view<TYPE2>* to_view,
+                           type::copy_type cptype) {
+
+    // The input and output types are allowed to be different, but only by
+    // const-ness.
+    static_assert(std::is_same<TYPE1, TYPE2>::value ||
+                      details::is_same_nc<TYPE1, TYPE2>::value,
+                  "Can only use compatible types in the copy");
+
+    // Some security checks.
+    assert(from_view != nullptr);
+    assert(to_view != nullptr);
 
     // Helper variables used in the copy.
     const std::remove_cv_t<TYPE1>* from_ptr = nullptr;
@@ -458,8 +329,8 @@ void copy::copy_views_impl2(std::size_t size,
     [[maybe_unused]] std::size_t copy_ops = 0;
 
     // Get the sizes of the two views.
-    const auto from_sizes = get_sizes(from_view, size);
-    const auto to_sizes = get_sizes(to_view, size);
+    const auto from_sizes = get_sizes_impl(from_view, size);
+    const auto to_sizes = get_sizes_impl(to_view, size);
 
     // Helper lambda for figuring out if the next vector element is
     // connected to the currently processed one or not.
@@ -529,7 +400,7 @@ void copy::copy_views_impl2(std::size_t size,
 }
 
 template <typename TYPE>
-std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
+std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes_impl(
     const data::vector_view<TYPE>* data, std::size_t size) {
 
     // Create the result vector.

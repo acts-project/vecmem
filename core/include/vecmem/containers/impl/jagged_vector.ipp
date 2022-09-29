@@ -30,7 +30,7 @@ data::jagged_vector_data<TYPE> get_data(jagged_vector<TYPE>& vec,
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] =
+        result.host_ptr()[i] =
             value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 
@@ -58,7 +58,7 @@ data::jagged_vector_data<TYPE> get_data(
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] =
+        result.host_ptr()[i] =
             value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 
@@ -85,7 +85,7 @@ data::jagged_vector_data<const TYPE> get_data(const jagged_vector<TYPE>& vec,
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] =
+        result.host_ptr()[i] =
             value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 
@@ -114,7 +114,7 @@ data::jagged_vector_data<const TYPE> get_data(
 
     // Fill the result object with information.
     for (std::size_t i = 0; i < size; ++i) {
-        result.m_ptr[i] =
+        result.host_ptr()[i] =
             value_type(static_cast<size_type>(vec[i].size()), vec[i].data());
     }
 

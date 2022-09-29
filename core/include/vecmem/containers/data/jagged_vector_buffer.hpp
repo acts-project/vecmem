@@ -95,18 +95,6 @@ public:
                          memory_resource& resource,
                          memory_resource* host_access_resource = nullptr);
 
-    /// Access the host accessible array describing the inner vectors
-    ///
-    /// This may or may not return the same pointer that
-    /// @c vecmem::data::jagged_vector_view::m_ptr holds. If the buffer is set
-    /// up on top of a "shared" (both host- and device accessible) memory
-    /// resource, then the two will be the same. If not, then
-    /// @c vecmem::data::jagged_vector_view::m_ptr is set up to point at the
-    /// device accessible array, and this function returns a pointer to the
-    /// host accessible one.
-    ///
-    pointer host_ptr() const;
-
 private:
     /// Data object for the @c vecmem::data::vector_view array
     vecmem::unique_alloc_ptr<value_type[]> m_outer_memory;

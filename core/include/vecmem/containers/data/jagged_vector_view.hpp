@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -41,14 +41,17 @@ namespace data {
  * an undefined state.
  */
 template <typename T>
-struct jagged_vector_view {
+class jagged_vector_view {
 
+public:
     /// Size type used in the class
     typedef std::size_t size_type;
     /// Value type of the jagged array
     typedef vector_view<T> value_type;
     /// Pointer type to the jagged array
     typedef value_type* pointer;
+    /// Constant pointer type to the jagged array
+    typedef const value_type* const_pointer;
 
     /**
      * Default constructor
@@ -58,7 +61,7 @@ struct jagged_vector_view {
      * Constructor with all the information held by the object.
      */
     VECMEM_HOST_AND_DEVICE
-    jagged_vector_view(size_type size, pointer ptr);
+    jagged_vector_view(size_type size, pointer ptr, pointer host_ptr = nullptr);
 
     /**
      * Constructor from a "slightly different" @c
@@ -73,8 +76,52 @@ struct jagged_vector_view {
         typename OTHERTYPE,
         std::enable_if_t<details::is_same_nc<T, OTHERTYPE>::value, bool> = true>
     VECMEM_HOST_AND_DEVICE jagged_vector_view(
-        const jagged_vector_view<OTHERTYPE>& parent);
+        jagged_vector_view<OTHERTYPE> parent);
 
+    /// Assignment operator from a "slightly different" object
+    template <
+        typename OTHERTYPE,
+        std::enable_if_t<details::is_same_nc<T, OTHERTYPE>::value, bool> = true>
+    VECMEM_HOST_AND_DEVICE jagged_vector_view& operator=(
+        jagged_vector_view<OTHERTYPE> rhs);
+
+    /// Get the "outer" size of the jagged vector
+    VECMEM_HOST_AND_DEVICE
+    size_type size() const;
+    /// Get the maximum capacity of the "outer" vector
+    VECMEM_HOST_AND_DEVICE
+    size_type capacity() const;
+
+    /// Get a pointer to the vector elements (non-const)
+    VECMEM_HOST_AND_DEVICE
+    pointer ptr();
+    /// Get a pointer to the vector elements (const)
+    VECMEM_HOST_AND_DEVICE
+    const_pointer ptr() const;
+
+    /// Access the host accessible non-const array describing the inner vectors
+    ///
+    /// This may or may not return the same pointer as @c ptr(). If the
+    /// underlying data is stored in host-accessible memory, then the two will
+    /// be the same.
+    ///
+    /// If not, then @c ptr() will return the device accessible array, and this
+    /// function returns a host-accessible one.
+    ///
+    /// @return A host-accessible pointer to the array describing the inner
+    ///         vectors
+    ///
+    VECMEM_HOST_AND_DEVICE
+    pointer host_ptr();
+    /// Access the host accessible const array describing the inner vectors
+    ///
+    /// @return A host-accessible pointer to the array describing the inner
+    ///         vectors
+    ///
+    VECMEM_HOST_AND_DEVICE
+    const_pointer host_ptr() const;
+
+protected:
     /**
      * The number of rows in this jagged vector.
      */
@@ -85,6 +132,9 @@ struct jagged_vector_view {
      * the given memory manager.
      */
     pointer m_ptr;
+
+    /// Host-accessible pointer to the inner vector array
+    pointer m_host_ptr;
 
 };  // struct jagged_vector_view
 

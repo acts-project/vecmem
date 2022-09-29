@@ -24,9 +24,10 @@ template <typename TYPE>
 std::vector<std::size_t> get_sizes(
     const vecmem::data::jagged_vector_view<TYPE>& jvv) {
 
-    std::vector<std::size_t> result(jvv.m_size);
-    for (std::size_t i = 0; i < jvv.m_size; ++i) {
-        result[i] = jvv.m_ptr[i].size();
+    std::vector<std::size_t> result(jvv.size());
+    for (typename vecmem::data::jagged_vector_view<TYPE>::size_type i = 0;
+         i < jvv.size(); ++i) {
+        result[i] = jvv.host_ptr()[i].size();
     }
     return result;
 }
@@ -82,11 +83,12 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     base_type::m_ptr =
         ((host_access_resource != nullptr) ? m_outer_memory.get()
                                            : m_outer_host_memory.get());
+    base_type::m_host_ptr = m_outer_host_memory.get();
 
     // Set up the host accessible memory array.
     std::ptrdiff_t ptrdiff = 0;
     for (std::size_t i = 0; i < sizes.size(); ++i) {
-        new (host_ptr() + i)
+        new (base_type::host_ptr() + i)
             value_type(static_cast<typename value_type::size_type>(sizes[i]),
                        reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff));
         ptrdiff += sizes[i] * sizeof(TYPE);
@@ -124,21 +126,16 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     base_type::m_ptr =
         ((host_access_resource != nullptr) ? m_outer_memory.get()
                                            : m_outer_host_memory.get());
+    base_type::m_host_ptr = m_outer_host_memory.get();
 
     // Set up the vecmem::vector_view objects in the host accessible memory.
     std::ptrdiff_t ptrdiff = 0;
     for (std::size_t i = 0; i < capacities.size(); ++i) {
-        new (host_ptr() + i) value_type(
+        new (base_type::host_ptr() + i) value_type(
             static_cast<typename value_type::size_type>(capacities[i]),
             &header_ptr[i], data_ptr + ptrdiff);
         ptrdiff += capacities[i];
     }
-}
-
-template <typename TYPE>
-auto jagged_vector_buffer<TYPE>::host_ptr() const -> pointer {
-
-    return m_outer_host_memory.get();
 }
 
 }  // namespace data
