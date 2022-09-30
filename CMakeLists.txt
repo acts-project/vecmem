@@ -24,6 +24,9 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}" CACHE PATH
    "Directory for the built static libraries" )
 
+# Flags controlling the meta-build system.
+option( VECMEM_USE_SYSTEM_LIBS "Use system libraries be default" FALSE )
+
 # Include the VecMem CMake code.
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 include( vecmem-functions )

@@ -12,7 +12,7 @@ option( VECMEM_SETUP_GOOGLETEST "Set up the GoogleTest targets explicitly"
    TRUE )
 option( VECMEM_USE_SYSTEM_GOOGLETEST
    "Pick up an existing installation of GoogleTest from the build environment"
-   FALSE )
+   ${VECMEM_USE_SYSTEM_LIBS} )
 if( VECMEM_SETUP_GOOGLETEST )
    if( VECMEM_USE_SYSTEM_GOOGLETEST )
       find_package( GTest REQUIRED )
