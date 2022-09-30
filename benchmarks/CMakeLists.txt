@@ -13,7 +13,7 @@ option(
 option(
    VECMEM_USE_SYSTEM_GOOGLEBENCHMARK
    "Pick up an existing installation of Google Benchmark from the build environment"
-   FALSE
+   ${VECMEM_USE_SYSTEM_LIBS}
 )
 if(VECMEM_SETUP_GOOGLEBENCHMARK)
    if(VECMEM_USE_SYSTEM_GOOGLEBENCHMARK)
