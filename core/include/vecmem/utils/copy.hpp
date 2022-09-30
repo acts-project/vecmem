@@ -67,11 +67,11 @@ public:
 
     /// Set up the internal state of a vector buffer correctly on a device
     template <typename TYPE>
-    void setup(data::vector_view<TYPE>& data);
+    void setup(data::vector_view<TYPE> data);
 
     /// Set all bytes of the vector to some value
     template <typename TYPE>
-    void memset(data::vector_view<TYPE>& data, int value);
+    void memset(data::vector_view<TYPE> data, int value);
 
     /// Copy a 1-dimensional vector to the specified memory resource
     template <typename TYPE>
@@ -82,7 +82,7 @@ public:
     /// Copy a 1-dimensional vector's data between two existing memory blocks
     template <typename TYPE1, typename TYPE2>
     void operator()(const data::vector_view<TYPE1>& from,
-                    data::vector_view<TYPE2>& to,
+                    data::vector_view<TYPE2> to,
                     type::copy_type cptype = type::unknown);
 
     /// Copy a 1-dimensional vector's data into a vector object
@@ -103,15 +103,11 @@ public:
 
     /// Copy the internal state of a jagged vector buffer to the target device
     template <typename TYPE>
-    void setup(data::jagged_vector_buffer<TYPE>& data);
+    void setup(data::jagged_vector_view<TYPE> data);
 
     /// Set all bytes of the jagged vector to some value
     template <typename TYPE>
-    void memset(data::jagged_vector_view<TYPE>& data, int value);
-
-    /// Set all bytes of the jagged vector to some value
-    template <typename TYPE>
-    void memset(data::jagged_vector_buffer<TYPE>& data, int value);
+    void memset(data::jagged_vector_view<TYPE> data, int value);
 
     /// Copy a jagged vector to the specified memory resource
     template <typename TYPE>
@@ -120,46 +116,15 @@ public:
         memory_resource* host_access_resource = nullptr,
         type::copy_type cptype = type::unknown);
 
-    /// Copy a jagged vector to the specified memory resource
-    template <typename TYPE>
-    data::jagged_vector_buffer<std::remove_cv_t<TYPE>> to(
-        const data::jagged_vector_buffer<TYPE>& data, memory_resource& resource,
-        memory_resource* host_access_resource = nullptr,
-        type::copy_type cptype = type::unknown);
-
     /// Copy a jagged vector's data between two existing allocations
     template <typename TYPE1, typename TYPE2>
     void operator()(const data::jagged_vector_view<TYPE1>& from,
-                    data::jagged_vector_view<TYPE2>& to,
-                    type::copy_type cptype = type::unknown);
-
-    /// Copy a jagged vector's data between two existing allocations
-    template <typename TYPE1, typename TYPE2>
-    void operator()(const data::jagged_vector_view<TYPE1>& from,
-                    data::jagged_vector_buffer<TYPE2>& to,
-                    type::copy_type cptype = type::unknown);
-
-    /// Copy a jagged vector's data between two existing allocations
-    template <typename TYPE1, typename TYPE2>
-    void operator()(const data::jagged_vector_buffer<TYPE1>& from,
-                    data::jagged_vector_view<TYPE2>& to,
-                    type::copy_type cptype = type::unknown);
-
-    /// Copy a jagged vector's data between two existing allocations
-    template <typename TYPE1, typename TYPE2>
-    void operator()(const data::jagged_vector_buffer<TYPE1>& from,
-                    data::jagged_vector_buffer<TYPE2>& to,
+                    data::jagged_vector_view<TYPE2> to,
                     type::copy_type cptype = type::unknown);
 
     /// Copy a jagged vector's data into a vector object
     template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
     void operator()(const data::jagged_vector_view<TYPE1>& from,
-                    std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to,
-                    type::copy_type cptype = type::unknown);
-
-    /// Copy a jagged vector's data into a vector object
-    template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
-    void operator()(const data::jagged_vector_buffer<TYPE1>& from,
                     std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to,
                     type::copy_type cptype = type::unknown);
 
@@ -167,11 +132,6 @@ public:
     template <typename TYPE>
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
         const data::jagged_vector_view<TYPE>& data);
-
-    /// Helper function for getting the sizes of a resizable jagged buffer
-    template <typename TYPE>
-    std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
-        const data::jagged_vector_buffer<TYPE>& data);
 
     /// @}
 
@@ -183,23 +143,13 @@ protected:
     virtual void do_memset(std::size_t size, void* ptr, int value);
 
 private:
-    /// Helper function implementing @c memset for jagged vectors
-    template <typename TYPE>
-    void memset_impl(std::size_t size, data::vector_view<TYPE>* data,
-                     int value);
     /// Helper function performing the copy of a jagged array/vector
     template <typename TYPE1, typename TYPE2>
-    void copy_views_impl1(std::size_t size,
-                          const data::vector_view<TYPE1>* from,
-                          data::vector_view<TYPE2>* to, type::copy_type cptype);
-    /// Helper function performing the copy of a jagged array/vector
-    template <typename TYPE1, typename TYPE2>
-    void copy_views_impl2(std::size_t size,
-                          const data::vector_view<TYPE1>* from,
-                          data::vector_view<TYPE2>* to, type::copy_type cptype);
+    void copy_views_impl(std::size_t size, const data::vector_view<TYPE1>* from,
+                         data::vector_view<TYPE2>* to, type::copy_type cptype);
     /// Helper function for getting the sizes of a jagged vector/buffer
     template <typename TYPE>
-    std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
+    std::vector<typename data::vector_view<TYPE>::size_type> get_sizes_impl(
         const data::vector_view<TYPE>* data, std::size_t size);
 
 };  // class copy

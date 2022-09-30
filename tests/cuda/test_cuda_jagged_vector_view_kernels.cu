@@ -23,7 +23,7 @@ __global__ void linearTransformKernel(
 
     // Find the current index.
     const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= input.m_size) {
+    if (i >= input.size()) {
         return;
     }
 
@@ -61,10 +61,10 @@ void linearTransform(const vecmem::data::vector_view<int>& constants,
                      vecmem::data::jagged_vector_view<int>& output) {
 
     // A sanity check.
-    assert(input.m_size == output.m_size);
+    assert(input.size() == output.size());
 
     // Launch the kernel.
-    linearTransformKernel<<<1, static_cast<unsigned int>(input.m_size)>>>(
+    linearTransformKernel<<<1, static_cast<unsigned int>(input.size())>>>(
         constants, input, output);
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());

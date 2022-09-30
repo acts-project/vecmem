@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -78,13 +78,7 @@ public:
      * object.
      */
     VECMEM_HOST_AND_DEVICE
-    jagged_device_vector(const data::jagged_vector_view<T>& data);
-    /// Construct a const jagged device vector from a non-const data object
-    template <
-        typename OTHERTYPE,
-        std::enable_if_t<details::is_same_nc<T, OTHERTYPE>::value, bool> = true>
-    VECMEM_HOST_AND_DEVICE jagged_device_vector(
-        const data::jagged_vector_view<OTHERTYPE>& data);
+    jagged_device_vector(data::jagged_vector_view<T> data);
 
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE

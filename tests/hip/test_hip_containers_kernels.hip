@@ -65,7 +65,7 @@ __global__ void linearTransformKernel(
 
     // Find the current index.
     const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
-    if (i >= input.m_size) {
+    if (i >= input.size()) {
         return;
     }
 
@@ -103,10 +103,10 @@ void linearTransform(vecmem::data::vector_view<const int> constants,
                      vecmem::data::jagged_vector_view<int> output) {
 
     // A sanity check.
-    assert(input.m_size == output.m_size);
+    assert(input.size() == output.size());
 
     // Launch the kernel.
-    hipLaunchKernelGGL(linearTransformKernel, 1, input.m_size, 0, nullptr,
+    hipLaunchKernelGGL(linearTransformKernel, 1, input.size(), 0, nullptr,
                        constants, input, output);
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
@@ -196,11 +196,11 @@ __global__ void filterTransformKernel(
 
     // Find the current indices.
     const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
-    if (i >= input.m_size) {
+    if (i >= input.size()) {
         return;
     }
     const std::size_t j = hipBlockIdx_y * hipBlockDim_y + hipThreadIdx_y;
-    if (j >= input.m_ptr[i].size()) {
+    if (j >= input.ptr()[i].size()) {
         return;
     }
 
@@ -222,7 +222,7 @@ void filterTransform(vecmem::data::jagged_vector_view<const int> input,
 
     // Launch the kernel.
     hipLaunchKernelGGL(filterTransformKernel, 1,
-                       dim3(input.m_size, max_vec_size), 0, nullptr, input,
+                       dim3(input.size(), max_vec_size), 0, nullptr, input,
                        output);
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
@@ -235,7 +235,7 @@ __global__ void fillTransformKernel(
 
     // Find the current index.
     const std::size_t i = hipBlockIdx_x * hipBlockDim_x + hipThreadIdx_x;
-    if (i >= vec_data.m_size) {
+    if (i >= vec_data.size()) {
         return;
     }
 
@@ -251,7 +251,7 @@ __global__ void fillTransformKernel(
 void fillTransform(vecmem::data::jagged_vector_view<int> vec) {
 
     // Launch the kernel
-    hipLaunchKernelGGL(fillTransformKernel, vec.m_size, 1, 0, nullptr, vec);
+    hipLaunchKernelGGL(fillTransformKernel, vec.size(), 1, 0, nullptr, vec);
 
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());

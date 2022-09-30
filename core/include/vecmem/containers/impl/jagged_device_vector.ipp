@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,20 +15,8 @@ namespace vecmem {
 
 template <typename T>
 VECMEM_HOST_AND_DEVICE jagged_device_vector<T>::jagged_device_vector(
-    const data::jagged_vector_view<T>& data)
-    : m_size(data.m_size), m_ptr(data.m_ptr) {}
-
-template <typename T>
-template <typename OTHERTYPE,
-          std::enable_if_t<details::is_same_nc<T, OTHERTYPE>::value, bool> >
-VECMEM_HOST_AND_DEVICE jagged_device_vector<T>::jagged_device_vector(
-    const data::jagged_vector_view<OTHERTYPE>& data)
-    : m_size(data.m_size),
-      // This looks scarier than it really is. We "just" reinterpret a
-      // vecmem::data::vector_view<T> pointer to be seen as
-      // vecmem::data::vector_view<const T> instead.
-      m_ptr(reinterpret_cast<typename data::jagged_vector_view<T>::pointer>(
-          data.m_ptr)) {}
+    data::jagged_vector_view<T> data)
+    : m_size(data.size()), m_ptr(data.ptr()) {}
 
 template <typename T>
 VECMEM_HOST_AND_DEVICE jagged_device_vector<T>::jagged_device_vector(
