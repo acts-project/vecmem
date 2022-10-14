@@ -223,7 +223,7 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     // memory.
     auto is_contiguous = [size](const auto* views) {
         auto ptr = views[0].ptr();
-        for (std::size_t i = 0; i < size; ++i) {
+        for (std::size_t i = 1; i < size; ++i) {
             if ((ptr + views[i - 1].capacity()) != views[i].ptr()) {
                 return false;
             }
@@ -237,10 +237,18 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     /// Helper (host) copy object
     static copy host_copy;
 
+    // Calculate the contiguous-ness of the memory allocations.
+    const bool from_is_contiguous = is_contiguous(from_view.host_ptr());
+    const bool to_is_contiguous = is_contiguous(to_view.host_ptr());
+    VECMEM_DEBUG_MSG(3, "from_is_contiguous = %d, to_is_contiguous = %d",
+                     from_is_contiguous, to_is_contiguous);
+
     // Deal with different types of memory configurations.
-    if ((cptype == type::host_to_device) &&
-        (is_contiguous(from_view.host_ptr()) == false) &&
-        (is_contiguous(to_view.host_ptr()) == true)) {
+    if ((cptype == type::host_to_device) && (from_is_contiguous == false) &&
+        (to_is_contiguous == true)) {
+        // Tell the user what's happening.
+        VECMEM_DEBUG_MSG(
+            2, "Performing optimised host->device jagged vector copy");
         // Create a contiguous buffer in host memory with the appropriate
         // capacities.
         std::vector<std::size_t> sizes(size);
@@ -254,8 +262,10 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
         // Now perform the host-to-device copy in one go.
         copy_views_impl(size, buffer.host_ptr(), to_view.host_ptr(), cptype);
     } else if ((cptype == type::device_to_host) &&
-               (is_contiguous(from_view.host_ptr()) == true) &&
-               (is_contiguous(to_view.host_ptr()) == false)) {
+               (from_is_contiguous == true) && (to_is_contiguous == false)) {
+        // Tell the user what's happening.
+        VECMEM_DEBUG_MSG(
+            2, "Performing optimised device->host jagged vector copy");
         // Create a contiguous buffer in host memory with the appropriate
         // capacities.
         std::vector<std::size_t> sizes(size);
