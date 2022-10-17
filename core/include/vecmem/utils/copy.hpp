@@ -133,6 +133,12 @@ public:
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
         const data::jagged_vector_view<TYPE>& data);
 
+    /// Helper function for setting the sizes of a resizable jagged vector
+    template <typename TYPE>
+    void set_sizes(
+        const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+        data::jagged_vector_view<TYPE> data);
+
     /// @}
 
 protected:
@@ -145,8 +151,10 @@ protected:
 private:
     /// Helper function performing the copy of a jagged array/vector
     template <typename TYPE1, typename TYPE2>
-    void copy_views_impl(std::size_t size, const data::vector_view<TYPE1>* from,
-                         data::vector_view<TYPE2>* to, type::copy_type cptype);
+    void copy_views_impl(
+        const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
+        const data::vector_view<TYPE1>* from, data::vector_view<TYPE2>* to,
+        type::copy_type cptype);
     /// Helper function for getting the sizes of a jagged vector/buffer
     template <typename TYPE>
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes_impl(

@@ -16,6 +16,7 @@
 // System include(s).
 #include <algorithm>
 #include <cassert>
+#include <stdexcept>
 
 namespace vecmem {
 
@@ -243,6 +244,9 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     VECMEM_DEBUG_MSG(3, "from_is_contiguous = %d, to_is_contiguous = %d",
                      from_is_contiguous, to_is_contiguous);
 
+    // Get the sizes of the source jagged vector.
+    const auto sizes = get_sizes(from_view);
+
     // Deal with different types of memory configurations.
     if ((cptype == type::host_to_device) && (from_is_contiguous == false) &&
         (to_is_contiguous == true)) {
@@ -250,17 +254,22 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
         VECMEM_DEBUG_MSG(
             2, "Performing optimised host->device jagged vector copy");
         // Create a contiguous buffer in host memory with the appropriate
-        // capacities.
-        std::vector<std::size_t> sizes(size);
-        std::transform(from_view.host_ptr(), from_view.host_ptr() + size,
-                       sizes.begin(),
+        // capacities and sizes.
+        std::vector<typename data::vector_view<TYPE1>::size_type> capacities(
+            size);
+        std::transform(to_view.host_ptr(), to_view.host_ptr() + size,
+                       capacities.begin(),
                        [](const auto& view) { return view.capacity(); });
-        data::jagged_vector_buffer<TYPE2> buffer(sizes, host_mr);
+        data::jagged_vector_buffer<TYPE2> buffer(
+            std::vector<std::size_t>(capacities.begin(), capacities.end()),
+            host_mr);
         // Collect the data into this buffer with host-to-host memory copies.
-        host_copy.copy_views_impl(size, from_view.host_ptr(), buffer.host_ptr(),
-                                  cptype);
+        host_copy.copy_views_impl(sizes, from_view.host_ptr(),
+                                  buffer.host_ptr(), cptype);
         // Now perform the host-to-device copy in one go.
-        copy_views_impl(size, buffer.host_ptr(), to_view.host_ptr(), cptype);
+        copy_views_impl(capacities, buffer.host_ptr(), to_view.host_ptr(),
+                        cptype);
+        set_sizes(sizes, to_view);
     } else if ((cptype == type::device_to_host) &&
                (from_is_contiguous == true) && (to_is_contiguous == false)) {
         // Tell the user what's happening.
@@ -268,19 +277,26 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
             2, "Performing optimised device->host jagged vector copy");
         // Create a contiguous buffer in host memory with the appropriate
         // capacities.
-        std::vector<std::size_t> sizes(size);
+        std::vector<typename data::vector_view<TYPE1>::size_type> capacities(
+            size);
         std::transform(from_view.host_ptr(), from_view.host_ptr() + size,
-                       sizes.begin(),
+                       capacities.begin(),
                        [](const auto& view) { return view.capacity(); });
-        data::jagged_vector_buffer<TYPE2> buffer(sizes, host_mr);
+        data::jagged_vector_buffer<TYPE2> buffer(
+            std::vector<std::size_t>(capacities.begin(), capacities.end()),
+            host_mr);
         // Perform the device-to-host copy into this contiguous buffer.
-        copy_views_impl(size, from_view.host_ptr(), buffer.host_ptr(), cptype);
+        copy_views_impl(capacities, from_view.host_ptr(), buffer.host_ptr(),
+                        cptype);
         // Now fill the host views with host-to-host memory copies.
-        host_copy.copy_views_impl(size, buffer.host_ptr(), to_view.host_ptr(),
+        host_copy.copy_views_impl(sizes, buffer.host_ptr(), to_view.host_ptr(),
                                   cptype);
+        host_copy.set_sizes(sizes, to_view);
     } else {
         // Do the copy as best as we can with the existing views.
-        copy_views_impl(size, from_view.host_ptr(), to_view.host_ptr(), cptype);
+        copy_views_impl(sizes, from_view.host_ptr(), to_view.host_ptr(),
+                        cptype);
+        set_sizes(sizes, to_view);
     }
 }
 
@@ -316,11 +332,51 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
     return get_sizes_impl(data.host_ptr(), data.size());
 }
 
+template <typename TYPE>
+void copy::set_sizes(
+    const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+    data::jagged_vector_view<TYPE> data) {
+
+    // Finish early if possible.
+    if ((sizes.size() == 0) && (data.size() == 0)) {
+        return;
+    }
+    // Make sure that the sizes match up.
+    if (sizes.size() != data.size()) {
+        throw std::runtime_error(
+            "Incorrect size vector received for target jagged vector sizes");
+    }
+    // Make sure that the target jagged vector is either resizable, or it has
+    // the correct sizes/capacities already.
+    bool perform_copy = true;
+    for (typename data::jagged_vector_view<TYPE>::size_type i = 0;
+         i < data.size(); ++i) {
+        if (data.host_ptr()[i].size_ptr() == nullptr) {
+            perform_copy = false;
+        } else if (perform_copy == true) {
+            throw std::runtime_error(
+                "Inconsistent target jagged vector view received for resizing");
+        } else if (data.host_ptr()[i].capacity() != sizes[i]) {
+            throw std::runtime_error(
+                "Non-resizable jaggged vector does not match the requested "
+                "size");
+        }
+    }
+    // If no copy is necessary, we're done.
+    if (perform_copy == false) {
+        return;
+    }
+    // Perform the copy with some internal knowledge of how resizable jagged
+    // vector buffers work.
+    do_copy(sizeof(typename data::vector_view<TYPE>::size_type) * sizes.size(),
+            sizes.data(), data.host_ptr()->size_ptr(), type::unknown);
+}
+
 template <typename TYPE1, typename TYPE2>
-void copy::copy_views_impl(std::size_t size,
-                           const data::vector_view<TYPE1>* from_view,
-                           data::vector_view<TYPE2>* to_view,
-                           type::copy_type cptype) {
+void copy::copy_views_impl(
+    const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
+    const data::vector_view<TYPE1>* from_view,
+    data::vector_view<TYPE2>* to_view, type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -333,19 +389,16 @@ void copy::copy_views_impl(std::size_t size,
     assert(to_view != nullptr);
 
     // Helper variables used in the copy.
+    const std::size_t size = sizes.size();
     const std::remove_cv_t<TYPE1>* from_ptr = nullptr;
     TYPE2* to_ptr = nullptr;
     std::size_t copy_size = 0;
     [[maybe_unused]] std::size_t copy_ops = 0;
 
-    // Get the sizes of the two views.
-    const auto from_sizes = get_sizes_impl(from_view, size);
-    const auto to_sizes = get_sizes_impl(to_view, size);
-
     // Helper lambda for figuring out if the next vector element is
     // connected to the currently processed one or not.
-    auto next_is_connected = [size](const auto* array, const auto& sizes,
-                                    std::size_t index) {
+    auto next_is_connected = [size, &sizes](const auto* array,
+                                            std::size_t index) {
         // Check if the next non-empty vector element is connected to the
         // current one.
         std::size_t j = index + 1;
@@ -364,32 +417,32 @@ void copy::copy_views_impl(std::size_t size,
     for (std::size_t i = 0; i < size; ++i) {
 
         // Skip empty "inner vectors".
-        if ((from_sizes[i] == 0) && (to_sizes[i] == 0)) {
+        if (sizes[i] == 0) {
             continue;
         }
 
         // Some sanity checks.
         assert(from_view[i].ptr() != nullptr);
         assert(to_view[i].ptr() != nullptr);
-        assert(from_sizes[i] != 0);
-        assert(from_sizes[i] == to_sizes[i]);
+        assert(sizes[i] <= from_view[i].capacity());
+        assert(sizes[i] <= to_view[i].capacity());
 
         // Set/update the helper variables.
         if ((from_ptr == nullptr) && (to_ptr == nullptr) && (copy_size == 0)) {
             from_ptr = from_view[i].ptr();
             to_ptr = to_view[i].ptr();
-            copy_size = from_sizes[i] * sizeof(TYPE1);
+            copy_size = sizes[i] * sizeof(TYPE1);
         } else {
             assert(from_ptr != nullptr);
             assert(to_ptr != nullptr);
             assert(copy_size != 0);
-            copy_size += from_sizes[i] * sizeof(TYPE1);
+            copy_size += sizes[i] * sizeof(TYPE1);
         }
 
         // Check if the next vector element connects to this one. If not,
         // perform the copy now.
-        if ((!next_is_connected(from_view, from_sizes, i)) ||
-            (!next_is_connected(to_view, to_sizes, i))) {
+        if ((!next_is_connected(from_view, i)) ||
+            (!next_is_connected(to_view, i))) {
 
             // Perform the copy.
             do_copy(copy_size, from_ptr, to_ptr, cptype);
