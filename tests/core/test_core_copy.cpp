@@ -19,7 +19,9 @@
 #include <gtest/gtest.h>
 
 // System include(s).
+#include <algorithm>
 #include <tuple>
+#include <vector>
 
 /// Test case for testing @c vecmem::copy
 class core_copy_test : public testing::Test {
@@ -80,6 +82,106 @@ TEST_F(core_copy_test, const_vector) {
            (copy_itr != copy_vector.end());
          ++reference_itr, ++copy_itr) {
         EXPECT_EQ(*reference_itr, *copy_itr);
+    }
+}
+
+/// Tests for copying 1-dimensional vector buffers
+TEST_F(core_copy_test, vector_buffer) {
+
+    // Set up a reference vector.
+    const vecmem::vector<int> reference = {{1, 5, 6, 74, 234, 43, 22},
+                                           &m_resource};
+    using vecmem_size_type = vecmem::device_vector<int>::size_type;
+    const vecmem_size_type size =
+        static_cast<vecmem_size_type>(reference.size());
+
+    // Create a non-resizable vector buffer.
+    vecmem::data::vector_buffer<int> source_data(size, m_resource);
+    m_copy.setup(source_data);
+    // Fill it with data.
+    vecmem::device_vector<int> source_data_vec(source_data);
+    EXPECT_EQ(static_cast<std::size_t>(source_data_vec.size()),
+              static_cast<std::size_t>(reference.size()));
+    EXPECT_EQ(source_data_vec.capacity(), source_data_vec.size());
+    for (vecmem_size_type i = 0; i < reference.size(); ++i) {
+        source_data_vec.at(i) = reference.at(i);
+    }
+
+    // Make a copy of it into a buffer.
+    auto copy_data = m_copy.to(source_data, m_resource);
+    // Check the copy.
+    vecmem::device_vector<int> copy_data_vec(copy_data);
+    EXPECT_EQ(source_data_vec.size(), copy_data_vec.size());
+    auto source_data_vec_itr = source_data_vec.begin();
+    auto copy_data_vec_itr = copy_data_vec.begin();
+    for (; (source_data_vec_itr != source_data_vec.end()) &&
+           (copy_data_vec_itr != copy_data_vec.end());
+         ++source_data_vec_itr, ++copy_data_vec_itr) {
+        EXPECT_EQ(*source_data_vec_itr, *copy_data_vec_itr);
+    }
+
+    // Make a copy into a host vector.
+    vecmem::vector<int> copy_vec(&m_resource);
+    m_copy(source_data, copy_vec);
+    // Check the copy.
+    EXPECT_EQ(reference.size(), copy_vec.size());
+    auto reference_itr = reference.begin();
+    auto copy_vec_itr = copy_vec.begin();
+    for (;
+         (reference_itr != reference.end()) && (copy_vec_itr != copy_vec.end());
+         ++reference_itr, ++copy_vec_itr) {
+        EXPECT_EQ(*reference_itr, *copy_vec_itr);
+    }
+}
+
+/// Tests for copying 1-dimensional resizable vector buffers
+TEST_F(core_copy_test, resizable_vector_buffer) {
+
+    // Set up a reference vector.
+    const vecmem::vector<int> reference = {{1, 5, 6, 74, 234, 43, 22},
+                                           &m_resource};
+
+    // Create a resizable vector buffer.
+    using vecmem_size_type = vecmem::device_vector<int>::size_type;
+    const vecmem_size_type capacity =
+        static_cast<vecmem_size_type>(reference.size() + 5);
+    vecmem::data::vector_buffer<int> source_data(capacity, 0, m_resource);
+    m_copy.setup(source_data);
+    // Fill it with data.
+    vecmem::device_vector<int> source_data_vec(source_data);
+    EXPECT_EQ(source_data_vec.size(), 0u);
+    EXPECT_EQ(source_data_vec.capacity(), capacity);
+    for (int data : reference) {
+        source_data_vec.push_back(data);
+    }
+    EXPECT_EQ(static_cast<std::size_t>(source_data_vec.size()),
+              static_cast<std::size_t>(reference.size()));
+    EXPECT_EQ(source_data_vec.capacity(), capacity);
+
+    // Make a copy of it into a buffer.
+    auto copy_data = m_copy.to(source_data, m_resource);
+    // Check the copy.
+    vecmem::device_vector<int> copy_data_vec(copy_data);
+    EXPECT_EQ(source_data_vec.size(), copy_data_vec.size());
+    auto source_data_vec_itr = source_data_vec.begin();
+    auto copy_data_vec_itr = copy_data_vec.begin();
+    for (; (source_data_vec_itr != source_data_vec.end()) &&
+           (copy_data_vec_itr != copy_data_vec.end());
+         ++source_data_vec_itr, ++copy_data_vec_itr) {
+        EXPECT_EQ(*source_data_vec_itr, *copy_data_vec_itr);
+    }
+
+    // Make a copy into a host vector.
+    vecmem::vector<int> copy_vec(&m_resource);
+    m_copy(source_data, copy_vec);
+    // Check the copy.
+    EXPECT_EQ(reference.size(), copy_vec.size());
+    auto reference_itr = reference.begin();
+    auto copy_vec_itr = copy_vec.begin();
+    for (;
+         (reference_itr != reference.end()) && (copy_vec_itr != copy_vec.end());
+         ++reference_itr, ++copy_vec_itr) {
+        EXPECT_EQ(*reference_itr, *copy_vec_itr);
     }
 }
 
@@ -157,6 +259,152 @@ TEST_F(core_copy_test, const_jagged_vector) {
                (copy_itr2 != copy_itr->end());
              ++reference_itr2, ++copy_itr2) {
             EXPECT_EQ(*reference_itr2, *copy_itr2);
+        }
+    }
+}
+
+/// Tests for copying jagged vector buffers
+TEST_F(core_copy_test, jagged_vector_buffer) {
+
+    // Create a reference vector.
+    const vecmem::jagged_vector<int> reference = {
+        {{{1, 2, 3, 4, 5}, &m_resource},
+         {{6, 7}, &m_resource},
+         {{8, 9, 10, 11}, &m_resource},
+         {{12, 13, 14, 15, 16, 17, 18}, &m_resource},
+         {{19}, &m_resource},
+         {{20}, &m_resource}},
+        &m_resource};
+
+    // Create a non-resizable vector buffer.
+    std::vector<std::size_t> sizes(reference.size());
+    std::transform(reference.begin(), reference.end(), sizes.begin(),
+                   [](const auto& vec) { return vec.size(); });
+    vecmem::data::jagged_vector_buffer<int> source_data(sizes, m_resource);
+    m_copy.setup(source_data);
+    // Fill it with data.
+    using vecmem_size_type = vecmem::device_vector<int>::size_type;
+    vecmem::jagged_device_vector<int> source_data_vec(source_data);
+    EXPECT_EQ(reference.size(), source_data_vec.size());
+    for (vecmem_size_type i = 0; i < reference.size(); ++i) {
+        EXPECT_EQ(static_cast<std::size_t>(reference.at(i).size()),
+                  static_cast<std::size_t>(source_data_vec.at(i).size()));
+        for (vecmem_size_type j = 0; j < reference.at(i).size(); ++j) {
+            source_data_vec.at(i).at(j) = reference.at(i).at(j);
+        }
+    }
+
+    // Make a copy of it into a buffer.
+    auto copy_data = m_copy.to(source_data, m_resource);
+    // Check the copy.
+    vecmem::jagged_device_vector<int> copy_data_vec(copy_data);
+    EXPECT_EQ(source_data_vec.size(), copy_data_vec.size());
+    auto source_data_vec_itr = source_data_vec.begin();
+    auto copy_data_vec_itr = copy_data_vec.begin();
+    for (; (source_data_vec_itr != source_data_vec.end()) &&
+           (copy_data_vec_itr != copy_data_vec.end());
+         ++source_data_vec_itr, ++copy_data_vec_itr) {
+        EXPECT_EQ(source_data_vec_itr->size(), copy_data_vec_itr->size());
+        auto source_data_vec_itr_itr = source_data_vec_itr->begin();
+        auto copy_data_vec_itr_itr = copy_data_vec_itr->begin();
+        for (; (source_data_vec_itr_itr != source_data_vec_itr->end()) &&
+               (copy_data_vec_itr_itr != copy_data_vec_itr->end());
+             ++source_data_vec_itr_itr, ++copy_data_vec_itr_itr) {
+            EXPECT_EQ(*source_data_vec_itr_itr, *copy_data_vec_itr_itr);
+        }
+    }
+
+    // Make a copy into a host vector.
+    vecmem::jagged_vector<int> copy_vec(&m_resource);
+    m_copy(source_data, copy_vec);
+    // Check the copy.
+    EXPECT_EQ(reference.size(), copy_vec.size());
+    auto reference_itr = reference.begin();
+    auto copy_vec_itr = copy_vec.begin();
+    for (;
+         (reference_itr != reference.end()) && (copy_vec_itr != copy_vec.end());
+         ++reference_itr, ++copy_vec_itr) {
+        EXPECT_EQ(reference_itr->size(), copy_vec_itr->size());
+        auto reference_itr_itr = reference_itr->begin();
+        auto copy_vec_itr_itr = copy_vec_itr->begin();
+        for (; (reference_itr_itr != reference_itr->end()) &&
+               (copy_vec_itr_itr != copy_vec_itr->end());
+             ++reference_itr_itr, ++copy_vec_itr_itr) {
+            EXPECT_EQ(*reference_itr_itr, *copy_vec_itr_itr);
+        }
+    }
+}
+
+/// Tests for copying resizable jagged vector buffers
+TEST_F(core_copy_test, resizable_jagged_vector_buffer) {
+
+    // Create a reference vector.
+    const vecmem::jagged_vector<int> reference = {
+        {{{1, 2, 3, 4, 5}, &m_resource},
+         {{6, 7}, &m_resource},
+         {{8, 9, 10, 11}, &m_resource},
+         {{12, 13, 14, 15, 16, 17, 18}, &m_resource},
+         {{19}, &m_resource},
+         {{20}, &m_resource}},
+        &m_resource};
+
+    // Create a resizable vector buffer.
+    std::vector<std::size_t> capacities(reference.size());
+    std::transform(reference.begin(), reference.end(), capacities.begin(),
+                   [](const auto& vec) { return vec.size() + 5; });
+    vecmem::data::jagged_vector_buffer<int> source_data(
+        std::vector<std::size_t>(capacities.size(), 0), capacities, m_resource);
+    m_copy.setup(source_data);
+    // Fill it with data.
+    vecmem::jagged_device_vector<int> source_data_vec(source_data);
+    EXPECT_EQ(reference.size(), source_data_vec.size());
+    for (std::size_t i = 0; i < reference.size(); ++i) {
+        for (std::size_t j = 0; j < reference.at(i).size(); ++j) {
+            source_data_vec.at(i).push_back(reference.at(i).at(j));
+        }
+        EXPECT_EQ(static_cast<std::size_t>(reference.at(i).size()),
+                  static_cast<std::size_t>(source_data_vec.at(i).size()));
+        EXPECT_EQ(source_data_vec.at(i).capacity(),
+                  source_data_vec.at(i).size() + 5);
+    }
+
+    // Make a copy of it into a buffer.
+    auto copy_data = m_copy.to(source_data, m_resource);
+    // Check the copy.
+    vecmem::jagged_device_vector<int> copy_data_vec(copy_data);
+    EXPECT_EQ(source_data_vec.size(), copy_data_vec.size());
+    auto source_data_vec_itr = source_data_vec.begin();
+    auto copy_data_vec_itr = copy_data_vec.begin();
+    for (; (source_data_vec_itr != source_data_vec.end()) &&
+           (copy_data_vec_itr != copy_data_vec.end());
+         ++source_data_vec_itr, ++copy_data_vec_itr) {
+        EXPECT_EQ(source_data_vec_itr->size(), copy_data_vec_itr->size());
+        auto source_data_vec_itr_itr = source_data_vec_itr->begin();
+        auto copy_data_vec_itr_itr = copy_data_vec_itr->begin();
+        for (; (source_data_vec_itr_itr != source_data_vec_itr->end()) &&
+               (copy_data_vec_itr_itr != copy_data_vec_itr->end());
+             ++source_data_vec_itr_itr, ++copy_data_vec_itr_itr) {
+            EXPECT_EQ(*source_data_vec_itr_itr, *copy_data_vec_itr_itr);
+        }
+    }
+
+    // Make a copy into a host vector.
+    vecmem::jagged_vector<int> copy_vec(&m_resource);
+    m_copy(source_data, copy_vec);
+    // Check the copy.
+    EXPECT_EQ(reference.size(), copy_vec.size());
+    auto reference_itr = reference.begin();
+    auto copy_vec_itr = copy_vec.begin();
+    for (;
+         (reference_itr != reference.end()) && (copy_vec_itr != copy_vec.end());
+         ++reference_itr, ++copy_vec_itr) {
+        EXPECT_EQ(reference_itr->size(), copy_vec_itr->size());
+        auto reference_itr_itr = reference_itr->begin();
+        auto copy_vec_itr_itr = copy_vec_itr->begin();
+        for (; (reference_itr_itr != reference_itr->end()) &&
+               (copy_vec_itr_itr != copy_vec_itr->end());
+             ++reference_itr_itr, ++copy_vec_itr_itr) {
+            EXPECT_EQ(*reference_itr_itr, *copy_vec_itr_itr);
         }
     }
 }
