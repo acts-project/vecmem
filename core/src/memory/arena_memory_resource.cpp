@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -26,14 +26,14 @@ arena_memory_resource::~arena_memory_resource() {}
 void* arena_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 
     void* ptr = m_arena->allocate(details::align_up(bytes));
-    VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", bytes, ptr);
+    VECMEM_DEBUG_MSG(2, "Allocated %lu bytes at %p", bytes, ptr);
     return ptr;
 }
 
 void arena_memory_resource::do_deallocate(void* p, std::size_t bytes,
                                           std::size_t) {
 
-    VECMEM_DEBUG_MSG(4, "De-allocating memory at %p", p);
+    VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", p);
     m_arena->deallocate(p, details::align_up(bytes));
 }
 

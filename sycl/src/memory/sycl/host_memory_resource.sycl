@@ -28,7 +28,7 @@ void* host_memory_resource::do_allocate(std::size_t nbytes,
     }
 
     // Let the user know what's happening.
-    VECMEM_DEBUG_MSG(5,
+    VECMEM_DEBUG_MSG(2,
                      "Allocated %ld bytes of (%ld aligned) host memory at %p",
                      nbytes, alignment, result);
 

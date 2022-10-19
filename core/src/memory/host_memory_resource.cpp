@@ -64,7 +64,7 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
     *(reinterpret_cast<void **>(static_cast<char *>(ptr) - sizeof(void *))) =
         unaligned_ptr;
 #endif  // VECMEM_HAVE_STD_ALIGNED_ALLOC
-    VECMEM_DEBUG_MSG(4,
+    VECMEM_DEBUG_MSG(3,
                      "Allocated %lu bytes of (%lu aligned) host memory at %p",
                      bytes, alignment, ptr);
     return ptr;
@@ -72,7 +72,7 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
 
 void host_memory_resource::do_deallocate(void *ptr, std::size_t, std::size_t) {
 
-    VECMEM_DEBUG_MSG(4, "De-allocating host memory at %p", ptr);
+    VECMEM_DEBUG_MSG(3, "De-allocating host memory at %p", ptr);
 
 #ifdef VECMEM_HAVE_STD_ALIGNED_ALLOC
     // We can directly de-allocate the memory that was given to us by

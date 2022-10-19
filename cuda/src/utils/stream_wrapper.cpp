@@ -34,7 +34,7 @@ stream_wrapper::stream_wrapper(int device)
     m_stream = m_managedStream->m_stream;
 
     // Tell the user what happened.
-    VECMEM_DEBUG_MSG(2, "Created stream on device: %s",
+    VECMEM_DEBUG_MSG(1, "Created stream on device: %s",
                      details::get_device_name(dev_selector.device()).c_str());
 }
 

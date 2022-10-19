@@ -29,7 +29,7 @@ void* device_memory_resource::do_allocate(std::size_t nbytes,
 
     // Let the user know what's happening.
     VECMEM_DEBUG_MSG(
-        5, "Allocated %ld bytes of (%ld aligned) device memory on \"%s\" at %p",
+        2, "Allocated %ld bytes of (%ld aligned) device memory on \"%s\" at %p",
         nbytes, alignment,
         details::get_queue(m_queue)
             .get_device()
