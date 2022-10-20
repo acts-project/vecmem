@@ -23,7 +23,7 @@ void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
     ::memcpy(to_ptr, from_ptr, size);
 
     // Let the user know what happened.
-    VECMEM_DEBUG_MSG(4,
+    VECMEM_DEBUG_MSG(1,
                      "Performed POSIX memory copy of %lu bytes from %p "
                      "to %p",
                      size, from_ptr, to_ptr);
@@ -35,7 +35,7 @@ void copy::do_memset(std::size_t size, void* ptr, int value) {
     ::memset(ptr, value, size);
 
     // Let the user know what happened.
-    VECMEM_DEBUG_MSG(4, "Set %lu bytes to %i at %p with POSIX memset", size,
+    VECMEM_DEBUG_MSG(2, "Set %lu bytes to %i at %p with POSIX memset", size,
                      value, ptr);
 }
 

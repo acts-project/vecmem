@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -23,7 +23,7 @@ queue_wrapper::queue_wrapper(const std::string& deviceName)
           device_selector(deviceName))) {
 
     m_queue = m_managedQueue.get();
-    VECMEM_DEBUG_MSG(2,
+    VECMEM_DEBUG_MSG(1,
                      "Created an \"owning wrapper\" around a queue on "
                      "device: %s",
                      details::get_queue(*this)
@@ -34,7 +34,7 @@ queue_wrapper::queue_wrapper(const std::string& deviceName)
 
 queue_wrapper::queue_wrapper(void* queue) : m_queue(queue), m_managedQueue() {
 
-    VECMEM_DEBUG_MSG(2,
+    VECMEM_DEBUG_MSG(3,
                      "Created a \"view wrapper\" around a queue on "
                      "device: %s",
                      details::get_queue(*this)

@@ -1,7 +1,7 @@
 /**
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -68,7 +68,7 @@ void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
      */
     std::size_t goal = std::max(min_page_size, round_up(size));
 
-    VECMEM_DEBUG_MSG(5,
+    VECMEM_DEBUG_MSG(3,
                      "Request received to allocate %ld bytes, looking for page "
                      "of size 2^%ld bytes",
                      size, goal);

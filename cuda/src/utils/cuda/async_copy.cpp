@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -56,7 +56,7 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                                             details::get_stream(m_stream)));
 
     // Let the user know what happened.
-    VECMEM_DEBUG_MSG(4,
+    VECMEM_DEBUG_MSG(1,
                      "Initiated asynchronous %s memory copy of %lu bytes "
                      "from %p to %p",
                      copy_type_printer[cptype].c_str(), size, from_ptr, to_ptr);
@@ -79,7 +79,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) {
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(
-        4, "Initiated setting %lu bytes to %i at %p asynchronously with CUDA",
+        2, "Initiated setting %lu bytes to %i at %p asynchronously with CUDA",
         size, value, ptr);
 }
 

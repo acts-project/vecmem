@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -52,7 +52,7 @@ void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
         cudaMemcpy(to_ptr, from_ptr, size, copy_type_translator[cptype]));
 
     // Let the user know what happened.
-    VECMEM_DEBUG_MSG(4,
+    VECMEM_DEBUG_MSG(1,
                      "Performed %s memory copy of %lu bytes from %p to "
                      "%p",
                      copy_type_printer[cptype].c_str(), size, from_ptr, to_ptr);
@@ -73,7 +73,7 @@ void copy::do_memset(std::size_t size, void* ptr, int value) {
     VECMEM_CUDA_ERROR_CHECK(cudaMemset(ptr, value, size));
 
     // Let the user know what happened.
-    VECMEM_DEBUG_MSG(4, "Set %lu bytes to %i at %p with CUDA", size, value,
+    VECMEM_DEBUG_MSG(2, "Set %lu bytes to %i at %p with CUDA", size, value,
                      ptr);
 }
 

@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -105,7 +105,7 @@ set_target_properties( vecmem_core PROPERTIES
 # Add definitions necessary for the correct functioning of VECMEM_DEBUG_MSG.
 string( LENGTH "${CMAKE_SOURCE_DIR}/" VECMEM_SOURCE_DIR_LENGTH )
 target_compile_definitions( vecmem_core PUBLIC
-   $<BUILD_INTERFACE:VECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}>
+   VECMEM_DEBUG_MSG_LVL=${VECMEM_DEBUG_MSG_LVL}
    $<BUILD_INTERFACE:VECMEM_SOURCE_DIR_LENGTH=${VECMEM_SOURCE_DIR_LENGTH}> )
 
 # The library headers make checks on the value of the __cplusplus macro. So we

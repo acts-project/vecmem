@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -22,14 +22,14 @@ void *managed_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
     // Allocate the memory.
     void *res = nullptr;
     VECMEM_CUDA_ERROR_CHECK(cudaMallocManaged(&res, bytes));
-    VECMEM_DEBUG_MSG(4, "Allocated %ld bytes at %p", bytes, res);
+    VECMEM_DEBUG_MSG(2, "Allocated %ld bytes at %p", bytes, res);
     return res;
 }
 
 void managed_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
 
     // Free the memory.
-    VECMEM_DEBUG_MSG(4, "De-allocating memory at %p", p);
+    VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", p);
     VECMEM_CUDA_ERROR_CHECK(cudaFree(p));
 }
 

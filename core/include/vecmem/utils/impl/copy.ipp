@@ -16,6 +16,7 @@
 // System include(s).
 #include <algorithm>
 #include <cassert>
+#include <sstream>
 #include <stdexcept>
 
 namespace vecmem {
@@ -63,10 +64,6 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 
     // Copy the payload of the vector.
     this->operator()(data, result, cptype);
-    VECMEM_DEBUG_MSG(2,
-                     "Created a vector buffer of type \"%s\" with "
-                     "capacity %u",
-                     typeid(TYPE).name(), data.capacity());
     return result;
 }
 
@@ -85,10 +82,17 @@ void copy::operator()(const data::vector_view<TYPE1>& from_view,
     const typename data::vector_view<TYPE1>::size_type size =
         get_size(from_view);
 
+    // Make sure that the copy can happen.
+    if (to_view.capacity() < size) {
+        std::ostringstream msg;
+        msg << "Target capacity (" << to_view.capacity() << ") < source size ("
+            << size << ")";
+        throw std::length_error(msg.str());
+    }
+
     // Make sure that if the target view is resizable, that it would be set up
     // for the correct size.
-    if (to_view.size_ptr() != 0) {
-        assert(to_view.capacity() >= size);
+    if (to_view.size_ptr() != nullptr) {
         do_copy(sizeof(typename data::vector_view<TYPE2>::size_type), &size,
                 to_view.size_ptr(), cptype);
     }

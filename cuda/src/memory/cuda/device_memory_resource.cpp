@@ -23,7 +23,7 @@ namespace vecmem::cuda {
 device_memory_resource::device_memory_resource(int device)
     : m_device(device >= 0 ? device : details::get_device()) {
 
-    VECMEM_DEBUG_MSG(2, "Created device memory resource on: %s",
+    VECMEM_DEBUG_MSG(1, "Created device memory resource on: %s",
                      details::get_device_name(m_device).c_str());
 }
 
@@ -35,7 +35,7 @@ void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
     // Allocate the memory.
     void *res = nullptr;
     VECMEM_CUDA_ERROR_CHECK(cudaMalloc(&res, bytes));
-    VECMEM_DEBUG_MSG(4, "Allocated %ld bytes at %p on device %i", bytes, res,
+    VECMEM_DEBUG_MSG(2, "Allocated %ld bytes at %p on device %i", bytes, res,
                      m_device);
     return res;
 }
@@ -46,7 +46,7 @@ void device_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
     details::select_device dev(m_device);
 
     // Free the memory.
-    VECMEM_DEBUG_MSG(4, "De-allocating memory at %p on device %i", p, m_device);
+    VECMEM_DEBUG_MSG(2, "De-allocating memory at %p on device %i", p, m_device);
     VECMEM_CUDA_ERROR_CHECK(cudaFree(p));
 }
 
