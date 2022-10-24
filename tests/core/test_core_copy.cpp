@@ -295,7 +295,8 @@ TEST_F(core_copy_test, jagged_vector_buffer) {
     }
 
     // Make a copy of it into a buffer.
-    auto copy_data = m_copy.to(source_data, m_resource);
+    auto copy_data = m_copy.to(source_data, m_resource, nullptr,
+                               vecmem::copy::type::host_to_device);
     // Check the copy.
     vecmem::jagged_device_vector<int> copy_data_vec(copy_data);
     EXPECT_EQ(source_data_vec.size(), copy_data_vec.size());
@@ -316,7 +317,7 @@ TEST_F(core_copy_test, jagged_vector_buffer) {
 
     // Make a copy into a host vector.
     vecmem::jagged_vector<int> copy_vec(&m_resource);
-    m_copy(source_data, copy_vec);
+    m_copy(source_data, copy_vec, vecmem::copy::type::device_to_host);
     // Check the copy.
     EXPECT_EQ(reference.size(), copy_vec.size());
     auto reference_itr = reference.begin();
@@ -369,7 +370,8 @@ TEST_F(core_copy_test, resizable_jagged_vector_buffer) {
     }
 
     // Make a copy of it into a buffer.
-    auto copy_data = m_copy.to(source_data, m_resource);
+    auto copy_data = m_copy.to(source_data, m_resource, nullptr,
+                               vecmem::copy::type::host_to_device);
     // Check the copy.
     vecmem::jagged_device_vector<int> copy_data_vec(copy_data);
     EXPECT_EQ(source_data_vec.size(), copy_data_vec.size());
@@ -390,7 +392,7 @@ TEST_F(core_copy_test, resizable_jagged_vector_buffer) {
 
     // Make a copy into a host vector.
     vecmem::jagged_vector<int> copy_vec(&m_resource);
-    m_copy(source_data, copy_vec);
+    m_copy(source_data, copy_vec, vecmem::copy::type::device_to_host);
     // Check the copy.
     EXPECT_EQ(reference.size(), copy_vec.size());
     auto reference_itr = reference.begin();

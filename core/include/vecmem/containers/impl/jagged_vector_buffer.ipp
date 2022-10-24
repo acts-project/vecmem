@@ -11,6 +11,7 @@
 #include "vecmem/containers/details/aligned_multiple_placement.hpp"
 
 // System include(s).
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>
@@ -25,10 +26,8 @@ std::vector<std::size_t> get_sizes(
     const vecmem::data::jagged_vector_view<TYPE>& jvv) {
 
     std::vector<std::size_t> result(jvv.size());
-    for (typename vecmem::data::jagged_vector_view<TYPE>::size_type i = 0;
-         i < jvv.size(); ++i) {
-        result[i] = jvv.host_ptr()[i].size();
-    }
+    std::transform(jvv.host_ptr(), jvv.host_ptr() + jvv.size(), result.begin(),
+                   [](const auto& vv) { return vv.size(); });
     return result;
 }
 

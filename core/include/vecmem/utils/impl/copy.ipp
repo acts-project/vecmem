@@ -16,6 +16,7 @@
 // System include(s).
 #include <algorithm>
 #include <cassert>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 
@@ -216,26 +217,18 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
                   "Can only use compatible types in the copy");
 
     // A sanity check.
-    assert(from_view.size() == to_view.size());
+    if (from_view.size() > to_view.size()) {
+        std::ostringstream msg;
+        msg << "from_view.size() (" << from_view.size()
+            << ") > to_view.size() (" << to_view.size() << ")";
+        throw std::length_error(msg.str());
+    }
 
     // Check if anything needs to be done.
-    if (from_view.size() == 0) {
+    const std::size_t size = from_view.size();
+    if (size == 0) {
         return;
     }
-    const std::size_t size = from_view.size();
-
-    // Helper lambda for figuring out if a set of views is contiguous in
-    // memory.
-    auto is_contiguous = [size](const auto* views) {
-        auto ptr = views[0].ptr();
-        for (std::size_t i = 1; i < size; ++i) {
-            if ((ptr + views[i - 1].capacity()) != views[i].ptr()) {
-                return false;
-            }
-            ptr = views[i].ptr();
-        }
-        return true;
-    };
 
     /// Helper (host) memory resource
     static host_memory_resource host_mr;
@@ -243,8 +236,8 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     static copy host_copy;
 
     // Calculate the contiguous-ness of the memory allocations.
-    const bool from_is_contiguous = is_contiguous(from_view.host_ptr());
-    const bool to_is_contiguous = is_contiguous(to_view.host_ptr());
+    const bool from_is_contiguous = is_contiguous(from_view.host_ptr(), size);
+    const bool to_is_contiguous = is_contiguous(to_view.host_ptr(), size);
     VECMEM_DEBUG_MSG(3, "from_is_contiguous = %d, to_is_contiguous = %d",
                      from_is_contiguous, to_is_contiguous);
 
@@ -271,8 +264,8 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
         host_copy.copy_views_impl(sizes, from_view.host_ptr(),
                                   buffer.host_ptr(), cptype);
         // Now perform the host-to-device copy in one go.
-        copy_views_impl(capacities, buffer.host_ptr(), to_view.host_ptr(),
-                        cptype);
+        copy_views_contiguous_impl(capacities, buffer.host_ptr(),
+                                   to_view.host_ptr(), cptype);
         set_sizes(sizes, to_view);
     } else if ((cptype == type::device_to_host) &&
                (from_is_contiguous == true) && (to_is_contiguous == false)) {
@@ -290,8 +283,8 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
             std::vector<std::size_t>(capacities.begin(), capacities.end()),
             host_mr);
         // Perform the device-to-host copy into this contiguous buffer.
-        copy_views_impl(capacities, from_view.host_ptr(), buffer.host_ptr(),
-                        cptype);
+        copy_views_contiguous_impl(capacities, from_view.host_ptr(),
+                                   buffer.host_ptr(), cptype);
         // Now fill the host views with host-to-host memory copies.
         host_copy.copy_views_impl(sizes, buffer.host_ptr(), to_view.host_ptr(),
                                   cptype);
@@ -392,30 +385,9 @@ void copy::copy_views_impl(
     assert(from_view != nullptr);
     assert(to_view != nullptr);
 
-    // Helper variables used in the copy.
+    // Helper variable(s) used in the copy.
     const std::size_t size = sizes.size();
-    const std::remove_cv_t<TYPE1>* from_ptr = nullptr;
-    TYPE2* to_ptr = nullptr;
-    std::size_t copy_size = 0;
     [[maybe_unused]] std::size_t copy_ops = 0;
-
-    // Helper lambda for figuring out if the next vector element is
-    // connected to the currently processed one or not.
-    auto next_is_connected = [size, &sizes](const auto* array,
-                                            std::size_t index) {
-        // Check if the next non-empty vector element is connected to the
-        // current one.
-        std::size_t j = index + 1;
-        while (j < size) {
-            if (sizes[j] == 0) {
-                ++j;
-                continue;
-            }
-            return ((array[index].ptr() + sizes[index]) == array[j].ptr());
-        }
-        // If we got here, then the answer is no...
-        return false;
-    };
 
     // Perform the copy in multiple steps.
     for (std::size_t i = 0; i < size; ++i) {
@@ -431,32 +403,10 @@ void copy::copy_views_impl(
         assert(sizes[i] <= from_view[i].capacity());
         assert(sizes[i] <= to_view[i].capacity());
 
-        // Set/update the helper variables.
-        if ((from_ptr == nullptr) && (to_ptr == nullptr) && (copy_size == 0)) {
-            from_ptr = from_view[i].ptr();
-            to_ptr = to_view[i].ptr();
-            copy_size = sizes[i] * sizeof(TYPE1);
-        } else {
-            assert(from_ptr != nullptr);
-            assert(to_ptr != nullptr);
-            assert(copy_size != 0);
-            copy_size += sizes[i] * sizeof(TYPE1);
-        }
-
-        // Check if the next vector element connects to this one. If not,
-        // perform the copy now.
-        if ((!next_is_connected(from_view, i)) ||
-            (!next_is_connected(to_view, i))) {
-
-            // Perform the copy.
-            do_copy(copy_size, from_ptr, to_ptr, cptype);
-
-            // Reset/update the variables.
-            from_ptr = nullptr;
-            to_ptr = nullptr;
-            copy_size = 0;
-            copy_ops += 1;
-        }
+        // Perform the copy.
+        do_copy(sizes[i] * sizeof(TYPE1), from_view[i].ptr(), to_view[i].ptr(),
+                cptype);
+        ++copy_ops;
     }
 
     // Let the user know what happened.
@@ -464,6 +414,55 @@ void copy::copy_views_impl(
                      "Copied the payload of a jagged vector of type "
                      "\"%s\" with %lu copy operation(s)",
                      typeid(TYPE2).name(), copy_ops);
+}
+
+template <typename TYPE1, typename TYPE2>
+void copy::copy_views_contiguous_impl(
+    const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
+    const data::vector_view<TYPE1>* from_view,
+    data::vector_view<TYPE2>* to_view, type::copy_type cptype) {
+
+    // The input and output types are allowed to be different, but only by
+    // const-ness.
+    static_assert(std::is_same<TYPE1, TYPE2>::value ||
+                      details::is_same_nc<TYPE1, TYPE2>::value,
+                  "Can only use compatible types in the copy");
+
+    // Some security checks.
+    assert(from_view != nullptr);
+    assert(to_view != nullptr);
+    assert(is_contiguous(from_view, sizes.size()));
+    assert(is_contiguous(to_view, sizes.size()));
+
+    // Helper variable(s) used in the copy.
+    const std::size_t size = sizes.size();
+    const std::size_t total_size =
+        std::accumulate(sizes.begin(), sizes.end(),
+                        static_cast<std::size_t>(0)) *
+        sizeof(TYPE1);
+
+    // Find the first non-empty element.
+    for (std::size_t i = 0; i < size; ++i) {
+
+        // Jump over empty elements.
+        if (sizes[i] == 0) {
+            continue;
+        }
+
+        // Some sanity checks.
+        assert(from_view[i].ptr() != nullptr);
+        assert(to_view[i].ptr() != nullptr);
+
+        // Perform the copy.
+        do_copy(total_size, from_view[i].ptr(), to_view[i].ptr(), cptype);
+        break;
+    }
+
+    // Let the user know what happened.
+    VECMEM_DEBUG_MSG(2,
+                     "Copied the payload of a jagged vector of type "
+                     "\"%s\" with 1 copy operation(s)",
+                     typeid(TYPE2).name());
 }
 
 template <typename TYPE>
@@ -494,6 +493,24 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes_impl(
         result[i] = data[i].capacity();
     }
     return result;
+}
+
+template <typename TYPE>
+bool copy::is_contiguous(const data::vector_view<TYPE>* data,
+                         std::size_t size) {
+
+    // We should never call this function for an empty jagged vector.
+    assert(size > 0);
+
+    // Check whether all memory blocks are contiguous.
+    auto ptr = data[0].ptr();
+    for (std::size_t i = 1; i < size; ++i) {
+        if ((ptr + data[i - 1].capacity()) != data[i].ptr()) {
+            return false;
+        }
+        ptr = data[i].ptr();
+    }
+    return true;
 }
 
 }  // namespace vecmem
