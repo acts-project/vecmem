@@ -155,10 +155,20 @@ private:
         const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
         const data::vector_view<TYPE1>* from, data::vector_view<TYPE2>* to,
         type::copy_type cptype);
+    /// Helper function performing the copy of a jagged array/vector
+    template <typename TYPE1, typename TYPE2>
+    void copy_views_contiguous_impl(
+        const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
+        const data::vector_view<TYPE1>* from, data::vector_view<TYPE2>* to,
+        type::copy_type cptype);
     /// Helper function for getting the sizes of a jagged vector/buffer
     template <typename TYPE>
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes_impl(
         const data::vector_view<TYPE>* data, std::size_t size);
+    /// Check if a vector of views occupy a contiguous block of memory
+    template <typename TYPE>
+    static bool is_contiguous(const data::vector_view<TYPE>* data,
+                              std::size_t size);
 
 };  // class copy
 
