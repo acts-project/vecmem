@@ -6,7 +6,6 @@
  */
 
 // Local include(s).
-#include "device_selector.hpp"
 #include "get_queue.hpp"
 #include "opaque_queue.hpp"
 #include "vecmem/utils/debug.hpp"
@@ -17,10 +16,9 @@
 
 namespace vecmem::sycl {
 
-queue_wrapper::queue_wrapper(const std::string& deviceName)
+queue_wrapper::queue_wrapper()
     : m_queue(nullptr),
-      m_managedQueue(std::make_unique<details::opaque_queue>(
-          device_selector(deviceName))) {
+      m_managedQueue(std::make_unique<details::opaque_queue>()) {
 
     m_queue = m_managedQueue.get();
     VECMEM_DEBUG_MSG(1,

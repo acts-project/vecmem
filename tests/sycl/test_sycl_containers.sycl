@@ -9,7 +9,6 @@
 #include <CL/sycl.hpp>
 
 // Local include(s).
-#include "../../sycl/src/utils/sycl/device_selector.hpp"
 #include "vecmem/containers/array.hpp"
 #include "vecmem/containers/const_device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
@@ -33,7 +32,7 @@ class sycl_containers_test : public testing::Test {};
 TEST_F(sycl_containers_test, shared_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue{vecmem::sycl::device_selector()};
+    cl::sycl::queue queue;
 
     // The shared memory resource.
     vecmem::sycl::shared_memory_resource resource(&queue);
@@ -90,7 +89,7 @@ TEST_F(sycl_containers_test, shared_memory) {
 TEST_F(sycl_containers_test, device_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue{vecmem::sycl::device_selector()};
+    cl::sycl::queue queue;
 
     // The memory resources.
     vecmem::sycl::host_memory_resource host_resource(&queue);
@@ -163,7 +162,7 @@ TEST_F(sycl_containers_test, device_memory) {
 TEST_F(sycl_containers_test, atomic_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue{vecmem::sycl::device_selector()};
+    cl::sycl::queue queue;
 
     // The memory resources.
     vecmem::sycl::shared_memory_resource resource(&queue);
@@ -216,7 +215,7 @@ TEST_F(sycl_containers_test, atomic_memory) {
 TEST_F(sycl_containers_test, extendable_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue{vecmem::sycl::device_selector()};
+    cl::sycl::queue queue;
 
     // The memory resources.
     vecmem::sycl::host_memory_resource host_resource(&queue);
@@ -277,7 +276,7 @@ TEST_F(sycl_containers_test, extendable_memory) {
 TEST_F(sycl_containers_test, array_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue{vecmem::sycl::device_selector()};
+    cl::sycl::queue queue;
 
     // The memory resource(s).
     vecmem::sycl::shared_memory_resource shared_resource(&queue);

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -25,7 +25,7 @@ class VECMEM_SYCL_EXPORT copy : public vecmem::copy {
 
 public:
     /// Constructor on top of a user-provided queue
-    copy(const queue_wrapper& queue = {""});
+    copy(const queue_wrapper& queue = {});
 
 protected:
     /// Perform a memory copy using SYCL

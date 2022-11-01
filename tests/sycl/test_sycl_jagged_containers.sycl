@@ -9,7 +9,6 @@
 #include <CL/sycl.hpp>
 
 // VecMem include(s).
-#include "../../sycl/src/utils/sycl/device_selector.hpp"
 #include "vecmem/containers/array.hpp"
 #include "vecmem/containers/data/jagged_vector_buffer.hpp"
 #include "vecmem/containers/device_array.hpp"
@@ -35,7 +34,7 @@ class sycl_jagged_containers_test : public testing::Test {
 public:
     /// Constructor, setting up the input data for the tests.
     sycl_jagged_containers_test()
-        : m_queue(vecmem::sycl::device_selector()),
+        : m_queue(),
           m_mem(&m_queue),
           m_vec({vecmem::vector<int>({1, 2, 3, 4}, &m_mem),
                  vecmem::vector<int>({5, 6}, &m_mem),
