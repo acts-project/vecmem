@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -11,7 +11,6 @@
 
 // System include(s).
 #include <memory>
-#include <string>
 
 namespace vecmem::sycl {
 
@@ -35,8 +34,8 @@ class opaque_queue;
 class VECMEM_SYCL_EXPORT queue_wrapper {
 
 public:
-    /// Construct a queue for a device with a specific name
-    queue_wrapper(const std::string& deviceName = "");
+    /// Construct a queue for the default device
+    queue_wrapper();
     /// Wrap an existing @c cl::sycl::queue object
     ///
     /// Without taking ownership of it!
@@ -49,6 +48,13 @@ public:
     queue_wrapper(queue_wrapper&& parent);
 
     /// Destructor
+    ///
+    /// The destructor is declared and implemented explicitly as an empty
+    /// function to make sure that client code would not try to generate it
+    /// itself. Leading to problems about the symbols of
+    /// @c vecmem::sycl::details::opaque_queue not being available in
+    /// client code.
+    ///
     ~queue_wrapper();
 
     /// Copy assignment

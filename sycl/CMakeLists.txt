@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -28,8 +28,6 @@ vecmem_add_library( vecmem_sycl sycl
    "src/utils/sycl/copy.sycl"
    "include/vecmem/utils/sycl/queue_wrapper.hpp"
    "src/utils/sycl/queue_wrapper.sycl"
-   "src/utils/sycl/device_selector.hpp"
-   "src/utils/sycl/device_selector.sycl"
    "src/utils/sycl/get_queue.hpp"
    "src/utils/sycl/get_queue.sycl"
    "src/utils/sycl/opaque_queue.hpp" )

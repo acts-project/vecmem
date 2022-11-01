@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -23,7 +23,7 @@ class VECMEM_SYCL_EXPORT memory_resource_base
 
 public:
     /// Constructor on top of a user-provided queue
-    memory_resource_base(const queue_wrapper& queue = {""});
+    memory_resource_base(const queue_wrapper& queue = {});
 
 protected:
     /// The queue that the allocations are made for/on
