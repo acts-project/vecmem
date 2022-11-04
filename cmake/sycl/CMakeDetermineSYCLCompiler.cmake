@@ -27,6 +27,12 @@ if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
    execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}" "--version"
       OUTPUT_VARIABLE _syclVersionOutput
       RESULT_VARIABLE _syclVersionResult )
+   if( NOT ${_syclVersionResult} EQUAL 0 )
+      execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}"
+                               "--hipsycl-version"
+         OUTPUT_VARIABLE _syclVersionOutput
+         RESULT_VARIABLE _syclVersionResult )
+   endif()
    if( ${_syclVersionResult} EQUAL 0 )
       if( "${_syclVersionOutput}" MATCHES "ComputeCpp" )
          set( CMAKE_SYCL_COMPILER_ID "ComputeCpp" CACHE STRING
@@ -34,15 +40,19 @@ if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
          set( _syclVersionRegex "([0-9\.]+) Device Compiler" )
       elseif( "${_syclVersionOutput}" MATCHES "oneAPI" )
          set( CMAKE_SYCL_COMPILER_ID "IntelLLVM" CACHE STRING
-         "Identifier for the SYCL compiler in use" )
+            "Identifier for the SYCL compiler in use" )
          set( _syclVersionRegex "DPC\\\+\\\+.*Compiler ([0-9\.]+)" )
       elseif( "${_syclVersionOutput}" MATCHES "intel/llvm" )
          set( CMAKE_SYCL_COMPILER_ID "IntelLLVM" CACHE STRING
-         "Identifier for the SYCL compiler in use" )
+            "Identifier for the SYCL compiler in use" )
          set( _syclVersionRegex "clang version ([0-9\.]+)" )
+      elseif( "${_syclVersionOutput}" MATCHES "hipSYCL" )
+         set( CMAKE_SYCL_COMPILER_ID "hipSYCL" CACHE STRING
+            "Identifier for the SYCL compiler in use" )
+         set( _syclVersionRegex "hipSYCL version: ([0-9\.]+)" )
       else()
          set( CMAKE_SYCL_COMPILER_ID "Unknown" CACHE STRING
-         "Identifier for the SYCL compiler in use" )
+            "Identifier for the SYCL compiler in use" )
          set( _syclVersionRegex "[a-zA-Z]+ version ([0-9\.]+)" )
       endif()
       string( REPLACE "\n" ";" _syclVersionOutputList "${_syclVersionOutput}" )
