@@ -76,7 +76,7 @@ jobs:
             CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda:v11"
             OPTIONS:
           - NAME: "CUDA"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:v13"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:v32"
             OPTIONS:
           - NAME: "HIP"
             CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm:v11"
@@ -85,7 +85,7 @@ jobs:
             CONTAINER: "ghcr.io/acts-project/ubuntu2004_oneapi:v20"
             OPTIONS:
           - NAME: "SYCL"
-            CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda_oneapi:v20"
+            CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda_oneapi:v32"
             OPTIONS: -DVECMEM_BUILD_CUDA_LIBRARY=FALSE
         include:
           - BUILD:
@@ -93,7 +93,7 @@ jobs:
               MSG_LVL: 0
             PLATFORM:
               NAME: "SYCL"
-              CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm_oneapi:v20"
+              CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm_oneapi:v32"
               OPTIONS: -DVECMEM_BUILD_HIP_LIBRARY=FALSE
 
     # The system to run on.
