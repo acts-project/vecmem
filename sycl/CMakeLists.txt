@@ -40,7 +40,8 @@ set_target_properties( vecmem_sycl PROPERTIES
 
 # Check if assertions work out of the box in the build.
 vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ASSERT
-   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/assert_test.sycl" )
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/assert_test.sycl"
+   CMAKE_FLAGS -DCMAKE_BUILD_TYPE:STRING=Debug )
 
 # If not, check if it can be solved as described in:
 #   https://github.com/intel/llvm/issues/3385
@@ -49,7 +50,8 @@ if( NOT VECMEM_HAVE_SYCL_ASSERT )
    # Check if the "CUDA polyfill" can make the test work.
    vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_CUDA_ASSERT_POLYFILL
       "${CMAKE_CURRENT_SOURCE_DIR}/cmake/assert_test.sycl"
-      "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/sycl/cuda_assert_polyfill.sycl" )
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/sycl/cuda_assert_polyfill.sycl"
+      CMAKE_FLAGS -DCMAKE_BUILD_TYPE:STRING=Debug )
 
    # If yes, we have to do something a bit elaborate. The "polyfill" code only
    # works correctly when linked into the binary that needs to use assertions.

@@ -15,7 +15,7 @@ include( CMakeParseArguments )
 function( vecmem_check_sycl_code_compiles _variable )
 
    # Parse the optional function arguments.
-   cmake_parse_arguments( ARG "" "" "COMPILE_DEFINITIONS" ${ARGN} )
+   cmake_parse_arguments( ARG "" "" "COMPILE_DEFINITIONS;CMAKE_FLAGS" ${ARGN} )
 
    # Enable the SYCL language.
    enable_language( SYCL )
@@ -36,7 +36,8 @@ function( vecmem_check_sycl_code_compiles _variable )
    try_compile( ${_variable}
       "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_variable}"
       SOURCES ${ARG_UNPARSED_ARGUMENTS}
-      COMPILE_DEFINITIONS ${ARG_COMPILE_DEFINITIONS} )
+      COMPILE_DEFINITIONS ${ARG_COMPILE_DEFINITIONS}
+      CMAKE_FLAGS ${ARG_CMAKE_FLAGS} )
 
    # Print a result message.
    if( ${_variable} )
