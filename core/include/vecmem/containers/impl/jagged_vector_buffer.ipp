@@ -52,6 +52,13 @@ allocate_jagged_buffer_outer_memory(
 namespace vecmem {
 namespace data {
 
+/// A custom implementation for the default constructor is necessary because
+/// @c vecmem::data::jagged_vector_view does not set its members to anything
+/// explicitly in its default constructor. (In order to be trivially default
+/// constructible.) So here we need to be explicit.
+template <typename TYPE>
+jagged_vector_buffer<TYPE>::jagged_vector_buffer() : base_type(0, nullptr) {}
+
 template <typename TYPE>
 template <typename OTHERTYPE,
           std::enable_if_t<std::is_convertible<TYPE, OTHERTYPE>::value, bool> >

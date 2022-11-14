@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -37,6 +37,8 @@ public:
     /// Use the base class's @c value_type
     typedef typename base_type::value_type value_type;
 
+    /// Default constructor
+    jagged_vector_data();
     /**
      * @brief Construct jagged vector data from raw information
      *
@@ -47,6 +49,11 @@ public:
      * @param[in] mem The memory resource to manage the internal state
      */
     jagged_vector_data(size_type size, memory_resource& mem);
+    /// Move constructor
+    jagged_vector_data(jagged_vector_data&&) = default;
+
+    /// Move assignment
+    jagged_vector_data& operator=(jagged_vector_data&&) = default;
 
 private:
     /// Data object owning the allocated memory

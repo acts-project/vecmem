@@ -35,6 +35,14 @@ allocate_jagged_memory(
 namespace vecmem {
 namespace data {
 
+/// A custom implementation for the default constructor is necessary because
+/// @c vecmem::data::jagged_vector_view does not set its members to anything
+/// explicitly in its default constructor. (In order to be trivially default
+/// constructible.) So here we need to be explicit.
+template <typename T>
+jagged_vector_data<T>::jagged_vector_data()
+    : base_type(static_cast<size_type>(0), nullptr) {}
+
 template <typename T>
 jagged_vector_data<T>::jagged_vector_data(size_type size, memory_resource& mem)
     : base_type(size, nullptr),
