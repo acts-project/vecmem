@@ -66,6 +66,13 @@ TEST_F(core_device_container_test, trivial_construct) {
         std::is_trivially_constructible<vecmem::data::vector_view<int> >());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
                 vecmem::data::vector_view<int> >());
+
+    EXPECT_TRUE(
+        std::is_default_constructible<vecmem::data::vector_buffer<int> >());
+    EXPECT_TRUE(std::is_default_constructible<
+                vecmem::data::jagged_vector_buffer<int> >());
+    EXPECT_TRUE(std::is_default_constructible<
+                vecmem::data::jagged_vector_data<int> >());
 }
 
 /// Test(s) for @c vecmem::data::vector_buffer
@@ -272,4 +279,97 @@ TEST_F(core_device_container_test, resizable_jagged_vector_buffer) {
     device_vec.at(9).push_back(321);
     EXPECT_EQ(device_vec.at(9).size(), 1u);
     EXPECT_EQ(device_vec.at(9).capacity(), 2u);
+}
+
+/// Tests with converting between compatible types.
+TEST_F(core_device_container_test, conversions) {
+
+    // Create a dummy vector buffer.
+    vecmem::data::vector_buffer<int> buffer1d1{10, 0, m_resource};
+    m_copy.setup(buffer1d1);
+
+    // Check that some conversions compile and work correctly.
+    vecmem::data::vector_view<int> view1d1 = buffer1d1;
+    vecmem::data::vector_view<int> view1d2;
+    view1d2 = view1d1;
+    vecmem::data::vector_view<const int> view1d3 = buffer1d1;
+    vecmem::data::vector_view<const int> view1d4 = view1d1;
+    vecmem::data::vector_view<const int> view1d5;
+    view1d5 = view1d1;
+    EXPECT_EQ(view1d1, view1d2);
+    EXPECT_EQ(view1d1, view1d3);
+    EXPECT_EQ(view1d1, view1d4);
+    EXPECT_EQ(view1d1, view1d5);
+    EXPECT_EQ(view1d2, view1d1);
+    EXPECT_EQ(view1d3, view1d1);
+    EXPECT_EQ(view1d4, view1d1);
+    EXPECT_EQ(view1d5, view1d1);
+
+    // Make copies of the buffer.
+    vecmem::data::vector_buffer<int> buffer1d2{std::move(buffer1d1)};
+    vecmem::data::vector_buffer<int> buffer1d3;
+    buffer1d3 = std::move(buffer1d2);
+
+    // Make sure that the previously created views still point correctly
+    // at the "latest" buffer.
+    vecmem::data::vector_view<int> view1d6 = buffer1d3;
+    EXPECT_EQ(view1d6, view1d1);
+
+    // Create a dummy jagged vector buffer.
+    vecmem::data::jagged_vector_buffer<int> buffer2d1(
+        std::vector<std::size_t>(10, 0),
+        std::vector<std::size_t>({0, 16, 10, 15, 8, 3, 0, 0, 55, 2}),
+        m_resource);
+    m_copy.setup(buffer2d1);
+
+    // Check that some conversions compile and work correctly.
+    vecmem::data::jagged_vector_view<int> view2d1 = buffer2d1;
+    vecmem::data::jagged_vector_view<int> view2d2;
+    view2d2 = view2d1;
+    vecmem::data::jagged_vector_view<const int> view2d3 = buffer2d1;
+    vecmem::data::jagged_vector_view<const int> view2d4 = view2d1;
+    vecmem::data::jagged_vector_view<const int> view2d5;
+    view2d5 = view2d1;
+    EXPECT_EQ(view2d1, view2d2);
+    EXPECT_EQ(view2d1, view2d3);
+    EXPECT_EQ(view2d1, view2d4);
+    EXPECT_EQ(view2d1, view2d5);
+    EXPECT_EQ(view2d2, view2d1);
+    EXPECT_EQ(view2d3, view2d1);
+    EXPECT_EQ(view2d4, view2d1);
+    EXPECT_EQ(view2d5, view2d1);
+
+    // Make copies of the buffer.
+    vecmem::data::jagged_vector_buffer<int> buffer2d2{std::move(buffer2d1)};
+    vecmem::data::jagged_vector_buffer<int> buffer2d3;
+    buffer2d3 = std::move(buffer2d2);
+
+    // Make sure that the previously created views still point correctly
+    // at the "latest" buffer.
+    vecmem::data::jagged_vector_view<int> view2d6 = buffer2d3;
+    EXPECT_EQ(view2d6, view2d1);
+
+    // Create a dummy jagged vector.
+    vecmem::jagged_vector<int> vector2d1 = {{
+                                                {{1, 2, 3, 4}, &m_resource},
+                                                {{5, 6}, &m_resource},
+                                                {{7}, &m_resource},
+                                                {{8, 9}, &m_resource},
+                                                {{10}, &m_resource},
+                                            },
+                                            &m_resource};
+
+    // Made a data object out of it.
+    vecmem::data::jagged_vector_data<int> data2d1 = vecmem::get_data(vector2d1);
+    vecmem::data::jagged_vector_view<int> view2d7 = data2d1;
+
+    // Make copies of the data.
+    vecmem::data::jagged_vector_data<int> data2d2{std::move(data2d1)};
+    vecmem::data::jagged_vector_data<int> data2d3;
+    data2d3 = std::move(data2d2);
+
+    // Make sure that the "latest" data object is still the same as the first
+    // one.
+    vecmem::data::jagged_vector_view<int> view2d8 = data2d3;
+    EXPECT_EQ(view2d7, view2d8);
 }
