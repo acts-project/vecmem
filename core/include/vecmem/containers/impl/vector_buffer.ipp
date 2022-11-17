@@ -16,6 +16,14 @@
 namespace vecmem {
 namespace data {
 
+/// A custom implementation for the default constructor is necessary because
+/// @c vecmem::data::vector_view does not set its members to anything
+/// explicitly in its default constructor. (In order to be trivially default
+/// constructible.) So here we need to be explicit.
+template <typename TYPE>
+vector_buffer<TYPE>::vector_buffer()
+    : base_type(static_cast<size_type>(0), nullptr) {}
+
 template <typename TYPE>
 vector_buffer<TYPE>::vector_buffer(size_type size, memory_resource& resource)
     : vector_buffer(size, size, resource) {}

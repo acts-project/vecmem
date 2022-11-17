@@ -67,6 +67,35 @@ public:
                                bool> = true>
     VECMEM_HOST_AND_DEVICE vector_view(const vector_view<OTHERTYPE>& parent);
 
+    /// Copy from a "slightly different" @c vecmem::details::vector_view object
+    ///
+    /// See the copy constructor for more details.
+    ///
+    template <typename OTHERTYPE,
+              std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value,
+                               bool> = true>
+    VECMEM_HOST_AND_DEVICE vector_view& operator=(
+        const vector_view<OTHERTYPE>& rhs);
+
+    /// Equality check. Two objects are only equal if they point at the same
+    /// memory.
+    template <
+        typename OTHERTYPE,
+        std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
+                                      std::remove_cv_t<OTHERTYPE> >::value,
+                         bool> = true>
+    VECMEM_HOST_AND_DEVICE bool operator==(
+        const vector_view<OTHERTYPE>& rhs) const;
+
+    /// Inequality check. Simply based on @c operator==.
+    template <
+        typename OTHERTYPE,
+        std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
+                                      std::remove_cv_t<OTHERTYPE> >::value,
+                         bool> = true>
+    VECMEM_HOST_AND_DEVICE bool operator!=(
+        const vector_view<OTHERTYPE>& rhs) const;
+
     /// Get the size of the vector
     VECMEM_HOST_AND_DEVICE
     size_type size() const;

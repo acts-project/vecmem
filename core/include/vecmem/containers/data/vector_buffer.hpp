@@ -1,6 +1,6 @@
 /** VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2022 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -47,11 +47,18 @@ public:
 
     /// @}
 
+    /// Default constructor
+    vector_buffer();
     /// Constant size data constructor
     vector_buffer(size_type size, memory_resource& resource);
     /// Resizable data constructor
     vector_buffer(size_type capacity, size_type size,
                   memory_resource& resource);
+    /// Move constructor
+    vector_buffer(vector_buffer&&) = default;
+
+    /// Move assignment
+    vector_buffer& operator=(vector_buffer&&) = default;
 
 private:
     /// Data object owning the allocated memory

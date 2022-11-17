@@ -53,6 +53,9 @@ public:
 
     /// @}
 
+    /// Default constructor
+    jagged_vector_buffer();
+
     /// Constructor from an existing @c vecmem::data::jagged_vector_view
     ///
     /// @param other The existing @c vecmem::data::jagged_vector_view object
@@ -94,6 +97,12 @@ public:
                          const std::vector<std::size_t>& capacities,
                          memory_resource& resource,
                          memory_resource* host_access_resource = nullptr);
+
+    /// Move constructor
+    jagged_vector_buffer(jagged_vector_buffer&&) = default;
+
+    /// Move assignment
+    jagged_vector_buffer& operator=(jagged_vector_buffer&&) = default;
 
 private:
     /// Data object for the @c vecmem::data::vector_view array

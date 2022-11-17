@@ -76,14 +76,33 @@ public:
         typename OTHERTYPE,
         std::enable_if_t<details::is_same_nc<T, OTHERTYPE>::value, bool> = true>
     VECMEM_HOST_AND_DEVICE jagged_vector_view(
-        jagged_vector_view<OTHERTYPE> parent);
+        const jagged_vector_view<OTHERTYPE>& parent);
 
     /// Assignment operator from a "slightly different" object
     template <
         typename OTHERTYPE,
         std::enable_if_t<details::is_same_nc<T, OTHERTYPE>::value, bool> = true>
     VECMEM_HOST_AND_DEVICE jagged_vector_view& operator=(
-        jagged_vector_view<OTHERTYPE> rhs);
+        const jagged_vector_view<OTHERTYPE>& rhs);
+
+    /// Equality check. Two objects are only equal if they point at the same
+    /// memory.
+    template <
+        typename OTHERTYPE,
+        std::enable_if_t<std::is_same<std::remove_cv_t<T>,
+                                      std::remove_cv_t<OTHERTYPE> >::value,
+                         bool> = true>
+    VECMEM_HOST_AND_DEVICE bool operator==(
+        const jagged_vector_view<OTHERTYPE>& rhs) const;
+
+    /// Inequality check. Simply based on @c operator==.
+    template <
+        typename OTHERTYPE,
+        std::enable_if_t<std::is_same<std::remove_cv_t<T>,
+                                      std::remove_cv_t<OTHERTYPE> >::value,
+                         bool> = true>
+    VECMEM_HOST_AND_DEVICE bool operator!=(
+        const jagged_vector_view<OTHERTYPE>& rhs) const;
 
     /// Get the "outer" size of the jagged vector
     VECMEM_HOST_AND_DEVICE
