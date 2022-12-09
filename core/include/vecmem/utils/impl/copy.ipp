@@ -230,11 +230,6 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
         return;
     }
 
-    /// Helper (host) memory resource
-    static host_memory_resource host_mr;
-    /// Helper (host) copy object
-    static copy host_copy;
-
     // Calculate the contiguous-ness of the memory allocations.
     const bool from_is_contiguous = is_contiguous(from_view.host_ptr(), size);
     const bool to_is_contiguous = is_contiguous(to_view.host_ptr(), size);
@@ -244,56 +239,34 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     // Get the sizes of the source jagged vector.
     const auto sizes = get_sizes(from_view);
 
-    // Deal with different types of memory configurations.
-    if ((cptype == type::host_to_device) && (from_is_contiguous == false) &&
-        (to_is_contiguous == true)) {
-        // Tell the user what's happening.
-        VECMEM_DEBUG_MSG(
-            2, "Performing optimised host->device jagged vector copy");
-        // Create a contiguous buffer in host memory with the appropriate
-        // capacities and sizes.
-        std::vector<typename data::vector_view<TYPE1>::size_type> capacities(
-            size);
-        std::transform(to_view.host_ptr(), to_view.host_ptr() + size,
-                       capacities.begin(),
-                       [](const auto& view) { return view.capacity(); });
-        data::jagged_vector_buffer<TYPE2> buffer(
-            std::vector<std::size_t>(capacities.begin(), capacities.end()),
-            host_mr);
-        // Collect the data into this buffer with host-to-host memory copies.
-        host_copy.copy_views_impl(sizes, from_view.host_ptr(),
-                                  buffer.host_ptr(), cptype);
-        // Now perform the host-to-device copy in one go.
-        copy_views_contiguous_impl(capacities, buffer.host_ptr(),
-                                   to_view.host_ptr(), cptype);
-        set_sizes(sizes, to_view);
-    } else if ((cptype == type::device_to_host) &&
-               (from_is_contiguous == true) && (to_is_contiguous == false)) {
-        // Tell the user what's happening.
-        VECMEM_DEBUG_MSG(
-            2, "Performing optimised device->host jagged vector copy");
-        // Create a contiguous buffer in host memory with the appropriate
-        // capacities.
-        std::vector<typename data::vector_view<TYPE1>::size_type> capacities(
-            size);
-        std::transform(from_view.host_ptr(), from_view.host_ptr() + size,
-                       capacities.begin(),
-                       [](const auto& view) { return view.capacity(); });
-        data::jagged_vector_buffer<TYPE2> buffer(
-            std::vector<std::size_t>(capacities.begin(), capacities.end()),
-            host_mr);
-        // Perform the device-to-host copy into this contiguous buffer.
+    // Before even attempting the copy, make sure that the target view either
+    // has the correct sizes, or can be resized correctly.
+    set_sizes(sizes, to_view);
+
+    // Check whether the source and target capacities match up. We can only
+    // perform the "optimised copy" if they do.
+    std::vector<typename data::vector_view<TYPE1>::size_type> capacities(size);
+    bool capacities_match = true;
+    for (std::size_t i = 0; i < size; ++i) {
+        if (from_view.host_ptr()[i].capacity() !=
+            to_view.host_ptr()[i].capacity()) {
+            capacities_match = false;
+            break;
+        }
+        capacities[i] = from_view.host_ptr()[i].capacity();
+    }
+
+    // Perform the copy as best as we can.
+    if (from_is_contiguous && to_is_contiguous && capacities_match) {
+        // Perform the copy in one go.
         copy_views_contiguous_impl(capacities, from_view.host_ptr(),
-                                   buffer.host_ptr(), cptype);
-        // Now fill the host views with host-to-host memory copies.
-        host_copy.copy_views_impl(sizes, buffer.host_ptr(), to_view.host_ptr(),
-                                  cptype);
-        host_copy.set_sizes(sizes, to_view);
+                                   to_view.host_ptr(), cptype);
     } else {
-        // Do the copy as best as we can with the existing views.
+        // Do the copy as best as we can. Note that since they are not
+        // contiguous anyway, we use the sizes of the vectors here, not their
+        // capcities.
         copy_views_impl(sizes, from_view.host_ptr(), to_view.host_ptr(),
                         cptype);
-        set_sizes(sizes, to_view);
     }
 }
 
