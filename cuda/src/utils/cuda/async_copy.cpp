@@ -20,6 +20,28 @@
 #include <cassert>
 #include <string>
 
+namespace {
+
+/// CUDA specific implementation of the abstract event interface
+struct cuda_event : public vecmem::abstract_event {
+
+    /// Constructor with the created event.
+    cuda_event(cudaEvent_t event) : m_event(event) {}
+    /// Destructor
+    ~cuda_event() { VECMEM_CUDA_ERROR_CHECK(cudaEventDestroy(m_event)); }
+
+    /// Synchronize on the underlying CUDA event
+    virtual void wait() override {
+        VECMEM_CUDA_ERROR_CHECK(cudaEventSynchronize(m_event));
+    }
+
+    /// The CUDA event wrapped by this struct
+    cudaEvent_t m_event;
+
+};  // struct cuda_event
+
+}  // namespace
+
 namespace vecmem::cuda {
 
 /// Helper array for translating between the vecmem and CUDA copy type
@@ -81,6 +103,24 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) {
     VECMEM_DEBUG_MSG(
         2, "Initiated setting %lu bytes to %i at %p asynchronously with CUDA",
         size, value, ptr);
+}
+
+async_copy::event_type async_copy::create_event() {
+
+    // Create a CUDA event.
+    cudaEvent_t cudaEvent = nullptr;
+    VECMEM_CUDA_ERROR_CHECK(cudaEventCreate(&cudaEvent));
+
+    // Create a smart pointer around it to make memory management a little
+    // safer.
+    auto event = std::make_unique<::cuda_event>(cudaEvent);
+
+    // Record it into the copy object's CUDA stream.
+    VECMEM_CUDA_ERROR_CHECK(
+        cudaEventRecord(cudaEvent, details::get_stream(m_stream)));
+
+    // Return the smart pointer.
+    return event;
 }
 
 }  // namespace vecmem::cuda
