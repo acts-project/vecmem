@@ -20,6 +20,7 @@
 #include "vecmem/memory/sycl/device_memory_resource.hpp"
 #include "vecmem/memory/sycl/host_memory_resource.hpp"
 #include "vecmem/memory/sycl/shared_memory_resource.hpp"
+#include "vecmem/utils/sycl/async_copy.hpp"
 #include "vecmem/utils/sycl/copy.hpp"
 
 // GoogleTest include(s).
@@ -300,7 +301,7 @@ TEST_F(sycl_jagged_containers_test, set_in_kernel) {
 TEST_F(sycl_jagged_containers_test, set_in_contiguous_kernel) {
 
     // Helper object for performing memory copies.
-    vecmem::sycl::copy copy(&m_queue);
+    vecmem::sycl::async_copy copy(&m_queue);
 
     // Make the input data contiguous in memory.
     vecmem::sycl::host_memory_resource host_resource(&m_queue);
@@ -322,7 +323,7 @@ TEST_F(sycl_jagged_containers_test, set_in_contiguous_kernel) {
     vecmem::sycl::device_memory_resource device_resource(&m_queue);
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         output_data_host, device_resource, &m_mem);
-    copy.setup(output_data_device);
+    copy.setup(output_data_device)->wait();
 
     // Run the linear transformation.
     m_queue
@@ -349,7 +350,8 @@ TEST_F(sycl_jagged_containers_test, set_in_contiguous_kernel) {
 
     // Copy the data back to the host.
     copy(output_data_device, output_data_host,
-         vecmem::copy::type::device_to_host);
+         vecmem::copy::type::device_to_host)
+        ->wait();
 
     // Check the results.
     EXPECT_EQ(output[0][0], 214);
@@ -374,13 +376,13 @@ TEST_F(sycl_jagged_containers_test, set_in_contiguous_kernel) {
 TEST_F(sycl_jagged_containers_test, filter) {
 
     // Helper object for performing memory copies.
-    vecmem::sycl::copy copy(&m_queue);
+    vecmem::sycl::async_copy copy(&m_queue);
 
     // Create the output data on the device.
     vecmem::sycl::device_memory_resource device_resource(&m_queue);
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         {0, 0, 0, 0, 0, 0}, {10, 10, 10, 10, 10, 10}, device_resource, &m_mem);
-    copy.setup(output_data_device);
+    copy.setup(output_data_device)->wait();
 
     // Create the view/data objects of the jagged vector outside of the
     // submission.
@@ -418,7 +420,7 @@ TEST_F(sycl_jagged_containers_test, filter) {
 
     // Copy the filtered output back into the host's memory.
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data_device, output);
+    copy(output_data_device, output)->wait();
 
     // Check the output. Note that the order of elements in the "inner vectors"
     // is not fixed. And for the single-element and empty vectors I just decided
