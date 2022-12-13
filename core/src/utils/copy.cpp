@@ -14,6 +14,13 @@
 // System include(s).
 #include <cstring>
 
+namespace {
+/// Empty/no-op implementation for @c vecmem::abstract_event
+struct noop_event : public vecmem::abstract_event {
+    virtual void wait() override {}
+};  // struct noop_event
+}  // namespace
+
 namespace vecmem {
 
 void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
@@ -37,6 +44,12 @@ void copy::do_memset(std::size_t size, void* ptr, int value) {
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(2, "Set %lu bytes to %i at %p with POSIX memset", size,
                      value, ptr);
+}
+
+copy::event_type copy::create_event() {
+
+    // Make a no-op event.
+    return std::make_unique<noop_event>();
 }
 
 }  // namespace vecmem
