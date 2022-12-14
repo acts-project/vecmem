@@ -30,10 +30,12 @@ if( "${CMAKE_CUDA_COMPILER_ID}" MATCHES "NVIDIA" )
    vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-G" )
 endif()
 
-# More rigorous tests for the Debug builds.
-if( ( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "10.2" ) AND
-    ( "${CMAKE_CUDA_COMPILER_ID}" MATCHES "NVIDIA" ) )
-   vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-Werror all-warnings" )
-elseif( "${CMAKE_CUDA_COMPILER_ID}" MATCHES "Clang" )
-   vecmem_add_flag( CMAKE_CUDA_FLAGS_DEBUG "-Werror" )
+# Fail on warnings, if asked for that behaviour.
+if( VECMEM_FAIL_ON_WARNINGS )
+   if( ( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "10.2" ) AND
+       ( "${CMAKE_CUDA_COMPILER_ID}" MATCHES "NVIDIA" ) )
+      vecmem_add_flag( CMAKE_CUDA_FLAGS "-Werror all-warnings" )
+   elseif( "${CMAKE_CUDA_COMPILER_ID}" MATCHES "Clang" )
+      vecmem_add_flag( CMAKE_CUDA_FLAGS "-Werror" )
+   endif()
 endif()

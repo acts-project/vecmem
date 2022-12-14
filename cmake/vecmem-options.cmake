@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2022 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -45,5 +45,9 @@ set( VECMEM_DEBUG_MSG_LVL 0 CACHE STRING
    "Debug message output level" )
 
 # Set the default library type to build.
-set( BUILD_SHARED_LIBS TRUE CACHE BOOL
-   "Flag for building shared/static libraries" )
+option( BUILD_SHARED_LIBS
+   "Flag for building shared/static libraries" TRUE )
+
+# Decide whether warnings in the code should be treated as errors.
+option( VECMEM_FAIL_ON_WARNINGS
+   "Make the build fail on compiler/linker warnings" FALSE )
