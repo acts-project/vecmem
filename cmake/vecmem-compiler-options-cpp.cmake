@@ -19,10 +19,12 @@ if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
    vecmem_add_flag( CMAKE_CXX_FLAGS "-Wextra" )
    vecmem_add_flag( CMAKE_CXX_FLAGS "-Wshadow" )
    vecmem_add_flag( CMAKE_CXX_FLAGS "-Wunused-local-typedefs" )
+   vecmem_add_flag( CMAKE_CXX_FLAGS "-pedantic" )
 
-   # More rigorous tests for the Debug builds.
-   vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-Werror" )
-   vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "-pedantic" )
+   # Fail on warnings, if asked for that behaviour.
+   if( VECMEM_FAIL_ON_WARNINGS )
+      vecmem_add_flag( CMAKE_CXX_FLAGS "-Werror" )
+   endif()
 
 elseif( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )
 
@@ -31,8 +33,10 @@ elseif( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )
       "${CMAKE_CXX_FLAGS}" )
    vecmem_add_flag( CMAKE_CXX_FLAGS "/W4" )
 
-   # More rigorous tests for the Debug builds.
-   vecmem_add_flag( CMAKE_CXX_FLAGS_DEBUG "/WX" )
+   # Fail on warnings, if asked for that behaviour.
+   if( VECMEM_FAIL_ON_WARNINGS )
+      vecmem_add_flag( CMAKE_CXX_FLAGS "/WX" )
+   endif()
 
 endif()
 

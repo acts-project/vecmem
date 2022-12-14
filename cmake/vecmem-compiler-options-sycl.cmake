@@ -18,10 +18,10 @@ foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wshadow" )
    vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Wunused-local-typedefs" )
 endforeach()
-
-# More rigorous tests for the Debug builds.
 if( NOT WIN32 )
-   vecmem_add_flag( CMAKE_SYCL_FLAGS_DEBUG "-pedantic" )
+   foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
+      vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-pedantic" )
+   endforeach()
 endif()
 
 # Avoid issues coming from MSVC<->DPC++ argument differences.
@@ -29,5 +29,12 @@ if( "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" )
    foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
       vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode}
          "-Wno-unused-command-line-argument" )
+   endforeach()
+endif()
+
+# Fail on warnings, if asked for that behaviour.
+if( VECMEM_FAIL_ON_WARNINGS )
+   foreach( mode RELEASE RELWITHDEBINFO MINSIZEREL DEBUG )
+      vecmem_add_flag( CMAKE_SYCL_FLAGS_${mode} "-Werror" )
    endforeach()
 endif()
