@@ -10,6 +10,7 @@
 #include <vecmem/memory/sycl/device_memory_resource.hpp>
 #include <vecmem/memory/sycl/host_memory_resource.hpp>
 #include <vecmem/utils/sycl/copy.hpp>
+#include <vecmem/utils/sycl/queue_wrapper.hpp>
 
 // Common benchmark include(s).
 #include "../common/make_jagged_sizes.hpp"
@@ -24,12 +25,14 @@
 
 namespace vecmem::sycl::benchmark {
 
+/// The queue that the VecMem objects should use
+static queue_wrapper queue;
 /// The (host) memory resource to use in the benchmark(s).
-static host_memory_resource host_mr;
+static host_memory_resource host_mr{queue};
 /// The (device) memory resource to use in the benchmark(s).
-static device_memory_resource device_mr;
+static device_memory_resource device_mr{queue};
 /// The copy object to use in the benchmark(s).
-static copy sycl_copy;
+static copy sycl_copy{queue};
 
 /// Function benchmarking "unknown" host-to-device jagged vector copies
 void jaggedVectorUnknownHtoDCopy(::benchmark::State& state) {
