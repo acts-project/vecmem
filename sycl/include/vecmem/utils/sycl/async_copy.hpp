@@ -36,18 +36,19 @@ class VECMEM_SYCL_EXPORT async_copy : public vecmem::copy {
 
 public:
     /// Constructor on top of a user-provided queue
-    async_copy(const queue_wrapper& queue = {});
+    async_copy(const queue_wrapper& queue);
     /// Destructor
     ~async_copy();
 
 protected:
     /// Perform a memory copy using SYCL
     virtual void do_copy(std::size_t size, const void* from, void* to,
-                         type::copy_type cptype) override;
+                         type::copy_type cptype) const override;
     /// Fill a memory area using SYCL
-    virtual void do_memset(std::size_t size, void* ptr, int value) override;
+    virtual void do_memset(std::size_t size, void* ptr,
+                           int value) const override;
     /// Create an event for synchronization
-    virtual event_type create_event() override;
+    virtual event_type create_event() const override;
 
 private:
     /// Internal data for the object

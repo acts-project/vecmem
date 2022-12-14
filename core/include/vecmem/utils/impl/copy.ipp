@@ -23,7 +23,7 @@
 namespace vecmem {
 
 template <typename TYPE>
-copy::event_type copy::setup(data::vector_view<TYPE> data) {
+copy::event_type copy::setup(data::vector_view<TYPE> data) const {
 
     // Check if anything needs to be done.
     if ((data.size_ptr() == nullptr) || (data.capacity() == 0)) {
@@ -43,7 +43,7 @@ copy::event_type copy::setup(data::vector_view<TYPE> data) {
 }
 
 template <typename TYPE>
-copy::event_type copy::memset(data::vector_view<TYPE> data, int value) {
+copy::event_type copy::memset(data::vector_view<TYPE> data, int value) const {
 
     // Check if anything needs to be done.
     if (data.capacity() == 0) {
@@ -62,7 +62,7 @@ copy::event_type copy::memset(data::vector_view<TYPE> data, int value) {
 template <typename TYPE>
 data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     const vecmem::data::vector_view<TYPE>& data, memory_resource& resource,
-    type::copy_type cptype) {
+    type::copy_type cptype) const {
 
     // Set up the result buffer.
     data::vector_buffer<std::remove_cv_t<TYPE>> result(
@@ -80,7 +80,7 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 template <typename TYPE1, typename TYPE2>
 copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
                                   data::vector_view<TYPE2> to_view,
-                                  type::copy_type cptype) {
+                                  type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -118,7 +118,7 @@ copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
 template <typename TYPE1, typename TYPE2, typename ALLOC>
 copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
                                   std::vector<TYPE2, ALLOC>& to_vec,
-                                  type::copy_type cptype) {
+                                  type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -141,7 +141,7 @@ copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
 
 template <typename TYPE>
 typename data::vector_view<TYPE>::size_type copy::get_size(
-    const data::vector_view<TYPE>& data) {
+    const data::vector_view<TYPE>& data) const {
 
     // Handle the simple case, when the view/buffer is not resizable.
     if (data.size_ptr() == nullptr) {
@@ -164,7 +164,7 @@ typename data::vector_view<TYPE>::size_type copy::get_size(
 }
 
 template <typename TYPE>
-copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) {
+copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) const {
 
     // Check if anything needs to be done.
     if (data.size() == 0) {
@@ -200,7 +200,8 @@ copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) {
 }
 
 template <typename TYPE>
-copy::event_type copy::memset(data::jagged_vector_view<TYPE> data, int value) {
+copy::event_type copy::memset(data::jagged_vector_view<TYPE> data,
+                              int value) const {
 
     // Use a very naive/expensive implementation.
     for (std::size_t i = 0; i < data.size(); ++i) {
@@ -214,7 +215,7 @@ copy::event_type copy::memset(data::jagged_vector_view<TYPE> data, int value) {
 template <typename TYPE>
 data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     const data::jagged_vector_view<TYPE>& data, memory_resource& resource,
-    memory_resource* host_access_resource, type::copy_type cptype) {
+    memory_resource* host_access_resource, type::copy_type cptype) const {
 
     // Create the result buffer object.
     data::jagged_vector_buffer<std::remove_cv_t<TYPE>> result(
@@ -235,7 +236,7 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 template <typename TYPE1, typename TYPE2>
 copy::event_type copy::operator()(
     const data::jagged_vector_view<TYPE1>& from_view,
-    data::jagged_vector_view<TYPE2> to_view, type::copy_type cptype) {
+    data::jagged_vector_view<TYPE2> to_view, type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -304,7 +305,7 @@ template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
 copy::event_type copy::operator()(
     const data::jagged_vector_view<TYPE1>& from_view,
     std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to_vec,
-    type::copy_type cptype) {
+    type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -327,7 +328,7 @@ copy::event_type copy::operator()(
 
 template <typename TYPE>
 std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
-    const data::jagged_vector_view<TYPE>& data) {
+    const data::jagged_vector_view<TYPE>& data) const {
 
     // Perform the operation using the private function.
     return get_sizes_impl(data.host_ptr(), data.size());
@@ -336,7 +337,7 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
 template <typename TYPE>
 copy::event_type copy::set_sizes(
     const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
-    data::jagged_vector_view<TYPE> data) {
+    data::jagged_vector_view<TYPE> data) const {
 
     // Finish early if possible.
     if ((sizes.size() == 0) && (data.size() == 0)) {
@@ -380,7 +381,7 @@ template <typename TYPE1, typename TYPE2>
 void copy::copy_views_impl(
     const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
     const data::vector_view<TYPE1>* from_view,
-    data::vector_view<TYPE2>* to_view, type::copy_type cptype) {
+    data::vector_view<TYPE2>* to_view, type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -427,7 +428,7 @@ template <typename TYPE1, typename TYPE2>
 void copy::copy_views_contiguous_impl(
     const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
     const data::vector_view<TYPE1>* from_view,
-    data::vector_view<TYPE2>* to_view, type::copy_type cptype) {
+    data::vector_view<TYPE2>* to_view, type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -474,7 +475,7 @@ void copy::copy_views_contiguous_impl(
 
 template <typename TYPE>
 std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes_impl(
-    const data::vector_view<TYPE>* data, std::size_t size) {
+    const data::vector_view<TYPE>* data, std::size_t size) const {
 
     // Create the result vector.
     std::vector<typename data::vector_view<TYPE>::size_type> result(size, 0);

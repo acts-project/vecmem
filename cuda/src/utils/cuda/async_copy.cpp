@@ -58,7 +58,7 @@ static const std::string copy_type_printer[copy::type::count] = {
 async_copy::async_copy(const stream_wrapper& stream) : m_stream(stream) {}
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
-                         type::copy_type cptype) {
+                         type::copy_type cptype) const {
 
     // Check if anything needs to be done.
     if (size == 0) {
@@ -84,7 +84,7 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                      copy_type_printer[cptype].c_str(), size, from_ptr, to_ptr);
 }
 
-void async_copy::do_memset(std::size_t size, void* ptr, int value) {
+void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Check if anything needs to be done.
     if (size == 0) {
@@ -105,7 +105,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) {
         size, value, ptr);
 }
 
-async_copy::event_type async_copy::create_event() {
+async_copy::event_type async_copy::create_event() const {
 
     // Create a CUDA event.
     cudaEvent_t cudaEvent = nullptr;

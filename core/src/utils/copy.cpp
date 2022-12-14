@@ -24,7 +24,7 @@ struct noop_event : public vecmem::abstract_event {
 namespace vecmem {
 
 void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
-                   type::copy_type) {
+                   type::copy_type) const {
 
     // Perform a simple POSIX memory copy.
     ::memcpy(to_ptr, from_ptr, size);
@@ -36,7 +36,7 @@ void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                      size, from_ptr, to_ptr);
 }
 
-void copy::do_memset(std::size_t size, void* ptr, int value) {
+void copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Perform the POSIX memory setting operation.
     ::memset(ptr, value, size);
@@ -46,7 +46,7 @@ void copy::do_memset(std::size_t size, void* ptr, int value) {
                      value, ptr);
 }
 
-copy::event_type copy::create_event() {
+copy::event_type copy::create_event() const {
 
     // Make a no-op event.
     return std::make_unique<noop_event>();
