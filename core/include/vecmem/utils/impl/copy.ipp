@@ -23,11 +23,11 @@
 namespace vecmem {
 
 template <typename TYPE>
-void copy::setup(data::vector_view<TYPE> data) {
+copy::event_type copy::setup(data::vector_view<TYPE> data) {
 
     // Check if anything needs to be done.
     if ((data.size_ptr() == nullptr) || (data.capacity() == 0)) {
-        return;
+        return vecmem::copy::create_event();
     }
 
     // Initialize the "size variable" correctly on the buffer.
@@ -37,20 +37,26 @@ void copy::setup(data::vector_view<TYPE> data) {
                      "Prepared a device vector buffer of capacity %u "
                      "for use on a device (ptr: %p)",
                      data.capacity(), static_cast<void*>(data.size_ptr()));
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE>
-void copy::memset(data::vector_view<TYPE> data, int value) {
+copy::event_type copy::memset(data::vector_view<TYPE> data, int value) {
 
     // Check if anything needs to be done.
     if (data.capacity() == 0) {
-        return;
+        return vecmem::copy::create_event();
     }
 
     // Call memset with the correct arguments.
     do_memset(data.capacity() * sizeof(TYPE), data.ptr(), value);
     VECMEM_DEBUG_MSG(2, "Set %u vector elements to %i at ptr: %p",
                      data.capacity(), value, static_cast<void*>(data.ptr()));
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE>
@@ -61,17 +67,20 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     // Set up the result buffer.
     data::vector_buffer<std::remove_cv_t<TYPE>> result(
         data.capacity(), get_size(data), resource);
-    setup(result);
+    setup(result)->wait();
 
-    // Copy the payload of the vector.
-    this->operator()(data, result, cptype);
+    // Copy the payload of the vector. Explicitly waiting for the copy to finish
+    // before returning the buffer.
+    operator()(data, result, cptype)->wait();
+
+    // Return the buffer.
     return result;
 }
 
 template <typename TYPE1, typename TYPE2>
-void copy::operator()(const data::vector_view<TYPE1>& from_view,
-                      data::vector_view<TYPE2> to_view,
-                      type::copy_type cptype) {
+copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
+                                  data::vector_view<TYPE2> to_view,
+                                  type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -101,12 +110,15 @@ void copy::operator()(const data::vector_view<TYPE1>& from_view,
     // Copy the payload.
     assert(size == get_size(to_view));
     do_copy(size * sizeof(TYPE1), from_view.ptr(), to_view.ptr(), cptype);
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE1, typename TYPE2, typename ALLOC>
-void copy::operator()(const data::vector_view<TYPE1>& from_view,
-                      std::vector<TYPE2, ALLOC>& to_vec,
-                      type::copy_type cptype) {
+copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
+                                  std::vector<TYPE2, ALLOC>& to_vec,
+                                  type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -122,6 +134,9 @@ void copy::operator()(const data::vector_view<TYPE1>& from_view,
     to_vec.resize(size);
     // Perform the memory copy.
     do_copy(size * sizeof(TYPE1), from_view.ptr(), to_vec.data(), cptype);
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE>
@@ -139,16 +154,21 @@ typename data::vector_view<TYPE>::size_type copy::get_size(
     do_copy(sizeof(typename data::vector_view<TYPE>::size_type),
             data.size_ptr(), &result, type::unknown);
 
+    // Wait for the copy operation to finish. With some backends
+    // (khm... SYCL... khm...) copies can be asynchronous even into
+    // non-pinned host memory.
+    create_event()->wait();
+
     // Return what we got.
     return result;
 }
 
 template <typename TYPE>
-void copy::setup(data::jagged_vector_view<TYPE> data) {
+copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) {
 
     // Check if anything needs to be done.
     if (data.size() == 0) {
-        return;
+        return vecmem::copy::create_event();
     }
 
     // "Set up" the inner vector descriptors, using the host-accessible data.
@@ -161,7 +181,7 @@ void copy::setup(data::jagged_vector_view<TYPE> data) {
 
     // Check if anything else needs to be done.
     if (data.ptr() == data.host_ptr()) {
-        return;
+        return create_event();
     }
 
     // Copy the description of the inner vectors of the buffer.
@@ -174,15 +194,21 @@ void copy::setup(data::jagged_vector_view<TYPE> data) {
                      "Prepared a jagged device vector buffer of size %lu "
                      "for use on a device",
                      data.size());
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE>
-void copy::memset(data::jagged_vector_view<TYPE> data, int value) {
+copy::event_type copy::memset(data::jagged_vector_view<TYPE> data, int value) {
 
     // Use a very naive/expensive implementation.
     for (std::size_t i = 0; i < data.size(); ++i) {
         this->memset(data.host_ptr()[i], value);
     }
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE>
@@ -196,19 +222,20 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     assert(result.size() == data.size());
 
     // Copy the description of the "inner vectors" if necessary.
-    setup(result);
+    setup(result)->wait();
 
-    // Copy the payload of the inner vectors.
-    this->operator()(data, result, cptype);
+    // Copy the payload of the inner vectors. Explicitly waiting for the copy to
+    // finish before returning the buffer.
+    operator()(data, result, cptype)->wait();
 
     // Return the newly created object.
     return result;
 }
 
 template <typename TYPE1, typename TYPE2>
-void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
-                      data::jagged_vector_view<TYPE2> to_view,
-                      type::copy_type cptype) {
+copy::event_type copy::operator()(
+    const data::jagged_vector_view<TYPE1>& from_view,
+    data::jagged_vector_view<TYPE2> to_view, type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -227,13 +254,8 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     // Check if anything needs to be done.
     const std::size_t size = from_view.size();
     if (size == 0) {
-        return;
+        return vecmem::copy::create_event();
     }
-
-    /// Helper (host) memory resource
-    static host_memory_resource host_mr;
-    /// Helper (host) copy object
-    static copy host_copy;
 
     // Calculate the contiguous-ness of the memory allocations.
     const bool from_is_contiguous = is_contiguous(from_view.host_ptr(), size);
@@ -244,63 +266,45 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     // Get the sizes of the source jagged vector.
     const auto sizes = get_sizes(from_view);
 
-    // Deal with different types of memory configurations.
-    if ((cptype == type::host_to_device) && (from_is_contiguous == false) &&
-        (to_is_contiguous == true)) {
-        // Tell the user what's happening.
-        VECMEM_DEBUG_MSG(
-            2, "Performing optimised host->device jagged vector copy");
-        // Create a contiguous buffer in host memory with the appropriate
-        // capacities and sizes.
-        std::vector<typename data::vector_view<TYPE1>::size_type> capacities(
-            size);
-        std::transform(to_view.host_ptr(), to_view.host_ptr() + size,
-                       capacities.begin(),
-                       [](const auto& view) { return view.capacity(); });
-        data::jagged_vector_buffer<TYPE2> buffer(
-            std::vector<std::size_t>(capacities.begin(), capacities.end()),
-            host_mr);
-        // Collect the data into this buffer with host-to-host memory copies.
-        host_copy.copy_views_impl(sizes, from_view.host_ptr(),
-                                  buffer.host_ptr(), cptype);
-        // Now perform the host-to-device copy in one go.
-        copy_views_contiguous_impl(capacities, buffer.host_ptr(),
-                                   to_view.host_ptr(), cptype);
-        set_sizes(sizes, to_view);
-    } else if ((cptype == type::device_to_host) &&
-               (from_is_contiguous == true) && (to_is_contiguous == false)) {
-        // Tell the user what's happening.
-        VECMEM_DEBUG_MSG(
-            2, "Performing optimised device->host jagged vector copy");
-        // Create a contiguous buffer in host memory with the appropriate
-        // capacities.
-        std::vector<typename data::vector_view<TYPE1>::size_type> capacities(
-            size);
-        std::transform(from_view.host_ptr(), from_view.host_ptr() + size,
-                       capacities.begin(),
-                       [](const auto& view) { return view.capacity(); });
-        data::jagged_vector_buffer<TYPE2> buffer(
-            std::vector<std::size_t>(capacities.begin(), capacities.end()),
-            host_mr);
-        // Perform the device-to-host copy into this contiguous buffer.
+    // Before even attempting the copy, make sure that the target view either
+    // has the correct sizes, or can be resized correctly.
+    set_sizes(sizes, to_view);
+
+    // Check whether the source and target capacities match up. We can only
+    // perform the "optimised copy" if they do.
+    std::vector<typename data::vector_view<TYPE1>::size_type> capacities(size);
+    bool capacities_match = true;
+    for (std::size_t i = 0; i < size; ++i) {
+        if (from_view.host_ptr()[i].capacity() !=
+            to_view.host_ptr()[i].capacity()) {
+            capacities_match = false;
+            break;
+        }
+        capacities[i] = from_view.host_ptr()[i].capacity();
+    }
+
+    // Perform the copy as best as we can.
+    if (from_is_contiguous && to_is_contiguous && capacities_match) {
+        // Perform the copy in one go.
         copy_views_contiguous_impl(capacities, from_view.host_ptr(),
-                                   buffer.host_ptr(), cptype);
-        // Now fill the host views with host-to-host memory copies.
-        host_copy.copy_views_impl(sizes, buffer.host_ptr(), to_view.host_ptr(),
-                                  cptype);
-        host_copy.set_sizes(sizes, to_view);
+                                   to_view.host_ptr(), cptype);
     } else {
-        // Do the copy as best as we can with the existing views.
+        // Do the copy as best as we can. Note that since they are not
+        // contiguous anyway, we use the sizes of the vectors here, not their
+        // capcities.
         copy_views_impl(sizes, from_view.host_ptr(), to_view.host_ptr(),
                         cptype);
-        set_sizes(sizes, to_view);
     }
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
-void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
-                      std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to_vec,
-                      type::copy_type cptype) {
+copy::event_type copy::operator()(
+    const data::jagged_vector_view<TYPE1>& from_view,
+    std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to_vec,
+    type::copy_type cptype) {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -311,14 +315,14 @@ void copy::operator()(const data::jagged_vector_view<TYPE1>& from_view,
     // Resize the output object to the correct size.
     to_vec.resize(from_view.size());
     const auto sizes = get_sizes(from_view);
+    assert(sizes.size() == to_vec.size());
     for (typename data::jagged_vector_view<TYPE1>::size_type i = 0;
          i < from_view.size(); ++i) {
         to_vec[i].resize(sizes[i]);
     }
 
     // Perform the memory copy.
-    auto helper = vecmem::get_data(to_vec);
-    this->operator()(from_view, helper, cptype);
+    return operator()(from_view, vecmem::get_data(to_vec), cptype);
 }
 
 template <typename TYPE>
@@ -330,13 +334,13 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
 }
 
 template <typename TYPE>
-void copy::set_sizes(
+copy::event_type copy::set_sizes(
     const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
     data::jagged_vector_view<TYPE> data) {
 
     // Finish early if possible.
     if ((sizes.size() == 0) && (data.size() == 0)) {
-        return;
+        return vecmem::copy::create_event();
     }
     // Make sure that the sizes match up.
     if (sizes.size() != data.size()) {
@@ -361,12 +365,15 @@ void copy::set_sizes(
     }
     // If no copy is necessary, we're done.
     if (perform_copy == false) {
-        return;
+        return vecmem::copy::create_event();
     }
     // Perform the copy with some internal knowledge of how resizable jagged
     // vector buffers work.
     do_copy(sizeof(typename data::vector_view<TYPE>::size_type) * sizes.size(),
             sizes.data(), data.host_ptr()->size_ptr(), type::unknown);
+
+    // Return a new event.
+    return create_event();
 }
 
 template <typename TYPE1, typename TYPE2>
@@ -481,6 +488,10 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes_impl(
             do_copy(sizeof(typename data::vector_view<TYPE>::size_type) *
                         (size - i),
                     data[i].size_ptr(), result.data() + i, type::unknown);
+            // Wait for the copy operation to finish. With some backends
+            // (khm... SYCL... khm...) copies can be asynchronous even into
+            // non-pinned host memory.
+            create_event()->wait();
             // At this point the result vector should have been set up
             // correctly.
             return result;

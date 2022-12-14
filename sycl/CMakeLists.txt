@@ -26,6 +26,8 @@ vecmem_add_library( vecmem_sycl sycl
    # Utilities.
    "include/vecmem/utils/sycl/copy.hpp"
    "src/utils/sycl/copy.sycl"
+   "include/vecmem/utils/sycl/async_copy.hpp"
+   "src/utils/sycl/async_copy.sycl"
    "include/vecmem/utils/sycl/queue_wrapper.hpp"
    "src/utils/sycl/queue_wrapper.sycl"
    "src/utils/sycl/get_queue.hpp"
