@@ -19,9 +19,10 @@ class VECMEM_HIP_EXPORT copy : public vecmem::copy {
 protected:
     /// Perform a memory copy using HIP
     virtual void do_copy(std::size_t size, const void* from, void* to,
-                         type::copy_type cptype) override;
+                         type::copy_type cptype) const override;
     /// Fill a memory area using HIP
-    virtual void do_memset(std::size_t size, void* ptr, int value) override;
+    virtual void do_memset(std::size_t size, void* ptr,
+                           int value) const override;
 
 };  // class copy
 

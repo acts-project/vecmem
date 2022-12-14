@@ -12,7 +12,14 @@
 #include "vecmem/utils/sycl/queue_wrapper.hpp"
 #include "vecmem/vecmem_sycl_export.hpp"
 
+// System include(s).
+#include <memory>
+
 namespace vecmem::sycl {
+namespace details {
+/// Object holding on to internal data for @c vecmem::sycl::copy
+struct copy_data;
+}  // namespace details
 
 /// Specialisation of @c vecmem::copy for SYCL
 ///
@@ -25,18 +32,21 @@ class VECMEM_SYCL_EXPORT copy : public vecmem::copy {
 
 public:
     /// Constructor on top of a user-provided queue
-    copy(const queue_wrapper& queue = {});
+    copy(const queue_wrapper& queue);
+    /// Destructor
+    ~copy();
 
 protected:
     /// Perform a memory copy using SYCL
     virtual void do_copy(std::size_t size, const void* from, void* to,
-                         type::copy_type cptype) override;
+                         type::copy_type cptype) const override;
     /// Fill a memory area using SYCL
-    virtual void do_memset(std::size_t size, void* ptr, int value) override;
+    virtual void do_memset(std::size_t size, void* ptr,
+                           int value) const override;
 
 private:
-    /// The queue that the copy operations are made with/for
-    queue_wrapper m_queue;
+    /// Internal data for the object
+    std::unique_ptr<details::copy_data> m_data;
 
 };  // class copy
 

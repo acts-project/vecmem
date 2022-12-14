@@ -72,34 +72,34 @@ public:
 
     /// Set up the internal state of a vector buffer correctly on a device
     template <typename TYPE>
-    event_type setup(data::vector_view<TYPE> data);
+    event_type setup(data::vector_view<TYPE> data) const;
 
     /// Set all bytes of the vector to some value
     template <typename TYPE>
-    event_type memset(data::vector_view<TYPE> data, int value);
+    event_type memset(data::vector_view<TYPE> data, int value) const;
 
     /// Copy a 1-dimensional vector to the specified memory resource
     template <typename TYPE>
     data::vector_buffer<std::remove_cv_t<TYPE>> to(
         const data::vector_view<TYPE>& data, memory_resource& resource,
-        type::copy_type cptype = type::unknown);
+        type::copy_type cptype = type::unknown) const;
 
     /// Copy a 1-dimensional vector's data between two existing memory blocks
     template <typename TYPE1, typename TYPE2>
     event_type operator()(const data::vector_view<TYPE1>& from,
                           data::vector_view<TYPE2> to,
-                          type::copy_type cptype = type::unknown);
+                          type::copy_type cptype = type::unknown) const;
 
     /// Copy a 1-dimensional vector's data into a vector object
     template <typename TYPE1, typename TYPE2, typename ALLOC>
     event_type operator()(const data::vector_view<TYPE1>& from,
                           std::vector<TYPE2, ALLOC>& to,
-                          type::copy_type cptype = type::unknown);
+                          type::copy_type cptype = type::unknown) const;
 
     /// Helper function for getting the size of a resizable 1D buffer
     template <typename TYPE>
     typename data::vector_view<TYPE>::size_type get_size(
-        const data::vector_view<TYPE>& data);
+        const data::vector_view<TYPE>& data) const;
 
     /// @}
 
@@ -108,52 +108,52 @@ public:
 
     /// Copy the internal state of a jagged vector buffer to the target device
     template <typename TYPE>
-    event_type setup(data::jagged_vector_view<TYPE> data);
+    event_type setup(data::jagged_vector_view<TYPE> data) const;
 
     /// Set all bytes of the jagged vector to some value
     template <typename TYPE>
-    event_type memset(data::jagged_vector_view<TYPE> data, int value);
+    event_type memset(data::jagged_vector_view<TYPE> data, int value) const;
 
     /// Copy a jagged vector to the specified memory resource
     template <typename TYPE>
     data::jagged_vector_buffer<std::remove_cv_t<TYPE>> to(
         const data::jagged_vector_view<TYPE>& data, memory_resource& resource,
         memory_resource* host_access_resource = nullptr,
-        type::copy_type cptype = type::unknown);
+        type::copy_type cptype = type::unknown) const;
 
     /// Copy a jagged vector's data between two existing allocations
     template <typename TYPE1, typename TYPE2>
     event_type operator()(const data::jagged_vector_view<TYPE1>& from,
                           data::jagged_vector_view<TYPE2> to,
-                          type::copy_type cptype = type::unknown);
+                          type::copy_type cptype = type::unknown) const;
 
     /// Copy a jagged vector's data into a vector object
     template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
     event_type operator()(const data::jagged_vector_view<TYPE1>& from,
                           std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to,
-                          type::copy_type cptype = type::unknown);
+                          type::copy_type cptype = type::unknown) const;
 
     /// Helper function for getting the sizes of a resizable jagged vector
     template <typename TYPE>
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes(
-        const data::jagged_vector_view<TYPE>& data);
+        const data::jagged_vector_view<TYPE>& data) const;
 
     /// Helper function for setting the sizes of a resizable jagged vector
     template <typename TYPE>
     event_type set_sizes(
         const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
-        data::jagged_vector_view<TYPE> data);
+        data::jagged_vector_view<TYPE> data) const;
 
     /// @}
 
 protected:
     /// Perform a "low level" memory copy
     virtual void do_copy(std::size_t size, const void* from, void* to,
-                         type::copy_type cptype);
+                         type::copy_type cptype) const;
     /// Perform a "low level" memory filling operation
-    virtual void do_memset(std::size_t size, void* ptr, int value);
+    virtual void do_memset(std::size_t size, void* ptr, int value) const;
     /// Create an event for synchronization
-    virtual event_type create_event();
+    virtual event_type create_event() const;
 
 private:
     /// Helper function performing the copy of a jagged array/vector
@@ -161,17 +161,17 @@ private:
     void copy_views_impl(
         const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
         const data::vector_view<TYPE1>* from, data::vector_view<TYPE2>* to,
-        type::copy_type cptype);
+        type::copy_type cptype) const;
     /// Helper function performing the copy of a jagged array/vector
     template <typename TYPE1, typename TYPE2>
     void copy_views_contiguous_impl(
         const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
         const data::vector_view<TYPE1>* from, data::vector_view<TYPE2>* to,
-        type::copy_type cptype);
+        type::copy_type cptype) const;
     /// Helper function for getting the sizes of a jagged vector/buffer
     template <typename TYPE>
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes_impl(
-        const data::vector_view<TYPE>* data, std::size_t size);
+        const data::vector_view<TYPE>* data, std::size_t size) const;
     /// Check if a vector of views occupy a contiguous block of memory
     template <typename TYPE>
     static bool is_contiguous(const data::vector_view<TYPE>* data,

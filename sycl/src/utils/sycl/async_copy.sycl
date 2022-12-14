@@ -51,7 +51,7 @@ async_copy::async_copy(const queue_wrapper& queue)
 async_copy::~async_copy() {}
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
-                         type::copy_type) {
+                         type::copy_type) const {
 
     // Check if anything needs to be done.
     if (size == 0) {
@@ -72,7 +72,7 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                      size, from_ptr, to_ptr);
 }
 
-void async_copy::do_memset(std::size_t size, void* ptr, int value) {
+void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Check if anything needs to be done.
     if (size == 0) {
@@ -102,7 +102,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) {
                      ptr);
 }
 
-copy::event_type async_copy::create_event() {
+copy::event_type async_copy::create_event() const {
 
     // Construct an event object out of all of the events collected.
     auto result = std::make_unique<::sycl_event>(m_data->m_events);

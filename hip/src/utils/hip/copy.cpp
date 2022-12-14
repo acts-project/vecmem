@@ -33,7 +33,7 @@ static const std::string copy_type_printer[copy::type::count] = {
     "unknown"};
 
 void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
-                   type::copy_type cptype) {
+                   type::copy_type cptype) const {
 
     // Check if anything needs to be done.
     if (size == 0) {
@@ -58,7 +58,7 @@ void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                      copy_type_printer[cptype].c_str(), size, from_ptr, to_ptr);
 }
 
-void copy::do_memset(std::size_t size, void* ptr, int value) {
+void copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Check if anything needs to be done.
     if (size == 0) {

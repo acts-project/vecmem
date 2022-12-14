@@ -18,11 +18,21 @@
 #include <vector>
 
 namespace vecmem::sycl {
+namespace details {
 
-copy::copy(const queue_wrapper& queue) : m_queue(queue) {}
+struct copy_data {
+    queue_wrapper m_queue;
+};
+
+}  // namespace details
+
+copy::copy(const queue_wrapper& queue)
+    : m_data(new details::copy_data{queue}) {}
+
+copy::~copy() {}
 
 void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
-                   type::copy_type) {
+                   type::copy_type) const {
 
     // Check if anything needs to be done.
     if (size == 0) {
@@ -35,15 +45,16 @@ void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
     assert(to_ptr != nullptr);
 
     // Perform the copy.
-    auto event = details::get_queue(m_queue).memcpy(to_ptr, from_ptr, size);
-    event.wait_and_throw();
+    details::get_queue(m_data->m_queue)
+        .memcpy(to_ptr, from_ptr, size)
+        .wait_and_throw();
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(1, "Performed memory copy of %lu bytes from %p to %p",
                      size, from_ptr, to_ptr);
 }
 
-void copy::do_memset(std::size_t size, void* ptr, int value) {
+void copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Check if anything needs to be done.
     if (size == 0) {
@@ -56,12 +67,15 @@ void copy::do_memset(std::size_t size, void* ptr, int value) {
 
     // Perform the operation.
 #if defined(VECMEM_HAVE_SYCL_MEMSET)
-    auto event = details::get_queue(m_queue).memset(ptr, value, size);
+    details::get_queue(m_data->m_queue)
+        .memset(ptr, value, size)
+        .wait_and_throw();
 #else
     const std::vector<int> dummy(size / sizeof(int) + 1, value);
-    auto event = details::get_queue(m_queue).memcpy(ptr, dummy.data(), size);
+    details::get_queue(m_data->m_queue)
+        .memcpy(ptr, dummy.data(), size)
+        .wait_and_throw();
 #endif  // VECMEM_HAVE_SYCL_MEMSET
-    event.wait_and_throw();
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(2, "Set %lu bytes to %i at %p with SYCL", size, value,
