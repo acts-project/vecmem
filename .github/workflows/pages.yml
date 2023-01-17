@@ -29,6 +29,7 @@ jobs:
   # Job building and deploying the Doxygen documentation for the project
   # to GitHub Pages.
   build-and-deploy:
+    if: github.repository == 'acts-project/vecmem'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
