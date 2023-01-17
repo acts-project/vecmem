@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -59,3 +59,28 @@ endif()
 
 # Set up the packaging of the project.
 include( vecmem-packaging )
+
+# Set up Doxygen documentation creation for the project.
+find_package( Doxygen )
+if( DOXYGEN_FOUND )
+   set( DOXYGEN_JAVADOC_AUTOBRIEF TRUE )
+   set( DOXYGEN_USE_MDFILE_AS_MAINPAGE
+      "${CMAKE_CURRENT_SOURCE_DIR}/README.md" )
+   set( DOXYGEN_FULL_PATH_NAMES TRUE )
+   set( DOXYGEN_INLINE_INHERITED_MEMB TRUE )
+   set( DOXYGEN_INHERIT_DOCS TRUE )
+   set( DOXYGEN_EXTRACT_PRIV_VIRTUAL TRUE )
+   set( DOXYGEN_STRIP_FROM_PATH
+      "${CMAKE_CURRENT_SOURCE_DIR}" )
+   set( DOXYGEN_STRIP_FROM_INC_PATH
+      "${CMAKE_CURRENT_SOURCE_DIR}/core/include"
+      "${CMAKE_CURRENT_SOURCE_DIR}/cuda/include"
+      "${CMAKE_CURRENT_SOURCE_DIR}/hip/include"
+      "${CMAKE_CURRENT_SOURCE_DIR}/sycl/include" )
+   set( DOXYGEN_EXCLUDE
+      "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+      "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks" )
+   doxygen_add_docs( vecmem_docs
+      "${CMAKE_CURRENT_SOURCE_DIR}"
+      COMMENT "Generating Doxygen pages" )
+endif()
