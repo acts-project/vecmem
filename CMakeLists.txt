@@ -79,7 +79,8 @@ if( DOXYGEN_FOUND )
       "${CMAKE_CURRENT_SOURCE_DIR}/sycl/include" )
    set( DOXYGEN_EXCLUDE
       "${CMAKE_CURRENT_SOURCE_DIR}/tests"
-      "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks" )
+      "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"
+      "${CMAKE_CURRENT_SOURCE_DIR}/build" )
    doxygen_add_docs( vecmem_docs
       "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMENT "Generating Doxygen pages" )
