@@ -12,6 +12,7 @@
 #include "vecmem/memory/details/memory_resource_base.hpp"
 #include "vecmem/vecmem_cuda_export.hpp"
 
+/// @brief Namespace holding types that work on/with CUDA
 namespace vecmem::cuda {
 
 /**
