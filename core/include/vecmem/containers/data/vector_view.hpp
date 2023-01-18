@@ -1,4 +1,4 @@
-/** VecMem project, part of the ACTS project (R&D line)
+/* VecMem project, part of the ACTS project (R&D line)
  *
  * (c) 2021 CERN for the benefit of the ACTS project
  *
@@ -15,6 +15,13 @@
 #include <type_traits>
 
 namespace vecmem {
+
+/// @brief Namespace holding "data types"
+///
+/// These are types that either own, or only provide a view of data owned by
+/// some other component. They are used for "non-interactive" data management
+/// in the code.
+///
 namespace data {
 
 /// Class holding data about a 1 dimensional vector/array

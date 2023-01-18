@@ -1,6 +1,6 @@
-/** VecMem project, part of the ACTS project (R&D line)
+/* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -13,6 +13,13 @@
 // System include(s).
 #include <vector>
 
+/// @brief Main namespace for the vecmem classes/functions
+///
+/// Public classes and functions that are not language/backend specific, are
+/// generally placed in this namespace.
+///
+/// @see @c vecmem::data
+///
 namespace vecmem {
 /**
  * @brief Alias type for vectors with our polymorphic allocator
