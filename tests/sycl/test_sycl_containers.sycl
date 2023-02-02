@@ -172,8 +172,8 @@ TEST_F(sycl_containers_test, device_memory) {
     }
 }
 
-/// Test atomic access in a simple kernel
-TEST_F(sycl_containers_test, atomic_memory) {
+/// Test atomic access to shared memory
+TEST_F(sycl_containers_test, atomic_shared_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
     cl::sycl::queue queue;
@@ -190,7 +190,7 @@ TEST_F(sycl_containers_test, atomic_memory) {
     // Do very basic atomic modifications on the buffer.
     queue
         .submit([&buffer](cl::sycl::handler& h) {
-            h.parallel_for<class AtomicTests>(
+            h.parallel_for<class AtomicSharedTests>(
                 cl::sycl::range<1>(buffer.size() * ITERATIONS),
                 [buffer = vecmem::get_data(buffer)](cl::sycl::item<1> id) {
                     // Check if anything needs to be done.
@@ -223,6 +223,73 @@ TEST_F(sycl_containers_test, atomic_memory) {
 
     // Check the output.
     for (int value : buffer) {
+        EXPECT_EQ(value, ITERATIONS * 4);
+    }
+}
+
+/// Test atomic access to device memory
+TEST_F(sycl_containers_test, atomic_device_memory) {
+
+    // Create the SYCL queue that we'll be using in the test.
+    cl::sycl::queue queue;
+
+    // The memory resources.
+    vecmem::sycl::host_memory_resource host_resource(&queue);
+    vecmem::sycl::device_memory_resource device_resource(&queue);
+
+    // Helper object for performing memory copies.
+    vecmem::sycl::async_copy copy(&queue);
+
+    // Allocate memory on the host, and set initial values in it.
+    vecmem::vector<int> host_vector(100, 0, &host_resource);
+
+    // Set up a device buffer with the data.
+    auto device_buffer =
+        copy.to(vecmem::get_data(host_vector), device_resource);
+
+    // Number of iterations performed on a single buffer element.
+    static constexpr int ITERATIONS = 100;
+
+    // Do very basic atomic modifications on the buffer.
+    queue
+        .submit([&device_buffer](cl::sycl::handler& h) {
+            h.parallel_for<class AtomicDeviceTests>(
+                cl::sycl::range<1>(device_buffer.size() * ITERATIONS),
+                [buffer =
+                     vecmem::get_data(device_buffer)](cl::sycl::item<1> id) {
+                    // Check if anything needs to be done.
+                    const std::size_t i = id[0];
+                    if (i >= buffer.size() * ITERATIONS) {
+                        return;
+                    }
+
+                    // Index/pointer to modify.
+                    const std::size_t index = i % buffer.size();
+                    int* ptr = buffer.ptr() + index;
+
+                    // Do some simple stuff with it using vecmem::atomic.
+                    vecmem::atomic<int> a(ptr);
+                    a.fetch_add(4);
+                    a.fetch_sub(2);
+                    a.fetch_and(0xffffffff);
+                    a.fetch_or(0x00000000);
+
+                    // Do the same simple stuff with it using
+                    // vecmem::atomic_ref.
+                    vecmem::device_atomic_ref<int> a2(*ptr);
+                    a2.fetch_add(4);
+                    a2.fetch_sub(2);
+                    a2.fetch_and(0xffffffff);
+                    a2.fetch_or(0x00000000);
+                });
+        })
+        .wait_and_throw();
+
+    // Copy the data back to the host.
+    copy(device_buffer, vecmem::get_data(host_vector))->wait();
+
+    // Check the output.
+    for (int value : host_vector) {
         EXPECT_EQ(value, ITERATIONS * 4);
     }
 }
