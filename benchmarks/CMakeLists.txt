@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -22,6 +22,9 @@ if(VECMEM_SETUP_GOOGLEBENCHMARK)
       add_subdirectory(googlebenchmark)
    endif()
 endif()
+
+# Project include(s).
+include( vecmem-compiler-options-cpp )
 
 # Build a common, helper library.
 add_library( vecmem_benchmark_common STATIC
