@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -20,7 +20,8 @@ std::vector<std::size_t> make_jagged_sizes(std::size_t outerSize,
 
     // Set up a simple random number generator for the inner vector sizes.
     std::default_random_engine eng;
-    eng.seed(outerSize + maxInnerSize);
+    eng.seed(static_cast<std::default_random_engine::result_type>(
+        outerSize + maxInnerSize));
     std::uniform_int_distribution<std::size_t> gen(0, maxInnerSize);
 
     // Generate the result vector.

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -26,9 +26,9 @@ namespace {
 
 /// "Complex" type used in the bulk of the tests
 struct TestType1 {
-    TestType1(int a = 0, long b = 123) : m_a(a), m_b(b) {}
+    TestType1(int a = 0, long b = 123l) : m_a(a), m_b(b) {}
     int m_a;
-    int m_b;
+    long m_b;
 };  // struct TestType1
 
 /// Helper operator for comparing two @c TestType1 objects
