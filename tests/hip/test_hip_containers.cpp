@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -92,8 +92,27 @@ TEST_F(hip_containers_test, device_memory) {
     }
 }
 
-/// Test the execution of atomic operations as part of a kernel
-TEST_F(hip_containers_test, atomic_memory) {
+/// Test the execution of atomic operations in host/shared memory
+TEST_F(hip_containers_test, atomic_shared_memory) {
+
+    // The memory resource(s).
+    vecmem::hip::host_memory_resource resource;
+
+    // Create a small vector in host/managed memory.
+    vecmem::vector<int> vec(100, 0, &resource);
+
+    // Give it to the test function.
+    static constexpr unsigned int ITERATIONS = 100;
+    atomicTransform(ITERATIONS, vecmem::get_data(vec));
+
+    // Check the output.
+    for (int value : vec) {
+        EXPECT_EQ(static_cast<unsigned int>(value), 4 * ITERATIONS);
+    }
+}
+
+/// Test the execution of atomic operations in device memory
+TEST_F(hip_containers_test, atomic_device_memory) {
 
     // The host/device memory resources.
     vecmem::hip::host_memory_resource host_resource;

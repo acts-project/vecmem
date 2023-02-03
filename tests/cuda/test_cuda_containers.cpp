@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -145,8 +145,27 @@ TEST_F(cuda_containers_test, async_memory) {
     }
 }
 
-/// Test the execution of atomic operations as part of a kernel
-TEST_F(cuda_containers_test, atomic_memory) {
+/// Test the execution of atomic operations in managed memory
+TEST_F(cuda_containers_test, atomic_managed_memory) {
+
+    // The memory resource(s).
+    vecmem::cuda::managed_memory_resource resource;
+
+    // Create a small vector in managed memory.
+    vecmem::vector<int> vec(100, 0, &resource);
+
+    // Give it to the test function.
+    static constexpr unsigned int ITERATIONS = 100;
+    atomicTransform(ITERATIONS, vecmem::get_data(vec));
+
+    // Check the output.
+    for (int value : vec) {
+        EXPECT_EQ(static_cast<unsigned int>(value), 4 * ITERATIONS);
+    }
+}
+
+/// Test the execution of atomic operations in device memory
+TEST_F(cuda_containers_test, atomic_device_memory) {
 
     // The memory resources.
     vecmem::cuda::host_memory_resource host_resource;
