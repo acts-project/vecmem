@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -26,6 +26,7 @@ if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
    # Determine the type and version of the SYCL compiler.
    execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}" "--version"
       OUTPUT_VARIABLE _syclVersionOutput
+      ERROR_VARIABLE _syclVersionError
       RESULT_VARIABLE _syclVersionResult )
    if( NOT ${_syclVersionResult} EQUAL 0 )
       execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}"

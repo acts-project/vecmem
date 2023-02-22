@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -15,12 +15,17 @@ __windows_compiler_intel( SYCL )
 string( REPLACE "<SOURCE>" "/Tp <SOURCE>" CMAKE_SYCL_COMPILE_OBJECT
    "${CMAKE_SYCL_COMPILE_OBJECT}" )
 
+# Use the (basic) flags set up for compilation, during linking as well.
+set( CMAKE_SYCL_LINK_FLAGS "${CMAKE_SYCL_FLAGS}" )
+
 # Tweak the linker commands to use the DPC++ executable for linking, and to
 # pass the arguments to the linker correctly.
 foreach( linker_command "CMAKE_SYCL_CREATE_SHARED_LIBRARY"
    "CMAKE_SYCL_CREATE_SHARED_MODULE" "CMAKE_SYCL_LINK_EXECUTABLE" )
 
-   # Replace the VS linker with DPC++.
+   # Replace the VS linker with DPC++. (Note that this does not do
+   # anything with modern CMake versions anymore. As those use
+   # <CMAKE_SYCL_COMPILER> in the link command out of the box.)
    string( REPLACE "<CMAKE_LINKER>" "\"${CMAKE_SYCL_HOST_LINKER}\""
       ${linker_command} "${${linker_command}}" )
 
