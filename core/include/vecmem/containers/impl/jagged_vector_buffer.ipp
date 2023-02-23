@@ -70,8 +70,9 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 }
 
 template <typename TYPE>
+template <typename SIZE_TYPE>
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
-    const std::vector<std::size_t>& sizes, memory_resource& resource,
+    const std::vector<SIZE_TYPE>& sizes, memory_resource& resource,
     memory_resource* host_access_resource)
     : base_type(sizes.size(), nullptr),
       m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
@@ -84,6 +85,9 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
           resource, std::accumulate(sizes.begin(), sizes.end(),
                                     static_cast<std::size_t>(0)) *
                         sizeof(TYPE))) {
+
+    static_assert(std::is_unsigned<SIZE_TYPE>::value,
+                  "Jagged vector buffer sizes must be unsigned integers.");
 
     // Point the base class at the newly allocated memory.
     base_type::m_ptr =
@@ -102,9 +106,10 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 }
 
 template <typename TYPE>
+template <typename SIZE_TYPE>
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
-    const std::vector<std::size_t>& sizes,
-    const std::vector<std::size_t>& capacities, memory_resource& resource,
+    const std::vector<SIZE_TYPE>& sizes,
+    const std::vector<SIZE_TYPE>& capacities, memory_resource& resource,
     memory_resource* host_access_resource)
     : base_type(sizes.size(), nullptr),
       m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
@@ -113,6 +118,10 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
           sizes.size(),
           (host_access_resource == nullptr ? resource
                                            : *host_access_resource))) {
+
+    static_assert(std::is_unsigned<SIZE_TYPE>::value,
+                  "Jagged vector buffer sizes must be unsigned integers.");
+
     using header_t = typename vecmem::data::jagged_vector_buffer<
         TYPE>::value_type::size_type;
     // Determine the allocation size.

@@ -79,7 +79,8 @@ public:
     ///        be host accessible.
     /// @param host_access_resource An optional host accessible memory
     ///        resource. Needed if @c resource is not host accessible.
-    jagged_vector_buffer(const std::vector<std::size_t>& sizes,
+    template <typename SIZE_TYPE = std::size_t>
+    jagged_vector_buffer(const std::vector<SIZE_TYPE>& sizes,
                          memory_resource& resource,
                          memory_resource* host_access_resource = nullptr);
 
@@ -93,8 +94,9 @@ public:
     ///        be host accessible.
     /// @param host_access_resource An optional host accessible memory
     ///        resource. Needed if @c resource is not host accessible.
-    jagged_vector_buffer(const std::vector<std::size_t>& sizes,
-                         const std::vector<std::size_t>& capacities,
+    template <typename SIZE_TYPE = std::size_t>
+    jagged_vector_buffer(const std::vector<SIZE_TYPE>& sizes,
+                         const std::vector<SIZE_TYPE>& capacities,
                          memory_resource& resource,
                          memory_resource* host_access_resource = nullptr);
 
