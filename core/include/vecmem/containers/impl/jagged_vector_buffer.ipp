@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -70,7 +70,10 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 }
 
 template <typename TYPE>
-template <typename SIZE_TYPE>
+template <typename SIZE_TYPE,
+          std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
+                               std::is_unsigned<SIZE_TYPE>::value,
+                           bool> >
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     const std::vector<SIZE_TYPE>& sizes, memory_resource& resource,
     memory_resource* host_access_resource)
@@ -85,9 +88,6 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
           resource, std::accumulate(sizes.begin(), sizes.end(),
                                     static_cast<std::size_t>(0)) *
                         sizeof(TYPE))) {
-
-    static_assert(std::is_unsigned<SIZE_TYPE>::value,
-                  "Jagged vector buffer sizes must be unsigned integers.");
 
     // Point the base class at the newly allocated memory.
     base_type::m_ptr =
@@ -106,7 +106,10 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 }
 
 template <typename TYPE>
-template <typename SIZE_TYPE>
+template <typename SIZE_TYPE,
+          std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
+                               std::is_unsigned<SIZE_TYPE>::value,
+                           bool> >
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     const std::vector<SIZE_TYPE>& sizes,
     const std::vector<SIZE_TYPE>& capacities, memory_resource& resource,
@@ -118,9 +121,6 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
           sizes.size(),
           (host_access_resource == nullptr ? resource
                                            : *host_access_resource))) {
-
-    static_assert(std::is_unsigned<SIZE_TYPE>::value,
-                  "Jagged vector buffer sizes must be unsigned integers.");
 
     using header_t = typename vecmem::data::jagged_vector_buffer<
         TYPE>::value_type::size_type;

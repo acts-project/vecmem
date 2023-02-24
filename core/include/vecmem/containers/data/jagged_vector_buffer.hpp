@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -79,7 +79,10 @@ public:
     ///        be host accessible.
     /// @param host_access_resource An optional host accessible memory
     ///        resource. Needed if @c resource is not host accessible.
-    template <typename SIZE_TYPE = std::size_t>
+    template <typename SIZE_TYPE = std::size_t,
+              std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
+                                   std::is_unsigned<SIZE_TYPE>::value,
+                               bool> = true>
     jagged_vector_buffer(const std::vector<SIZE_TYPE>& sizes,
                          memory_resource& resource,
                          memory_resource* host_access_resource = nullptr);
@@ -94,7 +97,10 @@ public:
     ///        be host accessible.
     /// @param host_access_resource An optional host accessible memory
     ///        resource. Needed if @c resource is not host accessible.
-    template <typename SIZE_TYPE = std::size_t>
+    template <typename SIZE_TYPE = std::size_t,
+              std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
+                                   std::is_unsigned<SIZE_TYPE>::value,
+                               bool> = true>
     jagged_vector_buffer(const std::vector<SIZE_TYPE>& sizes,
                          const std::vector<SIZE_TYPE>& capacities,
                          memory_resource& resource,
