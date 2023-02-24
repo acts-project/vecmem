@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -70,8 +70,12 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 }
 
 template <typename TYPE>
+template <typename SIZE_TYPE,
+          std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
+                               std::is_unsigned<SIZE_TYPE>::value,
+                           bool> >
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
-    const std::vector<std::size_t>& sizes, memory_resource& resource,
+    const std::vector<SIZE_TYPE>& sizes, memory_resource& resource,
     memory_resource* host_access_resource)
     : base_type(sizes.size(), nullptr),
       m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
@@ -102,9 +106,13 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 }
 
 template <typename TYPE>
+template <typename SIZE_TYPE,
+          std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
+                               std::is_unsigned<SIZE_TYPE>::value,
+                           bool> >
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
-    const std::vector<std::size_t>& sizes,
-    const std::vector<std::size_t>& capacities, memory_resource& resource,
+    const std::vector<SIZE_TYPE>& sizes,
+    const std::vector<SIZE_TYPE>& capacities, memory_resource& resource,
     memory_resource* host_access_resource)
     : base_type(sizes.size(), nullptr),
       m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
@@ -113,6 +121,7 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
           sizes.size(),
           (host_access_resource == nullptr ? resource
                                            : *host_access_resource))) {
+
     using header_t = typename vecmem::data::jagged_vector_buffer<
         TYPE>::value_type::size_type;
     // Determine the allocation size.
