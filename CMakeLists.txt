@@ -10,6 +10,7 @@ project( vecmem VERSION 0.24.0 LANGUAGES CXX )
 
 # Standard CMake include(s).
 include( GNUInstallDirs )
+include( CTest )
 
 # Explicitly set the output directory for the binaries. Such that if this
 # project is included by another project, the main project's configuration would
@@ -25,7 +26,8 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    "Directory for the built static libraries" )
 
 # Flags controlling the meta-build system.
-option( VECMEM_USE_SYSTEM_LIBS "Use system libraries be default" FALSE )
+option( VECMEM_USE_SYSTEM_LIBS "Use system libraries by default" FALSE )
+option( VECMEM_BUILD_TESTING "Build the unit tests of VecMem" TRUE )
 
 # Include the VecMem CMake code.
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
@@ -45,8 +47,6 @@ if( VECMEM_BUILD_SYCL_LIBRARY )
 endif()
 
 # Set up the test(s).
-option( VECMEM_BUILD_TESTING "Build the unit tests of VecMem" ON )
-include( CTest )
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
   add_subdirectory( tests )
 endif()

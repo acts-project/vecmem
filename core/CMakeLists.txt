@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -240,4 +240,12 @@ check_cxx_symbol_exists( "std::aligned_alloc" "cstdlib"
 if( VECMEM_HAVE_STD_ALIGNED_ALLOC )
    target_compile_definitions( vecmem_core
       PRIVATE VECMEM_HAVE_STD_ALIGNED_ALLOC )
+endif()
+
+# Test the public headers of vecmem::core.
+if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
+   file( GLOB_RECURSE vecmem_core_public_headers
+      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+      "include/*/*.hpp" )
+   vecmem_test_public_headers( vecmem_core ${vecmem_core_public_headers} )
 endif()

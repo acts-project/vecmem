@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -47,3 +47,11 @@ target_link_libraries( vecmem_cuda
 set_target_properties( vecmem_cuda PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden"
    CUDA_VISIBILITY_PRESET "hidden" )
+
+# Test the public headers of vecmem::cuda.
+if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
+   file( GLOB_RECURSE vecmem_cuda_public_headers
+      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+      "include/*/*.hpp" )
+   vecmem_test_public_headers( vecmem_cuda ${vecmem_cuda_public_headers} )
+endif()

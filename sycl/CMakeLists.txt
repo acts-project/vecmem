@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -82,4 +82,12 @@ vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_MEMSET
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/memset_test.sycl" )
 if( VECMEM_HAVE_SYCL_MEMSET )
    target_compile_definitions( vecmem_sycl PRIVATE VECMEM_HAVE_SYCL_MEMSET )
+endif()
+
+# Test the public headers of vecmem::sycl.
+if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
+   file( GLOB_RECURSE vecmem_sycl_public_headers
+      RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+      "include/*/*.hpp" )
+   vecmem_test_public_headers( vecmem_sycl ${vecmem_sycl_public_headers} )
 endif()
