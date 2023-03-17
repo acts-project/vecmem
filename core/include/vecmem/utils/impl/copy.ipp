@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -65,8 +65,8 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     type::copy_type cptype) const {
 
     // Set up the result buffer.
-    data::vector_buffer<std::remove_cv_t<TYPE>> result(
-        data.capacity(), get_size(data), resource);
+    data::vector_buffer<std::remove_cv_t<TYPE>> result(get_size(data),
+                                                       resource);
     setup(result)->wait();
 
     // Copy the payload of the vector. Explicitly waiting for the copy to finish

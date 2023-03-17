@@ -1,12 +1,13 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 #pragma once
 
 // Local include(s).
+#include "vecmem/containers/data/buffer_type.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/memory/unique_ptr.hpp"
@@ -49,11 +50,9 @@ public:
 
     /// Default constructor
     vector_buffer();
-    /// Constant size data constructor
-    vector_buffer(size_type size, memory_resource& resource);
-    /// Resizable data constructor
-    vector_buffer(size_type capacity, size_type size,
-                  memory_resource& resource);
+    /// Standard constructor
+    vector_buffer(size_type capacity, memory_resource& resource,
+                  buffer_type type = buffer_type::fixed_size);
     /// Move constructor
     vector_buffer(vector_buffer&&) = default;
 

@@ -207,7 +207,7 @@ TEST_F(cuda_containers_test, extendable_memory) {
     // Create a buffer that will hold the filtered elements of the input vector.
     vecmem::data::vector_buffer<int> output_buffer(
         static_cast<vecmem::data::vector_buffer<int>::size_type>(input.size()),
-        0, device_resource);
+        device_resource, vecmem::data::buffer_type::resizable);
     m_copy.setup(output_buffer);
 
     // Run the filtering kernel.
@@ -265,7 +265,8 @@ TEST_F(cuda_containers_test, large_buffer) {
     vecmem::cuda::managed_memory_resource managed_resource;
 
     // Test a (1D) vector.
-    vecmem::data::vector_buffer<unsigned long> buffer1(3, 0, managed_resource);
+    vecmem::data::vector_buffer<unsigned long> buffer1(
+        3, managed_resource, vecmem::data::buffer_type::resizable);
     m_copy.setup(buffer1);
     largeBufferTransform(buffer1);
     EXPECT_EQ(m_copy.get_size(buffer1), 1u);

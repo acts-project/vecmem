@@ -155,7 +155,7 @@ TEST_F(hip_containers_test, extendable_memory) {
     // Create a buffer that will hold the filtered elements of the input vector.
     vecmem::data::vector_buffer<int> output_buffer(
         static_cast<vecmem::data::vector_buffer<int>::size_type>(input.size()),
-        0, device_resource);
+        device_resource, vecmem::data::buffer_type::resizable);
     m_copy.setup(output_buffer);
 
     // Run the filtering kernel.

@@ -317,7 +317,7 @@ TEST_F(sycl_containers_test, extendable_memory) {
     // Create a buffer that will hold the filtered elements of the input vector.
     vecmem::data::vector_buffer<int> output_buffer(
         static_cast<vecmem::data::vector_buffer<int>::size_type>(input.size()),
-        0, device_resource);
+        device_resource, vecmem::data::buffer_type::resizable);
     copy.setup(output_buffer);
 
     // Run a kernel that filters the elements of the input vector.
