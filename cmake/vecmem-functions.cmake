@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -67,6 +67,44 @@ function( vecmem_add_library fullname basename )
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" )
 
 endfunction( vecmem_add_library )
+
+# Helper function testing the VecMem public headers.
+#
+# It can be used to test that public headers would include everything
+# that they need to work, and that the CMake library targets would take
+# care of declaring all of their dependencies correctly for the public
+# headers to work.
+#
+# Usage: vecmem_test_public_headers( vecmem_core include/header1.hpp ... )
+#
+function( vecmem_test_public_headers library )
+
+   # All arguments are treated as header file names.
+   foreach( _headerName ${ARGN} )
+
+      # Make the header filename into a "string".
+      string( REPLACE "/" "_" _headerNormName "${_headerName}" )
+      string( REPLACE "." "_" _headerNormName "${_headerNormName}" )
+
+      # Write a small source file that would test that the public
+      # header can be used as-is.
+      set( _testFileName
+         "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/test_${_headerNormName}.cpp" )
+      file( WRITE "${_testFileName}"
+         "#include \"${_headerName}\"\n"
+         "int main() { return 0; }" )
+
+      # Set up an executable that would build it. But hide it, don't put it
+      # into ${CMAKE_BINARY_DIR}/bin.
+      add_executable( "test_${_headerNormName}" "${_testFileName}" )
+      target_link_libraries( "test_${_headerNormName}" PRIVATE ${library} )
+      set_target_properties( "test_${_headerNormName}" PROPERTIES
+         RUNTIME_OUTPUT_DIRECTORY
+         "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}" )
+
+   endforeach()
+
+endfunction( vecmem_test_public_headers )
 
 # Helper function for setting up the VecMem tests.
 #
