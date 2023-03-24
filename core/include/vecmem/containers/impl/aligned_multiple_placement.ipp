@@ -48,7 +48,7 @@ aligned_multiple_placement_helper(void *p, std::size_t q, P n, Ps... ps) {
     /*
      * We start out by calculating the size of the current region.
      */
-    std::size_t size = sizeof(T) * n;
+    std::size_t size = sizeof(T) * static_cast<std::size_t>(n);
 
     /*
      * We will start out by having this region point to null, because it is
@@ -175,7 +175,8 @@ aligned_multiple_placement(vecmem::memory_resource &r, Ps... ps) {
      * over-aligned types).
      */
     const std::size_t bytes =
-        ((ps * sizeof(Ts)) + ...) + sizeof...(Ts) * alignment;
+        ((static_cast<std::size_t>(ps) * sizeof(Ts)) + ...) +
+        sizeof...(Ts) * alignment;
 
     /*
      * We can now make the allocation request with the memory resource, which

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -74,8 +74,8 @@ void *instrumenting_memory_resource::do_allocate(std::size_t size,
     std::chrono::high_resolution_clock::time_point t2 =
         std::chrono::high_resolution_clock::now();
 
-    std::size_t time =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+    std::size_t time = static_cast<std::size_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 
     /*
      * Add a new allocation event with the size, alignment, pointer, and time
@@ -132,8 +132,8 @@ void instrumenting_memory_resource::do_deallocate(void *ptr, std::size_t size,
     std::chrono::high_resolution_clock::time_point t2 =
         std::chrono::high_resolution_clock::now();
 
-    std::size_t time =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+    std::size_t time = static_cast<std::size_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count());
 
     /*
      * Register a deallocation event.

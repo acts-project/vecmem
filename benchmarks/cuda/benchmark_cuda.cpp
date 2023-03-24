@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -18,15 +18,16 @@
 
 static vecmem::cuda::device_memory_resource device_mr;
 void BenchmarkCudaDevice(benchmark::State& state) {
+    const std::size_t size = static_cast<std::size_t>(state.range(0));
     for (auto _ : state) {
-        void* p = device_mr.allocate(state.range(0));
-        device_mr.deallocate(p, state.range(0));
+        void* p = device_mr.allocate(size);
+        device_mr.deallocate(p, size);
     }
 }
 BENCHMARK(BenchmarkCudaDevice)->RangeMultiplier(2)->Range(1, 2UL << 31);
 
 void BenchmarkCudaDeviceBinaryPage(benchmark::State& state) {
-    std::size_t size = state.range(0);
+    std::size_t size = static_cast<std::size_t>(state.range(0));
 
     vecmem::binary_page_memory_resource mr(device_mr);
 
@@ -40,8 +41,8 @@ BENCHMARK(BenchmarkCudaDeviceBinaryPage)
     ->Range(1, 2UL << 31);
 
 void BenchmarkCudaDeviceBinaryPageMultiple(benchmark::State& state) {
-    std::size_t size = state.range(0);
-    std::size_t nallocs = state.range(1);
+    std::size_t size = static_cast<std::size_t>(state.range(0));
+    std::size_t nallocs = static_cast<std::size_t>(state.range(1));
 
     std::vector<void*> allocs;
 
@@ -64,15 +65,16 @@ BENCHMARK(BenchmarkCudaDeviceBinaryPageMultiple)
 
 static vecmem::cuda::host_memory_resource host_mr;
 void BenchmarkCudaPinned(benchmark::State& state) {
+    const std::size_t size = static_cast<std::size_t>(state.range(0));
     for (auto _ : state) {
-        void* p = host_mr.allocate(state.range(0));
-        host_mr.deallocate(p, state.range(0));
+        void* p = host_mr.allocate(size);
+        host_mr.deallocate(p, size);
     }
 }
 BENCHMARK(BenchmarkCudaPinned)->RangeMultiplier(2)->Range(1, 2UL << 31);
 
 void BenchmarkCudaPinnedBinaryPage(benchmark::State& state) {
-    std::size_t size = state.range(0);
+    std::size_t size = static_cast<std::size_t>(state.range(0));
 
     vecmem::binary_page_memory_resource mr(host_mr);
 
@@ -87,15 +89,16 @@ BENCHMARK(BenchmarkCudaPinnedBinaryPage)
 
 static vecmem::cuda::managed_memory_resource managed_mr;
 void BenchmarkCudaManaged(benchmark::State& state) {
+    const std::size_t size = static_cast<std::size_t>(state.range(0));
     for (auto _ : state) {
-        void* p = managed_mr.allocate(state.range(0));
-        managed_mr.deallocate(p, state.range(0));
+        void* p = managed_mr.allocate(size);
+        managed_mr.deallocate(p, size);
     }
 }
 BENCHMARK(BenchmarkCudaManaged)->RangeMultiplier(2)->Range(1, 2UL << 31);
 
 void BenchmarkCudaManagedBinaryPage(benchmark::State& state) {
-    std::size_t size = state.range(0);
+    std::size_t size = static_cast<std::size_t>(state.range(0));
 
     vecmem::binary_page_memory_resource mr(managed_mr);
 

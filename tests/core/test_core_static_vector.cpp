@@ -69,10 +69,17 @@ typedef testing::Types<int, long, float, double, TestType1> tested_types;
 TYPED_TEST_SUITE(core_static_vector_test, tested_types, tested_names);
 
 namespace {
-/// Helper function for comparing the value of primitive types
+/// Helper function for comparing the value of non-integral primitive types
 template <typename T>
-bool almost_equal(const T& v1, const T& v2) {
+typename std::enable_if<!std::is_integral<T>::value, bool>::type almost_equal(
+    const T& v1, const T& v2) {
     return (std::abs(v1 - v2) < 0.001);
+}
+/// Helper function for comparing the value of integral primitive types
+template <typename T>
+typename std::enable_if<std::is_integral<T>::value, bool>::type almost_equal(
+    const T& v1, const T& v2) {
+    return (v1 == v2);
 }
 /// Specialisation for comparing @c TestType1 objects
 template <>
