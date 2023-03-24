@@ -14,12 +14,13 @@ set( CMAKE_CXX_STANDARD 17 CACHE STRING "The (host) C++ standard to use" )
 if( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
     ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) )
 
-   # Basic flags for all build modes.
+   # Turn on a schizophrenic amount of warnings.
    vecmem_add_flag( CMAKE_CXX_FLAGS "-Wall" )
    vecmem_add_flag( CMAKE_CXX_FLAGS "-Wextra" )
    vecmem_add_flag( CMAKE_CXX_FLAGS "-Wshadow" )
    vecmem_add_flag( CMAKE_CXX_FLAGS "-Wunused-local-typedefs" )
    vecmem_add_flag( CMAKE_CXX_FLAGS "-pedantic" )
+   vecmem_add_flag( CMAKE_CXX_FLAGS "-Wconversion" )
 
    # Fail on warnings, if asked for that behaviour.
    if( VECMEM_FAIL_ON_WARNINGS )
