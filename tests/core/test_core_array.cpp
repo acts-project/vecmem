@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -47,8 +47,8 @@ protected:
     void test_array(vecmem::array<T, N>& a) {
 
         // Fill the array with some simple values.
-        for (int i = 0; i < static_cast<int>(a.size()); ++i) {
-            a.at(i) = T(i);
+        for (std::size_t i = 0; i < a.size(); ++i) {
+            a.at(i) = T(static_cast<int>(i));
         }
 
         // Check the contents using iterator based loops.

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,6 +12,7 @@
 #include "vecmem/utils/debug.hpp"
 
 // System include(s).
+#include <cassert>
 #include <memory>
 #include <stdexcept>
 
@@ -45,8 +46,10 @@ void *contiguous_memory_resource::do_allocate(std::size_t size,
      * Compute the remaining space, which needs to be an lvalue for standard
      * library-related reasons.
      */
+    assert(m_next >= m_begin);
     std::size_t rem =
-        m_size - (static_cast<char *>(m_next) - static_cast<char *>(m_begin));
+        m_size - static_cast<std::size_t>(static_cast<char *>(m_next) -
+                                          static_cast<char *>(m_begin));
 
     /*
      * Employ std::align to find the next properly aligned address.

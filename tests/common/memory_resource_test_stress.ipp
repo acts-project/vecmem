@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -39,7 +39,7 @@ TEST_P(memory_resource_test_stress, stress_test) {
 
         // Check that all vectors have the intended content after all of this.
         for (int j = 0; j < n_vectors; ++j) {
-            for (int value : vectors.at(j)) {
+            for (int value : vectors.at(static_cast<std::size_t>(j))) {
                 EXPECT_EQ(value, j);
             }
         }

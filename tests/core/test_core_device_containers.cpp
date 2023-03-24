@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -159,7 +159,7 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
     EXPECT_EQ(device_vector.capacity(), BUFFER_SIZE);
     EXPECT_EQ(device_vector.max_size(), BUFFER_SIZE);
     for (int i = 0; i < 10; ++i) {
-        EXPECT_EQ(device_vector[i], i + 1);
+        EXPECT_EQ(device_vector[static_cast<vector_size_type>(i)], i + 1);
     }
 
     // Modify the device vector in different ways, and check that it would work

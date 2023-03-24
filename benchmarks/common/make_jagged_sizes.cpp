@@ -11,21 +11,30 @@
 
 // System include(s).
 #include <algorithm>
+#include <cassert>
+#include <limits>
 #include <random>
 
 namespace vecmem::benchmark {
 
-std::vector<std::size_t> make_jagged_sizes(std::size_t outerSize,
-                                           std::size_t maxInnerSize) {
+std::vector<std::size_t> make_jagged_sizes(int64_t outerSize,
+                                           int64_t maxInnerSize) {
+
+    // Some security checks.
+    assert((outerSize >= 0) &&
+           (outerSize < std::numeric_limits<int32_t>::max()));
+    assert((maxInnerSize >= 0) &&
+           (maxInnerSize < std::numeric_limits<int32_t>::max()));
 
     // Set up a simple random number generator for the inner vector sizes.
     std::default_random_engine eng;
     eng.seed(static_cast<std::default_random_engine::result_type>(
         outerSize + maxInnerSize));
-    std::uniform_int_distribution<std::size_t> gen(0, maxInnerSize);
+    std::uniform_int_distribution<std::size_t> gen(
+        0, static_cast<std::size_t>(maxInnerSize));
 
     // Generate the result vector.
-    std::vector<std::size_t> result(outerSize);
+    std::vector<std::size_t> result(static_cast<std::size_t>(outerSize));
     std::generate(result.begin(), result.end(),
                   [&eng, &gen]() { return gen(eng); });
 
