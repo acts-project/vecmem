@@ -69,8 +69,10 @@ TEST_F(hip_containers_test, device_memory) {
 
     // Allocate a device memory block for the output container.
     auto outputvechost = vecmem::get_data(outputvec);
-    vecmem::data::vector_buffer<int> outputvecdevice(outputvec.size(),
-                                                     device_resource);
+    vecmem::data::vector_buffer<int> outputvecdevice(
+        static_cast<vecmem::data::vector_buffer<int>::size_type>(
+            outputvec.size()),
+        device_resource);
 
     // Create the array that is used in the linear transformation.
     vecmem::array<int, 2> constants(host_resource);
@@ -151,8 +153,9 @@ TEST_F(hip_containers_test, extendable_memory) {
     }
 
     // Create a buffer that will hold the filtered elements of the input vector.
-    vecmem::data::vector_buffer<int> output_buffer(input.size(), 0,
-                                                   device_resource);
+    vecmem::data::vector_buffer<int> output_buffer(
+        static_cast<vecmem::data::vector_buffer<int>::size_type>(input.size()),
+        0, device_resource);
     m_copy.setup(output_buffer);
 
     // Run the filtering kernel.

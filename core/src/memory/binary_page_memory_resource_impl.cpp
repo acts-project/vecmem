@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -39,9 +39,9 @@ std::size_t round_up(std::size_t size) {
 
 inline std::size_t clzl(std::size_t i) {
 #if defined(VECMEM_HAVE_LZCNT_U64)
-    return _lzcnt_u64(i);
+    return static_cast<std::size_t>(_lzcnt_u64(i));
 #elif defined(VECMEM_HAVE_BUILTIN_CLZL)
-    return __builtin_clzl(i);
+    return static_cast<std::size_t>(__builtin_clzl(i));
 #else
     std::size_t b;
     for (b = 0;
@@ -189,7 +189,10 @@ void binary_page_memory_resource_impl::do_deallocate(void *p, std::size_t s,
     /*
      * Finally, change the state of the page to vacant.
      */
-    page_ref(*sp, p_min + (diff / (static_cast<std::size_t>(1UL) << goal)))
+    page_ref(*sp,
+             p_min + static_cast<std::size_t>(
+                         diff / (static_cast<std::ptrdiff_t>(
+                                    static_cast<std::size_t>(1UL) << goal))))
         .change_state_occupied_to_vacant();
 }
 

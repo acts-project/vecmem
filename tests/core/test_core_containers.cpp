@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -150,7 +150,7 @@ TEST_F(core_container_test, static_array) {
               std::accumulate(test_array2.rbegin(), test_array2.rend(), 0));
     test_array3.fill(12);
     for (int i = 0; i < ARRAY_SIZE; ++i) {
-        EXPECT_EQ(test_array3.at(i), 12);
+        EXPECT_EQ(test_array3.at(static_cast<std::size_t>(i)), 12);
     }
     const vecmem::static_array<int, 0> test_array4{};
     EXPECT_EQ(test_array4.size(), 0);

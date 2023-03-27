@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -10,6 +10,7 @@
 
 // System include(s).
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 namespace vecmem::benchmark {
@@ -24,7 +25,7 @@ namespace vecmem::benchmark {
 ///                     resulting vector (buffer)
 /// @return A vector of sizes corresponding to the received parameters
 ///
-std::vector<std::size_t> make_jagged_sizes(std::size_t outerSize,
-                                           std::size_t maxInnerSize);
+std::vector<std::size_t> make_jagged_sizes(int64_t outerSize,
+                                           int64_t maxInnerSize);
 
 }  // namespace vecmem::benchmark

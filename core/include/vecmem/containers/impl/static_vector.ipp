@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -487,7 +487,7 @@ template <typename TYPE, std::size_t MAX_SIZE>
 VECMEM_HOST_AND_DEVICE typename static_vector<TYPE, MAX_SIZE>::ElementId
 static_vector<TYPE, MAX_SIZE>::element_id(const_iterator pos) {
 
-    size_type const index = pos - begin();
+    size_type const index = static_cast<size_type>(pos - begin());
     assert(index <= m_size);
     pointer const ptr = reinterpret_cast<pointer>(m_elements) + index;
     return {index, ptr};
