@@ -382,7 +382,8 @@ TEST_F(sycl_jagged_containers_test, filter) {
     // Create the output data on the device.
     vecmem::sycl::device_memory_resource device_resource(&m_queue);
     vecmem::data::jagged_vector_buffer<int> output_data_device(
-        {0, 0, 0, 0, 0, 0}, {10, 10, 10, 10, 10, 10}, device_resource, &m_mem);
+        {10, 10, 10, 10, 10, 10}, device_resource, &m_mem,
+        vecmem::data::buffer_type::resizable);
     copy.setup(output_data_device)->wait();
 
     // Create the view/data objects of the jagged vector outside of the
@@ -456,7 +457,8 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
 
     // Create the jagged vector buffer in managed memory.
     vecmem::data::jagged_vector_buffer<int> managed_data(
-        {0, 0, 0, 0, 0, 0}, {0, 1, 200, 1, 100, 2}, m_mem);
+        {0, 1, 200, 1, 100, 2}, m_mem, nullptr,
+        vecmem::data::buffer_type::resizable);
     copy.setup(managed_data);
 
     // Run the vector filling.
@@ -485,7 +487,8 @@ TEST_F(sycl_jagged_containers_test, zero_capacity) {
 
     // Create the jagged vector buffer in device memory.
     vecmem::data::jagged_vector_buffer<int> device_data(
-        {0, 0, 0, 0, 0, 0}, {0, 1, 200, 1, 100, 2}, device_resource, &m_mem);
+        {0, 1, 200, 1, 100, 2}, device_resource, &m_mem,
+        vecmem::data::buffer_type::resizable);
     copy.setup(device_data);
 
     // Run the vector filling.

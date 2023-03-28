@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -145,7 +145,8 @@ TEST_F(core_copy_test, resizable_vector_buffer) {
     using vecmem_size_type = vecmem::device_vector<int>::size_type;
     const vecmem_size_type capacity =
         static_cast<vecmem_size_type>(reference.size() + 5);
-    vecmem::data::vector_buffer<int> source_data(capacity, 0, m_resource);
+    vecmem::data::vector_buffer<int> source_data(
+        capacity, m_resource, vecmem::data::buffer_type::resizable);
     m_copy.setup(source_data);
     // Fill it with data.
     vecmem::device_vector<int> source_data_vec(source_data);
@@ -354,7 +355,7 @@ TEST_F(core_copy_test, resizable_jagged_vector_buffer) {
     std::transform(reference.begin(), reference.end(), capacities.begin(),
                    [](const auto& vec) { return vec.size() + 5; });
     vecmem::data::jagged_vector_buffer<int> source_data(
-        std::vector<std::size_t>(capacities.size(), 0), capacities, m_resource);
+        capacities, m_resource, nullptr, vecmem::data::buffer_type::resizable);
     m_copy.setup(source_data);
     // Fill it with data.
     vecmem::jagged_device_vector<int> source_data_vec(source_data);

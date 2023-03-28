@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -137,7 +137,8 @@ TEST_F(core_jagged_vector_view_test, filter) {
 
     // Create a resizable buffer for a jagged vector.
     vecmem::data::jagged_vector_buffer<int> output_data(
-        {0, 0, 0, 0, 0, 0}, {10, 10, 10, 10, 10, 10}, m_mem);
+        {10, 10, 10, 10, 10, 10}, m_mem, nullptr,
+        vecmem::data::buffer_type::resizable);
     copy.setup(output_data);
 
     // Fill the jagged vector buffer with just the odd elements.

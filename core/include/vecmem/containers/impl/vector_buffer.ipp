@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -25,16 +25,9 @@ vector_buffer<TYPE>::vector_buffer()
     : base_type(static_cast<size_type>(0), nullptr) {}
 
 template <typename TYPE>
-vector_buffer<TYPE>::vector_buffer(size_type size, memory_resource& resource)
-    : vector_buffer(size, size, resource) {}
-
-template <typename TYPE>
-vector_buffer<TYPE>::vector_buffer(size_type capacity, size_type size,
-                                   memory_resource& resource)
+vector_buffer<TYPE>::vector_buffer(size_type capacity,
+                                   memory_resource& resource, buffer_type type)
     : base_type(capacity, nullptr, nullptr) {
-
-    // A sanity check.
-    assert(capacity >= size);
 
     // Exit early for null-capacity buffers.
     if (capacity == 0) {
@@ -44,7 +37,7 @@ vector_buffer<TYPE>::vector_buffer(size_type capacity, size_type size,
     std::tie(m_memory, base_type::m_size, base_type::m_ptr) =
         details::aligned_multiple_placement<std::remove_pointer_t<size_pointer>,
                                             std::remove_pointer_t<pointer>>(
-            resource, size == capacity ? 0 : 1, capacity);
+            resource, type == buffer_type::fixed_size ? 0 : 1, capacity);
 }
 
 }  // namespace data
