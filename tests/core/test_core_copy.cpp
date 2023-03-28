@@ -355,7 +355,7 @@ TEST_F(core_copy_test, resizable_jagged_vector_buffer) {
     std::transform(reference.begin(), reference.end(), capacities.begin(),
                    [](const auto& vec) { return vec.size() + 5; });
     vecmem::data::jagged_vector_buffer<int> source_data(
-        std::vector<std::size_t>(capacities.size(), 0), capacities, m_resource);
+        capacities, m_resource, nullptr, vecmem::data::buffer_type::resizable);
     m_copy.setup(source_data);
     // Fill it with data.
     vecmem::jagged_device_vector<int> source_data_vec(source_data);

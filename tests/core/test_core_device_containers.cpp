@@ -223,9 +223,8 @@ TEST_F(core_device_container_test, resizable_jagged_vector_buffer) {
 
     // Create a buffer with some sufficiently varied capacities.
     vecmem::data::jagged_vector_buffer<int> jagged_buffer(
-        std::vector<std::size_t>(10, 0),
         std::vector<std::size_t>({0, 16, 10, 15, 8, 3, 0, 0, 55, 2}),
-        m_resource);
+        m_resource, nullptr, vecmem::data::buffer_type::resizable);
     m_copy.setup(jagged_buffer);
 
     // Create a device vector on top of the buffer.
@@ -317,9 +316,8 @@ TEST_F(core_device_container_test, conversions) {
 
     // Create a dummy jagged vector buffer.
     vecmem::data::jagged_vector_buffer<int> buffer2d1(
-        std::vector<std::size_t>(10, 0),
         std::vector<std::size_t>({0, 16, 10, 15, 8, 3, 0, 0, 55, 2}),
-        m_resource);
+        m_resource, nullptr, vecmem::data::buffer_type::resizable);
     m_copy.setup(buffer2d1);
 
     // Check that some conversions compile and work correctly.

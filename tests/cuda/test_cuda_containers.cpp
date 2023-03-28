@@ -273,7 +273,8 @@ TEST_F(cuda_containers_test, large_buffer) {
 
     // Test a (2D) jagged vector.
     vecmem::data::jagged_vector_buffer<unsigned long> buffer2(
-        {0, 0, 0}, {3, 3, 3}, managed_resource);
+        {3, 3, 3}, managed_resource, nullptr,
+        vecmem::data::buffer_type::resizable);
     m_copy.setup(buffer2);
     largeBufferTransform(buffer2);
     EXPECT_EQ(m_copy.get_sizes(buffer2), std::vector<unsigned int>({0, 1u, 0}));

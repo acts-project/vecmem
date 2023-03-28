@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -168,7 +168,8 @@ TEST_F(cuda_jagged_vector_view_test, filter) {
     // Create the output data on the device.
     vecmem::cuda::device_memory_resource device_resource;
     vecmem::data::jagged_vector_buffer<int> output_data_device(
-        {0, 0, 0, 0, 0, 0}, {10, 10, 10, 10, 10, 10}, device_resource, &m_mem);
+        {10, 10, 10, 10, 10, 10}, device_resource, &m_mem,
+        vecmem::data::buffer_type::resizable);
     copy.setup(output_data_device);
 
     // Run the filtering.
@@ -207,7 +208,8 @@ TEST_F(cuda_jagged_vector_view_test, zero_capacity) {
 
     // Create the jagged vector buffer in managed memory.
     vecmem::data::jagged_vector_buffer<int> managed_data(
-        {0, 0, 0, 0, 0, 0}, {0, 1, 200, 1, 100, 2}, m_mem);
+        {0, 1, 200, 1, 100, 2}, m_mem, nullptr,
+        vecmem::data::buffer_type::resizable);
     copy.setup(managed_data);
 
     // Run the vector filling.
@@ -228,7 +230,8 @@ TEST_F(cuda_jagged_vector_view_test, zero_capacity) {
 
     // Create the jagged vector buffer in device memory.
     vecmem::data::jagged_vector_buffer<int> device_data(
-        {0, 0, 0, 0, 0, 0}, {0, 1, 200, 1, 100, 2}, device_resource, &m_mem);
+        {0, 1, 200, 1, 100, 2}, device_resource, &m_mem,
+        vecmem::data::buffer_type::resizable);
     copy.setup(device_data);
 
     // Run the vector filling.

@@ -64,46 +64,9 @@ template <typename OTHERTYPE,
           std::enable_if_t<std::is_convertible<TYPE, OTHERTYPE>::value, bool> >
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     const jagged_vector_view<OTHERTYPE>& other, memory_resource& resource,
-    memory_resource* host_access_resource)
-    : jagged_vector_buffer(::get_sizes(other), resource, host_access_resource) {
-
-}
-
-template <typename TYPE>
-template <typename SIZE_TYPE,
-          std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
-                               std::is_unsigned<SIZE_TYPE>::value,
-                           bool> >
-jagged_vector_buffer<TYPE>::jagged_vector_buffer(
-    const std::vector<SIZE_TYPE>& sizes, memory_resource& resource,
-    memory_resource* host_access_resource)
-    : base_type(sizes.size(), nullptr),
-      m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
-          (host_access_resource == nullptr ? 0 : sizes.size()), resource)),
-      m_outer_host_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
-          sizes.size(),
-          (host_access_resource == nullptr ? resource
-                                           : *host_access_resource))),
-      m_inner_memory(vecmem::make_unique_alloc<char[]>(
-          resource, std::accumulate(sizes.begin(), sizes.end(),
-                                    static_cast<std::size_t>(0)) *
-                        sizeof(TYPE))) {
-
-    // Point the base class at the newly allocated memory.
-    base_type::m_ptr =
-        ((host_access_resource != nullptr) ? m_outer_memory.get()
-                                           : m_outer_host_memory.get());
-    base_type::m_host_ptr = m_outer_host_memory.get();
-
-    // Set up the host accessible memory array.
-    std::ptrdiff_t ptrdiff = 0;
-    for (std::size_t i = 0; i < sizes.size(); ++i) {
-        new (base_type::host_ptr() + i)
-            value_type(static_cast<typename value_type::size_type>(sizes[i]),
-                       reinterpret_cast<TYPE*>(m_inner_memory.get() + ptrdiff));
-        ptrdiff += sizes[i] * sizeof(TYPE);
-    }
-}
+    memory_resource* host_access_resource, buffer_type type)
+    : jagged_vector_buffer(::get_sizes(other), resource, host_access_resource,
+                           type) {}
 
 template <typename TYPE>
 template <typename SIZE_TYPE,
@@ -111,31 +74,38 @@ template <typename SIZE_TYPE,
                                std::is_unsigned<SIZE_TYPE>::value,
                            bool> >
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
-    const std::vector<SIZE_TYPE>& sizes,
     const std::vector<SIZE_TYPE>& capacities, memory_resource& resource,
-    memory_resource* host_access_resource)
-    : base_type(sizes.size(), nullptr),
+    memory_resource* host_access_resource, buffer_type type)
+    : base_type(capacities.size(), nullptr),
       m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
-          (host_access_resource == nullptr ? 0 : sizes.size()), resource)),
+          (host_access_resource == nullptr ? 0 : capacities.size()), resource)),
       m_outer_host_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
-          sizes.size(),
+          capacities.size(),
           (host_access_resource == nullptr ? resource
                                            : *host_access_resource))) {
 
+    // Determine the allocation size.
     using header_t = typename vecmem::data::jagged_vector_buffer<
         TYPE>::value_type::size_type;
-    // Determine the allocation size.
-    std::size_t total_elements = std::accumulate(
+    const std::size_t total_elements = std::accumulate(
         capacities.begin(), capacities.end(), static_cast<std::size_t>(0));
 
+    // Helper pointers to the "inner data".
     header_t* header_ptr = nullptr;
     TYPE* data_ptr = nullptr;
-    std::tie(m_inner_memory, header_ptr, data_ptr) =
-        details::aligned_multiple_placement<header_t, TYPE>(
-            resource, capacities.size(), total_elements);
 
-    // Some sanity check.
-    assert(sizes.size() == capacities.size());
+    // Allocate the "inner memory" for a fixed size buffer.
+    if (type == buffer_type::fixed_size) {
+        m_inner_memory = vecmem::make_unique_alloc<char[]>(
+            resource, total_elements * sizeof(TYPE));
+        data_ptr = reinterpret_cast<TYPE*>(m_inner_memory.get());
+    }
+    // Allocate the "inner memory" for a resizable buffer.
+    else if (type == buffer_type::resizable) {
+        std::tie(m_inner_memory, header_ptr, data_ptr) =
+            details::aligned_multiple_placement<header_t, TYPE>(
+                resource, capacities.size(), total_elements);
+    }
 
     // Point the base class at the newly allocated memory.
     base_type::m_ptr =
@@ -146,9 +116,15 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     // Set up the vecmem::vector_view objects in the host accessible memory.
     std::ptrdiff_t ptrdiff = 0;
     for (std::size_t i = 0; i < capacities.size(); ++i) {
-        new (base_type::host_ptr() + i) value_type(
-            static_cast<typename value_type::size_type>(capacities[i]),
-            &header_ptr[i], data_ptr + ptrdiff);
+        if (header_ptr != nullptr) {
+            new (base_type::host_ptr() + i) value_type(
+                static_cast<typename value_type::size_type>(capacities[i]),
+                &(header_ptr[i]), data_ptr + ptrdiff);
+        } else {
+            new (base_type::host_ptr() + i) value_type(
+                static_cast<typename value_type::size_type>(capacities[i]),
+                data_ptr + ptrdiff);
+        }
         ptrdiff += capacities[i];
     }
 }

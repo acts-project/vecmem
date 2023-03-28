@@ -8,6 +8,7 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/containers/data/buffer_type.hpp"
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/memory/unique_ptr.hpp"
@@ -64,47 +65,34 @@ public:
     ///        be host accessible.
     /// @param host_access_resource An optional host accessible memory
     ///        resource. Needed if @c resource is not host accessible.
+    /// @param type The type (resizable or not) of the buffer
+    ///
     template <typename OTHERTYPE,
               std::enable_if_t<std::is_convertible<TYPE, OTHERTYPE>::value,
                                bool> = true>
     jagged_vector_buffer(const jagged_vector_view<OTHERTYPE>& other,
                          memory_resource& resource,
-                         memory_resource* host_access_resource = nullptr);
+                         memory_resource* host_access_resource = nullptr,
+                         buffer_type type = buffer_type::fixed_size);
 
     /// Constructor from a vector of ("inner vector") sizes
     ///
-    /// @param sizes Simple vector holding the sizes of the "inner vectors"
-    ///        for the jagged vector buffer.
-    /// @param resource The device accessible memory resource, which may also
-    ///        be host accessible.
-    /// @param host_access_resource An optional host accessible memory
-    ///        resource. Needed if @c resource is not host accessible.
-    template <typename SIZE_TYPE = std::size_t,
-              std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
-                                   std::is_unsigned<SIZE_TYPE>::value,
-                               bool> = true>
-    jagged_vector_buffer(const std::vector<SIZE_TYPE>& sizes,
-                         memory_resource& resource,
-                         memory_resource* host_access_resource = nullptr);
-
-    /// Constructor from a vector of ("inner vector") sizes and capacities
-    ///
-    /// @param sizes Simple vector holding the sizes of the "inner vectors"
-    ///        for the jagged vector buffer.
-    /// @param capacities Simple vector holding the capacities of the
+    /// @param capacities Simple vector holding the capacities/sizes of the
     ///        "inner vectors" for the jagged vector buffer.
     /// @param resource The device accessible memory resource, which may also
     ///        be host accessible.
     /// @param host_access_resource An optional host accessible memory
     ///        resource. Needed if @c resource is not host accessible.
+    /// @param type The type (resizable or not) of the buffer
+    ///
     template <typename SIZE_TYPE = std::size_t,
               std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
                                    std::is_unsigned<SIZE_TYPE>::value,
                                bool> = true>
-    jagged_vector_buffer(const std::vector<SIZE_TYPE>& sizes,
-                         const std::vector<SIZE_TYPE>& capacities,
+    jagged_vector_buffer(const std::vector<SIZE_TYPE>& capacities,
                          memory_resource& resource,
-                         memory_resource* host_access_resource = nullptr);
+                         memory_resource* host_access_resource = nullptr,
+                         buffer_type type = buffer_type::fixed_size);
 
     /// Move constructor
     jagged_vector_buffer(jagged_vector_buffer&&) = default;
