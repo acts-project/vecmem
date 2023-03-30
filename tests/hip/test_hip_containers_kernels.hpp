@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -27,6 +27,10 @@ void linearTransform(vecmem::data::vector_view<const int> constants,
 /// Function incrementing the elements of the received vector using atomics
 void atomicTransform(std::size_t iterations,
                      vecmem::data::vector_view<int> vec);
+
+/// Function filling vectors after using atomics in local address space
+void atomicLocalRef(std::size_t num_blocks, std::size_t block_size,
+                    vecmem::data::vector_view<int> vec);
 
 /// Function filtering elements of an input vector into an output vector
 void filterTransform(vecmem::data::vector_view<const int> input,

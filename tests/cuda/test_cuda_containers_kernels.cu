@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -105,6 +105,46 @@ void atomicTransform(unsigned int iterations,
 
     // Launch the kernel.
     atomicTransformKernel<<<iterations, vec.size()>>>(iterations, vec);
+    // Check whether it succeeded to run.
+    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
+    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+}
+
+/// Kernel performing some basic atomic operations on local memory.
+__global__ void atomicLocalRefKernel(vecmem::data::vector_view<int> data) {
+
+    // Find the current block index.
+    const int i = blockIdx.x;
+
+    __shared__ int shared;
+
+    // Initialise shared memory variable
+    if (threadIdx.x == 0) {
+        shared = 0;
+    }
+    __syncthreads();
+
+    // Perform basic atomic operations on local memory.
+    vecmem::device_atomic_ref<int, vecmem::device_address_space::local> atom(
+        shared);
+    atom.fetch_add(2 * i);
+    atom.fetch_sub(i);
+    atom.fetch_and(0xffffffff);
+    atom.fetch_or(0x00000000);
+    __syncthreads();
+    if (threadIdx.x == 0) {
+        vecmem::device_vector<int> dev(data);
+        dev.at(i) = shared;
+    }
+
+    return;
+}
+
+void atomicLocalRef(std::size_t num_blocks, std::size_t block_size,
+                    vecmem::data::vector_view<int> vec) {
+
+    // Launch the kernel.
+    atomicLocalRefKernel<<<num_blocks, block_size>>>(vec);
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());

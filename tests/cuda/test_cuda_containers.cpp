@@ -190,6 +190,38 @@ TEST_F(cuda_containers_test, atomic_device_memory) {
     }
 }
 
+/// Test the execution of atomic operations in local memory
+TEST_F(cuda_containers_test, atomic_local_ref) {
+
+    // The memory resources.
+    vecmem::cuda::host_memory_resource host_resource;
+    vecmem::cuda::device_memory_resource device_resource;
+
+    // Local block size.
+    static constexpr int BLOCKSIZE = 128;
+
+    // Number of blocks.
+    static constexpr int NUMBLOCKS = 5;
+
+    // Allocate memory on the host, and set initial values in it.
+    vecmem::vector<int> host_vector(NUMBLOCKS, 0, &host_resource);
+
+    // Set up device buffers with the data.
+    auto device_buffer =
+        m_copy.to(vecmem::get_data(host_vector), device_resource);
+
+    // Run test function.
+    atomicLocalRef(NUMBLOCKS, BLOCKSIZE, device_buffer);
+
+    // Copy data back to the host.
+    m_copy(device_buffer, host_vector);
+
+    // Check the output.
+    for (std::size_t i = 0; i < NUMBLOCKS; ++i) {
+        EXPECT_EQ(host_vector[i], i * BLOCKSIZE);
+    }
+}
+
 /// Test the usage of extendable vectors in a kernel
 TEST_F(cuda_containers_test, extendable_memory) {
 
