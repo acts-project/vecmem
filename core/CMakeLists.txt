@@ -102,6 +102,14 @@ vecmem_add_library( vecmem_core core
 set_target_properties( vecmem_core PROPERTIES
    CXX_VISIBILITY_PRESET "hidden" )
 
+# Generate a version header for the project.
+configure_file( "cmake/version.hpp.in"
+   "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/vecmem/version.hpp"
+   @ONLY )
+install(
+   FILES "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/vecmem/version.hpp"
+   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/vecmem" )
+
 # Add definitions necessary for the correct functioning of VECMEM_DEBUG_MSG.
 string( LENGTH "${CMAKE_SOURCE_DIR}/" VECMEM_SOURCE_DIR_LENGTH )
 target_compile_definitions( vecmem_core PUBLIC
@@ -247,5 +255,6 @@ if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
    file( GLOB_RECURSE vecmem_core_public_headers
       RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
       "include/*/*.hpp" )
+   list( APPEND vecmem_core_public_headers "vecmem/version.hpp" )
    vecmem_test_public_headers( vecmem_core ${vecmem_core_public_headers} )
 endif()
