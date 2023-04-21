@@ -6,7 +6,7 @@
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
-project( vecmem VERSION 0.25.0 LANGUAGES CXX )
+project( vecmem VERSION 0.26.0 LANGUAGES CXX )
 
 # Standard CMake include(s).
 include( GNUInstallDirs )
