@@ -294,6 +294,88 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
     }
 }
 
+/// Test atomic access to local memory
+TEST_F(sycl_containers_test, atomic_local_ref) {
+
+    // Create the SYCL queue that we'll be using in the test.
+    cl::sycl::queue queue;
+
+    // Skip test if not running on a gpu.
+    if (queue.get_device().get_info<::sycl::info::device::device_type>() !=
+        ::sycl::info::device_type::gpu) {
+        GTEST_SKIP();
+    }
+
+    // The memory resources.
+    vecmem::sycl::host_memory_resource host_resource(&queue);
+    vecmem::sycl::device_memory_resource device_resource(&queue);
+
+    // Helper object for performing memory copies.
+    vecmem::sycl::async_copy copy(&queue);
+
+    // Local block size.
+    static constexpr int BLOCKSIZE = 128;
+
+    // Number of blocks.
+    static constexpr int NUMBLOCKS = 5;
+
+    // Allocate memory on the host, and set initial values in it.
+    vecmem::vector<int> host_vector(NUMBLOCKS, 0, &host_resource);
+
+    // Set up a device buffer with the data.
+    auto device_buffer =
+        copy.to(vecmem::get_data(host_vector), device_resource);
+
+    // Do basic atomic addition on local memory.
+    queue
+        .submit([&device_buffer](cl::sycl::handler& h) {
+            ::sycl::accessor<int, 1, ::sycl::access::mode::read_write,
+                             ::sycl::access::target::local>
+                shared(1, h);
+
+            h.parallel_for<class AtomicLocalRefTests>(
+                cl::sycl::nd_range<1>(BLOCKSIZE * NUMBLOCKS, BLOCKSIZE),
+                [buffer = vecmem::get_data(device_buffer),
+                 shared](cl::sycl::nd_item<1> item) {
+                    // Do simple stuff using local atomic ref
+                    const int i = item.get_group_linear_id();
+
+                    // Initialise shared memory variable
+                    if (item.get_local_linear_id() == 0) {
+                        shared[0] = 0;
+                    }
+                    item.barrier();
+
+                    // Perform basic atomic operations on local memory.
+                    vecmem::device_atomic_ref<
+                        int, vecmem::device_address_space::local>
+                        atom(shared[0]);
+                    atom.fetch_add(2 * i);
+                    atom.fetch_sub(i);
+                    atom.fetch_and(0xffffffff);
+                    atom.fetch_or(0x00000000);
+
+                    // Wait for work to be done
+                    item.barrier();
+
+                    // Write result to global memory
+                    if (item.get_local_linear_id() == 0) {
+                        vecmem::device_vector<int> dev(buffer);
+                        dev.at(i) = shared[0];
+                    }
+                });
+        })
+        .wait_and_throw();
+
+    // Copy data back to the host.
+    copy(device_buffer, vecmem::get_data(host_vector))->wait();
+
+    // Check the output.
+    for (std::size_t i = 0; i < NUMBLOCKS; ++i) {
+        EXPECT_EQ(host_vector[i], i * BLOCKSIZE);
+    }
+}
+
 /// Test the usage of extendable vectors in a kernel
 TEST_F(sycl_containers_test, extendable_memory) {
 

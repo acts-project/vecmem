@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -150,6 +150,47 @@ void atomicTransform(std::size_t iterations,
     // Launch the kernel.
     hipLaunchKernelGGL(atomicTransformKernel, iterations, vec.size(), 0,
                        nullptr, iterations, vec);
+    // Check whether it succeeded to run.
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+}
+
+/// Kernel performing some basic atomic operations on local memory.
+__global__ void atomicLocalRefKernel(vecmem::data::vector_view<int> data) {
+
+    // Find the current block index.
+    const int i = hipBlockIdx_x;
+
+    __shared__ int shared;
+
+    // Initialise shared memory variable
+    if (hipThreadIdx_x == 0) {
+        shared = 0;
+    }
+    __syncthreads();
+
+    // Perform basic atomic operations on local memory.
+    vecmem::device_atomic_ref<int, vecmem::device_address_space::local> atom(
+        shared);
+    atom.fetch_add(2 * i);
+    atom.fetch_sub(i);
+    atom.fetch_and(0xffffffff);
+    atom.fetch_or(0x00000000);
+    __syncthreads();
+    if (hipThreadIdx_x == 0) {
+        vecmem::device_vector<int> dev(data);
+        dev.at(i) = shared;
+    }
+
+    return;
+}
+
+void atomicLocalRef(std::size_t num_blocks, std::size_t block_size,
+                    vecmem::data::vector_view<int> vec) {
+
+    // Launch the kernel.
+    hipLaunchKernelGGL(atomicLocalRefKernel, num_blocks, block_size, 0, nullptr,
+                       vec);
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());

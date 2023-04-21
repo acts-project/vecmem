@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -14,41 +14,77 @@
 
 /// Helpers for explicit calls to the SYCL atomic functions
 #if defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
-#define __VECMEM_SYCL_ATOMIC_CALL0(FNAME, PTR) \
-    cl::sycl::atomic_##FNAME<value_type>(      \
-        cl::sycl::atomic<value_type>(cl::sycl::global_ptr<value_type>(PTR)))
-#define __VECMEM_SYCL_ATOMIC_CALL1(FNAME, PTR, ARG1)                         \
-    cl::sycl::atomic_##FNAME<value_type>(                                    \
-        cl::sycl::atomic<value_type>(cl::sycl::global_ptr<value_type>(PTR)), \
+
+namespace vecmem::details {
+template <device_address_space address>
+struct sycl_address_space {};
+
+template <>
+struct sycl_address_space<device_address_space::global> {
+    static constexpr cl::sycl::access::address_space add =
+        cl::sycl::access::address_space::global_space;
+
+    template <typename T>
+    using ptr_t = cl::sycl::global_ptr<T>;
+};
+template <>
+struct sycl_address_space<device_address_space::local> {
+    static constexpr cl::sycl::access::address_space add =
+        cl::sycl::access::address_space::local_space;
+
+    template <typename T>
+    using ptr_t = cl::sycl::local_ptr<T>;
+};
+}  // namespace vecmem::details
+
+#define __VECMEM_SYCL_ATOMIC_CALL0(FNAME, PTR)                             \
+    cl::sycl::atomic_##FNAME<value_type,                                   \
+                             details::sycl_address_space<address>::add>(   \
+        cl::sycl::atomic<value_type,                                       \
+                         details::sycl_address_space<address>::add>(       \
+            typename details::sycl_address_space<address>::template ptr_t< \
+                value_type>(PTR)))
+#define __VECMEM_SYCL_ATOMIC_CALL1(FNAME, PTR, ARG1)                       \
+    cl::sycl::atomic_##FNAME<value_type,                                   \
+                             details::sycl_address_space<address>::add>(   \
+        cl::sycl::atomic<value_type,                                       \
+                         details::sycl_address_space<address>::add>(       \
+            typename details::sycl_address_space<address>::template ptr_t< \
+                value_type>(PTR)),                                         \
         ARG1)
-#define __VECMEM_SYCL_ATOMIC_CALL2(FNAME, PTR, ARG1, ARG2)                   \
-    cl::sycl::atomic_##FNAME<value_type>(                                    \
-        cl::sycl::atomic<value_type>(cl::sycl::global_ptr<value_type>(PTR)), \
+#define __VECMEM_SYCL_ATOMIC_CALL2(FNAME, PTR, ARG1, ARG2)                 \
+    cl::sycl::atomic_##FNAME<value_type,                                   \
+                             details::sycl_address_space<address>::add>(   \
+        cl::sycl::atomic<value_type,                                       \
+                         details::sycl_address_space<address>::add>(       \
+            typename details::sycl_address_space<address>::template ptr_t< \
+                value_type>(PTR)),                                         \
         ARG1, ARG2)
 #endif
 
 namespace vecmem {
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE device_atomic_ref<T>::device_atomic_ref(reference ref)
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE device_atomic_ref<T, address>::device_atomic_ref(
+    reference ref)
     : m_ptr(&ref) {}
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE device_atomic_ref<T>::device_atomic_ref(
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE device_atomic_ref<T, address>::device_atomic_ref(
     const device_atomic_ref& parent)
     : m_ptr(parent.m_ptr) {}
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::operator=(
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::operator=(
     value_type data) const -> value_type {
 
     store(data);
     return load();
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE void device_atomic_ref<T>::store(value_type data,
-                                                        memory_order) const {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE void device_atomic_ref<T, address>::store(
+    value_type data, memory_order) const {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -62,9 +98,9 @@ VECMEM_HOST_AND_DEVICE void device_atomic_ref<T>::store(value_type data,
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::load(memory_order) const
-    -> value_type {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::load(
+    memory_order) const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -80,10 +116,9 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::load(memory_order) const
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::exchange(value_type data,
-                                                           memory_order) const
-    -> value_type {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::exchange(
+    value_type data, memory_order) const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -97,16 +132,21 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::exchange(value_type data,
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE bool device_atomic_ref<T>::compare_exchange_strong(
-    reference expected, value_type desired, memory_order, memory_order) const {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE bool
+device_atomic_ref<T, address>::compare_exchange_strong(reference expected,
+                                                       value_type desired,
+                                                       memory_order,
+                                                       memory_order) const {
 
     return compare_exchange_strong(expected, desired);
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE bool device_atomic_ref<T>::compare_exchange_strong(
-    reference expected, value_type desired, memory_order) const {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE bool
+device_atomic_ref<T, address>::compare_exchange_strong(reference expected,
+                                                       value_type desired,
+                                                       memory_order) const {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -125,10 +165,9 @@ VECMEM_HOST_AND_DEVICE bool device_atomic_ref<T>::compare_exchange_strong(
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_add(value_type data,
-                                                            memory_order) const
-    -> value_type {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_add(
+    value_type data, memory_order) const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -142,10 +181,9 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_add(value_type data,
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_sub(value_type data,
-                                                            memory_order) const
-    -> value_type {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_sub(
+    value_type data, memory_order) const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -159,10 +197,9 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_sub(value_type data,
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_and(value_type data,
-                                                            memory_order) const
-    -> value_type {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_and(
+    value_type data, memory_order) const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -176,10 +213,9 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_and(value_type data,
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_or(value_type data,
-                                                           memory_order) const
-    -> value_type {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_or(
+    value_type data, memory_order) const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))
@@ -193,10 +229,9 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_or(value_type data,
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T>::fetch_xor(value_type data,
-                                                            memory_order) const
-    -> value_type {
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_xor(
+    value_type data, memory_order) const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!(defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)))

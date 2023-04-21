@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -9,6 +9,13 @@
 
 // System include(s).
 #include <atomic>
+
+namespace vecmem {
+
+/// Custom definition for the adress space
+enum class device_address_space { global = 0, local = 1 };
+
+}  // namespace vecmem
 
 #if (defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)) && \
     defined(VECMEM_HAVE_SYCL_ATOMIC_REF)
@@ -21,12 +28,34 @@ namespace vecmem {
 /// Define @c vecmem::memory_order as @c sycl::memory_order
 using memory_order = ::sycl::memory_order;
 
+namespace details {
+template <device_address_space address>
+struct sycl_address_space {};
+
+template <>
+struct sycl_address_space<device_address_space::global> {
+    static constexpr ::sycl::memory_order ord = ::sycl::memory_order::relaxed;
+    static constexpr ::sycl::memory_scope scp = ::sycl::memory_scope::device;
+    static constexpr ::sycl::access::address_space add =
+        ::sycl::access::address_space::global_space;
+};
+template <>
+struct sycl_address_space<device_address_space::local> {
+    static constexpr ::sycl::memory_order ord = ::sycl::memory_order::relaxed;
+    static constexpr ::sycl::memory_scope scp =
+        ::sycl::memory_scope::work_group;
+    static constexpr ::sycl::access::address_space add =
+        ::sycl::access::address_space::local_space;
+};
+}  // namespace details
+
 /// @c vecmem::atomic_ref equals @c sycl::atomic_ref with "modern SYCL"
-template <typename T>
+template <typename T,
+          device_address_space address = device_address_space::global>
 using device_atomic_ref =
-    ::sycl::atomic_ref<T, ::sycl::memory_order::relaxed,
-                       ::sycl::memory_scope::device,
-                       ::sycl::access::address_space::global_space>;
+    ::sycl::atomic_ref<T, details::sycl_address_space<address>::ord,
+                       details::sycl_address_space<address>::scp,
+                       details::sycl_address_space<address>::add>;
 
 }  // namespace vecmem
 
@@ -40,7 +69,7 @@ namespace vecmem {
 using memory_order = std::memory_order;
 
 /// @c vecmem::atomic_ref equals @c std::atomic_ref in host code with C++20
-template <typename T>
+template <typename T, device_address_space = device_address_space::global>
 using device_atomic_ref = std::atomic_ref<T>;
 
 }  // namespace vecmem
@@ -74,7 +103,7 @@ enum class memory_order {
 /// implemented with @c std::atomic_ref in C++20. With earlier C++ standards all
 /// operations in host code are performed as "regular" operations.
 ///
-template <typename T>
+template <typename T, device_address_space = device_address_space::global>
 class device_atomic_ref {
 
 public:
