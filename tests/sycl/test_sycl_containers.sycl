@@ -22,6 +22,7 @@
 #include "vecmem/memory/sycl/shared_memory_resource.hpp"
 #include "vecmem/utils/sycl/async_copy.hpp"
 #include "vecmem/utils/sycl/copy.hpp"
+#include "vecmem/utils/sycl/local_accessor.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
@@ -329,9 +330,7 @@ TEST_F(sycl_containers_test, atomic_local_ref) {
     // Do basic atomic addition on local memory.
     queue
         .submit([&device_buffer](cl::sycl::handler& h) {
-            ::sycl::accessor<int, 1, ::sycl::access::mode::read_write,
-                             ::sycl::access::target::local>
-                shared(1, h);
+            vecmem::sycl::local_accessor<int> shared(1, h);
 
             h.parallel_for<class AtomicLocalRefTests>(
                 cl::sycl::nd_range<1>(BLOCKSIZE * NUMBLOCKS, BLOCKSIZE),
