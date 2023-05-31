@@ -84,6 +84,14 @@ if( VECMEM_HAVE_SYCL_MEMSET )
    target_compile_definitions( vecmem_sycl PRIVATE VECMEM_HAVE_SYCL_MEMSET )
 endif()
 
+# Check if sycl::local_accessor is available.
+vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_LOCAL_ACCESSOR
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/local_accessor_test.sycl" )
+if( VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )
+   target_compile_definitions( vecmem_sycl INTERFACE
+      VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )
+endif()
+
 # Test the public headers of vecmem::sycl.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
    file( GLOB_RECURSE vecmem_sycl_public_headers
