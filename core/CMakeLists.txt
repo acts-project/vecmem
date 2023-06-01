@@ -196,9 +196,9 @@ if( VECMEM_BUILD_SYCL_LIBRARY )
          VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ONEAPI::experimental::printf )
    else()
       message( WARNING "No valid printf function found for SYCL."
-         " Enabling debug messages will likely not work." )
+         " Enabling debug messages will likely not work in device code." )
       target_compile_definitions( vecmem_core PUBLIC
-         VECMEM_ONEAPI_PRINTF_FUNCTION=printf )
+         VECMEM_SYCL_PRINTF_FUNCTION=printf VECMEM_MSG_ATTRIBUTES= )
    endif()
 
    # Test whether sycl::atomic_ref is available.

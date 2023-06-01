@@ -14,7 +14,7 @@ int main() {
     cl::sycl::queue queue;
     queue
         .submit([](cl::sycl::handler& h) {
-            ::sycl::local_accessor<int> dummy(10, h);
+            cl::sycl::local_accessor<int> dummy(10, h);
             (void)dummy;
         })
         .wait_and_throw();
