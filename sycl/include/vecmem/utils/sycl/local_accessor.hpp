@@ -21,7 +21,7 @@ namespace vecmem::sycl {
 /// @tparam DIM Dimensions for the local memory array.
 ///
 template <typename T, int DIM = 1>
-using local_accessor = ::sycl::local_accessor<T, DIM>;
+using local_accessor = cl::sycl::local_accessor<T, DIM>;
 
 #elif (defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION))
 
@@ -32,8 +32,8 @@ using local_accessor = ::sycl::local_accessor<T, DIM>;
 ///
 template <typename T, int DIM = 1>
 using local_accessor =
-    ::sycl::accessor<T, DIM, ::sycl::access::mode::read_write,
-                     ::sycl::access::target::local>;
+    cl::sycl::accessor<T, DIM, cl::sycl::access::mode::read_write,
+                       cl::sycl::access::target::local>;
 
 #endif  // VECMEM_HAVE_SYCL_LOCAL_ACCESSOR
 

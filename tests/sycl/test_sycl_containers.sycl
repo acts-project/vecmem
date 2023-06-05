@@ -302,8 +302,8 @@ TEST_F(sycl_containers_test, atomic_local_ref) {
     cl::sycl::queue queue;
 
     // Skip test if not running on a gpu.
-    if (queue.get_device().get_info<::sycl::info::device::device_type>() !=
-        ::sycl::info::device_type::gpu) {
+    if (queue.get_device().get_info<cl::sycl::info::device::device_type>() !=
+        cl::sycl::info::device_type::gpu) {
         GTEST_SKIP();
     }
 
