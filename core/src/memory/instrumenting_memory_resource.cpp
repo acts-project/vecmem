@@ -38,6 +38,11 @@ void instrumenting_memory_resource::add_pre_deallocate_hook(
 
 void *instrumenting_memory_resource::do_allocate(std::size_t size,
                                                  std::size_t align) {
+
+    if (size == 0) {
+        return nullptr;
+    }
+
     /*
      * First, we will execute all pre-allocation hooks.
      */
@@ -106,6 +111,11 @@ void *instrumenting_memory_resource::do_allocate(std::size_t size,
 
 void instrumenting_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                                   std::size_t align) {
+
+    if (ptr == nullptr) {
+        return;
+    }
+
     /*
      * First, we will run all of our pre-deallocation hooks.
      */

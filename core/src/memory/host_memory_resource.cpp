@@ -23,6 +23,10 @@ namespace vecmem {
 void *host_memory_resource::do_allocate(std::size_t bytes,
                                         std::size_t alignment) {
 
+    if (bytes == 0) {
+        return nullptr;
+    }
+
 #ifdef VECMEM_HAVE_STD_ALIGNED_ALLOC
     // Rely on std::aligned_alloc to give us properly aligned memory.
     // Note that std::aligned_alloc has a number of quirks about the parameters
@@ -71,6 +75,10 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
 }
 
 void host_memory_resource::do_deallocate(void *ptr, std::size_t, std::size_t) {
+
+    if (ptr == nullptr) {
+        return;
+    }
 
     VECMEM_DEBUG_MSG(3, "De-allocating host memory at %p", ptr);
 

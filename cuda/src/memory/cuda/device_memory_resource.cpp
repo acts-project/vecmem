@@ -29,6 +29,10 @@ device_memory_resource::device_memory_resource(int device)
 
 void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 
+    if (bytes == 0) {
+        return nullptr;
+    }
+
     // Make sure that we would use the appropriate device.
     details::select_device dev(m_device);
 
@@ -41,6 +45,10 @@ void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 }
 
 void device_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
+
+    if (p == nullptr) {
+        return;
+    }
 
     // Make sure that we would use the appropriate device.
     details::select_device dev(m_device);

@@ -18,6 +18,11 @@ debug_memory_resource::debug_memory_resource(memory_resource &upstream)
     : m_upstream(upstream) {}
 
 void *debug_memory_resource::do_allocate(std::size_t size, std::size_t align) {
+
+    if (size == 0) {
+        return nullptr;
+    }
+
     /*
      * Forward the allocation upstream. At this time, we can't really check for
      * any errors yet.
@@ -60,6 +65,11 @@ void *debug_memory_resource::do_allocate(std::size_t size, std::size_t align) {
 
 void debug_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                           std::size_t align) {
+
+    if (ptr == nullptr) {
+        return;
+    }
+
     auto alloc_it = m_allocations.find(ptr);
 
     /*

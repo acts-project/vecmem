@@ -20,6 +20,11 @@ choice_memory_resource::choice_memory_resource(
     : m_decision(decision) {}
 
 void *choice_memory_resource::do_allocate(std::size_t size, std::size_t align) {
+
+    if (size == 0) {
+        return nullptr;
+    }
+
     /*
      * We cannot blindly allocate, because we need to keep track of which
      * upstream allocator allocated this memory. Thus, we must also store
@@ -36,6 +41,11 @@ void *choice_memory_resource::do_allocate(std::size_t size, std::size_t align) {
 
 void choice_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                            std::size_t align) {
+
+    if (ptr == nullptr) {
+        return;
+    }
+
     /*
      * Extract the record of which upstream resource was used to allocate the
      * given pointer.

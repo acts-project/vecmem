@@ -18,6 +18,10 @@ namespace vecmem::sycl {
 void* host_memory_resource::do_allocate(std::size_t nbytes,
                                         std::size_t alignment) {
 
+    if (nbytes == 0) {
+        return nullptr;
+    }
+
     // Allocate the memory.
     void* result = cl::sycl::aligned_alloc_host(alignment, nbytes,
                                                 details::get_queue(m_queue));

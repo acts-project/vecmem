@@ -16,6 +16,11 @@ identity_memory_resource::identity_memory_resource(memory_resource &upstream)
 
 void *identity_memory_resource::do_allocate(std::size_t size,
                                             std::size_t align) {
+
+    if (size == 0) {
+        return nullptr;
+    }
+
     /*
      * By definition, this just forwards the allocation upstream.
      */
@@ -24,6 +29,11 @@ void *identity_memory_resource::do_allocate(std::size_t size,
 
 void identity_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                              std::size_t align) {
+
+    if (ptr == nullptr) {
+        return;
+    }
+
     /*
      * The deallocation, like allocation, is a forwarding method.
      */

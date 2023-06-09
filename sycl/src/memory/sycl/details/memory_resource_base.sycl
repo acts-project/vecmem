@@ -20,6 +20,10 @@ memory_resource_base::memory_resource_base(const queue_wrapper& queue)
 
 void memory_resource_base::do_deallocate(void* ptr, std::size_t, std::size_t) {
 
+    if (ptr == nullptr) {
+        return;
+    }
+
     // Free the memory.
     VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", ptr);
     cl::sycl::free(ptr, get_queue(m_queue));
