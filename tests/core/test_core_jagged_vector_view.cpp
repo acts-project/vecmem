@@ -170,3 +170,91 @@ TEST_F(core_jagged_vector_view_test, filter) {
     EXPECT_EQ(std::set<int>(output[5].begin(), output[5].end()),
               std::set<int>({13, 15}));
 }
+
+TEST_F(core_jagged_vector_view_test, empty) {
+    // Helper object for performing memory copies.
+    vecmem::copy copy;
+
+    // Create a resizable buffer for a jagged vector.
+    vecmem::data::jagged_vector_buffer<int> output_data(
+        {}, m_mem, nullptr, vecmem::data::buffer_type::resizable);
+    copy.setup(output_data);
+
+    vecmem::jagged_device_vector device_vec(output_data);
+    EXPECT_EQ(device_vec.size(), 0);
+
+    // Copy the filtered output back into a "host object".
+    vecmem::jagged_vector<int> output(&m_mem);
+    copy(output_data, output);
+
+    // Check the output.
+    EXPECT_EQ(output.size(), 0);
+}
+
+TEST_F(core_jagged_vector_view_test, empty_fixed) {
+    // Helper object for performing memory copies.
+    vecmem::copy copy;
+
+    // Create a resizable buffer for a jagged vector.
+    vecmem::data::jagged_vector_buffer<int> output_data(
+        {}, m_mem, nullptr, vecmem::data::buffer_type::fixed_size);
+    copy.setup(output_data);
+
+    vecmem::jagged_device_vector device_vec(output_data);
+    EXPECT_EQ(device_vec.size(), 0);
+
+    // Copy the filtered output back into a "host object".
+    vecmem::jagged_vector<int> output(&m_mem);
+    copy(output_data, output);
+
+    // Check the output.
+    EXPECT_EQ(output.size(), 0);
+}
+
+TEST_F(core_jagged_vector_view_test, sizeless) {
+    // Helper object for performing memory copies.
+    vecmem::copy copy;
+
+    // Create a resizable buffer for a jagged vector.
+    vecmem::data::jagged_vector_buffer<int> output_data(
+        std::vector<std::size_t>(3, 0), m_mem, nullptr,
+        vecmem::data::buffer_type::resizable);
+    copy.setup(output_data);
+
+    vecmem::jagged_device_vector device_vec(output_data);
+    EXPECT_EQ(device_vec.size(), 3);
+
+    // Copy the filtered output back into a "host object".
+    vecmem::jagged_vector<int> output(&m_mem);
+    copy(output_data, output);
+
+    // Check the output.
+    EXPECT_EQ(output.size(), 3);
+    EXPECT_EQ(output[0].size(), 0);
+    EXPECT_EQ(output[1].size(), 0);
+    EXPECT_EQ(output[2].size(), 0);
+}
+
+TEST_F(core_jagged_vector_view_test, sizeless_fixed) {
+    // Helper object for performing memory copies.
+    vecmem::copy copy;
+
+    // Create a resizable buffer for a jagged vector.
+    vecmem::data::jagged_vector_buffer<int> output_data(
+        std::vector<std::size_t>(3, 0), m_mem, nullptr,
+        vecmem::data::buffer_type::fixed_size);
+    copy.setup(output_data);
+
+    vecmem::jagged_device_vector device_vec(output_data);
+    EXPECT_EQ(device_vec.size(), 3);
+
+    // Copy the filtered output back into a "host object".
+    vecmem::jagged_vector<int> output(&m_mem);
+    copy(output_data, output);
+
+    // Check the output.
+    EXPECT_EQ(output.size(), 3);
+    EXPECT_EQ(output[0].size(), 0);
+    EXPECT_EQ(output[1].size(), 0);
+    EXPECT_EQ(output[2].size(), 0);
+}
