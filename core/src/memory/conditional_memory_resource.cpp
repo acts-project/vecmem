@@ -18,6 +18,11 @@ conditional_memory_resource::conditional_memory_resource(
 
 void *conditional_memory_resource::do_allocate(std::size_t size,
                                                std::size_t align) {
+
+    if (size == 0) {
+        return nullptr;
+    }
+
     /*
      * Check whether the predicate is true for this allocation. If it is, we
      * allocate as normal. If not, we refuse the allocation.
@@ -31,6 +36,11 @@ void *conditional_memory_resource::do_allocate(std::size_t size,
 
 void conditional_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                                 std::size_t align) {
+
+    if (ptr == nullptr) {
+        return;
+    }
+
     /*
      * The deallocation is a simple forwarding method, since we live under the
      * assumption that clients will never ask us deallocate memory that we

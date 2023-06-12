@@ -14,6 +14,11 @@ namespace vecmem {
 allocator::allocator(memory_resource& mem) : m_mem(mem) {}
 
 void* allocator::allocate_bytes(std::size_t bytes, std::size_t alignment) {
+
+    if (bytes == 0) {
+        return nullptr;
+    }
+
     /*
      * This allocation method simply wraps the upstream allocator's allocate
      * method. Nothing special here.
@@ -23,6 +28,11 @@ void* allocator::allocate_bytes(std::size_t bytes, std::size_t alignment) {
 
 void allocator::deallocate_bytes(void* p, std::size_t bytes,
                                  std::size_t alignment) {
+
+    if (p == nullptr) {
+        return;
+    }
+
     /*
      * Again, we just wrap the upstream deallocate method.
      */

@@ -12,7 +12,7 @@
 TEST_P(memory_resource_test_basic, allocations) {
 
     vecmem::memory_resource* resource = GetParam();
-    for (std::size_t size = 1000; size < 100000; size += 1000) {
+    for (std::size_t size = 0; size < 100000; size += 1000) {
         void* ptr = resource->allocate(size);
         resource->deallocate(ptr, size);
     }

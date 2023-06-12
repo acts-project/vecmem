@@ -42,6 +42,11 @@ contiguous_memory_resource::~contiguous_memory_resource() {
 
 void *contiguous_memory_resource::do_allocate(std::size_t size,
                                               std::size_t alignment) {
+
+    if (size == 0) {
+        return nullptr;
+    }
+
     /*
      * Compute the remaining space, which needs to be an lvalue for standard
      * library-related reasons.

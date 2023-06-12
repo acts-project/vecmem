@@ -23,11 +23,19 @@ binary_page_memory_resource::~binary_page_memory_resource() {}
 void *binary_page_memory_resource::do_allocate(std::size_t size,
                                                std::size_t align) {
 
+    if (size == 0) {
+        return nullptr;
+    }
+
     return m_impl->do_allocate(size, align);
 }
 
 void binary_page_memory_resource::do_deallocate(void *p, std::size_t size,
                                                 std::size_t align) {
+
+    if (p == nullptr) {
+        return;
+    }
 
     m_impl->do_deallocate(p, size, align);
 }

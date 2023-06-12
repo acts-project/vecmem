@@ -21,6 +21,11 @@ coalescing_memory_resource::coalescing_memory_resource(
 
 void *coalescing_memory_resource::do_allocate(std::size_t size,
                                               std::size_t align) {
+
+    if (size == 0) {
+        return nullptr;
+    }
+
     /*
      * Try to allocate with each of the upstream resources.
      */
@@ -51,6 +56,11 @@ void *coalescing_memory_resource::do_allocate(std::size_t size,
 
 void coalescing_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                                std::size_t align) {
+
+    if (ptr == nullptr) {
+        return;
+    }
+
     /*
      * Fetch the resource used to allocate this pointer.
      */

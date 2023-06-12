@@ -19,6 +19,10 @@ namespace vecmem::cuda {
 
 void *host_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 
+    if (bytes == 0) {
+        return nullptr;
+    }
+
     // Allocate the memory.
     void *res = nullptr;
     VECMEM_CUDA_ERROR_CHECK(cudaMallocHost(&res, bytes));
@@ -27,6 +31,10 @@ void *host_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 }
 
 void host_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
+
+    if (p == nullptr) {
+        return;
+    }
 
     // Free the memory.
     VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", p);

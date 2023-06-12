@@ -18,6 +18,10 @@ namespace vecmem::hip {
 
 void* host_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 
+    if (nbytes == 0) {
+        return nullptr;
+    }
+
     // Allocate the memory.
     void* result = nullptr;
     VECMEM_HIP_ERROR_CHECK(hipHostMalloc(&result, nbytes));
@@ -26,6 +30,10 @@ void* host_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 }
 
 void host_memory_resource::do_deallocate(void* ptr, std::size_t, std::size_t) {
+
+    if (ptr == nullptr) {
+        return;
+    }
 
     // Free the memory.
     VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", ptr);
