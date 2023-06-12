@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -35,11 +35,11 @@ namespace details {
  * Under these rules, the function would allocate a chunk of memory that looks
  * like this:
  *
- *      ┌────────────────────────────────────────────────────────────────┐
- * Byte │╭ 00      ╭ 10      ╭ 20      ╭ 30      ╭ 40      ╭ 50      ╭ 60│
- * Data │-----###IIIIIIIIIIII####LLLLLLLLLLLLLLLLSSSSSSSSSSSSSS###-------│
- * Info │╰ A  ╰ B╰ C             ╰ D             ╰ E             ╰ F     │
- *      └────────────────────────────────────────────────────────────────┘
+ *          ┌────────────────────────────────────────────────────────────────┐
+ *     Byte │╭ 00      ╭ 10      ╭ 20      ╭ 30      ╭ 40      ╭ 50      ╭ 60│
+ *     Data │-----###IIIIIIIIIIII####LLLLLLLLLLLLLLLLSSSSSSSSSSSSSS###-------│
+ *     Info │╰ A  ╰ B╰ C             ╰ D             ╰ E             ╰ F     │
+ *          └────────────────────────────────────────────────────────────────┘
  *
  * In this diagram, we see a small 64-byte memory space, with the "-" character
  * denoting memory that is unallocated, "#" denoting memory that is used as
