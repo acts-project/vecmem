@@ -97,12 +97,16 @@ TEST_F(core_device_container_test, vector_buffer) {
 TEST_F(core_device_container_test, jagged_vector_buffer) {
 
     // Create a dummy jagged vector in regular host memory.
-    std::vector<std::vector<int> > host_vector{{1, 2, 3, 4, 5},
+    std::vector<std::vector<int> > host_vector{{},
+                                               {1, 2, 3, 4, 5},
                                                {6, 7},
                                                {8, 9, 10, 11},
                                                {12, 13, 14, 15, 16, 17, 18},
                                                {},
-                                               {19, 20}};
+                                               {},
+                                               {19, 20},
+                                               {},
+                                               {21}};
     auto host_data = vecmem::get_data(host_vector, &m_resource);
 
     // Set up an "alternative" memory resource for the test.
