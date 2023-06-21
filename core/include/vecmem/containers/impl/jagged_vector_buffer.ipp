@@ -95,13 +95,13 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     TYPE* data_ptr = nullptr;
 
     // Allocate the "inner memory" for a fixed size buffer.
-    if (type == buffer_type::fixed_size) {
+    if (type == buffer_type::fixed_size && total_elements != 0) {
         m_inner_memory = vecmem::make_unique_alloc<char[]>(
             resource, total_elements * sizeof(TYPE));
         data_ptr = reinterpret_cast<TYPE*>(m_inner_memory.get());
     }
     // Allocate the "inner memory" for a resizable buffer.
-    else if (type == buffer_type::resizable) {
+    else if (type == buffer_type::resizable && capacities.size() != 0) {
         std::tie(m_inner_memory, header_ptr, data_ptr) =
             details::aligned_multiple_placement<header_t, TYPE>(
                 resource, capacities.size(), total_elements);
