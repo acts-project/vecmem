@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -45,8 +45,27 @@ protected:
                            int value) const override;
 
 private:
+// Disable the warning(s) about using standard library types
+// with an exported class.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#endif  // MSVC
+#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
+#pragma nv_diagnostic push
+#pragma nv_diag_suppress 1394
+#endif  // CUDA disgnostics
+
     /// Internal data for the object
     std::unique_ptr<details::copy_data> m_data;
+
+// Re-enable the warning(s).
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // MSVC
+#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
+#pragma nv_diagnostic pop
+#endif  // CUDA disgnostics
 
 };  // class copy
 
