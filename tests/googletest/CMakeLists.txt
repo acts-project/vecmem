@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -18,8 +18,8 @@ message( STATUS "Building GoogleTest as part of the VecMem project" )
 
 # Declare where to get GoogleTest from.
 FetchContent_Declare( GoogleTest
-   URL "https://github.com/google/googletest/archive/release-1.11.0.tar.gz"
-   URL_MD5 "e8a8df240b6938bb6384155d4c37d937" )
+   URL "https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz"
+   URL_MD5 "c8340a482851ef6a3fe618a082304cfc" )
 
 # Options used in the build of GoogleTest.
 set( BUILD_GMOCK FALSE CACHE BOOL "Turn off the build of GMock" )
