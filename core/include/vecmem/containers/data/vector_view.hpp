@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -36,6 +36,11 @@ namespace data {
 ///
 template <typename TYPE>
 class vector_view {
+
+    /// We cannot use boolean types.
+    static_assert(
+        !std::is_same<typename std::remove_cv<TYPE>::type, bool>::value,
+        "bool is not supported in VecMem containers");
 
 public:
     /// Size type used in the class
