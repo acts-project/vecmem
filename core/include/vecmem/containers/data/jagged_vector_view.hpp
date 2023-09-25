@@ -43,6 +43,10 @@ namespace data {
 template <typename T>
 class jagged_vector_view {
 
+    /// We cannot use boolean types.
+    static_assert(!std::is_same<typename std::remove_cv<T>::type, bool>::value,
+                  "bool is not supported in VecMem containers");
+
 public:
     /// Size type used in the class
     typedef std::size_t size_type;
