@@ -10,6 +10,15 @@ include( Platform/Windows-IntelLLVM )
 # Set up the variables specifying the command line arguments of the compiler.
 __windows_compiler_intel( SYCL )
 
+# With CMake 3.27 by default CMake would try to add version information into
+# the DLL file names. Confusing the linking process.
+#
+# I tried to disable this using the DLL_NAME_WITH_SOVERSION property, the thing
+# that was introduced in CMake 3.27, but for some reason that did not work. :-/
+# So when SYCL code is being used on Windows, I disable "versioned SONAMEs"
+# completely. For all languages and targets.
+set( CMAKE_PLATFORM_NO_VERSIONED_SONAME TRUE )
+
 # Tweak the compiler command, to let the compiler explicitly know that it is
 # receiving C++ source code with the provided .sycl file(s).
 string( REPLACE "<SOURCE>" "/Tp <SOURCE>" CMAKE_SYCL_COMPILE_OBJECT
@@ -31,10 +40,15 @@ foreach( linker_command "CMAKE_SYCL_CREATE_SHARED_LIBRARY"
 
    # Prefix the linker-specific arguments with "/link", to let DPC++ know
    # that these are to be given to the linker. "/out" just happens to be the
-   # first linker argument on the command line. (With CMake 3.21.) So this part
-   # may need to be tweaked in the future.
-   string( REPLACE "/out" "/link /out"
-      ${linker_command} "${${linker_command}}" )
+   # first linker argument on the command line. (With CMake 3.21.)
+   #
+   # Later CMake versions fixed this out of the box, so this is only needed
+   # if "/link" is missing from the commands.
+   if( ( NOT "${${linker_command}}" MATCHES "/link" ) AND
+       ( NOT "${${linker_command}}" MATCHES "-link" ) )
+      string( REPLACE "/out" "/link /out"
+         ${linker_command} "${${linker_command}}" )
+   endif()
 
 endforeach()
 
