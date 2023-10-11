@@ -16,12 +16,15 @@ find_package( CUDAToolkit REQUIRED )
 # Set up the build of the VecMem CUDA library.
 vecmem_add_library( vecmem_cuda cuda
    # Memory resources.
+   "include/vecmem/memory/cuda/details/device_memory_resource.hpp"
    "include/vecmem/memory/cuda/device_memory_resource.hpp"
-   "src/memory/cuda/device_memory_resource.cpp"
+   "src/memory/device_memory_resource.cpp"
+   "include/vecmem/memory/cuda/details/host_memory_resource.hpp"
    "include/vecmem/memory/cuda/host_memory_resource.hpp"
-   "src/memory/cuda/host_memory_resource.cpp"
+   "src/memory/host_memory_resource.cpp"
+   "include/vecmem/memory/cuda/details/managed_memory_resource.hpp"
    "include/vecmem/memory/cuda/managed_memory_resource.hpp"
-   "src/memory/cuda/managed_memory_resource.cpp"
+   "src/memory/managed_memory_resource.cpp"
    # Utilities.
    "include/vecmem/utils/cuda/copy.hpp"
    "src/utils/cuda/copy.cpp"
