@@ -13,9 +13,6 @@
 #include "vecmem/containers/static_array.hpp"
 #include "vecmem/utils/cuda/stream_wrapper.hpp"
 
-// System include(s).
-#include <cstddef>
-
 /// Perform a linear transformation using the received vectors
 void linearTransform(vecmem::data::vector_view<const int> constants,
                      vecmem::data::vector_view<const int> input,
@@ -32,7 +29,7 @@ void atomicTransform(unsigned int iterations,
                      vecmem::data::vector_view<int> vec);
 
 /// Function filling vectors after using atomics in local address space
-void atomicLocalRef(std::size_t num_blocks, std::size_t block_size,
+void atomicLocalRef(unsigned int num_blocks, unsigned int block_size,
                     vecmem::data::vector_view<int> vec);
 
 /// Function filtering elements of an input vector into an output vector

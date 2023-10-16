@@ -140,7 +140,7 @@ __global__ void atomicLocalRefKernel(vecmem::data::vector_view<int> data) {
     return;
 }
 
-void atomicLocalRef(std::size_t num_blocks, std::size_t block_size,
+void atomicLocalRef(unsigned int num_blocks, unsigned int block_size,
                     vecmem::data::vector_view<int> vec) {
 
     // Launch the kernel.
