@@ -16,13 +16,16 @@ include( vecmem-check-sycl-code-compiles )
 vecmem_add_library( vecmem_sycl sycl
    # Memory management.
    "include/vecmem/memory/sycl/details/memory_resource_base.hpp"
-   "src/memory/sycl/details/memory_resource_base.sycl"
+   "src/memory/memory_resource_base.sycl"
+   "include/vecmem/memory/sycl/details/device_memory_resource.hpp"
    "include/vecmem/memory/sycl/device_memory_resource.hpp"
-   "src/memory/sycl/device_memory_resource.sycl"
+   "src/memory/device_memory_resource.sycl"
+   "include/vecmem/memory/sycl/details/host_memory_resource.hpp"
    "include/vecmem/memory/sycl/host_memory_resource.hpp"
-   "src/memory/sycl/host_memory_resource.sycl"
+   "src/memory/host_memory_resource.sycl"
+   "include/vecmem/memory/sycl/details/shared_memory_resource.hpp"
    "include/vecmem/memory/sycl/shared_memory_resource.hpp"
-   "src/memory/sycl/shared_memory_resource.sycl"
+   "src/memory/shared_memory_resource.sycl"
    # Utilities.
    "include/vecmem/utils/sycl/copy.hpp"
    "src/utils/sycl/copy.sycl"

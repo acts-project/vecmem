@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -9,13 +9,12 @@
 #include <gtest/gtest.h>
 
 #include "vecmem/memory/debug_memory_resource.hpp"
-#include "vecmem/memory/details/memory_resource_base.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 
 namespace {
 class broken_double_allocate_memory_resource final
-    : public vecmem::details::memory_resource_base {
+    : public vecmem::memory_resource {
 
 public:
     broken_double_allocate_memory_resource(memory_resource& upstream)
@@ -38,6 +37,11 @@ private:
     }
 
     virtual void do_deallocate(void*, std::size_t, std::size_t) override {}
+
+    virtual bool do_is_equal(
+        const vecmem::memory_resource&) const noexcept override {
+        return false;
+    }
 
     vecmem::memory_resource& m_upstream;
 
