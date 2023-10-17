@@ -44,16 +44,18 @@ public:
     // Allocates memory of size at least `bytes`
     //
     // @param[in] bytes the size in bytes of the allocation
+    // @param[in] alignment the alignment of the allocation (unused)
     // @return void* pointer to the newly allocated memory
-    void* allocate(std::size_t bytes);
+    void* allocate(std::size_t bytes, std::size_t alignment = 0);
 
     // Deallocate memory pointed to by `p`, and keeping all free superblocks.
     // return the block to the set that have the free blocks.
     //
     // @param[in] p the pointer of the memory
     // @param[in] bytes the size in bytes of the deallocation
+    // @param[in] alignment the alignment of the deallocation (unused)
     // @return if the allocation was found, false otherwise
-    bool deallocate(void* p, std::size_t bytes);
+    bool deallocate(void* p, std::size_t bytes, std::size_t alignment = 0);
 
 private:
     /// Representation of a memory block

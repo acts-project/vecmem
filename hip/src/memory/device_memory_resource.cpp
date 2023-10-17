@@ -6,7 +6,7 @@
  */
 
 // Local include(s).
-#include "vecmem/memory/hip/details/device_memory_resource.hpp"
+#include "vecmem/memory/hip/device_memory_resource.hpp"
 
 #include "../utils/get_device.hpp"
 #include "../utils/hip_error_handling.hpp"
@@ -16,12 +16,14 @@
 // HIP include(s).
 #include <hip/hip_runtime_api.h>
 
-namespace vecmem::hip::details {
+namespace vecmem::hip {
 
 device_memory_resource::device_memory_resource(int device)
     : m_device(device == INVALID_DEVICE ? details::get_device() : device) {}
 
-void* device_memory_resource::mr_allocate(std::size_t nbytes, std::size_t) {
+device_memory_resource::~device_memory_resource() = default;
+
+void* device_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 
     if (nbytes == 0) {
         return nullptr;
@@ -37,7 +39,7 @@ void* device_memory_resource::mr_allocate(std::size_t nbytes, std::size_t) {
     return result;
 }
 
-void device_memory_resource::mr_deallocate(void* ptr, std::size_t,
+void device_memory_resource::do_deallocate(void* ptr, std::size_t,
                                            std::size_t) {
 
     if (ptr == nullptr) {
@@ -51,7 +53,7 @@ void device_memory_resource::mr_deallocate(void* ptr, std::size_t,
         [ptr]() { VECMEM_HIP_ERROR_CHECK(hipFree(ptr)); });
 }
 
-bool device_memory_resource::mr_is_equal(
+bool device_memory_resource::do_is_equal(
     const memory_resource& other) const noexcept {
 
     // Try to cast the other object to this exact type.
@@ -62,4 +64,4 @@ bool device_memory_resource::mr_is_equal(
     return ((p != nullptr) && (p->m_device == m_device));
 }
 
-}  // namespace vecmem::hip::details
+}  // namespace vecmem::hip

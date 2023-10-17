@@ -63,66 +63,57 @@ vecmem_add_library( vecmem_core core
    # Memory resources.
    #
    # Memory resource base types.
-   "include/vecmem/memory/details/memory_resource_base.hpp"
    "src/memory/details/memory_resource_base.cpp"
-   "include/vecmem/memory/details/memory_resource_adaptor.hpp"
+   "include/vecmem/memory/details/memory_resource_base.hpp"
+   "src/memory/details/memory_resource_impl.hpp"
    # Host memory resource.
-   "src/memory/details/host_memory_resource.cpp"
-   "include/vecmem/memory/details/host_memory_resource.hpp"
+   "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/host_memory_resource.hpp"
    # Arena memory resource.
    "src/memory/details/arena_memory_resource_impl.cpp"
    "src/memory/details/arena_memory_resource_impl.hpp"
-   "src/memory/details/arena_memory_resource.cpp"
-   "include/vecmem/memory/details/arena_memory_resource.hpp"
+   "src/memory/arena_memory_resource.cpp"
    "include/vecmem/memory/arena_memory_resource.hpp"
    # Binary page memory resource.
    "src/memory/details/binary_page_memory_resource_impl.cpp"
    "src/memory/details/binary_page_memory_resource_impl.hpp"
-   "src/memory/details/binary_page_memory_resource.cpp"
-   "include/vecmem/memory/details/binary_page_memory_resource.hpp"
+   "src/memory/binary_page_memory_resource.cpp"
    "include/vecmem/memory/binary_page_memory_resource.hpp"
    # Choice memory resource.
    "src/memory/details/choice_memory_resource_impl.cpp"
    "src/memory/details/choice_memory_resource_impl.hpp"
-   "src/memory/details/choice_memory_resource.cpp"
-   "include/vecmem/memory/details/choice_memory_resource.hpp"
+   "src/memory/choice_memory_resource.cpp"
    "include/vecmem/memory/choice_memory_resource.hpp"
    # Coalescing memory resource.
    "src/memory/details/coalescing_memory_resource_impl.cpp"
    "src/memory/details/coalescing_memory_resource_impl.hpp"
-   "src/memory/details/coalescing_memory_resource.cpp"
-   "include/vecmem/memory/details/coalescing_memory_resource.hpp"
+   "src/memory/coalescing_memory_resource.cpp"
    "include/vecmem/memory/coalescing_memory_resource.hpp"
    # Conditional memory resource.
    "src/memory/details/conditional_memory_resource_impl.cpp"
    "src/memory/details/conditional_memory_resource_impl.hpp"
-   "src/memory/details/conditional_memory_resource.cpp"
-   "include/vecmem/memory/details/conditional_memory_resource.hpp"
+   "src/memory/conditional_memory_resource.cpp"
    "include/vecmem/memory/conditional_memory_resource.hpp"
    # Contiguous memory resource.
-   "src/memory/details/contiguous_memory_resource.cpp"
-   "include/vecmem/memory/details/contiguous_memory_resource.hpp"
+   "src/memory/details/contiguous_memory_resource_impl.cpp"
+   "src/memory/details/contiguous_memory_resource_impl.hpp"
+   "src/memory/contiguous_memory_resource.cpp"
    "include/vecmem/memory/contiguous_memory_resource.hpp"
    # Debug memory resource.
    "src/memory/details/debug_memory_resource_impl.cpp"
    "src/memory/details/debug_memory_resource_impl.hpp"
-   "src/memory/details/debug_memory_resource.cpp"
-   "include/vecmem/memory/details/debug_memory_resource.hpp"
+   "src/memory/debug_memory_resource.cpp"
    "include/vecmem/memory/debug_memory_resource.hpp"
    # Identity memory resource.
-   "src/memory/details/identity_memory_resource.cpp"
-   "include/vecmem/memory/details/identity_memory_resource.hpp"
+   "src/memory/identity_memory_resource.cpp"
    "include/vecmem/memory/identity_memory_resource.hpp"
    # Instrumenting memory resource.
    "src/memory/details/instrumenting_memory_resource_impl.cpp"
    "src/memory/details/instrumenting_memory_resource_impl.hpp"
-   "src/memory/details/instrumenting_memory_resource.cpp"
-   "include/vecmem/memory/details/instrumenting_memory_resource.hpp"
+   "src/memory/instrumenting_memory_resource.cpp"
    "include/vecmem/memory/instrumenting_memory_resource.hpp"
-   # terminal_memory_resource.
-   "src/memory/details/terminal_memory_resource.cpp"
-   "include/vecmem/memory/details/terminal_memory_resource.hpp"
+   # Terminal memory resource.
+   "src/memory/terminal_memory_resource.cpp"
    "include/vecmem/memory/terminal_memory_resource.hpp"
    # Utilities.
    "include/vecmem/utils/copy.hpp"

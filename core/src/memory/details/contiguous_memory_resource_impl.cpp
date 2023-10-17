@@ -7,7 +7,7 @@
  */
 
 // Local include(s).
-#include "vecmem/memory/details/contiguous_memory_resource.hpp"
+#include "contiguous_memory_resource_impl.hpp"
 
 #include "vecmem/utils/debug.hpp"
 
@@ -18,7 +18,7 @@
 
 namespace vecmem::details {
 
-contiguous_memory_resource::contiguous_memory_resource(
+contiguous_memory_resource_impl::contiguous_memory_resource_impl(
     memory_resource &upstream, std::size_t size)
     : m_upstream(upstream),
       m_size(size),
@@ -30,7 +30,7 @@ contiguous_memory_resource::contiguous_memory_resource(
         m_size, m_begin);
 }
 
-contiguous_memory_resource::~contiguous_memory_resource() {
+contiguous_memory_resource_impl::~contiguous_memory_resource_impl() {
     /*
      * Deallocate our memory arena upstream.
      */
@@ -40,8 +40,8 @@ contiguous_memory_resource::~contiguous_memory_resource() {
         m_size, m_begin);
 }
 
-void *contiguous_memory_resource::mr_allocate(std::size_t size,
-                                              std::size_t alignment) {
+void *contiguous_memory_resource_impl::allocate(std::size_t size,
+                                                std::size_t alignment) {
 
     if (size == 0) {
         return nullptr;
@@ -79,8 +79,8 @@ void *contiguous_memory_resource::mr_allocate(std::size_t size,
     }
 }
 
-void contiguous_memory_resource::mr_deallocate(void *, std::size_t,
-                                               std::size_t) {
+void contiguous_memory_resource_impl::deallocate(void *, std::size_t,
+                                                 std::size_t) {
     /*
      * Deallocation is a no-op for this memory resource, so we do nothing.
      */

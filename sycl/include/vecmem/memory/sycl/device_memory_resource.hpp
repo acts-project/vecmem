@@ -9,14 +9,33 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/details/memory_resource_adaptor.hpp"
-#include "vecmem/memory/sycl/details/device_memory_resource.hpp"
+#include "vecmem/memory/sycl/details/memory_resource_base.hpp"
+#include "vecmem/vecmem_sycl_export.hpp"
 
 /// @brief Namespace holding types that work on/with oneAPI/SYCL
 namespace vecmem::sycl {
 
 /// Memory resource for a specific SYCL device
-using device_memory_resource =
-    vecmem::details::memory_resource_adaptor<details::device_memory_resource>;
+class device_memory_resource final : public details::memory_resource_base {
+
+public:
+    /// Constructor on top of a user-provided queue
+    VECMEM_SYCL_EXPORT
+    device_memory_resource(const queue_wrapper& queue = {});
+    /// Destructor
+    VECMEM_SYCL_EXPORT
+    ~device_memory_resource();
+
+private:
+    /// @name Function(s) implementing @c vecmem::memory_resource
+    /// @{
+
+    /// Function performing the memory allocation
+    VECMEM_SYCL_EXPORT
+    void* do_allocate(std::size_t nbytes, std::size_t alignment) override final;
+
+    /// @}
+
+};  // device_memory_resource
 
 }  // namespace vecmem::sycl

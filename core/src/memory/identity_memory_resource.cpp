@@ -7,14 +7,16 @@
  */
 
 // Local include(s).
-#include "vecmem/memory/details/identity_memory_resource.hpp"
+#include "vecmem/memory/identity_memory_resource.hpp"
 
-namespace vecmem::details {
+namespace vecmem {
 
 identity_memory_resource::identity_memory_resource(memory_resource &upstream)
     : m_upstream(upstream) {}
 
-void *identity_memory_resource::mr_allocate(std::size_t size,
+identity_memory_resource::~identity_memory_resource() = default;
+
+void *identity_memory_resource::do_allocate(std::size_t size,
                                             std::size_t align) {
 
     if (size == 0) {
@@ -27,7 +29,7 @@ void *identity_memory_resource::mr_allocate(std::size_t size,
     return m_upstream.allocate(size, align);
 }
 
-void identity_memory_resource::mr_deallocate(void *ptr, std::size_t size,
+void identity_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                              std::size_t align) {
 
     if (ptr == nullptr) {
@@ -40,7 +42,7 @@ void identity_memory_resource::mr_deallocate(void *ptr, std::size_t size,
     m_upstream.deallocate(ptr, size, align);
 }
 
-bool identity_memory_resource::mr_is_equal(
+bool identity_memory_resource::do_is_equal(
     const memory_resource &other) const noexcept {
     /*
      * These memory resources are equal if and only if they are the same
@@ -52,4 +54,4 @@ bool identity_memory_resource::mr_is_equal(
     return o != nullptr && m_upstream.is_equal(o->m_upstream);
 }
 
-}  // namespace vecmem::details
+}  // namespace vecmem

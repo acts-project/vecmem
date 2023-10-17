@@ -1,12 +1,12 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 
 // Local include(s).
-#include "vecmem/memory/details/host_memory_resource.hpp"
+#include "vecmem/memory/host_memory_resource.hpp"
 
 #include "vecmem/utils/debug.hpp"
 
@@ -17,9 +17,13 @@
 #include <cstdlib>
 #include <memory>
 
-namespace vecmem::details {
+namespace vecmem {
 
-void *host_memory_resource::mr_allocate(std::size_t bytes,
+host_memory_resource::host_memory_resource() = default;
+
+host_memory_resource::~host_memory_resource() = default;
+
+void *host_memory_resource::do_allocate(std::size_t bytes,
                                         std::size_t alignment) {
 
     if (bytes == 0) {
@@ -73,7 +77,7 @@ void *host_memory_resource::mr_allocate(std::size_t bytes,
     return ptr;
 }
 
-void host_memory_resource::mr_deallocate(void *ptr, std::size_t, std::size_t) {
+void host_memory_resource::do_deallocate(void *ptr, std::size_t, std::size_t) {
 
     if (ptr == nullptr) {
         return;
@@ -93,7 +97,7 @@ void host_memory_resource::mr_deallocate(void *ptr, std::size_t, std::size_t) {
 #endif  // VECMEM_HAVE_STD_ALIGNED_ALLOC
 }
 
-bool host_memory_resource::mr_is_equal(
+bool host_memory_resource::do_is_equal(
     const memory_resource &other) const noexcept {
     /*
      * All malloc resources are equal to each other, because they have no
@@ -101,10 +105,7 @@ bool host_memory_resource::mr_is_equal(
      * form of the underlying C library memory manager, but that is not
      * relevant for us.
      */
-    const host_memory_resource *c =
-        dynamic_cast<const host_memory_resource *>(&other);
-
-    return c != nullptr;
+    return (dynamic_cast<const host_memory_resource *>(&other) != nullptr);
 }
 
-}  // namespace vecmem::details
+}  // namespace vecmem

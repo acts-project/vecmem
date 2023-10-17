@@ -7,18 +7,20 @@
  */
 
 // Local include(s).
-#include "vecmem/memory/details/terminal_memory_resource.hpp"
+#include "vecmem/memory/terminal_memory_resource.hpp"
 
 // System include(s).
 #include <stdexcept>
 
-namespace vecmem::details {
+namespace vecmem {
 
 terminal_memory_resource::terminal_memory_resource(void) {}
 
 terminal_memory_resource::terminal_memory_resource(memory_resource &) {}
 
-void *terminal_memory_resource::mr_allocate(std::size_t, std::size_t) {
+terminal_memory_resource::~terminal_memory_resource() = default;
+
+void *terminal_memory_resource::do_allocate(std::size_t, std::size_t) {
 
     /*
      * Allocation always fails.
@@ -26,7 +28,7 @@ void *terminal_memory_resource::mr_allocate(std::size_t, std::size_t) {
     throw std::bad_alloc();
 }
 
-void terminal_memory_resource::mr_deallocate(void *, std::size_t, std::size_t) {
+void terminal_memory_resource::do_deallocate(void *, std::size_t, std::size_t) {
 
     /*
      * Deallocation is a no-op.
@@ -34,7 +36,7 @@ void terminal_memory_resource::mr_deallocate(void *, std::size_t, std::size_t) {
     return;
 }
 
-bool terminal_memory_resource::mr_is_equal(
+bool terminal_memory_resource::do_is_equal(
     const memory_resource &other) const noexcept {
 
     /*
@@ -43,4 +45,4 @@ bool terminal_memory_resource::mr_is_equal(
     return dynamic_cast<const terminal_memory_resource *>(&other) != nullptr;
 }
 
-}  // namespace vecmem::details
+}  // namespace vecmem

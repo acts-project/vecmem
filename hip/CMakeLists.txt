@@ -17,10 +17,8 @@ find_package( HIPToolkit REQUIRED )
 # Set up the build of the VecMem HIP library.
 vecmem_add_library( vecmem_hip hip
    # Memory management.
-   "include/vecmem/memory/hip/details/device_memory_resource.hpp"
    "include/vecmem/memory/hip/device_memory_resource.hpp"
    "src/memory/device_memory_resource.cpp"
-   "include/vecmem/memory/hip/details/host_memory_resource.hpp"
    "include/vecmem/memory/hip/host_memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
    # Utilities.

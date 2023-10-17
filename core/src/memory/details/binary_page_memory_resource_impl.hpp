@@ -211,9 +211,9 @@ struct binary_page_memory_resource_impl {
     /// @{
 
     /// Allocate a blob of memory
-    void *do_allocate(std::size_t size, std::size_t align);
+    void *allocate(std::size_t size, std::size_t align);
     /// De-allocate a previously allocated memory blob
-    void do_deallocate(void *p, std::size_t size, std::size_t align);
+    void deallocate(void *p, std::size_t size, std::size_t align);
 
     /// @}
 

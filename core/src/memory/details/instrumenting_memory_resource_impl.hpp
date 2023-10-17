@@ -9,7 +9,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/details/instrumenting_memory_resource.hpp"
+#include "vecmem/memory/instrumenting_memory_resource.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 
 // System include(s).
