@@ -14,9 +14,13 @@
 // HIP include(s).
 #include <hip/hip_runtime_api.h>
 
-namespace vecmem::hip::details {
+namespace vecmem::hip {
 
-void* host_memory_resource::mr_allocate(std::size_t nbytes, std::size_t) {
+host_memory_resource::host_memory_resource() = default;
+
+host_memory_resource::~host_memory_resource() = default;
+
+void* host_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 
     if (nbytes == 0) {
         return nullptr;
@@ -29,7 +33,7 @@ void* host_memory_resource::mr_allocate(std::size_t nbytes, std::size_t) {
     return result;
 }
 
-void host_memory_resource::mr_deallocate(void* ptr, std::size_t, std::size_t) {
+void host_memory_resource::do_deallocate(void* ptr, std::size_t, std::size_t) {
 
     if (ptr == nullptr) {
         return;
@@ -40,11 +44,11 @@ void host_memory_resource::mr_deallocate(void* ptr, std::size_t, std::size_t) {
     VECMEM_HIP_ERROR_CHECK(hipHostFree(ptr));
 }
 
-bool host_memory_resource::mr_is_equal(
+bool host_memory_resource::do_is_equal(
     const memory_resource& other) const noexcept {
 
     // The two are equal if they are of the same type.
     return (dynamic_cast<const host_memory_resource*>(&other) != nullptr);
 }
 
-}  // namespace vecmem::hip::details
+}  // namespace vecmem::hip

@@ -60,8 +60,8 @@ binary_page_memory_resource_impl::binary_page_memory_resource_impl(
     memory_resource &upstream)
     : m_upstream(upstream) {}
 
-void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
-                                                    std::size_t) {
+void *binary_page_memory_resource_impl::allocate(std::size_t size,
+                                                 std::size_t) {
     /*
      * First, we round our allocation request up to a power of two, since
      * that is what the sizes of all our pages are.
@@ -140,8 +140,8 @@ void *binary_page_memory_resource_impl::do_allocate(std::size_t size,
     return res;
 }
 
-void binary_page_memory_resource_impl::do_deallocate(void *p, std::size_t s,
-                                                     std::size_t) {
+void binary_page_memory_resource_impl::deallocate(void *p, std::size_t s,
+                                                  std::size_t) {
     VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", p);
 
     /*

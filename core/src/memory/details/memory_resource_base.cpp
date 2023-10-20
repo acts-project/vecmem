@@ -10,12 +10,12 @@
 
 namespace vecmem::details {
 
-bool memory_resource_base::mr_is_equal(
+bool memory_resource_base::do_is_equal(
     const memory_resource &other) const noexcept {
 
     // Perform a simple pointer comparison. Assuming that only the very same
     // memory resource objects can be considered equal.
-    return (dynamic_cast<const memory_resource *>(this) == &other);
+    return (this == &other);
 }
 
 }  // namespace vecmem::details

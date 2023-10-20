@@ -9,8 +9,11 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/details/memory_resource_adaptor.hpp"
-#include "vecmem/memory/details/terminal_memory_resource.hpp"
+#include "vecmem/memory/details/memory_resource_base.hpp"
+#include "vecmem/memory/memory_resource.hpp"
+
+// System include(s).
+#include <cstddef>
 
 namespace vecmem {
 
@@ -23,7 +26,45 @@ namespace vecmem {
  * Reimplementation of @c std::pmr::null_memory_resource but can accept another
  * memory resource in its constructor.
  */
-using terminal_memory_resource =
-    details::memory_resource_adaptor<details::terminal_memory_resource>;
+class terminal_memory_resource final : public details::memory_resource_base {
+
+public:
+    /**
+     * @brief Constructs the terminal memory resource, without an upstream
+     * resource.
+     */
+    VECMEM_CORE_EXPORT
+    terminal_memory_resource(void);
+    /**
+     * @brief Constructs the terminal memory resource, with an upstream
+     * resource.
+     *
+     * @param[in] upstream The upstream memory resource to use.
+     */
+    VECMEM_CORE_EXPORT
+    terminal_memory_resource(memory_resource& upstream);
+    /// Destructor
+    VECMEM_CORE_EXPORT
+    ~terminal_memory_resource();
+
+private:
+    /// @name Function(s) implementing @c vecmem::memory_resource
+    /// @{
+
+    /// Throw @c std::bad_alloc.
+    VECMEM_CORE_EXPORT
+    virtual void* do_allocate(std::size_t, std::size_t) override final;
+    /// Do nothing.
+    VECMEM_CORE_EXPORT
+    virtual void do_deallocate(void* p, std::size_t,
+                               std::size_t) override final;
+    /// Check whether the other resource is also a terminal resource.
+    VECMEM_CORE_EXPORT
+    virtual bool do_is_equal(
+        const memory_resource& other) const noexcept override final;
+
+    /// @}
+
+};  // class terminal_memory_resource
 
 }  // namespace vecmem

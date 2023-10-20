@@ -7,7 +7,7 @@
  */
 
 // Local include(s).
-#include "vecmem/memory/cuda/details/device_memory_resource.hpp"
+#include "vecmem/memory/cuda/device_memory_resource.hpp"
 
 #include "../utils/cuda_error_handling.hpp"
 #include "../utils/cuda_wrappers.hpp"
@@ -18,7 +18,7 @@
 // CUDA include(s).
 #include <cuda_runtime_api.h>
 
-namespace vecmem::cuda::details {
+namespace vecmem::cuda {
 
 device_memory_resource::device_memory_resource(int device)
     : m_device(device == INVALID_DEVICE ? details::get_device() : device) {
@@ -27,7 +27,9 @@ device_memory_resource::device_memory_resource(int device)
                      details::get_device_name(m_device).c_str());
 }
 
-void *device_memory_resource::mr_allocate(std::size_t bytes, std::size_t) {
+device_memory_resource::~device_memory_resource() = default;
+
+void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 
     if (bytes == 0) {
         return nullptr;
@@ -44,7 +46,7 @@ void *device_memory_resource::mr_allocate(std::size_t bytes, std::size_t) {
     return res;
 }
 
-void device_memory_resource::mr_deallocate(void *p, std::size_t, std::size_t) {
+void device_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
 
     if (p == nullptr) {
         return;
@@ -58,7 +60,7 @@ void device_memory_resource::mr_deallocate(void *p, std::size_t, std::size_t) {
     VECMEM_CUDA_ERROR_CHECK(cudaFree(p));
 }
 
-bool device_memory_resource::mr_is_equal(
+bool device_memory_resource::do_is_equal(
     const memory_resource &other) const noexcept {
     const device_memory_resource *c;
     c = dynamic_cast<const device_memory_resource *>(&other);
@@ -71,4 +73,4 @@ bool device_memory_resource::mr_is_equal(
     return c != nullptr && c->m_device == m_device;
 }
 
-}  // namespace vecmem::cuda::details
+}  // namespace vecmem::cuda

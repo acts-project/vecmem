@@ -13,9 +13,14 @@
 // SYCL include(s).
 #include <CL/sycl.hpp>
 
-namespace vecmem::sycl::details {
+namespace vecmem::sycl {
 
-void* shared_memory_resource::mr_allocate(std::size_t nbytes,
+shared_memory_resource::shared_memory_resource(const queue_wrapper& queue)
+    : memory_resource_base(queue) {}
+
+shared_memory_resource::~shared_memory_resource() = default;
+
+void* shared_memory_resource::do_allocate(std::size_t nbytes,
                                           std::size_t alignment) {
 
     if (nbytes == 0) {
@@ -45,4 +50,4 @@ void* shared_memory_resource::mr_allocate(std::size_t nbytes,
     return result;
 }
 
-}  // namespace vecmem::sycl::details
+}  // namespace vecmem::sycl

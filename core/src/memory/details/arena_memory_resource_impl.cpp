@@ -117,7 +117,7 @@ arena_memory_resource_impl::~arena_memory_resource_impl() {
     }
 }
 
-void* arena_memory_resource_impl::allocate(std::size_t bytes) {
+void* arena_memory_resource_impl::allocate(std::size_t bytes, std::size_t) {
 
     bytes = align_up(bytes);
 
@@ -127,7 +127,8 @@ void* arena_memory_resource_impl::allocate(std::size_t bytes) {
     return b.pointer();
 }
 
-bool arena_memory_resource_impl::deallocate(void* p, std::size_t bytes) {
+bool arena_memory_resource_impl::deallocate(void* p, std::size_t bytes,
+                                            std::size_t) {
 
     bytes = align_up(bytes);
 
