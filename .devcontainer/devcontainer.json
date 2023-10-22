@@ -1,25 +1,21 @@
 {
-   "name": "VecMem CentOS 7",
+   "name": "VecMem AlmaLinux 9",
    "dockerFile": "Dockerfile",
 
    "runArgs": [],
 
-   "settings": {
-      "terminal.integrated.shell.linux": "/bin/bash"
-   },
-
    "remoteUser": "atlas",
 
-   "containerEnv": {
-      "CXX": "/opt/intel-clang/13.0.0/x86_64-centos7/bin/clang++",
-      "VSCODE_CXX": "/opt/lcg/gcc/8.3.0-eda0e/x86_64-centos7/bin/g++",
-      "CUDA_INCLUDE_PATH": "/usr/local/cuda/include",
-      "ROCM_INCLUDE_PATH": "/opt/rocm/include",
-      "SYCL_INCLUDE_PATH": "/opt/intel-clang/13.0.0/x86_64-centos7/include"
-   },
-
-   "extensions": [
-      "ms-vscode.cpptools",
-      "twxs.cmake"
-   ]
+   "customizations": {
+      "vscode": {
+         "settings": {
+            "terminal.integrated.shell.linux": "/bin/bash"
+         },
+         "extensions": [
+            "ms-vscode.cpptools",
+            "ms-vscode.cmake-tools",
+            "twxs.cmake"
+         ]
+      }
+   }
 }
