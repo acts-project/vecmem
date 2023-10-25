@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -56,6 +56,8 @@ static const std::string copy_type_printer[copy::type::count] = {
     "unknown"};
 
 async_copy::async_copy(const stream_wrapper& stream) : m_stream(stream) {}
+
+async_copy::~async_copy() {}
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                          type::copy_type cptype) const {

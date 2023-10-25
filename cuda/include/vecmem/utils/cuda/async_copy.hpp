@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -24,11 +24,15 @@ namespace vecmem::cuda {
 /// right order, and they would finish before an operation that needs them
 /// is executed.
 ///
-class VECMEM_CUDA_EXPORT async_copy : public vecmem::copy {
+class async_copy : public vecmem::copy {
 
 public:
     /// Constructor with the stream to operate on
+    VECMEM_CUDA_EXPORT
     async_copy(const stream_wrapper& stream);
+    /// Destructor
+    VECMEM_CUDA_EXPORT
+    ~async_copy();
 
 protected:
     /// Perform an asynchronous memory copy using CUDA
