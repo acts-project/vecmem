@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -21,53 +21,51 @@ namespace details {
 class opaque_stream;
 }
 
-// Disable the warning(s) about inheriting from/using standard library types
-// with an exported class.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif  // MSVC
-#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
-#pragma nv_diagnostic push
-#pragma nv_diag_suppress 1394
-#endif  // CUDA disgnostics
-
 /// Wrapper class for @c cudaStream_t
 ///
 /// It is necessary for passing around CUDA stream objects in code that should
 /// not be directly exposed to the CUDA header(s).
 ///
-class VECMEM_CUDA_EXPORT stream_wrapper {
+class stream_wrapper {
 
 public:
     /// Invalid/default device identifier
     static constexpr int INVALID_DEVICE = -1;
 
     /// Construct a new stream (for the specified device)
+    VECMEM_CUDA_EXPORT
     stream_wrapper(int device = INVALID_DEVICE);
     /// Wrap an existing @c cudaStream_t object
     ///
     /// Without taking ownership of it!
     ///
+    VECMEM_CUDA_EXPORT
     stream_wrapper(void* stream);
 
     /// Copy constructor
+    VECMEM_CUDA_EXPORT
     stream_wrapper(const stream_wrapper& parent);
     /// Move constructor
+    VECMEM_CUDA_EXPORT
     stream_wrapper(stream_wrapper&& parent);
 
     /// Destructor
+    VECMEM_CUDA_EXPORT
     ~stream_wrapper();
 
     /// Copy assignment
+    VECMEM_CUDA_EXPORT
     stream_wrapper& operator=(const stream_wrapper& rhs);
     /// Move assignment
+    VECMEM_CUDA_EXPORT
     stream_wrapper& operator=(stream_wrapper&& rhs);
 
     /// Access a typeless pointer to the managed @c cudaStream_t object
+    VECMEM_CUDA_EXPORT
     void* stream() const;
 
     /// Wait for all queued tasks from the stream to complete
+    VECMEM_CUDA_EXPORT
     void synchronize();
 
 private:
@@ -80,11 +78,3 @@ private:
 
 }  // namespace cuda
 }  // namespace vecmem
-
-// Re-enable the warning(s).
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // MSVC
-#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
-#pragma nv_diagnostic pop
-#endif  // CUDA disgnostics

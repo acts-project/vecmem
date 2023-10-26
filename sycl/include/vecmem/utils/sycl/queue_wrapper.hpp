@@ -24,20 +24,24 @@ class opaque_queue;
 /// It is necessary for passing around SYCL queue objects in code that should
 /// not be directly exposed to the SYCL headers.
 ///
-class VECMEM_SYCL_EXPORT queue_wrapper {
+class queue_wrapper {
 
 public:
     /// Construct a queue for the default device
+    VECMEM_SYCL_EXPORT
     queue_wrapper();
     /// Wrap an existing @c cl::sycl::queue object
     ///
     /// Without taking ownership of it!
     ///
+    VECMEM_SYCL_EXPORT
     queue_wrapper(void* queue);
 
     /// Copy constructor
+    VECMEM_SYCL_EXPORT
     queue_wrapper(const queue_wrapper& parent);
     /// Move constructor
+    VECMEM_SYCL_EXPORT
     queue_wrapper(queue_wrapper&& parent);
 
     /// Destructor
@@ -48,43 +52,29 @@ public:
     /// @c vecmem::sycl::details::opaque_queue not being available in
     /// client code.
     ///
+    VECMEM_SYCL_EXPORT
     ~queue_wrapper();
 
     /// Copy assignment
+    VECMEM_SYCL_EXPORT
     queue_wrapper& operator=(const queue_wrapper& rhs);
     /// Move assignment
+    VECMEM_SYCL_EXPORT
     queue_wrapper& operator=(queue_wrapper&& rhs);
 
     /// Access a typeless pointer to the managed @c cl::sycl::queue object
+    VECMEM_SYCL_EXPORT
     void* queue();
     /// Access a typeless pointer to the managed @c cl::sycl::queue object
+    VECMEM_SYCL_EXPORT
     const void* queue() const;
 
 private:
     /// Bare pointer to the wrapped @c cl::sycl::queue object
     void* m_queue;
 
-// Disable the warning(s) about using standard library types
-// with an exported class.
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#endif  // MSVC
-#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
-#pragma nv_diagnostic push
-#pragma nv_diag_suppress 1394
-#endif  // CUDA disgnostics
-
     /// Smart pointer to the managed @c cl::sycl::queue object
     std::unique_ptr<details::opaque_queue> m_managedQueue;
-
-// Re-enable the warning(s).
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif  // MSVC
-#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
-#pragma nv_diagnostic pop
-#endif  // CUDA disgnostics
 
 };  // class queue_wrapper
 
