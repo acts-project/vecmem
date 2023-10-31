@@ -159,7 +159,7 @@ aligned_multiple_placement(vecmem::memory_resource &r, Ps... ps) {
      * parameter pack, which will determine the amount of additional space
      * we need to allocate.
      */
-    std::size_t alignment = std::max(alignof(Ts)...);
+    std::size_t alignment = vecmem::details::max(alignof(Ts)...);
 
     /*
      * Next, we pessimistically calculate the number of bytes we need. We do

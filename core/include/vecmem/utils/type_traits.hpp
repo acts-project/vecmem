@@ -1,12 +1,13 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 #pragma once
 
 // System include(s).
+#include <algorithm>
 #include <iterator>
 #include <type_traits>
 
@@ -60,6 +61,26 @@ struct conjunction<B1, Bn...>
 
 template <class... B>
 constexpr bool conjunction_v = conjunction<B...>::value;
+
+/// Find the maximum of a variadic number of elements, terminal function
+/// @tparam T The type of the (final) element
+/// @param t The value of the (final) element
+/// @return  The value of the (final) element
+template <typename T>
+auto max(T&& t) {
+    return std::forward<T>(t);
+}
+
+/// Find the maximum of a variadic number of elements, recursive function
+/// @tparam T  The type of the (next) element
+/// @tparam Ts The types of the remaining element(s)
+/// @param t   The value of the (next) element
+/// @param ts  The values of the remaining element(s)
+/// @return    The maximum of the elements
+template <typename T, typename... Ts>
+auto max(T&& t, Ts&&... ts) {
+    return std::max(std::forward<T>(t), max(std::forward<Ts>(ts)...));
+}
 
 }  // namespace details
 }  // namespace vecmem
