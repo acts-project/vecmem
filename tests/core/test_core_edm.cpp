@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "vecmem/edm/buffer.hpp"
+#include "vecmem/edm/host.hpp"
 #include "vecmem/edm/view.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/utils/copy.hpp"
@@ -55,4 +56,15 @@ TEST_F(core_edm_test, simple_buffer) {
         vecmem::edm::schema<vecmem::edm::type::scalar<const int>,
                             vecmem::edm::type::vector<const float> > >
         view3{buffer1}, view4{buffer2};
+}
+
+TEST_F(core_edm_test, simple_host) {
+
+    // Test the creation of a simple host container.
+    vecmem::edm::host<vecmem::edm::schema<vecmem::edm::type::scalar<int>,
+                                          vecmem::edm::type::vector<float> > >
+        host1;
+
+    // Make a (non-const) view out of it.
+    auto view1 = vecmem::get_data(host1);
 }
