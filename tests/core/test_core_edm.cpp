@@ -56,6 +56,23 @@ TEST_F(core_edm_test, simple_buffer) {
         vecmem::edm::schema<vecmem::edm::type::scalar<const int>,
                             vecmem::edm::type::vector<const float> > >
         view3{buffer1}, view4{buffer2};
+
+    // Check the views.
+    EXPECT_NE(view1.get<0>(), nullptr);
+    EXPECT_EQ(view1.get<1>().size(), 10u);
+    EXPECT_EQ(view1.get<1>().capacity(), 10u);
+
+    EXPECT_NE(view2.get<0>(), nullptr);
+    EXPECT_EQ(view2.get<1>().size(), 0u);
+    EXPECT_EQ(view2.get<1>().capacity(), 10u);
+
+    EXPECT_NE(view3.get<0>(), nullptr);
+    EXPECT_EQ(view3.get<1>().size(), 10u);
+    EXPECT_EQ(view3.get<1>().capacity(), 10u);
+
+    EXPECT_NE(view4.get<0>(), nullptr);
+    EXPECT_EQ(view4.get<1>().size(), 0u);
+    EXPECT_EQ(view4.get<1>().capacity(), 10u);
 }
 
 TEST_F(core_edm_test, simple_host) {
@@ -63,8 +80,15 @@ TEST_F(core_edm_test, simple_host) {
     // Test the creation of a simple host container.
     vecmem::edm::host<vecmem::edm::schema<vecmem::edm::type::scalar<int>,
                                           vecmem::edm::type::vector<float> > >
-        host1;
+        host1{m_resource};
 
-    // Make a (non-const) view out of it.
-    auto view1 = vecmem::get_data(host1);
+    // Make views out of it.
+    auto ncview1 = vecmem::get_data(host1);
+    auto cview1 = [](const auto& host) {
+        return vecmem::get_data(host);
+    }(host1);
+
+    // Make trivial checks on the contents of the view(s).
+    EXPECT_EQ(ncview1.get<0>(), host1.get<0>().get());
+    EXPECT_EQ(cview1.get<1>().size(), host1.get<1>().size());
 }
