@@ -62,6 +62,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/details/is_aligned.hpp"
    "src/memory/details/is_aligned.cpp"
    # EDM types.
+   "include/vecmem/edm/accessor.hpp"
+   "include/vecmem/edm/impl/accessor.ipp"
    "include/vecmem/edm/buffer.hpp"
    "include/vecmem/edm/impl/buffer.ipp"
    "include/vecmem/edm/data.hpp"
