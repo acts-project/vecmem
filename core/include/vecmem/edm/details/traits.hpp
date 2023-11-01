@@ -9,7 +9,7 @@
 // Local include(s).
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
-#include "vecmem/edm/types.hpp"
+#include "vecmem/edm/schema.hpp"
 
 // System include(s).
 #include <tuple>

@@ -28,12 +28,13 @@ protected:
 TEST_F(core_edm_test, simple_view) {
 
     // Test the creation of a simple view.
-    vecmem::edm::view<vecmem::edm::type::scalar<int>,
-                      vecmem::edm::type::vector<float> >
+    vecmem::edm::view<vecmem::edm::schema<vecmem::edm::type::scalar<int>,
+                                          vecmem::edm::type::vector<float> > >
         view1;
 
-    vecmem::edm::view<vecmem::edm::type::scalar<const int>,
-                      vecmem::edm::type::vector<const float> >
+    vecmem::edm::view<
+        vecmem::edm::schema<vecmem::edm::type::scalar<const int>,
+                            vecmem::edm::type::vector<const float> > >
         view2{view1};
 }
 
@@ -41,16 +42,17 @@ TEST_F(core_edm_test, simple_buffer) {
 
     // Test the creation of fixed sized and resizable, at the same time "simple"
     // buffers.
-    vecmem::edm::buffer<vecmem::edm::type::scalar<int>,
-                        vecmem::edm::type::vector<float> >
+    vecmem::edm::buffer<vecmem::edm::schema<vecmem::edm::type::scalar<int>,
+                                            vecmem::edm::type::vector<float> > >
         buffer1(10, m_resource, vecmem::data::buffer_type::fixed_size),
         buffer2(10, m_resource, vecmem::data::buffer_type::resizable);
 
     // "Create" views off of the buffers.
-    vecmem::edm::view<vecmem::edm::type::scalar<int>,
-                      vecmem::edm::type::vector<float> >
+    vecmem::edm::view<vecmem::edm::schema<vecmem::edm::type::scalar<int>,
+                                          vecmem::edm::type::vector<float> > >
         view1{buffer1}, view2{buffer2};
-    vecmem::edm::view<vecmem::edm::type::scalar<const int>,
-                      vecmem::edm::type::vector<const float> >
+    vecmem::edm::view<
+        vecmem::edm::schema<vecmem::edm::type::scalar<const int>,
+                            vecmem::edm::type::vector<const float> > >
         view3{buffer1}, view4{buffer2};
 }
