@@ -17,21 +17,20 @@ namespace vecmem::testing {
 /// Meaning that it would not have any jagged vector variables in it...
 ///
 struct simple_container
-    : public edm::container<
-          edm::type::scalar<int>, vecmem::edm::type::vector<float>,
-          vecmem::edm::type::scalar<float>, vecmem::edm::type::vector<int> > {
+    : public edm::container<edm::type::scalar<int>, edm::type::vector<float>,
+                            edm::type::scalar<float>, edm::type::vector<int> > {
 
     /// @name Accessors to the individual variables in the collection
     /// @{
 
     /// Global "count" of something
-    using count = edm::accessor<0>;
+    using count = edm::accessor<0, schema>;
     /// "Measurement" of something
-    using measurement = edm::accessor<1>;
+    using measurement = edm::accessor<1, schema>;
     /// Global "average" of something
-    using average = edm::accessor<2>;
+    using average = edm::accessor<2, schema>;
     /// "Index" of something
-    using index = edm::accessor<3>;
+    using index = edm::accessor<3, schema>;
 
     /// @}
 

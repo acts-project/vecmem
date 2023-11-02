@@ -13,6 +13,7 @@
 #include "vecmem/edm/schema.hpp"
 #include "vecmem/edm/view.hpp"
 
+/// Namespace for the types serving as base classes for an SoA event data model
 namespace vecmem::edm {
 
 /// Description of a container, with all of the types needed to use it
