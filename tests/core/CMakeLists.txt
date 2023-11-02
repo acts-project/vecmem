@@ -29,4 +29,5 @@ vecmem_add_test( core
    "test_core_edm_view.cpp"
    "test_core_edm_copy.cpp"
    "test_core_edm.cpp"
+   "test_core_edm_copy.cpp"
    LINK_LIBRARIES vecmem::core GTest::gtest_main vecmem_testing_common )

@@ -34,7 +34,7 @@ vector_buffer<TYPE>::vector_buffer(size_type capacity,
         return;
     }
 
-    std::tie(m_memory, base_type::m_size, base_type::m_ptr) =
+    std::tie(m_memory, std::ignore, base_type::m_size, base_type::m_ptr) =
         details::aligned_multiple_placement<std::remove_pointer_t<size_pointer>,
                                             std::remove_pointer_t<pointer>>(
             resource, type == buffer_type::fixed_size ? 0 : 1, capacity);

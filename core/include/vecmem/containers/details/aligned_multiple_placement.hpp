@@ -81,13 +81,14 @@ namespace details {
  * compatible type, and the length must be equal to that of `Ts`.
  * @param r The memory resource to use for allocation.
  * @param ps The set of sizes of the differently typed regions.
- * @returns A tuple of |Ts| + 1 elements, where the first element is a unique
+ * @returns A tuple of |Ts| + 2 elements, where the first element is a unique
  * allocation pointer to the complete block of memory (such that it may be
- * freed), and the other values represent the addresses in memory where the
- * regions begin.
+ * freed), the second is the number of allocated bytes and the other values
+ * represent the addresses in memory where the regions begin.
  */
 template <typename... Ts, typename... Ps>
-std::tuple<vecmem::unique_alloc_ptr<char[]>, std::add_pointer_t<Ts>...>
+std::tuple<vecmem::unique_alloc_ptr<char[]>, std::size_t,
+           std::add_pointer_t<Ts>...>
 aligned_multiple_placement(vecmem::memory_resource &r, Ps... ps);
 }  // namespace details
 }  // namespace vecmem

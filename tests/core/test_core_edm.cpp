@@ -22,7 +22,7 @@ protected:
     /// Helper object for the memory copies.
     vecmem::copy m_copy;
 
-};  // class core_device_container_test
+};  // class core_edm_test
 
 TEST_F(core_edm_test, simple_view) {
 
@@ -39,6 +39,8 @@ TEST_F(core_edm_test, simple_buffer) {
         10, m_resource, vecmem::data::buffer_type::fixed_size);
     vecmem::testing::simple_container::buffer buffer2(
         10, m_resource, vecmem::data::buffer_type::resizable);
+    m_copy.setup(buffer1);
+    m_copy.setup(buffer2);
 
     // "Create" views off of the buffers.
     vecmem::testing::simple_container::view view1{buffer1}, view2{buffer2};

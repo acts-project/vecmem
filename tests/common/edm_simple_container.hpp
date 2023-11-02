@@ -36,4 +36,16 @@ struct simple_container
 
 };  // struct simple_container
 
+/// Helper function testing the equality of two host containers
+void compare(const simple_container::host& lhs,
+             const simple_container::host& rhs);
+
+/// Helper function testing the equality of two device containers
+void compare(const simple_container::const_device& lhs,
+             const simple_container::const_device& rhs);
+
+/// Helper function testing the equality of a host and a device container
+void compare(const simple_container::host& lhs,
+             const simple_container::const_device& rhs);
+
 }  // namespace vecmem::testing
