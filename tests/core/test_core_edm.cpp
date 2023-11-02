@@ -161,9 +161,14 @@ TEST_F(core_edm_test, simple_host) {
 
     // Check the contents of the host container.
     const auto& host1c = host1;
+    EXPECT_EQ(host1.size(), 1u);
     EXPECT_EQ(simple_edm::counts(host1c), 10);
     EXPECT_EQ(simple_edm::measurements(host1c).size(), 1u);
     EXPECT_FLOAT_EQ(simple_edm::measurements(host1c)[0], 1.0f);
+
+    // Check that resizing the container works.
+    host1.resize(5);
+    EXPECT_EQ(host1.size(), 5u);
 
     // Make views out of it.
     simple_edm::view ncview1 = vecmem::get_data(host1);
@@ -183,9 +188,12 @@ TEST_F(core_edm_test, simple_host) {
     EXPECT_EQ(simple_edm::counts(device1), 10);
     EXPECT_EQ(simple_edm::counts(device2), 10);
     EXPECT_EQ(simple_edm::counts(device3), 10);
-    EXPECT_EQ(simple_edm::measurements(device1).size(), 1u);
-    EXPECT_EQ(simple_edm::measurements(device2).size(), 1u);
-    EXPECT_EQ(simple_edm::measurements(device3).size(), 1u);
+    EXPECT_EQ(simple_edm::measurements(device1).size(),
+              simple_edm::measurements(host1).size());
+    EXPECT_EQ(simple_edm::measurements(device2).size(),
+              simple_edm::measurements(host1).size());
+    EXPECT_EQ(simple_edm::measurements(device3).size(),
+              simple_edm::measurements(host1).size());
     EXPECT_FLOAT_EQ(simple_edm::measurements(device1)[0], 1.0f);
     EXPECT_FLOAT_EQ(simple_edm::measurements(device2)[0], 1.0f);
     EXPECT_FLOAT_EQ(simple_edm::measurements(device3)[0], 1.0f);
