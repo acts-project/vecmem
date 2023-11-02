@@ -82,10 +82,11 @@ TEST_F(core_edm_test, simple_buffer) {
     // Set some data on the device containers.
     vecmem::testing::simple_container::count::get(device1) = 10;
     vecmem::testing::simple_container::average::get(device1) = 3.f;
-    for (int i = 0; i < 10; ++i) {
+    for (unsigned int i = 0; i < 10; ++i) {
         vecmem::testing::simple_container::measurement::get(device1)[i] =
             static_cast<float>(i);
-        vecmem::testing::simple_container::index::get(device1)[i] = i;
+        vecmem::testing::simple_container::index::get(device1)[i] =
+            static_cast<int>(i);
     }
 
     vecmem::testing::simple_container::count::get(device2) = 5;
@@ -143,19 +144,22 @@ TEST_F(core_edm_test, simple_buffer) {
               10u);
     EXPECT_EQ(vecmem::testing::simple_container::index::get(device5).capacity(),
               10u);
-    for (int i = 0; i < 10; ++i) {
+    for (unsigned int i = 0; i < 10; ++i) {
         EXPECT_FLOAT_EQ(
             vecmem::testing::simple_container::measurement::get(device1)[i],
             static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device1)[i], i);
+        EXPECT_EQ(vecmem::testing::simple_container::index::get(device1)[i],
+                  static_cast<int>(i));
         EXPECT_FLOAT_EQ(
             vecmem::testing::simple_container::measurement::get(device3)[i],
             static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device3)[i], i);
+        EXPECT_EQ(vecmem::testing::simple_container::index::get(device3)[i],
+                  static_cast<int>(i));
         EXPECT_FLOAT_EQ(
             vecmem::testing::simple_container::measurement::get(device5)[i],
             static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device5)[i], i);
+        EXPECT_EQ(vecmem::testing::simple_container::index::get(device5)[i],
+                  static_cast<int>(i));
     }
 
     EXPECT_EQ(device2.size(), 5u);
@@ -203,22 +207,22 @@ TEST_F(core_edm_test, simple_buffer) {
               5u);
     EXPECT_EQ(vecmem::testing::simple_container::index::get(device6).capacity(),
               10u);
-    for (int i = 0; i < 5; ++i) {
+    for (unsigned int i = 0; i < 5; ++i) {
         EXPECT_FLOAT_EQ(
             vecmem::testing::simple_container::measurement::get(device2)[i],
             2.f * static_cast<float>(i));
         EXPECT_EQ(vecmem::testing::simple_container::index::get(device2)[i],
-                  2 * i);
+                  2 * static_cast<int>(i));
         EXPECT_FLOAT_EQ(
             vecmem::testing::simple_container::measurement::get(device4)[i],
             2.f * static_cast<float>(i));
         EXPECT_EQ(vecmem::testing::simple_container::index::get(device4)[i],
-                  2 * i);
+                  2 * static_cast<int>(i));
         EXPECT_FLOAT_EQ(
             vecmem::testing::simple_container::measurement::get(device6)[i],
             2.f * static_cast<float>(i));
         EXPECT_EQ(vecmem::testing::simple_container::index::get(device6)[i],
-                  2 * i);
+                  2 * static_cast<int>(i));
     }
 }
 
