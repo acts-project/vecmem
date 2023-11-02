@@ -11,6 +11,7 @@
 #include "vecmem/edm/device.hpp"
 #include "vecmem/edm/host.hpp"
 #include "vecmem/edm/schema.hpp"
+#include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <cstddef>
@@ -29,29 +30,30 @@ struct accessor {
 
     /// (Non-const) Access a specific variable from an SoA host container
     template <typename... VARTYPES>
-    constexpr
+    VECMEM_HOST static constexpr
         typename details::accessor_host_type_at<INDEX, VARTYPES...>::return_type
-        operator()(host<schema<VARTYPES...>>& obj) const;
+        get(host<schema<VARTYPES...>>& obj);
 
     /// (const) Access a specific variable from an SoA host container
     template <typename... VARTYPES>
-    constexpr
+    VECMEM_HOST static constexpr
         typename details::accessor_host_type_at<INDEX,
                                                 VARTYPES...>::const_return_type
-        operator()(const host<schema<VARTYPES...>>& obj) const;
+        get(const host<schema<VARTYPES...>>& obj);
 
     /// (Non-const) Access a specific variable from an SoA device container
     template <typename... VARTYPES>
-    constexpr
+    VECMEM_HOST_AND_DEVICE static constexpr
         typename details::accessor_device_type_at<INDEX,
                                                   VARTYPES...>::return_type
-        operator()(device<schema<VARTYPES...>>& obj) const;
+        get(device<schema<VARTYPES...>>& obj);
 
     /// (const) Access a specific variable from an SoA device container
     template <typename... VARTYPES>
-    constexpr typename details::accessor_device_type_at<
-        INDEX, VARTYPES...>::const_return_type
-    operator()(const device<schema<VARTYPES...>>& obj) const;
+    VECMEM_HOST_AND_DEVICE static constexpr
+        typename details::accessor_device_type_at<
+            INDEX, VARTYPES...>::const_return_type
+        get(const device<schema<VARTYPES...>>& obj);
 
 };  // struct accessor
 

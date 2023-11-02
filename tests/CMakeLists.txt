@@ -23,6 +23,7 @@ endif()
 
 # Build a common, helper library.
 add_library( vecmem_testing_common STATIC
+   "common/edm_simple_container.hpp"
    "common/memory_resource_name_gen.hpp"
    "common/memory_resource_name_gen.cpp"
    "common/memory_resource_test_alignment.hpp"

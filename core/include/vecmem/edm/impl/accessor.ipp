@@ -13,9 +13,9 @@ namespace vecmem::edm {
 
 template <std::size_t INDEX>
 template <typename... VARTYPES>
-constexpr
+VECMEM_HOST constexpr
     typename details::accessor_host_type_at<INDEX, VARTYPES...>::return_type
-    accessor<INDEX>::operator()(host<schema<VARTYPES...>>& obj) const {
+    accessor<INDEX>::get(host<schema<VARTYPES...>>& obj) {
 
     return details::accessor_host_get_at<INDEX, VARTYPES...>::get(
         obj.template get<INDEX>());
@@ -23,10 +23,10 @@ constexpr
 
 template <std::size_t INDEX>
 template <typename... VARTYPES>
-constexpr
+VECMEM_HOST constexpr
     typename details::accessor_host_type_at<INDEX,
                                             VARTYPES...>::const_return_type
-    accessor<INDEX>::operator()(const host<schema<VARTYPES...>>& obj) const {
+    accessor<INDEX>::get(const host<schema<VARTYPES...>>& obj) {
 
     return details::accessor_host_get_at<INDEX, VARTYPES...>::get(
         obj.template get<INDEX>());
@@ -34,9 +34,9 @@ constexpr
 
 template <std::size_t INDEX>
 template <typename... VARTYPES>
-constexpr
+VECMEM_HOST_AND_DEVICE constexpr
     typename details::accessor_device_type_at<INDEX, VARTYPES...>::return_type
-    accessor<INDEX>::operator()(device<schema<VARTYPES...>>& obj) const {
+    accessor<INDEX>::get(device<schema<VARTYPES...>>& obj) {
 
     return details::accessor_device_get_at<INDEX, VARTYPES...>::get(
         obj.template get<INDEX>());
@@ -44,10 +44,10 @@ constexpr
 
 template <std::size_t INDEX>
 template <typename... VARTYPES>
-constexpr
+VECMEM_HOST_AND_DEVICE constexpr
     typename details::accessor_device_type_at<INDEX,
                                               VARTYPES...>::const_return_type
-    accessor<INDEX>::operator()(const device<schema<VARTYPES...>>& obj) const {
+    accessor<INDEX>::get(const device<schema<VARTYPES...>>& obj) {
 
     return details::accessor_device_get_at<INDEX, VARTYPES...>::get(
         obj.template get<INDEX>());
