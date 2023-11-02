@@ -28,16 +28,16 @@ struct accessor {
 
     /// (Non-const) Access a specific variable from an SoA host container
     template <typename... VARTYPES>
-    static constexpr
+    constexpr
         typename details::accessor_host_type_at<INDEX, VARTYPES...>::return_type
-        get(host<schema<VARTYPES...>>& obj);
+        operator()(host<schema<VARTYPES...>>& obj) const;
 
     /// (const) Access a specific variable from an SoA host container
     template <typename... VARTYPES>
-    static constexpr
+    constexpr
         typename details::accessor_host_type_at<INDEX,
                                                 VARTYPES...>::const_return_type
-        get(const host<schema<VARTYPES...>>& obj);
+        operator()(const host<schema<VARTYPES...>>& obj) const;
 
 };  // struct accessor
 
