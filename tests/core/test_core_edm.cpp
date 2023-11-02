@@ -114,12 +114,18 @@ TEST_F(core_edm_test, simple_buffer) {
     }
 
     // Check the device containers.
+    EXPECT_EQ(device1.size(), 10u);
+    EXPECT_EQ(device1.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device1), 10);
     EXPECT_EQ(simple_edm::measurements(device1).size(), 10u);
     EXPECT_EQ(simple_edm::measurements(device1).capacity(), 10u);
+    EXPECT_EQ(device3.size(), 10u);
+    EXPECT_EQ(device3.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device3), 10);
     EXPECT_EQ(simple_edm::measurements(device3).size(), 10u);
     EXPECT_EQ(simple_edm::measurements(device3).capacity(), 10u);
+    EXPECT_EQ(device5.size(), 10u);
+    EXPECT_EQ(device5.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device5), 10);
     EXPECT_EQ(simple_edm::measurements(device5).size(), 10u);
     EXPECT_EQ(simple_edm::measurements(device5).capacity(), 10u);
@@ -131,12 +137,18 @@ TEST_F(core_edm_test, simple_buffer) {
         EXPECT_FLOAT_EQ(simple_edm::measurements(device5)[i],
                         static_cast<float>(i));
     }
+    EXPECT_EQ(device2.size(), 5u);
+    EXPECT_EQ(device2.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device2), 5);
     EXPECT_EQ(simple_edm::measurements(device2).size(), 5u);
     EXPECT_EQ(simple_edm::measurements(device2).capacity(), 10u);
+    EXPECT_EQ(device4.size(), 5u);
+    EXPECT_EQ(device4.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device4), 5);
     EXPECT_EQ(simple_edm::measurements(device4).size(), 5u);
     EXPECT_EQ(simple_edm::measurements(device4).capacity(), 10u);
+    EXPECT_EQ(device6.size(), 5u);
+    EXPECT_EQ(device6.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device6), 5);
     EXPECT_EQ(simple_edm::measurements(device6).size(), 5u);
     EXPECT_EQ(simple_edm::measurements(device6).capacity(), 10u);
@@ -177,6 +189,10 @@ TEST_F(core_edm_test, simple_host) {
     }(host1);
 
     // Make trivial checks on the contents of the view(s).
+    EXPECT_EQ(ncview1.size(), host1.size());
+    EXPECT_EQ(ncview1.capacity(), host1.size());
+    EXPECT_EQ(cview1.size(), host1.size());
+    EXPECT_EQ(cview1.capacity(), host1.size());
     EXPECT_EQ(ncview1.get<0>(), host1.get<0>().get());
     EXPECT_EQ(cview1.get<1>().size(), host1.get<1>().size());
 
@@ -185,14 +201,26 @@ TEST_F(core_edm_test, simple_host) {
     simple_edm::const_device device2{ncview1}, device3{cview1};
 
     // Check the contents of the device containers.
+    EXPECT_EQ(device1.size(), host1.size());
+    EXPECT_EQ(device1.capacity(), host1.size());
+    EXPECT_EQ(device2.size(), host1.size());
+    EXPECT_EQ(device2.capacity(), host1.size());
+    EXPECT_EQ(device3.size(), host1.size());
+    EXPECT_EQ(device3.capacity(), host1.size());
     EXPECT_EQ(simple_edm::counts(device1), 10);
     EXPECT_EQ(simple_edm::counts(device2), 10);
     EXPECT_EQ(simple_edm::counts(device3), 10);
     EXPECT_EQ(simple_edm::measurements(device1).size(),
               simple_edm::measurements(host1).size());
+    EXPECT_EQ(simple_edm::measurements(device1).capacity(),
+              simple_edm::measurements(host1).size());
     EXPECT_EQ(simple_edm::measurements(device2).size(),
               simple_edm::measurements(host1).size());
+    EXPECT_EQ(simple_edm::measurements(device2).capacity(),
+              simple_edm::measurements(host1).size());
     EXPECT_EQ(simple_edm::measurements(device3).size(),
+              simple_edm::measurements(host1).size());
+    EXPECT_EQ(simple_edm::measurements(device3).capacity(),
               simple_edm::measurements(host1).size());
     EXPECT_FLOAT_EQ(simple_edm::measurements(device1)[0], 1.0f);
     EXPECT_FLOAT_EQ(simple_edm::measurements(device2)[0], 1.0f);
