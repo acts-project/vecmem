@@ -8,6 +8,7 @@
 
 // Local include(s).
 #include "vecmem/edm/details/accessor_traits.hpp"
+#include "vecmem/edm/device.hpp"
 #include "vecmem/edm/host.hpp"
 #include "vecmem/edm/schema.hpp"
 
@@ -38,6 +39,19 @@ struct accessor {
         typename details::accessor_host_type_at<INDEX,
                                                 VARTYPES...>::const_return_type
         operator()(const host<schema<VARTYPES...>>& obj) const;
+
+    /// (Non-const) Access a specific variable from an SoA device container
+    template <typename... VARTYPES>
+    constexpr
+        typename details::accessor_device_type_at<INDEX,
+                                                  VARTYPES...>::return_type
+        operator()(device<schema<VARTYPES...>>& obj) const;
+
+    /// (const) Access a specific variable from an SoA device container
+    template <typename... VARTYPES>
+    constexpr typename details::accessor_device_type_at<
+        INDEX, VARTYPES...>::const_return_type
+    operator()(const device<schema<VARTYPES...>>& obj) const;
 
 };  // struct accessor
 

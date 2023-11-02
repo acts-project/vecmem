@@ -32,4 +32,25 @@ constexpr
         obj.template get<INDEX>());
 }
 
+template <std::size_t INDEX>
+template <typename... VARTYPES>
+constexpr
+    typename details::accessor_device_type_at<INDEX, VARTYPES...>::return_type
+    accessor<INDEX>::operator()(device<schema<VARTYPES...>>& obj) const {
+
+    return details::accessor_device_get_at<INDEX, VARTYPES...>::get(
+        obj.template get<INDEX>());
+}
+
+template <std::size_t INDEX>
+template <typename... VARTYPES>
+constexpr
+    typename details::accessor_device_type_at<INDEX,
+                                            VARTYPES...>::const_return_type
+    accessor<INDEX>::operator()(const device<schema<VARTYPES...>>& obj) const {
+
+    return details::accessor_device_get_at<INDEX, VARTYPES...>::get(
+        obj.template get<INDEX>());
+}
+
 }  // namespace vecmem::edm
