@@ -108,6 +108,7 @@ TEST_F(core_edm_test, simple_buffer) {
         simple_edm::measurements(device1)[i] = static_cast<float>(i);
     }
     simple_edm::counts(device2) = 5;
+    device2.push_back_default();
     for (int i = 0; i < 5; ++i) {
         simple_edm::measurements(device2).push_back(2.f *
                                                     static_cast<float>(i));
@@ -137,27 +138,30 @@ TEST_F(core_edm_test, simple_buffer) {
         EXPECT_FLOAT_EQ(simple_edm::measurements(device5)[i],
                         static_cast<float>(i));
     }
-    EXPECT_EQ(device2.size(), 5u);
+    EXPECT_EQ(device2.size(), 6u);
     EXPECT_EQ(device2.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device2), 5);
-    EXPECT_EQ(simple_edm::measurements(device2).size(), 5u);
+    EXPECT_EQ(simple_edm::measurements(device2).size(), 6u);
     EXPECT_EQ(simple_edm::measurements(device2).capacity(), 10u);
-    EXPECT_EQ(device4.size(), 5u);
+    EXPECT_FLOAT_EQ(simple_edm::measurements(device2)[0], 0.f);
+    EXPECT_EQ(device4.size(), 6u);
     EXPECT_EQ(device4.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device4), 5);
-    EXPECT_EQ(simple_edm::measurements(device4).size(), 5u);
+    EXPECT_EQ(simple_edm::measurements(device4).size(), 6u);
     EXPECT_EQ(simple_edm::measurements(device4).capacity(), 10u);
-    EXPECT_EQ(device6.size(), 5u);
+    EXPECT_FLOAT_EQ(simple_edm::measurements(device4)[0], 0.f);
+    EXPECT_EQ(device6.size(), 6u);
     EXPECT_EQ(device6.capacity(), 10u);
     EXPECT_EQ(simple_edm::counts(device6), 5);
-    EXPECT_EQ(simple_edm::measurements(device6).size(), 5u);
+    EXPECT_EQ(simple_edm::measurements(device6).size(), 6u);
     EXPECT_EQ(simple_edm::measurements(device6).capacity(), 10u);
+    EXPECT_FLOAT_EQ(simple_edm::measurements(device6)[0], 0.f);
     for (int i = 0; i < 5; ++i) {
-        EXPECT_FLOAT_EQ(simple_edm::measurements(device2)[i],
+        EXPECT_FLOAT_EQ(simple_edm::measurements(device2)[i + 1],
                         2.f * static_cast<float>(i));
-        EXPECT_FLOAT_EQ(simple_edm::measurements(device4)[i],
+        EXPECT_FLOAT_EQ(simple_edm::measurements(device4)[i + 1],
                         2.f * static_cast<float>(i));
-        EXPECT_FLOAT_EQ(simple_edm::measurements(device6)[i],
+        EXPECT_FLOAT_EQ(simple_edm::measurements(device6)[i + 1],
                         2.f * static_cast<float>(i));
     }
 }
