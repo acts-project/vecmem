@@ -22,7 +22,7 @@ namespace details {
 
 template <typename TYPE>
 struct accessor_device_type {
-    struct UNKNOWN_TYPE {};
+     struct UNKNOWN_TYPE {};
     using stored_type = UNKNOWN_TYPE;
     using return_type = UNKNOWN_TYPE;
     using const_return_type = UNKNOWN_TYPE;
