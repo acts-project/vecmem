@@ -36,6 +36,12 @@ struct simple_container
 
 };  // struct simple_container
 
+/// Fill a host container with some dummy data
+void fill(simple_container::host& obj);
+
+/// Fill a device container with some dummy data
+void fill(simple_container::device& obj);
+
 /// Helper function testing the equality of two host containers
 void compare(const simple_container::host& lhs,
              const simple_container::host& rhs);

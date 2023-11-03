@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -15,5 +15,6 @@ include( vecmem-compiler-options-sycl )
 vecmem_add_test( sycl
    "test_sycl_memory_resources.cpp"
    "test_sycl_containers.sycl" "test_sycl_jagged_containers.sycl"
+   "test_sycl_edm_copy.cpp"
    LINK_LIBRARIES vecmem::core vecmem::sycl GTest::gtest_main
                   vecmem_testing_common )

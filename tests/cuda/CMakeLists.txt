@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -38,6 +38,7 @@ vecmem_add_test( cuda
    "test_cuda_memory_resources.cpp"
    "test_cuda_containers.cpp" "test_cuda_containers_kernels.cuh"
    "test_cuda_containers_kernels.cu"
+   "test_cuda_edm_copy.cpp"
    "test_cuda_jagged_vector_view.cpp"
    "test_cuda_jagged_vector_view_kernels.cu"
    "test_cuda_jagged_vector_view_kernels.cuh"
@@ -55,6 +56,7 @@ if( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "11.0" )
       "test_cuda_memory_resources.cu"
       "test_cuda_containers.cu" "test_cuda_containers_kernels.cuh"
       "test_cuda_containers_kernels.cu"
+      "test_cuda_edm_copy.cu"
       "test_cuda_jagged_vector_view.cu"
       "test_cuda_jagged_vector_view_kernels.cu"
       "test_cuda_jagged_vector_view_kernels.cuh"

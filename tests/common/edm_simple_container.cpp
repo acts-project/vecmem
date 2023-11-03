@@ -13,6 +13,30 @@
 
 namespace vecmem::testing {
 
+void fill(simple_container::host& obj) {
+
+    obj.resize(10);
+    simple_container::count::get(obj) = 55;
+    simple_container::average::get(obj) = 3.141592f;
+    for (std::size_t i = 0; i < obj.size(); ++i) {
+        simple_container::measurement::get(obj)[i] =
+            1.0f * static_cast<float>(i);
+        simple_container::index::get(obj)[i] = static_cast<int>(i);
+    }
+}
+
+void fill(simple_container::device& obj) {
+
+    simple_container::count::get(obj) = 55;
+    simple_container::average::get(obj) = 3.141592f;
+    for (std::size_t i = 0; i < obj.capacity(); ++i) {
+        const simple_container::device::size_type ii = obj.push_back_default();
+        simple_container::measurement::get(obj)[ii] =
+            1.0f * static_cast<float>(ii);
+        simple_container::index::get(obj)[ii] = static_cast<int>(ii);
+    }
+}
+
 template <typename T>
 void compare(const vector<T>& lhs, const vector<T>& rhs) {
 
