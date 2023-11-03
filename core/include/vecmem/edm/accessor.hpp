@@ -7,17 +7,22 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/edm/details/accessor_traits.hpp"
+#include "vecmem/edm/details/accessor_device_traits.hpp"
 #include "vecmem/edm/details/schema_traits.hpp"
 #include "vecmem/edm/device.hpp"
-#include "vecmem/edm/host.hpp"
 #include "vecmem/edm/schema.hpp"
 #include "vecmem/utils/types.hpp"
+
+#if __cplusplus >= 201700L
+#include "vecmem/edm/details/accessor_host_traits.hpp"
+#include "vecmem/edm/host.hpp"
+#endif  // __cplusplus >= 201700L
 
 // System include(s).
 #include <cstddef>
 
-namespace vecmem::edm {
+namespace vecmem {
+namespace edm {
 
 /// Generic accessor template
 template <std::size_t INDEX, typename... VARTYPES>
@@ -33,6 +38,7 @@ struct accessor {};
 template <std::size_t INDEX, typename... VARTYPES>
 struct accessor<INDEX, schema<VARTYPES...>> {
 
+#if __cplusplus >= 201700L
     /// @name Host container accessor function(s)
     /// @{
 
@@ -48,6 +54,7 @@ struct accessor<INDEX, schema<VARTYPES...>> {
         get(const host<schema<VARTYPES...>>& obj);
 
     /// @}
+#endif  // __cplusplus >= 201700L
 
     /// @name Device container accessor function(s)
     /// @{
@@ -85,7 +92,8 @@ struct accessor<INDEX, schema<VARTYPES...>> {
 
 };  // struct accessor
 
-}  // namespace vecmem::edm
+}  // namespace edm
+}  // namespace vecmem
 
 // Include the implementation.
 #include "vecmem/edm/impl/accessor.ipp"

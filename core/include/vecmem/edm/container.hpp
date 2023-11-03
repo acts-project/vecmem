@@ -7,14 +7,18 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/edm/buffer.hpp"
 #include "vecmem/edm/device.hpp"
-#include "vecmem/edm/host.hpp"
 #include "vecmem/edm/schema.hpp"
 #include "vecmem/edm/view.hpp"
 
+#if __cplusplus >= 201700L
+#include "vecmem/edm/buffer.hpp"
+#include "vecmem/edm/host.hpp"
+#endif  // __cplusplus >= 201700L
+
 /// Namespace for the types serving as base classes for an SoA event data model
-namespace vecmem::edm {
+namespace vecmem {
+namespace edm {
 
 /// Description of a container, with all of the types needed to use it
 ///
@@ -28,8 +32,13 @@ struct container {
     /// Constant version of the schema
     using const_schema = typename vecmem::edm::add_const<schema>::type;
 
+#if __cplusplus >= 201700L
     /// Host container type
     using host = vecmem::edm::host<schema>;
+
+    /// Buffer type
+    using buffer = vecmem::edm::buffer<schema>;
+#endif  // __cplusplus >= 201700L
 
     /// (Non-const) Device container type
     using device = vecmem::edm::device<schema>;
@@ -41,9 +50,7 @@ struct container {
     /// (Const) view type
     using const_view = vecmem::edm::view<const_schema>;
 
-    /// Buffer type
-    using buffer = vecmem::edm::buffer<schema>;
-
 };  // struct container
 
-}  // namespace vecmem::edm
+}  // namespace edm
+}  // namespace vecmem

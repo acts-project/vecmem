@@ -6,10 +6,10 @@
  */
 #pragma once
 
-// Local include(s).
-#include "vecmem/edm/details/accessor_traits.hpp"
+namespace vecmem {
+namespace edm {
 
-namespace vecmem::edm {
+#if __cplusplus >= 201700L
 
 template <std::size_t INDEX, typename... VARTYPES>
 VECMEM_HOST constexpr
@@ -30,6 +30,8 @@ VECMEM_HOST constexpr
     return details::accessor_host_get_at<INDEX, VARTYPES...>::get(
         obj.template get<INDEX>());
 }
+
+#endif  // __cplusplus >= 201700L
 
 template <std::size_t INDEX, typename... VARTYPES>
 VECMEM_HOST_AND_DEVICE constexpr
@@ -76,4 +78,5 @@ accessor<INDEX, schema<VARTYPES...>>::get(
         get(obj.template get<INDEX>());
 }
 
-}  // namespace vecmem::edm
+}  // namespace edm
+}  // namespace vecmem

@@ -7,6 +7,7 @@
 
 // Local include(s).
 #include "../common/edm_simple_container.hpp"
+#include "../common/edm_simple_container_helpers.hpp"
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
 #include "vecmem/memory/cuda/host_memory_resource.hpp"
 #include "vecmem/utils/copy.hpp"

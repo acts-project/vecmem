@@ -10,7 +10,8 @@
 #include "vecmem/edm/accessor.hpp"
 #include "vecmem/edm/container.hpp"
 
-namespace vecmem::testing {
+namespace vecmem {
+namespace testing {
 
 /// "Simple" container for the tests
 ///
@@ -36,22 +37,5 @@ struct simple_container
 
 };  // struct simple_container
 
-/// Fill a host container with some dummy data
-void fill(simple_container::host& obj);
-
-/// Fill a device container with some dummy data
-void fill(simple_container::device& obj);
-
-/// Helper function testing the equality of two host containers
-void compare(const simple_container::host& lhs,
-             const simple_container::host& rhs);
-
-/// Helper function testing the equality of two device containers
-void compare(const simple_container::const_device& lhs,
-             const simple_container::const_device& rhs);
-
-/// Helper function testing the equality of a host and a device container
-void compare(const simple_container::host& lhs,
-             const simple_container::const_device& rhs);
-
-}  // namespace vecmem::testing
+}  // namespace testing
+}  // namespace vecmem

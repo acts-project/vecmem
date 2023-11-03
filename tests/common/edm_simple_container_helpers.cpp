@@ -6,7 +6,7 @@
  */
 
 // Local include(s).
-#include "edm_simple_container.hpp"
+#include "edm_simple_container_helpers.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
