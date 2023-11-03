@@ -41,7 +41,7 @@ template <typename T>
 void compare(const vector<T>& lhs, const vector<T>& rhs) {
 
     // Check the size of the vectors.
-    EXPECT_EQ(lhs.size(), rhs.size());
+    ASSERT_EQ(lhs.size(), rhs.size());
 
     // Check the content of the vectors.
     for (typename vector<T>::size_type i = 0; i < lhs.size(); ++i) {
@@ -57,7 +57,7 @@ template <typename T>
 void compare(const device_vector<T>& lhs, const device_vector<T>& rhs) {
 
     // Check the size of the vectors.
-    EXPECT_EQ(lhs.size(), rhs.size());
+    ASSERT_EQ(lhs.size(), rhs.size());
 
     // Check the content of the vectors.
     for (typename device_vector<T>::size_type i = 0; i < lhs.size(); ++i) {
@@ -73,7 +73,7 @@ template <typename T>
 void compare(const vector<T>& lhs, const device_vector<const T>& rhs) {
 
     // Check the size of the vectors.
-    EXPECT_EQ(static_cast<int>(lhs.size()), static_cast<int>(rhs.size()));
+    ASSERT_EQ(static_cast<int>(lhs.size()), static_cast<int>(rhs.size()));
 
     // Check the content of the vectors.
     for (typename device_vector<T>::size_type i = 0; i < lhs.size(); ++i) {
