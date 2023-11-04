@@ -7,11 +7,16 @@
 
 // Local include(s).
 #include "../common/edm_simple_container.hpp"
+#include "vecmem/edm/details/tuple.hpp"
+#include "vecmem/edm/details/tuple_traits.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/utils/copy.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
+
+// System include(s).
+#include <type_traits>
 
 /// Test case for the EDM code
 class core_edm_test : public testing::Test {
@@ -23,6 +28,68 @@ protected:
     vecmem::copy m_copy;
 
 };  // class core_edm_test
+
+TEST_F(core_edm_test, tuple) {
+
+    // Construct trivial tuples in a few different ways.
+    vecmem::edm::details::tuple<int, float, double> t1;
+    vecmem::edm::details::tuple<float, int> t2{2.f, 3};
+    vecmem::edm::details::tuple<double, int> t3{
+        t2};  // Type mismatch on purpose!
+
+    // Get/set elements in those tuples.
+    EXPECT_FLOAT_EQ(vecmem::edm::details::get<0>(t2), 2.f);
+    EXPECT_EQ(vecmem::edm::details::get<1>(t2), 3);
+
+    vecmem::edm::details::get<0>(t3) = 4.;
+    vecmem::edm::details::get<1>(t3) = 6;
+    EXPECT_DOUBLE_EQ(vecmem::edm::details::get<0>(t3), 4.f);
+    EXPECT_EQ(vecmem::edm::details::get<1>(t3), 6);
+
+    // Exercise vecmem::edm::details::tie(...).
+    int value1 = 0;
+    float value2 = 1.f;
+    double value3 = 2.;
+    auto t4 = vecmem::edm::details::tie(value1, value2, value3);
+    EXPECT_EQ(vecmem::edm::details::get<0>(t4), 0);
+    EXPECT_FLOAT_EQ(vecmem::edm::details::get<1>(t4), 1.f);
+    EXPECT_DOUBLE_EQ(vecmem::edm::details::get<2>(t4), 2.);
+
+    // Exercise vecmem::edm::details::tuple_element.
+    static constexpr bool type_check1 = std::is_same_v<
+        vecmem::edm::details::tuple_element<
+            1, vecmem::edm::details::tuple<int, float, double>>::type,
+        float>;
+    EXPECT_TRUE(type_check1);
+    static constexpr bool type_check2 =
+        std::is_same_v<vecmem::edm::details::tuple_element_t<
+                           2, vecmem::edm::details::tuple<int, float, double>>,
+                       double>;
+    EXPECT_TRUE(type_check2);
+
+    // Exercise vecmem::edm::details::make_tuple(...).
+    auto t5 = vecmem::edm::details::make_tuple(1, 2u, 3.f, 4.);
+    EXPECT_EQ(vecmem::edm::details::get<0>(t5), 1);
+    EXPECT_EQ(vecmem::edm::details::get<1>(t5), 2);
+    EXPECT_FLOAT_EQ(vecmem::edm::details::get<2>(t5), 3.f);
+    EXPECT_DOUBLE_EQ(vecmem::edm::details::get<3>(t5), 4.);
+    static constexpr bool type_check3 =
+        std::is_same_v<vecmem::edm::details::tuple_element_t<0, decltype(t5)>,
+                       int>;
+    EXPECT_TRUE(type_check3);
+    static constexpr bool type_check4 =
+        std::is_same_v<vecmem::edm::details::tuple_element_t<1, decltype(t5)>,
+                       unsigned int>;
+    EXPECT_TRUE(type_check4);
+    static constexpr bool type_check5 =
+        std::is_same_v<vecmem::edm::details::tuple_element_t<2, decltype(t5)>,
+                       float>;
+    EXPECT_TRUE(type_check5);
+    static constexpr bool type_check6 =
+        std::is_same_v<vecmem::edm::details::tuple_element_t<3, decltype(t5)>,
+                       double>;
+    EXPECT_TRUE(type_check6);
+}
 
 TEST_F(core_edm_test, simple_view) {
 
