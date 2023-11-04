@@ -178,11 +178,6 @@ target_compile_options( vecmem_core PUBLIC
    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CXX>>:/Zc:__cplusplus>
    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler /Zc:__cplusplus> )
 
-# The vecmem::edm code makes use of standard library features that are only
-# supported by CUDA using the --expt-relaxed-constexpr flag.
-target_compile_options( vecmem_core PUBLIC
-   $<$<AND:$<CUDA_COMPILER_ID:NVIDIA>,$<COMPILE_LANGUAGE:CUDA>>:--expt-relaxed-constexpr> )
-
 # Figure out where to get <memory_resource> from.
 include( CheckCXXSourceCompiles )
 check_cxx_source_compiles( "
