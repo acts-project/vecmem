@@ -424,7 +424,8 @@ TEST_F(sycl_jagged_containers_test, filter) {
         .wait_and_throw();
 
     // Copy the filtered output back into the host's memory.
-    vecmem::jagged_vector<int> output(&m_mem);
+    vecmem::sycl::host_memory_resource host_resource(&m_queue);
+    vecmem::jagged_vector<int> output(&host_resource);
     copy(output_data_device, output)->wait();
 
     // Check the output. Note that the order of elements in the "inner vectors"
