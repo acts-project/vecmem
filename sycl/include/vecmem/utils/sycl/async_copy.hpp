@@ -44,12 +44,15 @@ public:
 
 protected:
     /// Perform a memory copy using SYCL
+    VECMEM_SYCL_EXPORT
     virtual void do_copy(std::size_t size, const void* from, void* to,
                          type::copy_type cptype) const override;
     /// Fill a memory area using SYCL
+    VECMEM_SYCL_EXPORT
     virtual void do_memset(std::size_t size, void* ptr,
                            int value) const override;
     /// Create an event for synchronization
+    VECMEM_SYCL_EXPORT
     virtual event_type create_event() const override;
 
 private:
