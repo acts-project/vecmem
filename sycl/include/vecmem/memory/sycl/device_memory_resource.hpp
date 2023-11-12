@@ -32,7 +32,8 @@ private:
 
     /// Function performing the memory allocation
     VECMEM_SYCL_EXPORT
-    void* do_allocate(std::size_t nbytes, std::size_t alignment) override final;
+    virtual void* do_allocate(std::size_t nbytes,
+                              std::size_t alignment) override final;
 
     /// @}
 

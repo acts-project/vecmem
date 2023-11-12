@@ -39,12 +39,12 @@ private:
 
     /// Function performing the memory de-allocation
     VECMEM_SYCL_EXPORT
-    void do_deallocate(void* ptr, std::size_t nbytes,
-                       std::size_t alignment) override final;
+    virtual void do_deallocate(void* ptr, std::size_t nbytes,
+                               std::size_t alignment) override final;
 
     /// Function comparing two memory resource instances
     VECMEM_SYCL_EXPORT
-    bool do_is_equal(
+    virtual bool do_is_equal(
         const memory_resource& other) const noexcept override final;
 
     /// @}

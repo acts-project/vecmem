@@ -31,16 +31,17 @@ private:
 
     /// Function performing the memory allocation
     VECMEM_HIP_EXPORT
-    void* do_allocate(std::size_t nbytes, std::size_t alignment) override final;
+    virtual void* do_allocate(std::size_t nbytes,
+                              std::size_t alignment) override final;
 
     /// Function performing the memory de-allocation
     VECMEM_HIP_EXPORT
-    void do_deallocate(void* ptr, std::size_t nbytes,
-                       std::size_t alignment) override final;
+    virtual void do_deallocate(void* ptr, std::size_t nbytes,
+                               std::size_t alignment) override final;
 
     /// Function comparing two memory resource instances
     VECMEM_HIP_EXPORT
-    bool do_is_equal(
+    virtual bool do_is_equal(
         const memory_resource& other) const noexcept override final;
 
     /// @}
