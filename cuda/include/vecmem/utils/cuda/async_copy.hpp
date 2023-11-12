@@ -36,13 +36,16 @@ public:
 
 protected:
     /// Perform an asynchronous memory copy using CUDA
+    VECMEM_CUDA_EXPORT
     virtual void do_copy(std::size_t size, const void* from, void* to,
-                         type::copy_type cptype) const override;
+                         type::copy_type cptype) const override final;
     /// Fill a memory area using CUDA asynchronously
+    VECMEM_CUDA_EXPORT
     virtual void do_memset(std::size_t size, void* ptr,
-                           int value) const override;
+                           int value) const override final;
     /// Create an event for synchronization
-    virtual event_type create_event() const override;
+    VECMEM_CUDA_EXPORT
+    virtual event_type create_event() const override final;
 
 private:
     /// The stream that the copies are performed on

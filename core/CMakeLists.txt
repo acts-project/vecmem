@@ -43,6 +43,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/containers/impl/jagged_device_vector_iterator.ipp"
    "include/vecmem/containers/details/reverse_iterator.hpp"
    "include/vecmem/containers/impl/reverse_iterator.ipp"
+   # Container helper code.
+   "include/vecmem/containers/details/resize_jagged_vector.hpp"
    # Allocator
    "include/vecmem/memory/allocator.hpp"
    "include/vecmem/memory/impl/allocator.ipp"

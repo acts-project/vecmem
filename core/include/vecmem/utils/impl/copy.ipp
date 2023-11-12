@@ -8,6 +8,7 @@
 #pragma once
 
 // VecMem include(s).
+#include "vecmem/containers/details/resize_jagged_vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/utils/debug.hpp"
@@ -314,7 +315,7 @@ copy::event_type copy::operator()(
                   "Can only use compatible types in the copy");
 
     // Resize the output object to the correct size.
-    to_vec.resize(from_view.size());
+    details::resize_jagged_vector(to_vec, from_view.size());
     const auto sizes = get_sizes(from_view);
     assert(sizes.size() == to_vec.size());
     for (typename data::jagged_vector_view<TYPE1>::size_type i = 0;
