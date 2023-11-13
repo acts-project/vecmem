@@ -6,6 +6,7 @@
  */
 
 // Local include(s).
+#include "../common/edm_jagged_container.hpp"
 #include "../common/edm_simple_container.hpp"
 #include "vecmem/edm/details/tuple.hpp"
 #include "vecmem/edm/details/tuple_traits.hpp"
@@ -398,4 +399,66 @@ TEST_F(core_edm_test, simple_host) {
     EXPECT_FLOAT_EQ(
         vecmem::testing::simple_container::measurement::get(device3)[0], 1.0f);
     EXPECT_EQ(vecmem::testing::simple_container::index::get(device3)[0], 3);
+}
+
+TEST_F(core_edm_test, jagged_host) {
+
+    // Test the creation of a simple host container.
+    vecmem::testing::jagged_container::host host1{m_resource};
+
+    // Fill the host container with some data.
+    vecmem::testing::jagged_container::count::get(host1) = 10;
+    vecmem::testing::jagged_container::average::get(host1) = 2.34f;
+    host1.resize(2);
+    vecmem::testing::jagged_container::measurement::get(host1)[0] = 1.0f;
+    vecmem::testing::jagged_container::measurement::get(host1)[1] = 2.0f;
+    vecmem::testing::jagged_container::index::get(host1)[0] = 3;
+    vecmem::testing::jagged_container::index::get(host1)[1] = 4;
+    vecmem::testing::jagged_container::measurements::get(host1)[0].push_back(
+        1.1f);
+    vecmem::testing::jagged_container::measurements::get(host1)[1].push_back(
+        2.1f);
+    vecmem::testing::jagged_container::indices::get(host1)[0].push_back(
+        31);
+    vecmem::testing::jagged_container::indices::get(host1)[1].push_back(
+        41);
+
+    // Check the contents of the host container.
+    const auto& host1c = host1;
+    EXPECT_EQ(host1.size(), 2u);
+    EXPECT_EQ(vecmem::testing::jagged_container::count::get(host1c), 10);
+    EXPECT_FLOAT_EQ(vecmem::testing::jagged_container::average::get(host1),
+                    2.34f);
+    EXPECT_EQ(
+        vecmem::testing::jagged_container::measurement::get(host1c).size(), 2u);
+    EXPECT_FLOAT_EQ(
+        vecmem::testing::jagged_container::measurement::get(host1)[0], 1.0f);
+    EXPECT_FLOAT_EQ(
+        vecmem::testing::jagged_container::measurement::get(host1c)[1], 2.0f);
+    EXPECT_EQ(vecmem::testing::jagged_container::index::get(host1c).size(), 2u);
+    EXPECT_EQ(vecmem::testing::jagged_container::index::get(host1)[0], 3);
+    EXPECT_EQ(vecmem::testing::jagged_container::index::get(host1c)[1], 4);
+    EXPECT_EQ(
+        vecmem::testing::jagged_container::measurements::get(host1)[0].size(),
+        1u);
+    EXPECT_EQ(
+        vecmem::testing::jagged_container::measurements::get(host1c)[1].size(),
+        1u);
+    EXPECT_FLOAT_EQ(
+        vecmem::testing::jagged_container::measurements::get(host1)[0][0],
+        1.1f);
+    EXPECT_FLOAT_EQ(
+        vecmem::testing::jagged_container::measurements::get(host1c)[1][0],
+        2.1f);
+    EXPECT_EQ(
+        vecmem::testing::jagged_container::indices::get(host1)[0].size(), 1u);
+    EXPECT_EQ(
+        vecmem::testing::jagged_container::indices::get(host1c)[1].size(), 1u);
+    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1)[0][0],
+              31);
+    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1c)[1][0],
+              41);
+
+    // Make views out of it.
+    vecmem::testing::jagged_container::view ncview1 = vecmem::get_data(host1);
 }
