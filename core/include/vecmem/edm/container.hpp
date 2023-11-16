@@ -13,6 +13,7 @@
 
 #if __cplusplus >= 201700L
 #include "vecmem/edm/buffer.hpp"
+#include "vecmem/edm/data.hpp"
 #include "vecmem/edm/host.hpp"
 #endif  // __cplusplus >= 201700L
 
@@ -35,6 +36,9 @@ struct container {
 #if __cplusplus >= 201700L
     /// Host container type
     using host = vecmem::edm::host<schema>;
+
+    /// Data type
+    using data = vecmem::edm::data<schema>;
 
     /// Buffer type
     using buffer = vecmem::edm::buffer<schema>;

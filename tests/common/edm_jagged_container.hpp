@@ -18,11 +18,10 @@ namespace testing {
 /// Meaning that it would not have any jagged vector variables in it...
 ///
 struct jagged_container
-    : public edm::container<edm::type::scalar<int>, edm::type::vector<float>,
-                            edm::type::jagged_vector<double>,
-                            edm::type::scalar<float>,
-                            edm::type::jagged_vector<int>,
-                            edm::type::vector<int> > {
+    : public edm::container<
+          edm::type::scalar<int>, edm::type::vector<float>,
+          edm::type::jagged_vector<double>, edm::type::scalar<float>,
+          edm::type::jagged_vector<int>, edm::type::vector<int> > {
 
     /// @name Accessors to the individual variables in the collection
     /// @{
