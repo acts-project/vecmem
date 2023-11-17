@@ -416,6 +416,19 @@ TEST_F(core_edm_test, jagged_data) {
     vecmem::testing::jagged_container::const_view view2{view1};
 }
 
+TEST_F(core_edm_test, jagged_buffer) {
+
+    // Test the creation of fixed sized and resizable, at the same time "simple"
+    // buffers.
+    std::vector<std::size_t> capacities = {0, 2, 5, 0, 8};
+    vecmem::testing::jagged_container::buffer buffer1(
+        capacities, m_resource, nullptr, vecmem::data::buffer_type::fixed_size);
+    vecmem::testing::jagged_container::buffer buffer2(
+        capacities, m_resource, nullptr, vecmem::data::buffer_type::resizable);
+    m_copy.setup(buffer1);
+    m_copy.setup(buffer2);
+}
+
 TEST_F(core_edm_test, jagged_host) {
 
     // Test the creation of a simple host container.
