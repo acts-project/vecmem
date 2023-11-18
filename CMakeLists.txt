@@ -81,6 +81,7 @@ if( DOXYGEN_FOUND )
       "${CMAKE_CURRENT_SOURCE_DIR}/tests"
       "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"
       "${CMAKE_CURRENT_SOURCE_DIR}/build" )
+   set( DOXYGEN_PREDEFINED "VECMEM_DOXYGEN_IGNORE" )
    doxygen_add_docs( vecmem_docs
       "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMENT "Generating Doxygen pages" )
