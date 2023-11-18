@@ -104,8 +104,25 @@ copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
     // Make sure that if the target view is resizable, that it would be set up
     // for the correct size.
     if (to_view.size_ptr() != nullptr) {
+        // Select what type of copy this should be. Keeping in mind that we copy
+        // from a variable on the host stack. So the question is just whether
+        // the target is the host, or a device.
+        type::copy_type size_cptype = type::unknown;
+        switch (cptype) {
+            case type::host_to_device:
+            case type::device_to_device:
+                size_cptype = type::host_to_device;
+                break;
+            case type::device_to_host:
+            case type::host_to_host:
+                size_cptype = type::host_to_host;
+                break;
+            default:
+                break;
+        }
+        // Perform the copy.
         do_copy(sizeof(typename data::vector_view<TYPE2>::size_type), &size,
-                to_view.size_ptr(), cptype);
+                to_view.size_ptr(), size_cptype);
     }
 
     // Copy the payload.
