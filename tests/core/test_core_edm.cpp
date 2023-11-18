@@ -443,9 +443,9 @@ TEST_F(core_edm_test, jagged_host) {
     vecmem::testing::jagged_container::index::get(host1)[0] = 3;
     vecmem::testing::jagged_container::index::get(host1)[1] = 4;
     vecmem::testing::jagged_container::measurements::get(host1)[0].push_back(
-        1.1f);
+        1.1);
     vecmem::testing::jagged_container::measurements::get(host1)[1].push_back(
-        2.1f);
+        2.1);
     vecmem::testing::jagged_container::indices::get(host1)[0].push_back(31);
     vecmem::testing::jagged_container::indices::get(host1)[1].push_back(41);
 
@@ -470,12 +470,11 @@ TEST_F(core_edm_test, jagged_host) {
     EXPECT_EQ(
         vecmem::testing::jagged_container::measurements::get(host1c)[1].size(),
         1u);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurements::get(host1)[0][0],
-        1.1f);
-    EXPECT_FLOAT_EQ(
+    EXPECT_DOUBLE_EQ(
+        vecmem::testing::jagged_container::measurements::get(host1)[0][0], 1.1);
+    EXPECT_DOUBLE_EQ(
         vecmem::testing::jagged_container::measurements::get(host1c)[1][0],
-        2.1f);
+        2.1);
     EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1)[0].size(),
               1u);
     EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1c)[1].size(),
@@ -595,24 +594,24 @@ TEST_F(core_edm_test, jagged_host) {
         vecmem::testing::jagged_container::measurements::get(device3)[1].size(),
         1u);
 
-    EXPECT_FLOAT_EQ(
+    EXPECT_DOUBLE_EQ(
         vecmem::testing::jagged_container::measurements::get(device1)[0][0],
-        1.1f);
-    EXPECT_FLOAT_EQ(
+        1.1);
+    EXPECT_DOUBLE_EQ(
         vecmem::testing::jagged_container::measurements::get(device1)[1][0],
-        2.1f);
-    EXPECT_FLOAT_EQ(
+        2.1);
+    EXPECT_DOUBLE_EQ(
         vecmem::testing::jagged_container::measurements::get(device2)[0][0],
-        1.1f);
-    EXPECT_FLOAT_EQ(
+        1.1);
+    EXPECT_DOUBLE_EQ(
         vecmem::testing::jagged_container::measurements::get(device2)[1][0],
-        2.1f);
-    EXPECT_FLOAT_EQ(
+        2.1);
+    EXPECT_DOUBLE_EQ(
         vecmem::testing::jagged_container::measurements::get(device3)[0][0],
-        1.1f);
-    EXPECT_FLOAT_EQ(
+        1.1);
+    EXPECT_DOUBLE_EQ(
         vecmem::testing::jagged_container::measurements::get(device3)[1][0],
-        2.1f);
+        2.1);
 
     EXPECT_EQ(
         vecmem::testing::jagged_container::indices::get(device1)[0].size(), 1u);
