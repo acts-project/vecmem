@@ -133,8 +133,7 @@ aligned_multiple_placement_helper(void *p, std::size_t q, P n, Ps... ps) {
 }
 
 template <typename... Ts, typename... Ps>
-std::tuple<vecmem::unique_alloc_ptr<char[]>, std::size_t,
-           std::add_pointer_t<Ts>...>
+std::tuple<vecmem::unique_alloc_ptr<char[]>, std::add_pointer_t<Ts>...>
 aligned_multiple_placement(vecmem::memory_resource &r, Ps... ps) {
     /*
      * First, we will assert that we have exactly as many template arguments as
@@ -200,8 +199,8 @@ aligned_multiple_placement(vecmem::memory_resource &r, Ps... ps) {
      * a whole, and then one pointer for where each of our type regions starts.
      * To accomplish this, we will concatenate two smaller tuples, namely:
      *
-     * 1. A two-element tuple containing the unique pointer to the start of
-     *    the allocated region, and its size.
+     * 1. A single-element tuple containing the unique pointer to the start of
+     *    the allocated region.
      * 2. A tuple of length equal to the number of type parameters, each
      *    element of which is a pointer representing where that type's region
      *    starts.
@@ -211,12 +210,11 @@ aligned_multiple_placement(vecmem::memory_resource &r, Ps... ps) {
      */
     return std::tuple_cat(
         /*
-         * Here, we construct our two-element tuple, into which we simply
+         * Here, we construct our single-element tuple, into which we simply
          * move the unique pointer which manages the memory that we have
-         * allocated previously, along with a copy of the allocation size.
+         * allocated previously.
          */
-        std::tuple<vecmem::unique_alloc_ptr<char[]>, std::size_t>(
-            std::move(ptr), bytes),
+        std::make_tuple<vecmem::unique_alloc_ptr<char[]>>(std::move(ptr)),
         /*
          * And here we call a helper function, which will actually do all of
          * the alignment. We pass it the start of our allocation, the amount of

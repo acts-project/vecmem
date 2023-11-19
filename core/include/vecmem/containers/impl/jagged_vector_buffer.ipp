@@ -102,7 +102,7 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     }
     // Allocate the "inner memory" for a resizable buffer.
     else if (type == buffer_type::resizable && capacities.size() != 0) {
-        std::tie(m_inner_memory, std::ignore, header_ptr, data_ptr) =
+        std::tie(m_inner_memory, header_ptr, data_ptr) =
             details::aligned_multiple_placement<header_t, TYPE>(
                 resource, capacities.size(), total_elements);
     }
