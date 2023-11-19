@@ -11,3 +11,4 @@ PointerAlignment: Left
 ColumnLimit: 80
 AccessModifierOffset: -4
 KeepEmptyLinesAtTheStartOfBlocks: true
+ReflowComments: false
