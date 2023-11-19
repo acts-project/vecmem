@@ -29,30 +29,30 @@ template <typename... VARIABLES>
 struct container {
 
     /// Schema for this container
-    using schema = vecmem::edm::schema<VARIABLES...>;
+    using schema_type = schema<VARIABLES...>;
     /// Constant version of the schema
-    using const_schema = typename vecmem::edm::add_const<schema>::type;
+    using const_schema_type = typename details::add_const<schema_type>::type;
 
 #if __cplusplus >= 201700L
     /// Host container type
-    using host = vecmem::edm::host<schema>;
+    using host = vecmem::edm::host<schema_type>;
 
     /// Data type
-    using data = vecmem::edm::data<schema>;
+    using data = vecmem::edm::data<schema_type>;
 
     /// Buffer type
-    using buffer = vecmem::edm::buffer<schema>;
+    using buffer = vecmem::edm::buffer<schema_type>;
 #endif  // __cplusplus >= 201700L
 
     /// (Non-const) Device container type
-    using device = vecmem::edm::device<schema>;
+    using device = vecmem::edm::device<schema_type>;
     /// (Const) Device container type
-    using const_device = vecmem::edm::device<const_schema>;
+    using const_device = vecmem::edm::device<const_schema_type>;
 
     /// (Non-const) View type
-    using view = vecmem::edm::view<schema>;
+    using view = vecmem::edm::view<schema_type>;
     /// (Const) view type
-    using const_view = vecmem::edm::view<const_schema>;
+    using const_view = vecmem::edm::view<const_schema_type>;
 
 };  // struct container
 

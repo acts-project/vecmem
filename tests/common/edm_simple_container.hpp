@@ -25,13 +25,13 @@ struct simple_container
     /// @{
 
     /// Global "count" of something
-    using count = edm::accessor<0, schema>;
+    using count = edm::accessor<0, schema_type>;
     /// "Measurement" of something
-    using measurement = edm::accessor<1, schema>;
+    using measurement = edm::accessor<1, schema_type>;
     /// Global "average" of something
-    using average = edm::accessor<2, schema>;
+    using average = edm::accessor<2, schema_type>;
     /// "Index" of something
-    using index = edm::accessor<3, schema>;
+    using index = edm::accessor<3, schema_type>;
 
     /// @}
 

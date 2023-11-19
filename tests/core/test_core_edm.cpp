@@ -334,9 +334,9 @@ TEST_F(core_edm_test, simple_host) {
     EXPECT_EQ(ncview1.capacity(), host1.size());
     EXPECT_EQ(cview1.size(), host1.size());
     EXPECT_EQ(cview1.capacity(), host1.size());
-    EXPECT_EQ(ncview1.get<0>(), host1.get<0>().get());
+    EXPECT_EQ(ncview1.get<0>(), &(host1.get<0>()));
     EXPECT_EQ(cview1.get<1>().size(), host1.get<1>().size());
-    EXPECT_EQ(ncview1.get<2>(), host1.get<2>().get());
+    EXPECT_EQ(ncview1.get<2>(), &(host1.get<2>()));
     EXPECT_EQ(cview1.get<3>().size(), host1.get<3>().size());
 
     // Make device containers out of the views.
@@ -493,10 +493,10 @@ TEST_F(core_edm_test, jagged_host) {
     EXPECT_EQ(ncview1.capacity(), host1.size());
     EXPECT_EQ(cview1.size(), host1.size());
     EXPECT_EQ(cview1.capacity(), host1.size());
-    EXPECT_EQ(ncview1.get<0>(), host1.get<0>().get());
+    EXPECT_EQ(ncview1.get<0>(), &(host1.get<0>()));
     EXPECT_EQ(cview1.get<1>().size(), host1.get<1>().size());
     EXPECT_EQ(cview1.get<2>().size(), host1.get<2>().size());
-    EXPECT_EQ(ncview1.get<3>(), host1.get<3>().get());
+    EXPECT_EQ(ncview1.get<3>(), &(host1.get<3>()));
     EXPECT_EQ(ncview1.get<4>().size(), host1.get<4>().size());
     EXPECT_EQ(cview1.get<5>().size(), host1.get<5>().size());
 

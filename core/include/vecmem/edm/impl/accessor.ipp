@@ -9,74 +9,51 @@
 namespace vecmem {
 namespace edm {
 
+template <std::size_t INDEX, typename... VARTYPES>
+VECMEM_HOST_AND_DEVICE constexpr auto accessor<INDEX, schema<VARTYPES...>>::get(
+    device_type& obj) -> device_return_type {
+
+    return obj.template get<INDEX>();
+}
+
+template <std::size_t INDEX, typename... VARTYPES>
+VECMEM_HOST_AND_DEVICE constexpr auto accessor<INDEX, schema<VARTYPES...>>::get(
+    const device_type& obj) -> device_const_return_type {
+
+    return obj.template get<INDEX>();
+}
+
+template <std::size_t INDEX, typename... VARTYPES>
+VECMEM_HOST_AND_DEVICE constexpr auto accessor<INDEX, schema<VARTYPES...>>::get(
+    const_device_type& obj) -> const_device_return_type {
+
+    return obj.template get<INDEX>();
+}
+
+template <std::size_t INDEX, typename... VARTYPES>
+VECMEM_HOST_AND_DEVICE constexpr auto accessor<INDEX, schema<VARTYPES...>>::get(
+    const const_device_type& obj) -> const_device_const_return_type {
+
+    return obj.template get<INDEX>();
+}
+
 #if __cplusplus >= 201700L
 
 template <std::size_t INDEX, typename... VARTYPES>
-VECMEM_HOST constexpr
-    typename details::accessor_host_type_at<INDEX, VARTYPES...>::return_type
-    accessor<INDEX, schema<VARTYPES...>>::get(host<schema<VARTYPES...>>& obj) {
+VECMEM_HOST constexpr auto accessor<INDEX, schema<VARTYPES...>>::get(
+    host_type& obj) -> host_return_type {
 
-    return details::accessor_host_get_at<INDEX, VARTYPES...>::get(
-        obj.template get<INDEX>());
+    return obj.template get<INDEX>();
 }
 
 template <std::size_t INDEX, typename... VARTYPES>
-VECMEM_HOST constexpr
-    typename details::accessor_host_type_at<INDEX,
-                                            VARTYPES...>::const_return_type
-    accessor<INDEX, schema<VARTYPES...>>::get(
-        const host<schema<VARTYPES...>>& obj) {
+VECMEM_HOST constexpr auto accessor<INDEX, schema<VARTYPES...>>::get(
+    const host_type& obj) -> host_const_return_type {
 
-    return details::accessor_host_get_at<INDEX, VARTYPES...>::get(
-        obj.template get<INDEX>());
+    return obj.template get<INDEX>();
 }
 
 #endif  // __cplusplus >= 201700L
-
-template <std::size_t INDEX, typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE constexpr
-    typename details::accessor_device_type_at<INDEX, VARTYPES...>::return_type
-    accessor<INDEX, schema<VARTYPES...>>::get(
-        device<schema<VARTYPES...>>& obj) {
-
-    return details::accessor_device_get_at<INDEX, VARTYPES...>::get(
-        obj.template get<INDEX>());
-}
-
-template <std::size_t INDEX, typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE constexpr
-    typename details::accessor_device_type_at<INDEX,
-                                              VARTYPES...>::const_return_type
-    accessor<INDEX, schema<VARTYPES...>>::get(
-        const device<schema<VARTYPES...>>& obj) {
-
-    return details::accessor_device_get_at<INDEX, VARTYPES...>::get(
-        obj.template get<INDEX>());
-}
-
-template <std::size_t INDEX, typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE constexpr typename details::accessor_device_type_at<
-    INDEX, typename type::details::add_const<VARTYPES>::type...>::return_type
-accessor<INDEX, schema<VARTYPES...>>::get(
-    device<schema<typename type::details::add_const<VARTYPES>::type...>>& obj) {
-
-    return details::accessor_device_get_at<
-        INDEX, typename type::details::add_const<VARTYPES>::type...>::
-        get(obj.template get<INDEX>());
-}
-
-template <std::size_t INDEX, typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE constexpr typename details::accessor_device_type_at<
-    INDEX,
-    typename type::details::add_const<VARTYPES>::type...>::const_return_type
-accessor<INDEX, schema<VARTYPES...>>::get(
-    const device<schema<typename type::details::add_const<VARTYPES>::type...>>&
-        obj) {
-
-    return details::accessor_device_get_at<
-        INDEX, typename type::details::add_const<VARTYPES>::type...>::
-        get(obj.template get<INDEX>());
-}
 
 }  // namespace edm
 }  // namespace vecmem
