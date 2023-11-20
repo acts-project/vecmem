@@ -101,12 +101,15 @@ TEST_F(core_edm_test, simple_view) {
 
 TEST_F(core_edm_test, simple_buffer) {
 
+    // The capacity of the tested buffer(s).
+    static constexpr unsigned int capacity = 10;
+
     // Test the creation of fixed sized and resizable, at the same time "simple"
     // buffers.
     vecmem::testing::simple_container::buffer buffer1(
-        10, m_resource, vecmem::data::buffer_type::fixed_size);
+        capacity, m_resource, vecmem::data::buffer_type::fixed_size);
     vecmem::testing::simple_container::buffer buffer2(
-        10, m_resource, vecmem::data::buffer_type::resizable);
+        capacity, m_resource, vecmem::data::buffer_type::resizable);
     m_copy.setup(buffer1);
     m_copy.setup(buffer2);
 
@@ -115,34 +118,45 @@ TEST_F(core_edm_test, simple_buffer) {
     vecmem::testing::simple_container::const_view view3{buffer1},
         view4{buffer2};
 
+    // Helper lambdas for checking the contents of the views.
+    auto check_scalar_view = [](const auto& view) { EXPECT_NE(view, nullptr); };
+    auto check_fixed_vector_view = [](const auto& view) {
+        EXPECT_EQ(view.size(), capacity);
+        EXPECT_EQ(view.capacity(), capacity);
+        EXPECT_EQ(view.size_ptr(), nullptr);
+        if (view.size() > 0) {
+            EXPECT_NE(view.ptr(), nullptr);
+        }
+    };
+    auto check_resizable_vector_view = [](const auto& view) {
+        EXPECT_EQ(view.size(), 0u);
+        EXPECT_EQ(view.capacity(), capacity);
+        EXPECT_NE(view.size_ptr(), nullptr);
+        if (view.capacity() > 0) {
+            EXPECT_NE(view.ptr(), nullptr);
+        }
+    };
+    auto check_fixed_view = [&](const auto& view) {
+        check_scalar_view(view.template get<0>());
+        check_fixed_vector_view(view.template get<1>());
+        check_scalar_view(view.template get<2>());
+        check_fixed_vector_view(view.template get<3>());
+    };
+    auto check_resizable_view = [&](const auto& view) {
+        check_scalar_view(view.template get<0>());
+        check_resizable_vector_view(view.template get<1>());
+        check_scalar_view(view.template get<2>());
+        check_resizable_vector_view(view.template get<3>());
+    };
+
     // Check the views.
-    EXPECT_NE(view1.get<0>(), nullptr);
-    EXPECT_EQ(view1.get<1>().size(), 10u);
-    EXPECT_EQ(view1.get<1>().capacity(), 10u);
-    EXPECT_NE(view1.get<2>(), nullptr);
-    EXPECT_EQ(view1.get<3>().size(), 10u);
-    EXPECT_EQ(view1.get<3>().capacity(), 10u);
+    check_fixed_view(view1);
+    check_resizable_view(view2);
+    check_fixed_view(view3);
+    check_resizable_view(view4);
 
-    EXPECT_NE(view2.get<0>(), nullptr);
-    EXPECT_EQ(view2.get<1>().size(), 0u);
-    EXPECT_EQ(view2.get<1>().capacity(), 10u);
-    EXPECT_NE(view2.get<2>(), nullptr);
-    EXPECT_EQ(view2.get<3>().size(), 0u);
-    EXPECT_EQ(view2.get<3>().capacity(), 10u);
-
-    EXPECT_NE(view3.get<0>(), nullptr);
-    EXPECT_EQ(view3.get<1>().size(), 10u);
-    EXPECT_EQ(view3.get<1>().capacity(), 10u);
-    EXPECT_NE(view3.get<2>(), nullptr);
-    EXPECT_EQ(view3.get<3>().size(), 10u);
-    EXPECT_EQ(view3.get<3>().capacity(), 10u);
-
-    EXPECT_NE(view4.get<0>(), nullptr);
-    EXPECT_EQ(view4.get<1>().size(), 0u);
-    EXPECT_EQ(view4.get<1>().capacity(), 10u);
-    EXPECT_NE(view4.get<2>(), nullptr);
-    EXPECT_EQ(view4.get<3>().size(), 0u);
-    EXPECT_EQ(view4.get<3>().capacity(), 10u);
+    // The size of the resizable vector(s).
+    static constexpr unsigned int size = 5;
 
     // Create device containers from the views.
     vecmem::testing::simple_container::device device1{view1}, device2{view2};
@@ -152,7 +166,7 @@ TEST_F(core_edm_test, simple_buffer) {
     // Set some data on the device containers.
     vecmem::testing::simple_container::count::get(device1) = 10;
     vecmem::testing::simple_container::average::get(device1) = 3.f;
-    for (unsigned int i = 0; i < 10; ++i) {
+    for (unsigned int i = 0; i < capacity; ++i) {
         vecmem::testing::simple_container::measurement::get(device1)[i] =
             static_cast<float>(i);
         vecmem::testing::simple_container::index::get(device1)[i] =
@@ -161,139 +175,85 @@ TEST_F(core_edm_test, simple_buffer) {
 
     vecmem::testing::simple_container::count::get(device2) = 5;
     vecmem::testing::simple_container::average::get(device2) = 6.f;
-    for (int i = 0; i < 5; ++i) {
+    for (unsigned int i = 0; i < size; ++i) {
         auto index = device2.push_back_default();
         vecmem::testing::simple_container::measurement::get(device2)[index] =
             2.f * static_cast<float>(i);
-        vecmem::testing::simple_container::index::get(device2)[index] = 2 * i;
+        vecmem::testing::simple_container::index::get(device2)[index] =
+            2 * static_cast<int>(i);
     }
+
+    // Helper lambdas for checking the device containers.
+    auto check_fixed_device_scalars = [](const auto& device) {
+        EXPECT_EQ(vecmem::testing::simple_container::count::get(device), 10);
+        EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device),
+                        3.f);
+    };
+    auto check_fixed_device_vectors = [](const auto& device) {
+        EXPECT_EQ(
+            vecmem::testing::simple_container::measurement::get(device).size(),
+            capacity);
+        EXPECT_EQ(vecmem::testing::simple_container::measurement::get(device)
+                      .capacity(),
+                  capacity);
+        EXPECT_EQ(vecmem::testing::simple_container::index::get(device).size(),
+                  capacity);
+        EXPECT_EQ(
+            vecmem::testing::simple_container::index::get(device).capacity(),
+            capacity);
+        for (unsigned int i = 0; i < capacity; ++i) {
+            EXPECT_FLOAT_EQ(
+                vecmem::testing::simple_container::measurement::get(device)[i],
+                static_cast<float>(i));
+            EXPECT_EQ(vecmem::testing::simple_container::index::get(device)[i],
+                      static_cast<int>(i));
+        }
+    };
+    auto check_resizable_device_scalars = [](const auto& device) {
+        EXPECT_EQ(vecmem::testing::simple_container::count::get(device), 5);
+        EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device),
+                        6.f);
+    };
+    auto check_resizable_device_vectors = [](const auto& device) {
+        EXPECT_EQ(
+            vecmem::testing::simple_container::measurement::get(device).size(),
+            size);
+        EXPECT_EQ(vecmem::testing::simple_container::measurement::get(device)
+                      .capacity(),
+                  capacity);
+        EXPECT_EQ(vecmem::testing::simple_container::index::get(device).size(),
+                  size);
+        EXPECT_EQ(
+            vecmem::testing::simple_container::index::get(device).capacity(),
+            capacity);
+        for (unsigned int i = 0; i < size; ++i) {
+            EXPECT_FLOAT_EQ(
+                vecmem::testing::simple_container::measurement::get(device)[i],
+                2.f * static_cast<float>(i));
+            EXPECT_EQ(vecmem::testing::simple_container::index::get(device)[i],
+                      2 * static_cast<int>(i));
+        }
+    };
+    auto check_fixed_device = [&](const auto& device) {
+        EXPECT_EQ(device.size(), capacity);
+        EXPECT_EQ(device.capacity(), capacity);
+        check_fixed_device_scalars(device);
+        check_fixed_device_vectors(device);
+    };
+    auto check_resizable_device = [&](const auto& device) {
+        EXPECT_EQ(device.size(), size);
+        EXPECT_EQ(device.capacity(), capacity);
+        check_resizable_device_scalars(device);
+        check_resizable_device_vectors(device);
+    };
 
     // Check the device containers.
-    EXPECT_EQ(device1.size(), 10u);
-    EXPECT_EQ(device1.capacity(), 10u);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device1), 10);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device1),
-                    3.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device1).size(),
-        10u);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device1).capacity(),
-        10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device1).size(),
-              10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device1).capacity(),
-              10u);
-    EXPECT_EQ(device3.size(), 10u);
-    EXPECT_EQ(device3.capacity(), 10u);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device3), 10);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device3),
-                    3.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device3).size(),
-        10u);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device3).capacity(),
-        10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device3).size(),
-              10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device3).capacity(),
-              10u);
-    EXPECT_EQ(device5.size(), 10u);
-    EXPECT_EQ(device5.capacity(), 10u);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device5), 10);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device5),
-                    3.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device5).size(),
-        10u);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device5).capacity(),
-        10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device5).size(),
-              10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device5).capacity(),
-              10u);
-    for (unsigned int i = 0; i < 10; ++i) {
-        EXPECT_FLOAT_EQ(
-            vecmem::testing::simple_container::measurement::get(device1)[i],
-            static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device1)[i],
-                  static_cast<int>(i));
-        EXPECT_FLOAT_EQ(
-            vecmem::testing::simple_container::measurement::get(device3)[i],
-            static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device3)[i],
-                  static_cast<int>(i));
-        EXPECT_FLOAT_EQ(
-            vecmem::testing::simple_container::measurement::get(device5)[i],
-            static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device5)[i],
-                  static_cast<int>(i));
-    }
-
-    EXPECT_EQ(device2.size(), 5u);
-    EXPECT_EQ(device2.capacity(), 10u);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device2), 5);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device2),
-                    6.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device2).size(),
-        5u);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device2).capacity(),
-        10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device2).size(),
-              5u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device2).capacity(),
-              10u);
-    EXPECT_EQ(device4.size(), 5u);
-    EXPECT_EQ(device4.capacity(), 10u);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device4), 5);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device4),
-                    6.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device4).size(),
-        5u);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device4).capacity(),
-        10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device4).size(),
-              5u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device4).capacity(),
-              10u);
-    EXPECT_EQ(device6.size(), 5u);
-    EXPECT_EQ(device6.capacity(), 10u);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device6), 5);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device6),
-                    6.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device6).size(),
-        5u);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device6).capacity(),
-        10u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device6).size(),
-              5u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device6).capacity(),
-              10u);
-    for (unsigned int i = 0; i < 5; ++i) {
-        EXPECT_FLOAT_EQ(
-            vecmem::testing::simple_container::measurement::get(device2)[i],
-            2.f * static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device2)[i],
-                  2 * static_cast<int>(i));
-        EXPECT_FLOAT_EQ(
-            vecmem::testing::simple_container::measurement::get(device4)[i],
-            2.f * static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device4)[i],
-                  2 * static_cast<int>(i));
-        EXPECT_FLOAT_EQ(
-            vecmem::testing::simple_container::measurement::get(device6)[i],
-            2.f * static_cast<float>(i));
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device6)[i],
-                  2 * static_cast<int>(i));
-    }
+    check_fixed_device(device1);
+    check_resizable_device(device2);
+    check_fixed_device(device3);
+    check_resizable_device(device4);
+    check_fixed_device(device5);
+    check_resizable_device(device6);
 }
 
 TEST_F(core_edm_test, simple_host) {
@@ -427,6 +387,73 @@ TEST_F(core_edm_test, jagged_buffer) {
         capacities, m_resource, nullptr, vecmem::data::buffer_type::resizable);
     m_copy.setup(buffer1);
     m_copy.setup(buffer2);
+
+    // "Create" views off of the buffers.
+    vecmem::testing::jagged_container::view view1{buffer1}, view2{buffer2};
+    vecmem::testing::jagged_container::const_view view3{buffer1},
+        view4{buffer2};
+
+    // Helper lambdas for checking the contents of the views.
+    auto check_scalar = [](const auto& view) { EXPECT_NE(view, nullptr); };
+    auto check_fixed_vector = [&capacities](const auto& view) {
+        EXPECT_EQ(view.size(), capacities.size());
+        EXPECT_EQ(view.capacity(), capacities.size());
+        EXPECT_EQ(view.size_ptr(), nullptr);
+        if (view.size() > 0) {
+            EXPECT_NE(view.ptr(), nullptr);
+        }
+    };
+    auto check_fixed_jagged_vector = [&capacities](const auto& view) {
+        EXPECT_EQ(view.size(), capacities.size());
+        EXPECT_EQ(view.ptr(), view.host_ptr());
+        for (std::size_t i = 0; i < capacities.size(); ++i) {
+            EXPECT_EQ(view.host_ptr()[i].size(), capacities[i]);
+            EXPECT_EQ(view.host_ptr()[i].capacity(), capacities[i]);
+            EXPECT_EQ(view.host_ptr()[i].size_ptr(), nullptr);
+            if (view.host_ptr()[i].size() > 0) {
+                EXPECT_NE(view.host_ptr()[i].ptr(), nullptr);
+            }
+        }
+    };
+    auto check_resizable_jagged_vector = [&capacities](const auto& view) {
+        EXPECT_EQ(view.size(), capacities.size());
+        EXPECT_EQ(view.ptr(), view.host_ptr());
+        for (std::size_t i = 0; i < capacities.size(); ++i) {
+            EXPECT_EQ(view.host_ptr()[i].size(), 0u);
+            EXPECT_EQ(view.host_ptr()[i].capacity(), capacities[i]);
+            EXPECT_NE(view.host_ptr()[i].size_ptr(), nullptr);
+            if (view.host_ptr()[i].capacity() > 0) {
+                EXPECT_NE(view.host_ptr()[i].ptr(), nullptr);
+            }
+        }
+    };
+    auto check_fixed_view = [&](const auto& view) {
+        check_scalar(view.template get<0>());
+        check_fixed_vector(view.template get<1>());
+        check_fixed_jagged_vector(view.template get<2>());
+        check_scalar(view.template get<3>());
+        check_fixed_jagged_vector(view.template get<4>());
+        check_fixed_vector(view.template get<5>());
+    };
+    auto check_resizable_view = [&](const auto& view) {
+        check_scalar(view.template get<0>());
+        check_fixed_vector(view.template get<1>());  // The 1D vectors are fixed
+        check_resizable_jagged_vector(view.template get<2>());
+        check_scalar(view.template get<3>());
+        check_resizable_jagged_vector(view.template get<4>());
+        check_fixed_vector(view.template get<5>());  // The 1D vectors are fixed
+    };
+
+    // Check the views.
+    check_fixed_view(view1);
+    check_resizable_view(view2);
+    check_fixed_view(view3);
+    check_resizable_view(view4);
+
+    // Create device containers from the views.
+    vecmem::testing::jagged_container::device device1{view1}, device2{view2};
+    vecmem::testing::jagged_container::const_device device3{view1},
+        device4{view2}, device5{view3}, device6{view4};
 }
 
 TEST_F(core_edm_test, jagged_host) {
