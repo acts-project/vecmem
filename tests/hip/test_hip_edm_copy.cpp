@@ -81,7 +81,7 @@ TEST_F(hip_edm_copy_test, host_to_fixed_device_to_host_optimal) {
     m_host_copy(vecmem::get_data(input), host_buffer1);
 
     // Create the (fixed sized) device buffer.
-    test_edm::buffer device_buffer{host_buffer1.size(), m_device_mr,
+    test_edm::buffer device_buffer{host_buffer1.capacity(), m_device_mr,
                                    vecmem::data::buffer_type::fixed_size};
     m_hip_copy.setup(device_buffer);
 
@@ -89,7 +89,7 @@ TEST_F(hip_edm_copy_test, host_to_fixed_device_to_host_optimal) {
     m_hip_copy(host_buffer1, device_buffer, vecmem::copy::type::host_to_device);
 
     // Create a (fixed sized) host buffer, to stage the data back into.
-    test_edm::buffer host_buffer2{host_buffer1.size(), m_host_mr,
+    test_edm::buffer host_buffer2{host_buffer1.capacity(), m_host_mr,
                                   vecmem::data::buffer_type::fixed_size};
     m_host_copy.setup(host_buffer2);
 
@@ -152,7 +152,7 @@ TEST_F(hip_edm_copy_test, host_to_resizable_device_to_host_optimal) {
     m_host_copy(vecmem::get_data(input), host_buffer1);
 
     // Create the (fixed sized) device buffer.
-    test_edm::buffer device_buffer{host_buffer1.size(), m_device_mr,
+    test_edm::buffer device_buffer{host_buffer1.capacity(), m_device_mr,
                                    vecmem::data::buffer_type::resizable};
     m_hip_copy.setup(device_buffer);
 
@@ -160,7 +160,7 @@ TEST_F(hip_edm_copy_test, host_to_resizable_device_to_host_optimal) {
     m_hip_copy(host_buffer1, device_buffer, vecmem::copy::type::host_to_device);
 
     // Create a (fixed sized) host buffer, to stage the data back into.
-    test_edm::buffer host_buffer2{host_buffer1.size(), m_host_mr,
+    test_edm::buffer host_buffer2{host_buffer1.capacity(), m_host_mr,
                                   vecmem::data::buffer_type::resizable};
     m_host_copy.setup(host_buffer2);
 

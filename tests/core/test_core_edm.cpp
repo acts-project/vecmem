@@ -137,12 +137,14 @@ TEST_F(core_edm_test, simple_buffer) {
         }
     };
     auto check_fixed_view = [&](const auto& view) {
+        EXPECT_EQ(view.capacity(), capacity);
         check_scalar_view(view.template get<0>());
         check_fixed_vector_view(view.template get<1>());
         check_scalar_view(view.template get<2>());
         check_fixed_vector_view(view.template get<3>());
     };
     auto check_resizable_view = [&](const auto& view) {
+        EXPECT_EQ(view.capacity(), capacity);
         check_scalar_view(view.template get<0>());
         check_resizable_vector_view(view.template get<1>());
         check_scalar_view(view.template get<2>());
@@ -290,9 +292,7 @@ TEST_F(core_edm_test, simple_host) {
         [](const auto& host) { return vecmem::get_data(host); }(host1);
 
     // Make trivial checks on the contents of the view(s).
-    EXPECT_EQ(ncview1.size(), host1.size());
     EXPECT_EQ(ncview1.capacity(), host1.size());
-    EXPECT_EQ(cview1.size(), host1.size());
     EXPECT_EQ(cview1.capacity(), host1.size());
     EXPECT_EQ(ncview1.get<0>(), &(host1.get<0>()));
     EXPECT_EQ(cview1.get<1>().size(), host1.get<1>().size());
@@ -516,9 +516,7 @@ TEST_F(core_edm_test, jagged_host) {
     vecmem::testing::jagged_container::const_view cview1 = data1;
 
     // Make trivial checks on the contents of the view(s).
-    EXPECT_EQ(ncview1.size(), host1.size());
     EXPECT_EQ(ncview1.capacity(), host1.size());
-    EXPECT_EQ(cview1.size(), host1.size());
     EXPECT_EQ(cview1.capacity(), host1.size());
     EXPECT_EQ(ncview1.get<0>(), &(host1.get<0>()));
     EXPECT_EQ(cview1.get<1>().size(), host1.get<1>().size());

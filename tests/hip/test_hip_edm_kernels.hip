@@ -28,7 +28,7 @@ void edmModify(vecmem::testing::simple_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
-    const unsigned int gridSize = (view.size() + blockSize - 1) / blockSize;
+    const unsigned int gridSize = (view.capacity() + blockSize - 1) / blockSize;
     hipLaunchKernelGGL(edmModifyKernel, gridSize, blockSize, 0, nullptr, view);
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());

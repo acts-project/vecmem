@@ -114,7 +114,7 @@ TEST_F(sycl_edm_test, modify_device) {
     m_queue
         .submit([&buffer](cl::sycl::handler& h) {
             h.parallel_for<class edm_modify_device>(
-                cl::sycl::range<1>{buffer.size()},
+                cl::sycl::range<1>{buffer.capacity()},
                 [view = vecmem::get_data(buffer)](cl::sycl::id<1> id) {
                     test_edm::device device2{view};
                     modify(id[0], device2);

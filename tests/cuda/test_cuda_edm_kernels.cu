@@ -24,7 +24,7 @@ void edmModify(vecmem::testing::simple_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
-    const unsigned int gridSize = (view.size() + blockSize - 1) / blockSize;
+    const unsigned int gridSize = (view.capacity() + blockSize - 1) / blockSize;
     edmModifyKernel<<<gridSize, blockSize>>>(view);
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
