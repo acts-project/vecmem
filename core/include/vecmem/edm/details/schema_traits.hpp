@@ -124,6 +124,34 @@ constexpr bool is_same_nc_v = is_same_nc<TYPE1, TYPE2>::value;
 
 /// @}
 
+/// @name Traits checking if two types are the same, except for constness
+/// @{
+
+template <typename TYPE1, typename TYPE2>
+struct is_same_nc {
+    static constexpr bool value = false;
+};  // struct is_same_nc
+
+template <typename TYPE1, typename TYPE2>
+struct is_same_nc<type::scalar<TYPE1>, type::scalar<TYPE2> > {
+    static constexpr bool value =
+        vecmem::details::is_same_nc<TYPE1, TYPE2>::value;
+};  // struct is_same_nc
+
+template <typename TYPE1, typename TYPE2>
+struct is_same_nc<type::vector<TYPE1>, type::vector<TYPE2> > {
+    static constexpr bool value =
+        vecmem::details::is_same_nc<TYPE1, TYPE2>::value;
+};  // struct is_same_nc
+
+template <typename TYPE1, typename TYPE2>
+struct is_same_nc<type::jagged_vector<TYPE1>, type::jagged_vector<TYPE2> > {
+    static constexpr bool value =
+        vecmem::details::is_same_nc<TYPE1, TYPE2>::value;
+};  // struct is_same_nc
+
+/// @}
+
 }  // namespace details
 }  // namespace type
 
