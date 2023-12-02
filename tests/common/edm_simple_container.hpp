@@ -7,7 +7,6 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/edm/accessor.hpp"
 #include "vecmem/edm/container.hpp"
 #include "vecmem/utils/types.hpp"
 

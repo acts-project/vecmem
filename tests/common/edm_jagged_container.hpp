@@ -7,8 +7,8 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/edm/accessor.hpp"
 #include "vecmem/edm/container.hpp"
+#include "vecmem/utils/types.hpp"
 
 namespace vecmem {
 namespace testing {
@@ -16,6 +16,7 @@ namespace testing {
 /// Interface to a "jagged container" used for testing
 template <typename BASE>
 class jagged_interface : public BASE {
+
 public:
     /// Inherit the base class's constructor(s)
     using BASE::BASE;
