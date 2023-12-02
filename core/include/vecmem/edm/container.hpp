@@ -23,11 +23,16 @@ namespace edm {
 
 /// Description of a container, with all of the types needed to use it
 ///
+/// @tparam INTERFACE Class providing a convenient user interface to the
+///                   container
 /// @tparam ...VARIABLES The variable types stored in the container
 ///
-template <typename... VARIABLES>
+template <template <typename> class INTERFACE, typename... VARIABLES>
 struct container {
 
+    /// Interface to the container
+    template <typename DERIVED>
+    using interface_type = INTERFACE<DERIVED>;
     /// Schema for this container
     using schema_type = schema<VARIABLES...>;
     /// Constant version of the schema
@@ -35,7 +40,7 @@ struct container {
 
 #if __cplusplus >= 201700L
     /// Host container type
-    using host = vecmem::edm::host<schema_type>;
+    using host = interface_type<vecmem::edm::host<schema_type> >;
 
     /// Data type
     using data = vecmem::edm::data<schema_type>;
@@ -45,9 +50,10 @@ struct container {
 #endif  // __cplusplus >= 201700L
 
     /// (Non-const) Device container type
-    using device = vecmem::edm::device<schema_type>;
+    using device = interface_type<vecmem::edm::device<schema_type> >;
     /// (Const) Device container type
-    using const_device = vecmem::edm::device<const_schema_type>;
+    using const_device =
+        interface_type<vecmem::edm::device<const_schema_type> >;
 
     /// (Non-const) View type
     using view = vecmem::edm::view<schema_type>;

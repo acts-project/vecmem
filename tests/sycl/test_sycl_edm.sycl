@@ -38,36 +38,34 @@ protected:
 
 };  // class sycl_edm_test
 
-/// Convenience type declaration
-using test_edm = vecmem::testing::simple_container;
-
 /// Helper function for modifying the data in a container
-void modify(unsigned int i, test_edm::device& device) {
+void modify(unsigned int i, vecmem::testing::simple_container::device& device) {
 
     // In the first thread modify the scalars.
     if (i == 0) {
-        test_edm::count::get(device) += 2;
-        test_edm::average::get(device) -= 1.0f;
+        device.count() += 2;
+        device.average() -= 1.0f;
     }
     // In the rest of the threads modify the vector variables.
     if (i < device.size()) {
-        test_edm::measurement::get(device)[i] *= 2.0f;
-        test_edm::index::get(device)[i] += 10;
+        device.measurement()[i] *= 2.0f;
+        device.index()[i] += 10;
     }
 }
 
 TEST_F(sycl_edm_test, modify_host) {
 
     // Create two host containers in host and shared memory.
-    test_edm::host container1{m_host_mr};
-    test_edm::host container2{m_shared_mr};
+    vecmem::testing::simple_container::host container1{m_host_mr};
+    vecmem::testing::simple_container::host container2{m_shared_mr};
 
     // Fill them with some data.
     vecmem::testing::fill(container1);
     vecmem::testing::fill(container2);
 
     // Modify the container in host memory, using a simple for loop.
-    test_edm::device device1 = vecmem::get_data(container1);
+    vecmem::testing::simple_container::device device1 =
+        vecmem::get_data(container1);
     for (unsigned int i = 0; i < container1.size(); ++i) {
         modify(i, device1);
     }
@@ -78,7 +76,7 @@ TEST_F(sycl_edm_test, modify_host) {
             h.parallel_for<class edm_modify_host>(
                 cl::sycl::range<1>{container2.size()},
                 [view = vecmem::get_data(container2)](cl::sycl::id<1> id) {
-                    test_edm::device device2{view};
+                    vecmem::testing::simple_container::device device2{view};
                     modify(id[0], device2);
                 });
         })
@@ -91,21 +89,23 @@ TEST_F(sycl_edm_test, modify_host) {
 TEST_F(sycl_edm_test, modify_device) {
 
     // Create a host container in host memory as a start.
-    test_edm::host container1{m_host_mr};
+    vecmem::testing::simple_container::host container1{m_host_mr};
 
     // Fill it with some data.
     vecmem::testing::fill(container1);
 
     // Copy it to the device.
-    test_edm::buffer buffer{
-        static_cast<test_edm::buffer::size_type>(container1.size()),
+    vecmem::testing::simple_container::buffer buffer{
+        static_cast<vecmem::testing::simple_container::buffer::size_type>(
+            container1.size()),
         m_device_mr};
     m_copy.setup(buffer);
     m_copy(vecmem::get_data(container1), buffer,
            vecmem::copy::type::host_to_device);
 
     // Modify the container in host memory, using a simple for loop.
-    test_edm::device device1 = vecmem::get_data(container1);
+    vecmem::testing::simple_container::device device1 =
+        vecmem::get_data(container1);
     for (unsigned int i = 0; i < container1.size(); ++i) {
         modify(i, device1);
     }
@@ -116,14 +116,14 @@ TEST_F(sycl_edm_test, modify_device) {
             h.parallel_for<class edm_modify_device>(
                 cl::sycl::range<1>{buffer.capacity()},
                 [view = vecmem::get_data(buffer)](cl::sycl::id<1> id) {
-                    test_edm::device device2{view};
+                    vecmem::testing::simple_container::device device2{view};
                     modify(id[0], device2);
                 });
         })
         .wait_and_throw();
 
     // Copy the data back to the host.
-    test_edm::host container2{m_host_mr};
+    vecmem::testing::simple_container::host container2{m_host_mr};
     m_copy(buffer, container2);
 
     // Compare the two.
@@ -131,17 +131,17 @@ TEST_F(sycl_edm_test, modify_device) {
 }
 
 /// Helper function for filling data into a device container
-void fill(unsigned int i, test_edm::device& device) {
+void fill(unsigned int i, vecmem::testing::simple_container::device& device) {
 
     // In the first thread modify the scalars.
     if (i == 0) {
-        test_edm::count::get(device) = 55;
-        test_edm::average::get(device) = 3.141592f;
+        device.count() = 55;
+        device.average() = 3.141592f;
     }
     // In the rest of the threads modify the vector variables.
     if (i < device.size()) {
-        test_edm::measurement::get(device)[i] = 1.0f * static_cast<float>(i);
-        test_edm::index::get(device)[i] = static_cast<int>(i);
+        device.measurement()[i] = 1.0f * static_cast<float>(i);
+        device.index()[i] = static_cast<int>(i);
     }
 }
 
@@ -151,16 +151,17 @@ TEST_F(sycl_edm_test, fill_device) {
     static constexpr unsigned int CONTAINER_SIZE = 10000;
 
     // Create a host container, and fill it.
-    test_edm::host container1{m_host_mr};
+    vecmem::testing::simple_container::host container1{m_host_mr};
     container1.resize(CONTAINER_SIZE);
-    test_edm::device device1{vecmem::get_data(container1)};
+    vecmem::testing::simple_container::device device1{
+        vecmem::get_data(container1)};
     for (unsigned int i = 0; i < container1.size(); ++i) {
         fill(i, device1);
     }
 
     // Create a resizable device buffer.
-    test_edm::buffer buffer{CONTAINER_SIZE, m_device_mr,
-                            vecmem::data::buffer_type::resizable};
+    vecmem::testing::simple_container::buffer buffer{
+        CONTAINER_SIZE, m_device_mr, vecmem::data::buffer_type::resizable};
     m_copy.setup(buffer);
 
     // Run a kernel that fills the buffer.
@@ -169,10 +170,10 @@ TEST_F(sycl_edm_test, fill_device) {
             h.parallel_for<class edm_fill_device>(
                 cl::sycl::range<1>{buffer.capacity()},
                 [view = vecmem::get_data(buffer)](cl::sycl::id<1> id) {
-                    test_edm::device device2{view};
+                    vecmem::testing::simple_container::device device2{view};
                     if (id[0] < device2.capacity()) {
-                        test_edm::device::size_type ii =
-                            device2.push_back_default();
+                        vecmem::testing::simple_container::device::size_type
+                            ii = device2.push_back_default();
                         fill(ii, device2);
                     }
                 });
@@ -180,7 +181,7 @@ TEST_F(sycl_edm_test, fill_device) {
         .wait_and_throw();
 
     // Copy the device buffer back to the host.
-    test_edm::host container2{m_host_mr};
+    vecmem::testing::simple_container::host container2{m_host_mr};
     m_copy(buffer, container2);
 
     // Compare the two containers.

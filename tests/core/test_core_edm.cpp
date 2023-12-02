@@ -166,74 +166,49 @@ TEST_F(core_edm_test, simple_buffer) {
         device4{view2}, device5{view3}, device6{view4};
 
     // Set some data on the device containers.
-    vecmem::testing::simple_container::count::get(device1) = 10;
-    vecmem::testing::simple_container::average::get(device1) = 3.f;
+    device1.count() = 10;
+    device1.average() = 3.f;
     for (unsigned int i = 0; i < capacity; ++i) {
-        vecmem::testing::simple_container::measurement::get(device1)[i] =
-            static_cast<float>(i);
-        vecmem::testing::simple_container::index::get(device1)[i] =
-            static_cast<int>(i);
+        device1.measurement()[i] = static_cast<float>(i);
+        device1.index()[i] = static_cast<int>(i);
     }
 
-    vecmem::testing::simple_container::count::get(device2) = 5;
-    vecmem::testing::simple_container::average::get(device2) = 6.f;
+    device2.count() = 5;
+    device2.average() = 6.f;
     for (unsigned int i = 0; i < size; ++i) {
         auto index = device2.push_back_default();
-        vecmem::testing::simple_container::measurement::get(device2)[index] =
-            2.f * static_cast<float>(i);
-        vecmem::testing::simple_container::index::get(device2)[index] =
-            2 * static_cast<int>(i);
+        device2.measurement()[index] = 2.f * static_cast<float>(i);
+        device2.index()[index] = 2 * static_cast<int>(i);
     }
 
     // Helper lambdas for checking the device containers.
     auto check_fixed_device_scalars = [](const auto& device) {
-        EXPECT_EQ(vecmem::testing::simple_container::count::get(device), 10);
-        EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device),
-                        3.f);
+        EXPECT_EQ(device.count(), 10);
+        EXPECT_FLOAT_EQ(device.average(), 3.f);
     };
     auto check_fixed_device_vectors = [](const auto& device) {
-        EXPECT_EQ(
-            vecmem::testing::simple_container::measurement::get(device).size(),
-            capacity);
-        EXPECT_EQ(vecmem::testing::simple_container::measurement::get(device)
-                      .capacity(),
-                  capacity);
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device).size(),
-                  capacity);
-        EXPECT_EQ(
-            vecmem::testing::simple_container::index::get(device).capacity(),
-            capacity);
+        ASSERT_EQ(device.measurement().size(), capacity);
+        ASSERT_EQ(device.measurement().capacity(), capacity);
+        ASSERT_EQ(device.index().size(), capacity);
+        ASSERT_EQ(device.index().capacity(), capacity);
         for (unsigned int i = 0; i < capacity; ++i) {
-            EXPECT_FLOAT_EQ(
-                vecmem::testing::simple_container::measurement::get(device)[i],
-                static_cast<float>(i));
-            EXPECT_EQ(vecmem::testing::simple_container::index::get(device)[i],
-                      static_cast<int>(i));
+            EXPECT_FLOAT_EQ(device.measurement()[i], static_cast<float>(i));
+            EXPECT_EQ(device.index()[i], static_cast<int>(i));
         }
     };
     auto check_resizable_device_scalars = [](const auto& device) {
-        EXPECT_EQ(vecmem::testing::simple_container::count::get(device), 5);
-        EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device),
-                        6.f);
+        EXPECT_EQ(device.count(), 5);
+        EXPECT_FLOAT_EQ(device.average(), 6.f);
     };
     auto check_resizable_device_vectors = [](const auto& device) {
-        EXPECT_EQ(
-            vecmem::testing::simple_container::measurement::get(device).size(),
-            size);
-        EXPECT_EQ(vecmem::testing::simple_container::measurement::get(device)
-                      .capacity(),
-                  capacity);
-        EXPECT_EQ(vecmem::testing::simple_container::index::get(device).size(),
-                  size);
-        EXPECT_EQ(
-            vecmem::testing::simple_container::index::get(device).capacity(),
-            capacity);
+        ASSERT_EQ(device.measurement().size(), size);
+        ASSERT_EQ(device.measurement().capacity(), capacity);
+        ASSERT_EQ(device.index().size(), size);
+        ASSERT_EQ(device.index().capacity(), capacity);
         for (unsigned int i = 0; i < size; ++i) {
-            EXPECT_FLOAT_EQ(
-                vecmem::testing::simple_container::measurement::get(device)[i],
-                2.f * static_cast<float>(i));
-            EXPECT_EQ(vecmem::testing::simple_container::index::get(device)[i],
-                      2 * static_cast<int>(i));
+            EXPECT_FLOAT_EQ(device.measurement()[i],
+                            2.f * static_cast<float>(i));
+            EXPECT_EQ(device.index()[i], 2 * static_cast<int>(i));
         }
     };
     auto check_fixed_device = [&](const auto& device) {
@@ -264,23 +239,27 @@ TEST_F(core_edm_test, simple_host) {
     vecmem::testing::simple_container::host host1{m_resource};
 
     // Fill the host container with some data.
-    vecmem::testing::simple_container::count::get(host1) = 10;
-    vecmem::testing::simple_container::measurement::get(host1).push_back(1.0f);
-    vecmem::testing::simple_container::average::get(host1) = 2.f;
-    vecmem::testing::simple_container::index::get(host1).push_back(3);
+    host1.count() = 10;
+    host1.measurement().push_back(1.0f);
+    host1.average() = 2.f;
+    host1.index().push_back(3);
+
+    // Helper lambda for checking the contents of a container.
+    auto check_container = [](const auto& container, unsigned int size) {
+        EXPECT_EQ(container.count(), 10);
+        ASSERT_EQ(container.measurement().size(), size);
+        EXPECT_FLOAT_EQ(container.measurement()[0], 1.0f);
+        EXPECT_FLOAT_EQ(container.average(), 2.f);
+        ASSERT_EQ(container.index().size(), size);
+        EXPECT_EQ(container.index()[0], 3);
+    };
 
     // Check the contents of the host container.
-    const auto& host1c = host1;
     EXPECT_EQ(host1.size(), 1u);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(host1c), 10);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(host1c),
-                    2.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(host1c).size(), 1u);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::simple_container::measurement::get(host1c)[0], 1.0f);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(host1c).size(), 1u);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(host1c)[0], 3);
+    check_container(host1, 1u);
+    const auto& host1c = host1;
+    EXPECT_EQ(host1c.size(), 1u);
+    check_container(host1c, 1u);
 
     // Check that resizing the container works.
     host1.resize(5);
@@ -311,54 +290,9 @@ TEST_F(core_edm_test, simple_host) {
     EXPECT_EQ(device2.capacity(), host1.size());
     EXPECT_EQ(device3.size(), host1.size());
     EXPECT_EQ(device3.capacity(), host1.size());
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device1), 10);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device2), 10);
-    EXPECT_EQ(vecmem::testing::simple_container::count::get(device3), 10);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device1),
-                    2.f);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device2),
-                    2.f);
-    EXPECT_FLOAT_EQ(vecmem::testing::simple_container::average::get(device3),
-                    2.f);
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device1).size(),
-        vecmem::testing::simple_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device1).size(),
-              vecmem::testing::simple_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device1).capacity(),
-        vecmem::testing::simple_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device1).capacity(),
-              vecmem::testing::simple_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device2).size(),
-        vecmem::testing::simple_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device2).size(),
-              vecmem::testing::simple_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device2).capacity(),
-        vecmem::testing::simple_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device2).capacity(),
-              vecmem::testing::simple_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device3).size(),
-        vecmem::testing::simple_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device3).size(),
-              vecmem::testing::simple_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::simple_container::measurement::get(device3).capacity(),
-        vecmem::testing::simple_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device3).capacity(),
-              vecmem::testing::simple_container::index::get(host1).size());
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::simple_container::measurement::get(device1)[0], 1.0f);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device1)[0], 3);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::simple_container::measurement::get(device2)[0], 1.0f);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device2)[0], 3);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::simple_container::measurement::get(device3)[0], 1.0f);
-    EXPECT_EQ(vecmem::testing::simple_container::index::get(device3)[0], 3);
+    check_container(device1, 5u);
+    check_container(device2, 5u);
+    check_container(device3, 5u);
 }
 
 TEST_F(core_edm_test, jagged_view) {
@@ -462,53 +396,46 @@ TEST_F(core_edm_test, jagged_host) {
     vecmem::testing::jagged_container::host host1{m_resource};
 
     // Fill the host container with some data.
-    vecmem::testing::jagged_container::count::get(host1) = 10;
-    vecmem::testing::jagged_container::average::get(host1) = 2.34f;
+    host1.count() = 10;
+    host1.average() = 2.34f;
     host1.resize(2);
-    vecmem::testing::jagged_container::measurement::get(host1)[0] = 1.0f;
-    vecmem::testing::jagged_container::measurement::get(host1)[1] = 2.0f;
-    vecmem::testing::jagged_container::index::get(host1)[0] = 3;
-    vecmem::testing::jagged_container::index::get(host1)[1] = 4;
-    vecmem::testing::jagged_container::measurements::get(host1)[0].push_back(
-        1.1);
-    vecmem::testing::jagged_container::measurements::get(host1)[1].push_back(
-        2.1);
-    vecmem::testing::jagged_container::indices::get(host1)[0].push_back(31);
-    vecmem::testing::jagged_container::indices::get(host1)[1].push_back(41);
+    host1.measurement()[0] = 1.0f;
+    host1.measurement()[1] = 2.0f;
+    host1.index()[0] = 3;
+    host1.index()[1] = 4;
+    host1.measurements()[0].push_back(1.1);
+    host1.measurements()[1].push_back(2.1);
+    host1.indices()[0].push_back(31);
+    host1.indices()[1].push_back(41);
+
+    // Helper lambda for checking the contents of a container.
+    auto check_container = [](const auto& container) {
+        EXPECT_EQ(container.count(), 10);
+        EXPECT_FLOAT_EQ(container.average(), 2.34f);
+        ASSERT_EQ(container.measurement().size(), 2u);
+        EXPECT_FLOAT_EQ(container.measurement()[0], 1.0f);
+        EXPECT_FLOAT_EQ(container.measurement()[1], 2.0f);
+        ASSERT_EQ(container.index().size(), 2u);
+        EXPECT_EQ(container.index()[0], 3);
+        EXPECT_EQ(container.index()[1], 4);
+        ASSERT_EQ(container.measurements().size(), 2u);
+        ASSERT_EQ(container.measurements()[0].size(), 1u);
+        ASSERT_EQ(container.measurements()[1].size(), 1u);
+        EXPECT_DOUBLE_EQ(container.measurements()[0][0], 1.1);
+        EXPECT_DOUBLE_EQ(container.measurements()[1][0], 2.1);
+        ASSERT_EQ(container.indices().size(), 2u);
+        ASSERT_EQ(container.indices()[0].size(), 1u);
+        ASSERT_EQ(container.indices()[1].size(), 1u);
+        EXPECT_EQ(container.indices()[0][0], 31);
+        EXPECT_EQ(container.indices()[1][0], 41);
+    };
 
     // Check the contents of the host container.
     const auto& host1c = host1;
-    EXPECT_EQ(host1.size(), 2u);
-    EXPECT_EQ(vecmem::testing::jagged_container::count::get(host1c), 10);
-    EXPECT_FLOAT_EQ(vecmem::testing::jagged_container::average::get(host1),
-                    2.34f);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurement::get(host1c).size(), 2u);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(host1)[0], 1.0f);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(host1c)[1], 2.0f);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(host1c).size(), 2u);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(host1)[0], 3);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(host1c)[1], 4);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(host1)[0].size(),
-        1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(host1c)[1].size(),
-        1u);
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(host1)[0][0], 1.1);
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(host1c)[1][0],
-        2.1);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1)[0].size(),
-              1u);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1c)[1].size(),
-              1u);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1)[0][0], 31);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(host1c)[1][0],
-              41);
+    ASSERT_EQ(host1.size(), 2u);
+    check_container(host1);
+    ASSERT_EQ(host1c.size(), 2u);
+    check_container(host1c);
 
     // Make views out of it.
     vecmem::testing::jagged_container::data data1 = vecmem::get_data(host1);
@@ -533,134 +460,11 @@ TEST_F(core_edm_test, jagged_host) {
     // Check the contents of the device containers.
     EXPECT_EQ(device1.size(), host1.size());
     EXPECT_EQ(device1.capacity(), host1.size());
+    check_container(device1);
     EXPECT_EQ(device2.size(), host1.size());
     EXPECT_EQ(device2.capacity(), host1.size());
+    check_container(device2);
     EXPECT_EQ(device3.size(), host1.size());
     EXPECT_EQ(device3.capacity(), host1.size());
-
-    EXPECT_EQ(vecmem::testing::jagged_container::count::get(device1), 10);
-    EXPECT_EQ(vecmem::testing::jagged_container::count::get(device2), 10);
-    EXPECT_EQ(vecmem::testing::jagged_container::count::get(device3), 10);
-
-    EXPECT_FLOAT_EQ(vecmem::testing::jagged_container::average::get(device1),
-                    2.34f);
-    EXPECT_FLOAT_EQ(vecmem::testing::jagged_container::average::get(device2),
-                    2.34f);
-    EXPECT_FLOAT_EQ(vecmem::testing::jagged_container::average::get(device3),
-                    2.34f);
-
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device1).size(),
-        vecmem::testing::jagged_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device1).size(),
-              vecmem::testing::jagged_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device1).size(),
-        vecmem::testing::jagged_container::measurements::get(host1).size());
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device1).size(),
-              vecmem::testing::jagged_container::indices::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device2).size(),
-        vecmem::testing::jagged_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device2).size(),
-              vecmem::testing::jagged_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device2).size(),
-        vecmem::testing::jagged_container::measurements::get(host1).size());
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device2).size(),
-              vecmem::testing::jagged_container::indices::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device3).size(),
-        vecmem::testing::jagged_container::measurement::get(host1).size());
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device3).size(),
-              vecmem::testing::jagged_container::index::get(host1).size());
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device3).size(),
-        vecmem::testing::jagged_container::measurements::get(host1).size());
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device3).size(),
-              vecmem::testing::jagged_container::indices::get(host1).size());
-
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device1)[0], 1.0f);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device1)[1], 2.0f);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device2)[0], 1.0f);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device2)[1], 2.0f);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device3)[0], 1.0f);
-    EXPECT_FLOAT_EQ(
-        vecmem::testing::jagged_container::measurement::get(device3)[1], 2.0f);
-
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device1)[0], 3);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device1)[1], 4);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device2)[0], 3);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device2)[1], 4);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device3)[0], 3);
-    EXPECT_EQ(vecmem::testing::jagged_container::index::get(device3)[1], 4);
-
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device1)[0].size(),
-        1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device1)[1].size(),
-        1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device2)[0].size(),
-        1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device2)[1].size(),
-        1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device3)[0].size(),
-        1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::measurements::get(device3)[1].size(),
-        1u);
-
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(device1)[0][0],
-        1.1);
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(device1)[1][0],
-        2.1);
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(device2)[0][0],
-        1.1);
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(device2)[1][0],
-        2.1);
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(device3)[0][0],
-        1.1);
-    EXPECT_DOUBLE_EQ(
-        vecmem::testing::jagged_container::measurements::get(device3)[1][0],
-        2.1);
-
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::indices::get(device1)[0].size(), 1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::indices::get(device1)[1].size(), 1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::indices::get(device2)[0].size(), 1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::indices::get(device2)[1].size(), 1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::indices::get(device3)[0].size(), 1u);
-    EXPECT_EQ(
-        vecmem::testing::jagged_container::indices::get(device3)[1].size(), 1u);
-
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device1)[0][0],
-              31);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device1)[1][0],
-              41);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device2)[0][0],
-              31);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device2)[1][0],
-              41);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device3)[0][0],
-              31);
-    EXPECT_EQ(vecmem::testing::jagged_container::indices::get(device3)[1][0],
-              41);
+    check_container(device3);
 }

@@ -13,35 +13,63 @@
 namespace vecmem {
 namespace testing {
 
-/// "Simple" container for the tests
-///
-/// Meaning that it would not have any jagged vector variables in it...
-///
-struct jagged_container
-    : public edm::container<
-          edm::type::scalar<int>, edm::type::vector<float>,
-          edm::type::jagged_vector<double>, edm::type::scalar<float>,
-          edm::type::jagged_vector<int>, edm::type::vector<int> > {
+/// Interface to a "jagged container" used for testing
+template <typename BASE>
+class jagged_interface : public BASE {
+public:
+    /// Inherit the base class's constructor(s)
+    using BASE::BASE;
 
-    /// @name Accessors to the individual variables in the collection
-    /// @{
+    /// Global "count" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& count() { return BASE::template get<0>(); }
+    /// Global "count" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& count() const { return BASE::template get<0>(); }
 
-    /// Global "count" of something
-    using count = edm::accessor<0, schema_type>;
-    /// "Measurement" of something
-    using measurement = edm::accessor<1, schema_type>;
-    /// "Measurements" of something
-    using measurements = edm::accessor<2, schema_type>;
-    /// Global "average" of something
-    using average = edm::accessor<3, schema_type>;
-    /// "Indices" of something
-    using indices = edm::accessor<4, schema_type>;
-    /// "Index" of something
-    using index = edm::accessor<5, schema_type>;
+    /// "Measurement" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& measurement() { return BASE::template get<1>(); }
+    /// "Measurement" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& measurement() const { return BASE::template get<1>(); }
 
-    /// @}
+    /// "Measurements" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& measurements() { return BASE::template get<2>(); }
+    /// "Measurements" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& measurements() const { return BASE::template get<2>(); }
 
-};  // struct jagged_container
+    /// Global "average" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& average() { return BASE::template get<3>(); }
+    /// Global "average" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& average() const { return BASE::template get<3>(); }
+
+    /// "Indices" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& indices() { return BASE::template get<4>(); }
+    /// "Indices" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& indices() const { return BASE::template get<4>(); }
+
+    /// "Index" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& index() { return BASE::template get<5>(); }
+    /// "Index" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& index() const { return BASE::template get<5>(); }
+
+};  // class jagged_interface
+
+/// "Jagged" container for the tests
+using jagged_container =
+    edm::container<jagged_interface, edm::type::scalar<int>,
+                   edm::type::vector<float>, edm::type::jagged_vector<double>,
+                   edm::type::scalar<float>, edm::type::jagged_vector<int>,
+                   edm::type::vector<int> >;
 
 }  // namespace testing
 }  // namespace vecmem

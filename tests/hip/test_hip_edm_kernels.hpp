@@ -17,13 +17,13 @@ inline void modify(unsigned int i,
 
     // In the first thread modify the scalars.
     if (i == 0) {
-        vecmem::testing::simple_container::count::get(device) += 2;
-        vecmem::testing::simple_container::average::get(device) -= 1.0f;
+        device.count() += 2;
+        device.average() -= 1.0f;
     }
     // In the rest of the threads modify the vector variables.
     if (i < device.size()) {
-        vecmem::testing::simple_container::measurement::get(device)[i] *= 2.0f;
-        vecmem::testing::simple_container::index::get(device)[i] += 10;
+        device.measurement()[i] *= 2.0f;
+        device.index()[i] += 10;
     }
 }
 
@@ -34,15 +34,13 @@ inline void fill(unsigned int i,
 
     // In the first thread modify the scalars.
     if (i == 0) {
-        vecmem::testing::simple_container::count::get(device) = 55;
-        vecmem::testing::simple_container::average::get(device) = 3.141592f;
+        device.count() = 55;
+        device.average() = 3.141592f;
     }
     // In the rest of the threads modify the vector variables.
     if (i < device.size()) {
-        vecmem::testing::simple_container::measurement::get(device)[i] =
-            1.0f * static_cast<float>(i);
-        vecmem::testing::simple_container::index::get(device)[i] =
-            static_cast<int>(i);
+        device.measurement()[i] = 1.0f * static_cast<float>(i);
+        device.index()[i] = static_cast<int>(i);
     }
 }
 

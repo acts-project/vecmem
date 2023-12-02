@@ -9,33 +9,57 @@
 // Local include(s).
 #include "vecmem/edm/accessor.hpp"
 #include "vecmem/edm/container.hpp"
+#include "vecmem/utils/types.hpp"
 
 namespace vecmem {
 namespace testing {
+
+/// Interface to a "simple container" used for testing
+template <typename BASE>
+class simple_interface : public BASE {
+
+public:
+    /// Inherit the base class's constructor(s)
+    using BASE::BASE;
+
+    /// Global "count" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& count() { return BASE::template get<0>(); }
+    /// Global "count" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& count() const { return BASE::template get<0>(); }
+
+    /// "Measurement" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& measurement() { return BASE::template get<1>(); }
+    /// "Measurement" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& measurement() const { return BASE::template get<1>(); }
+
+    /// Global "average" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& average() { return BASE::template get<2>(); }
+    /// Global "average" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& average() const { return BASE::template get<2>(); }
+
+    /// "Index" of something (non-const)
+    VECMEM_HOST_AND_DEVICE
+    auto& index() { return BASE::template get<3>(); }
+    /// "Index" of something (const)
+    VECMEM_HOST_AND_DEVICE
+    const auto& index() const { return BASE::template get<3>(); }
+
+};  // class simple_interface
 
 /// "Simple" container for the tests
 ///
 /// Meaning that it would not have any jagged vector variables in it...
 ///
-struct simple_container
-    : public edm::container<edm::type::scalar<int>, edm::type::vector<float>,
-                            edm::type::scalar<float>, edm::type::vector<int> > {
-
-    /// @name Accessors to the individual variables in the collection
-    /// @{
-
-    /// Global "count" of something
-    using count = edm::accessor<0, schema_type>;
-    /// "Measurement" of something
-    using measurement = edm::accessor<1, schema_type>;
-    /// Global "average" of something
-    using average = edm::accessor<2, schema_type>;
-    /// "Index" of something
-    using index = edm::accessor<3, schema_type>;
-
-    /// @}
-
-};  // struct simple_container
+using simple_container =
+    edm::container<simple_interface, edm::type::scalar<int>,
+                   edm::type::vector<float>, edm::type::scalar<float>,
+                   edm::type::vector<int> >;
 
 }  // namespace testing
 }  // namespace vecmem
