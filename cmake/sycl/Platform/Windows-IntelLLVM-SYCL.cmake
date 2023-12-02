@@ -6,9 +6,17 @@
 
 # CMake include(s).
 include( Platform/Windows-IntelLLVM )
+include( Compiler/IntelLLVM )
 
 # Set up the variables specifying the command line arguments of the compiler.
 __windows_compiler_intel( SYCL )
+__compiler_intel_llvm( SYCL )
+
+# Set up the dependency file generation for this platform. Note that SYCL
+# compilation only works with Makefile and Ninja generators, so no check is made
+# here for the current generator.
+set( CMAKE_SYCL_DEPENDS_USE_COMPILER TRUE )
+set( CMAKE_SYCL_DEPFILE_FORMAT gcc )
 
 # With CMake 3.27 by default CMake would try to add version information into
 # the DLL file names. Confusing the linking process.
