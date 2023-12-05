@@ -1,26 +1,41 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
 # Include whatever CMake can give us to configure the LLVM based intel compiler,
 # and use it.
 include( Platform/Linux-IntelLLVM OPTIONAL
+   RESULT_VARIABLE LinuxIntelLLVM_AVAILABLE )
+include( Compiler/IntelLLVM OPTIONAL
    RESULT_VARIABLE IntelLLVM_AVAILABLE )
-if( IntelLLVM_AVAILABLE )
+if( LinuxIntelLLVM_AVAILABLE AND IntelLLVM_AVAILABLE )
    # We have a "new enough" version of CMake to use the most appropriate
    # configuration.
    __linux_compiler_intel_llvm( SYCL )
+   __compiler_intel_llvm( SYCL )
 else()
    # We have a somewhat older version of CMake. Use the configuration for the
    # older Intel compilers.
    include( Platform/Linux-Intel OPTIONAL
-      RESULT_VARIABLE Intel_AVAILABLE )
-   if( Intel_AVAILABLE )
+      RESULT_VARIABLE LinuxIntel_AVAILABLE )
+   include( Compiler/Intel OPTIONAL
+      RESULT_VARIABLE LinuxIntel_AVAILABLE )
+   if( LinuxIntel_AVAILABLE AND Intel_AVAILABLE )
       __linux_compiler_intel( SYCL )
+      __compiler_intel( SYCL )
+   else()
+      message( WARNING "No Intel compiler configuration found in CMake! "
+         "The build will likely fail." )
    endif()
 endif()
+
+# Set up the dependency file generation for this platform. Note that SYCL
+# compilation only works with Makefile and Ninja generators, so no check is made
+# here for the current generator.
+set( CMAKE_SYCL_DEPENDS_USE_COMPILER TRUE )
+set( CMAKE_SYCL_DEPFILE_FORMAT gcc )
 
 # Set a compiler command from scratch for this platform.
 set( CMAKE_SYCL_COMPILE_OBJECT
