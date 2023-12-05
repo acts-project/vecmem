@@ -62,6 +62,37 @@ struct conjunction<B1, Bn...>
 template <class... B>
 constexpr bool conjunction_v = conjunction<B...>::value;
 
+/// Implementation for @c std::disjunction
+///
+/// Since @c std::disjunction is only available starting with C++17, but it
+/// comes in very handy in some places in the VecMem code, this is a naive
+/// custom implementation for it.
+///
+template <class...>
+struct disjunction : std::false_type {};
+
+template <class B1>
+struct disjunction<B1> : B1 {};
+
+template <class B1, class... Bn>
+struct disjunction<B1, Bn...>
+    : std::conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
+
+template <class... B>
+constexpr bool disjunction_v = disjunction<B...>::value;
+
+/// Implementation for @c std::negation
+///
+/// Since @c std::negation is only available starting with C++17, but it
+/// comes in very handy in some places in the VecMem code, this is a naive
+/// custom implementation for it.
+///
+template <class B>
+struct negation : std::integral_constant<bool, !bool(B::value)> {};
+
+template <class B>
+constexpr bool negation_v = negation<B>::value;
+
 /// Find the maximum of a variadic number of elements, terminal function
 /// @tparam T The type of the (final) element
 /// @param t The value of the (final) element

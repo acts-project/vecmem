@@ -124,6 +124,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/utils/debug.hpp"
    "src/utils/memory_monitor.cpp"
    "include/vecmem/utils/memory_monitor.hpp"
+   "include/vecmem/utils/tuple.hpp"
+   "include/vecmem/utils/impl/tuple.ipp"
    "include/vecmem/utils/type_traits.hpp"
    "include/vecmem/utils/types.hpp" )
 

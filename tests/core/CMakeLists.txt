@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -22,4 +22,5 @@ vecmem_add_test( core
    "test_core_debug_memory_resource.cpp"
    "test_core_unique_alloc_ptr.cpp"
    "test_core_unique_obj_ptr.cpp"
+   "test_core_tuple.cpp"
    LINK_LIBRARIES vecmem::core GTest::gtest_main vecmem_testing_common )

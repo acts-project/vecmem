@@ -19,6 +19,7 @@
 #include "vecmem/containers/static_array.hpp"
 #include "vecmem/memory/atomic.hpp"
 #include "vecmem/memory/device_atomic_ref.hpp"
+#include "vecmem/utils/tuple.hpp"
 
 /// Kernel performing a linear transformation using the vector helper types
 __global__ void linearTransformKernel(
@@ -36,12 +37,15 @@ __global__ void linearTransformKernel(
     const vecmem::const_device_array<int, 2> constantarray1(constants);
     const vecmem::static_array<int, 2> constantarray2 = {constantarray1[0],
                                                          constantarray1[1]};
+    auto tuple1 = vecmem::make_tuple(constantarray1[0], constantarray1[1]);
+    auto tuple2 = vecmem::tie(constantarray1, constantarray2);
     const vecmem::const_device_vector<int> inputvec(input);
     vecmem::device_vector<int> outputvec(output);
 
     // Perform the linear transformation.
-    outputvec.at(i) =
-        inputvec.at(i) * constantarray1.at(0) + vecmem::get<1>(constantarray2);
+    outputvec.at(i) = inputvec.at(i) * constantarray1.at(0) +
+                      vecmem::get<1>(constantarray2) + vecmem::get<0>(tuple1) -
+                      vecmem::get<1>(tuple2)[0];
     return;
 }
 
