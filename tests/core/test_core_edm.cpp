@@ -31,7 +31,7 @@ protected:
 TEST_F(core_edm_test, simple_view) {
 
     // Test the creation of simple views.
-    vecmem::testing::simple_container::view view1;
+    vecmem::testing::simple_container::view view1{};
     vecmem::testing::simple_container::const_view view2{view1};
 }
 
@@ -234,7 +234,7 @@ TEST_F(core_edm_test, simple_host) {
 TEST_F(core_edm_test, jagged_view) {
 
     // Test the creation of jagged views.
-    vecmem::testing::jagged_container::view view1;
+    vecmem::testing::jagged_container::view view1{};
     vecmem::testing::jagged_container::const_view view2{view1};
 }
 
