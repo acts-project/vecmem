@@ -19,6 +19,12 @@
 
 namespace vecmem {
 
+// Forward declaration(s).
+namespace edm {
+template <typename T>
+class device;
+}
+
 /// Class mimicking an @c std::vector in "device code"
 ///
 /// This type can be used in "generic device code" as an @c std::vector that
@@ -28,6 +34,10 @@ namespace vecmem {
 ///
 template <typename TYPE>
 class device_vector {
+
+    // Make @c vecmem::edm::device a friend of this class.
+    template <typename T>
+    friend class edm::device;
 
 public:
     /// @name Type definitions, mimicking @c std::vector
