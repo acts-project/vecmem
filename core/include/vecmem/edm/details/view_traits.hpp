@@ -43,14 +43,14 @@ template <typename TYPE>
 struct view_type<type::vector<TYPE> > : public view_type_base<TYPE> {
     using layout_type = int;
     using layout_ptr = std::add_pointer_t<layout_type>;
-    using type = data::vector_view<TYPE>;
+    using type = vecmem::data::vector_view<TYPE>;
 };  // struct view_type
 
 template <typename TYPE>
 struct view_type<type::jagged_vector<TYPE> > : public view_type_base<TYPE> {
     using layout_type = vecmem::data::vector_view<TYPE>;
     using layout_ptr = std::add_pointer_t<layout_type>;
-    using type = data::jagged_vector_view<TYPE>;
+    using type = vecmem::data::jagged_vector_view<TYPE>;
 };  // struct view_type
 
 /// @}
