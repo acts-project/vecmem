@@ -68,8 +68,9 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/edm/impl/view.ipp"
    "include/vecmem/edm/schema.hpp"
    "include/vecmem/edm/details/device_traits.hpp"
-   "include/vecmem/edm/details/schema_traits.hpp"
    "include/vecmem/edm/details/view_traits.hpp"
+   "include/vecmem/edm/details/schema_traits.hpp"
+   "include/vecmem/edm/details/types.hpp"
    #
    # Memory resources.
    #

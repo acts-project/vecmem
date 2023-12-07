@@ -8,6 +8,7 @@
 
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/edm/details/types.hpp"
 #include "vecmem/edm/details/view_traits.hpp"
 #include "vecmem/edm/schema.hpp"
 #include "vecmem/utils/tuple.hpp"
@@ -46,22 +47,21 @@ public:
     /// The schema describing the container view
     using schema_type = schema<VARTYPES...>;
     /// Size type used for the container
-    using size_type = data::vector_view<int>::size_type;
+    using size_type = details::size_type;
     /// Pointer type to the size of the container
     using size_pointer = std::conditional_t<
         vecmem::details::disjunction_v<std::is_const<
             typename details::view_type<VARTYPES>::payload_type>...>,
-        std::add_pointer_t<std::add_const_t<size_type>>,
-        std::add_pointer_t<size_type>>;
+        details::const_size_pointer, details::size_pointer>;
     /// Constant pointer type to the size of the container
-    using const_size_pointer = std::add_const_t<size_pointer>;
+    using const_size_pointer = details::const_size_pointer;
     /// The tuple type holding all of the views for the individual variables
     using tuple_type = tuple<typename details::view_type<VARTYPES>::type...>;
     /// Type of the view(s) into the raw data of the view
-    using memory_view_type = data::vector_view<std::conditional_t<
+    using memory_view_type = std::conditional_t<
         vecmem::details::disjunction_v<std::is_const<
             typename details::view_type<VARTYPES>::payload_type>...>,
-        const char, char>>;
+        details::const_memory_view, details::memory_view>;
 
     /// @name Constructors and assignment operators
     /// @{

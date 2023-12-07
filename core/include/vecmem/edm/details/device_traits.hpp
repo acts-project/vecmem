@@ -9,8 +9,8 @@
 // Local include(s).
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
+#include "vecmem/edm/details/types.hpp"
 #include "vecmem/edm/schema.hpp"
-#include "vecmem/edm/view.hpp"
 #include "vecmem/utils/tuple.hpp"
 
 // System include(s).
@@ -101,16 +101,16 @@ struct device_get<type::scalar<TYPE>> {
 /// @}
 
 /// Check whether a scalar variable has the right capacity (always true)
-template <typename TYPE, typename SIZE_TYPE>
+template <typename TYPE>
 VECMEM_HOST_AND_DEVICE constexpr bool device_capacity_matches(
-    SIZE_TYPE, const typename device_type<type::scalar<TYPE>>::type&) {
+    const size_type, const typename device_type<type::scalar<TYPE>>::type&) {
     return true;
 }
 
 /// Check whether a vector variable has the right capacity
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE constexpr bool device_capacity_matches(
-    const typename device_type<type::vector<TYPE>>::type::size_type capacity,
+    const size_type capacity,
     const typename device_type<type::vector<TYPE>>::type& variable) {
 
     return (capacity == variable.capacity());
@@ -119,8 +119,7 @@ VECMEM_HOST_AND_DEVICE constexpr bool device_capacity_matches(
 /// Check whether a jagged vector variable has the right capacity
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE constexpr bool device_capacity_matches(
-    const typename device_type<
-        type::jagged_vector<TYPE>>::type::value_type::size_type capacity,
+    const size_type capacity,
     const typename device_type<type::jagged_vector<TYPE>>::type& variable) {
 
     return (capacity == variable.capacity());
@@ -129,8 +128,7 @@ VECMEM_HOST_AND_DEVICE constexpr bool device_capacity_matches(
 /// Terminal node for @c vecmem::edm::details::device_capacities_match
 template <typename... VARTYPES>
 VECMEM_HOST_AND_DEVICE constexpr bool device_capacities_match(
-    const typename view<schema<VARTYPES...>>::size_type,
-    const tuple<typename device_type<VARTYPES>::type...>&,
+    const size_type, const tuple<typename device_type<VARTYPES>::type...>&,
     std::index_sequence<>) {
 
     return true;
@@ -143,7 +141,7 @@ VECMEM_HOST_AND_DEVICE constexpr bool device_capacities_match(
 ///
 template <typename... VARTYPES, std::size_t INDEX, std::size_t... INDICES>
 VECMEM_HOST_AND_DEVICE constexpr bool device_capacities_match(
-    const typename view<schema<VARTYPES...>>::size_type capacity,
+    const size_type capacity,
     const tuple<typename device_type<VARTYPES>::type...>& variables,
     std::index_sequence<INDEX, INDICES...>) {
 
@@ -156,32 +154,41 @@ VECMEM_HOST_AND_DEVICE constexpr bool device_capacities_match(
 }
 
 /// Helper trait for setting the @c m_size variable of a device object
-template <typename SCHEMA, bool HAS_JAGGED_VECTOR>
+template <bool HAS_JAGGED_VECTOR>
 struct device_size_pointer;
 
 /// Helper trait for setting the @c m_size variable of a device object
 /// (for a "jagged schema")
-template <typename SCHEMA>
-struct device_size_pointer<SCHEMA, true> {
-    VECMEM_HOST_AND_DEVICE static constexpr typename view<SCHEMA>::size_pointer
-    get(const typename view<SCHEMA>::memory_view_type&) {
-
+template <>
+struct device_size_pointer<true> {
+    VECMEM_HOST_AND_DEVICE static constexpr size_pointer get(
+        const memory_view&) {
+        return nullptr;
+    }
+    VECMEM_HOST_AND_DEVICE static constexpr const_size_pointer get(
+        const const_memory_view&) {
         return nullptr;
     }
 };
 
 /// Helper trait for setting the @c m_size variable of a device object
 /// (for a "non-jagged schema")
-template <typename SCHEMA>
-struct device_size_pointer<SCHEMA, false> {
-    VECMEM_HOST_AND_DEVICE static constexpr typename view<SCHEMA>::size_pointer
-    get(const typename view<SCHEMA>::memory_view_type& v) {
+template <>
+struct device_size_pointer<false> {
+    VECMEM_HOST_AND_DEVICE static size_pointer get(const memory_view& v) {
 
         // A sanity check.
-        assert((v.ptr() == nullptr) ||
-               (v.size() == sizeof(typename view<SCHEMA>::size_type)));
+        assert((v.ptr() == nullptr) || (v.size() == sizeof(size_type)));
         // Do a forceful conversion.
-        return reinterpret_cast<typename view<SCHEMA>::size_pointer>(v.ptr());
+        return reinterpret_cast<size_pointer>(v.ptr());
+    }
+    VECMEM_HOST_AND_DEVICE static const_size_pointer get(
+        const const_memory_view& v) {
+
+        // A sanity check.
+        assert((v.ptr() == nullptr) || (v.size() == sizeof(size_type)));
+        // Do a forceful conversion.
+        return reinterpret_cast<const_size_pointer>(v.ptr());
     }
 };
 

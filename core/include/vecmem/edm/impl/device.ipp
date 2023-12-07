@@ -21,10 +21,8 @@ template <typename... VARTYPES>
 VECMEM_HOST_AND_DEVICE device<schema<VARTYPES...>>::device(
     const view<schema_type>& view)
     : m_capacity{view.capacity()},
-      m_size{details::device_size_pointer<
-          schema_type,
-          vecmem::details::disjunction_v<
-              type::details::is_jagged_vector<VARTYPES>...>>::get(view.size())},
+      m_size{details::device_size_pointer<vecmem::details::disjunction_v<
+          type::details::is_jagged_vector<VARTYPES>...>>::get(view.size())},
       m_data{view.variables()} {
 
     // Check that all variables have the correct capacities.
