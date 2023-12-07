@@ -78,8 +78,6 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/edm/details/data_traits.hpp"
    "include/vecmem/edm/details/device_traits.hpp"
    "include/vecmem/edm/details/host_traits.hpp"
-   "include/vecmem/edm/details/tuple.hpp"
-   "include/vecmem/edm/details/tuple_traits.hpp"
    "include/vecmem/edm/details/view_traits.hpp"
    "include/vecmem/edm/details/schema_traits.hpp"
    "include/vecmem/edm/details/types.hpp"
