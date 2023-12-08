@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,6 +15,7 @@
 // System include(s).
 #include <cstddef>
 #include <iterator>
+#include <type_traits>
 
 namespace vecmem {
 namespace details {
@@ -39,7 +40,7 @@ public:
     /// Type of the data object that we have an array of
     typedef data::vector_view<TYPE> data_type;
     /// Pointer to the data object
-    typedef data_type* data_pointer;
+    typedef const data_type* data_pointer;
 
     /// @}
 
@@ -92,6 +93,12 @@ public:
     /// Constructor from an underlying data object
     VECMEM_HOST_AND_DEVICE
     jagged_device_vector_iterator(data_pointer data);
+    /// Constructor from a slightly different underlying data object
+    template <typename OTHERTYPE,
+              std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value,
+                               bool> = true>
+    VECMEM_HOST_AND_DEVICE jagged_device_vector_iterator(
+        const data::vector_view<OTHERTYPE>* data);
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE
     jagged_device_vector_iterator(const jagged_device_vector_iterator& parent);

@@ -375,3 +375,142 @@ TEST_F(core_device_container_test, conversions) {
     vecmem::data::jagged_vector_view<int> view2d8 = data2d3;
     EXPECT_EQ(view2d7, view2d8);
 }
+
+TEST_F(core_device_container_test, vector_iteration) {
+
+    // Set up a simple host vector.
+    vecmem::vector<int> host_vector{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+                                    &m_resource};
+
+    // Create a non-const device vector from it.
+    vecmem::device_vector<int> device_vector1(vecmem::get_data(host_vector));
+
+    // Check that non-const iteration works.
+    vecmem::device_vector<int>::iterator it1 = device_vector1.begin();
+    vecmem::device_vector<int>::iterator end1 = device_vector1.end();
+    for (int i = 1; it1 != end1; ++it1, ++i) {
+        EXPECT_EQ(*it1, i);
+    }
+
+    // Check that const iteration works.
+    vecmem::device_vector<int>::const_iterator it2 = device_vector1.cbegin();
+    vecmem::device_vector<int>::const_iterator end2 = device_vector1.cend();
+    for (int i = 1; it2 != end2; ++it2, ++i) {
+        EXPECT_EQ(*it2, i);
+    }
+    it2 = [](const auto& vec) { return vec.begin(); }(device_vector1);
+    end2 = [](const auto& vec) { return vec.end(); }(device_vector1);
+    for (int i = 1; it2 != end2; ++it2, ++i) {
+        EXPECT_EQ(*it2, i);
+    }
+
+    // Create a const device vector from it.
+    vecmem::device_vector<const int> device_vector2(
+        vecmem::get_data(host_vector));
+
+    // Check that "non-const" iteration works.
+    vecmem::device_vector<const int>::iterator it3 = device_vector2.begin();
+    vecmem::device_vector<const int>::iterator end3 = device_vector2.end();
+    for (int i = 1; it3 != end3; ++it3, ++i) {
+        EXPECT_EQ(*it3, i);
+    }
+
+    // Check that const iteration works.
+    vecmem::device_vector<const int>::const_iterator it4 =
+        device_vector2.cbegin();
+    vecmem::device_vector<const int>::const_iterator end4 =
+        device_vector2.cend();
+    for (int i = 1; it4 != end4; ++it4, ++i) {
+        EXPECT_EQ(*it4, i);
+    }
+    it4 = [](const auto& vec) { return vec.begin(); }(device_vector2);
+    end4 = [](const auto& vec) { return vec.end(); }(device_vector2);
+    for (int i = 1; it4 != end4; ++it4, ++i) {
+        EXPECT_EQ(*it4, i);
+    }
+}
+
+TEST_F(core_device_container_test, jagged_vector_iteration) {
+
+    // Set up a "simple" host vector.
+    vecmem::jagged_vector<int> host_vector = {
+        {
+            {{1, 2, 3, 4}, &m_resource},
+            {{5, 6}, &m_resource},
+            vecmem::vector<int>{&m_resource},
+            {{7, 8, 9}, &m_resource},
+            {{10}, &m_resource},
+        },
+        &m_resource};
+    auto host_data = vecmem::get_data(host_vector);
+
+    // Create a non-const device vector from it.
+    vecmem::jagged_device_vector<int> device_vector1(
+        vecmem::get_data(host_data));
+
+    // Check that non-const iteration works.
+    int i = 1;
+    vecmem::jagged_device_vector<int>::iterator it1 = device_vector1.begin();
+    vecmem::jagged_device_vector<int>::iterator end1 = device_vector1.end();
+    for (; it1 != end1; ++it1) {
+        for (auto it = it1->begin(); it != it1->end(); ++it, ++i) {
+            EXPECT_EQ(*it, i);
+        }
+    }
+
+    // Check that const iteration works.
+    i = 1;
+    vecmem::jagged_device_vector<int>::const_iterator it2 =
+        device_vector1.cbegin();
+    vecmem::jagged_device_vector<int>::const_iterator end2 =
+        device_vector1.cend();
+    for (; it2 != end2; ++it2) {
+        for (auto it = it2->cbegin(); it != it2->cend(); ++it, ++i) {
+            EXPECT_EQ(*it, i);
+        }
+    }
+    i = 1;
+    it2 = [](const auto& vec) { return vec.begin(); }(device_vector1);
+    end2 = [](const auto& vec) { return vec.end(); }(device_vector1);
+    for (; it2 != end2; ++it2) {
+        for (auto it = it2->cbegin(); it != it2->cend(); ++it, ++i) {
+            EXPECT_EQ(*it, i);
+        }
+    }
+
+    // Create a const device vector from it.
+    vecmem::jagged_device_vector<const int> device_vector2(
+        vecmem::get_data(host_data));
+
+    // Check that "non-const" iteration works.
+    i = 1;
+    vecmem::jagged_device_vector<const int>::iterator it3 =
+        device_vector2.begin();
+    vecmem::jagged_device_vector<const int>::iterator end3 =
+        device_vector2.end();
+    for (; it3 != end3; ++it3) {
+        for (auto it = it3->begin(); it != it3->end(); ++it, ++i) {
+            EXPECT_EQ(*it, i);
+        }
+    }
+
+    // Check that const iteration works.
+    i = 1;
+    vecmem::jagged_device_vector<const int>::const_iterator it4 =
+        device_vector2.cbegin();
+    vecmem::jagged_device_vector<const int>::const_iterator end4 =
+        device_vector2.cend();
+    for (; it4 != end4; ++it4) {
+        for (auto it = it4->cbegin(); it != it4->cend(); ++it, ++i) {
+            EXPECT_EQ(*it, i);
+        }
+    }
+    i = 1;
+    it4 = [](const auto& vec) { return vec.begin(); }(device_vector2);
+    end4 = [](const auto& vec) { return vec.end(); }(device_vector2);
+    for (; it4 != end4; ++it4) {
+        for (auto it = it4->cbegin(); it != it4->cend(); ++it, ++i) {
+            EXPECT_EQ(*it, i);
+        }
+    }
+}
