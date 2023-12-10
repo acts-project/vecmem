@@ -7,6 +7,7 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/containers/details/resize_jagged_vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/edm/details/schema_traits.hpp"
@@ -135,8 +136,11 @@ void host_resize(std::tuple<typename host_type<VARTYPES>::type...>& data,
                  std::size_t size, std::index_sequence<INDEX, Is...>) {
 
     // Resize this variable.
-    if constexpr (type::details::is_vector<typename std::tuple_element<
-                      INDEX, std::tuple<VARTYPES...>>::type>::value) {
+    if constexpr (type::details::is_jagged_vector_v<typename std::tuple_element<
+                      INDEX, std::tuple<VARTYPES...>>::type>) {
+        vecmem::details::resize_jagged_vector(std::get<INDEX>(data), size);
+    } else if constexpr (type::details::is_vector_v<typename std::tuple_element<
+                             INDEX, std::tuple<VARTYPES...>>::type>) {
         std::get<INDEX>(data).resize(size);
     }
     // Terminate, or continue.
