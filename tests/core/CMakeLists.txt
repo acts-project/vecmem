@@ -23,6 +23,7 @@ vecmem_add_test( core
    "test_core_unique_alloc_ptr.cpp"
    "test_core_unique_obj_ptr.cpp"
    "test_core_tuple.cpp"
+   "test_core_edm_buffer.cpp"
    "test_core_edm_device.cpp"
    "test_core_edm_host.cpp"
    "test_core_edm_view.cpp"
