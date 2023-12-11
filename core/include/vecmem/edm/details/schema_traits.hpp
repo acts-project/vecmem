@@ -129,19 +129,85 @@ constexpr bool is_same_nc_v = is_same_nc<TYPE1, TYPE2>::value;
 
 namespace details {
 
-/// @name Trait(s) making an entire schema into a constant one
+/// @name Trait(s) operating on a full schema
 /// @{
 
-template <typename... VARTYPES>
+/// Technical base type for @c add_const<schema<VARTYPES...>>
+template <typename T>
 struct add_const;
 
+/// Add constness to all variable types in a schema
+///
+/// @tparam ...VARTYPES The variable types in the schema
+///
 template <typename... VARTYPES>
 struct add_const<schema<VARTYPES...>> {
     using type = schema<typename type::details::add_const<VARTYPES>::type...>;
 };
 
+/// Convenience alias for @c add_const<schema<VARTYPES...>>::type
 template <typename... VARTYPES>
 using add_const_t = typename add_const<VARTYPES...>::type;
+
+/// @}
+
+/// @name Trait(s) checking the contents of a full schema
+/// @{
+
+/// Technical base type for @c has_scalar<schema<VARTYPES...>>
+template <typename T>
+struct has_scalar;
+
+/// Check if a schema contains at least one scalar variable
+///
+/// @tparam ...VARTYPES The variable types in the schema
+///
+template <typename... VARTYPES>
+struct has_scalar<schema<VARTYPES...>> {
+    static constexpr bool value =
+        vecmem::details::disjunction_v<type::details::is_scalar<VARTYPES>...>;
+};  // struct has_scalar
+
+/// Convenience alias for @c has_scalar<schema<VARTYPES...>>::value
+template <typename... VARTYPES>
+constexpr bool has_scalar_v = has_scalar<schema<VARTYPES...>>::value;
+
+/// Technical base type for @c has_vector<schema<VARTYPES...>>
+template <typename T>
+struct has_vector;
+
+/// Check if a schema contains at least one vector variable
+///
+/// @tparam ...VARTYPES The variable types in the schema
+///
+template <typename... VARTYPES>
+struct has_vector<schema<VARTYPES...>> {
+    static constexpr bool value =
+        vecmem::details::disjunction_v<type::details::is_vector<VARTYPES>...>;
+};  // struct has_vector
+
+/// Convenience alias for @c has_vector<schema<VARTYPES...>>::value
+template <typename... VARTYPES>
+constexpr bool has_vector_v = has_vector<schema<VARTYPES...>>::value;
+
+/// Technical base type for @c has_jagged_vector<schema<VARTYPES...>>
+template <typename T>
+struct has_jagged_vector;
+
+/// Check if a schema contains at least one jagged vector variable
+///
+/// @tparam ...VARTYPES The variable types in the schema
+///
+template <typename... VARTYPES>
+struct has_jagged_vector<schema<VARTYPES...>> {
+    static constexpr bool value = vecmem::details::disjunction_v<
+        type::details::is_jagged_vector<VARTYPES>...>;
+};  // struct has_jagged_vector
+
+/// Convenience alias for @c has_jagged_vector<schema<VARTYPES...>>::value
+template <typename... VARTYPES>
+constexpr bool has_jagged_vector_v =
+    has_jagged_vector<schema<VARTYPES...>>::value;
 
 /// @}
 
