@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,6 +12,8 @@
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/edm/host.hpp"
+#include "vecmem/edm/view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/utils/abstract_event.hpp"
 #include "vecmem/vecmem_core_export.hpp"
@@ -146,6 +148,32 @@ public:
 
     /// @}
 
+    /// @name SoA container handling functions
+    /// @{
+
+    /// Set up the internal state of a buffer correctly on a device
+    template <typename SCHEMA>
+    event_type setup(edm::view<SCHEMA> data) const;
+
+    /// Set all bytes of the container to some value
+    template <typename... VARTYPES>
+    event_type memset(edm::view<edm::schema<VARTYPES...>> data,
+                      int value) const;
+
+    /// Copy between two views
+    template <typename... VARTYPES1, typename... VARTYPES2>
+    event_type operator()(const edm::view<edm::schema<VARTYPES1...>>& from,
+                          edm::view<edm::schema<VARTYPES2...>> to,
+                          type::copy_type cptype = type::unknown) const;
+
+    /// Copy from a view, into a host container
+    template <typename... VARTYPES1, typename... VARTYPES2>
+    event_type operator()(const edm::view<edm::schema<VARTYPES1...>>& from,
+                          edm::host<edm::schema<VARTYPES2...>>& to,
+                          type::copy_type cptype = type::unknown) const;
+
+    /// @}
+
 protected:
     /// Perform a "low level" memory copy
     virtual void do_copy(std::size_t size, const void* from, void* to,
@@ -176,6 +204,24 @@ private:
     template <typename TYPE>
     static bool is_contiguous(const data::vector_view<TYPE>* data,
                               std::size_t size);
+    /// Implementation for the variadic @c memset function
+    template <std::size_t INDEX, typename... VARTYPES>
+    void memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value) const;
+    /// Implementation for setting the sizes of an SoA container
+    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
+    void resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
+                     edm::host<edm::schema<VARTYPES2...>>& to,
+                     type::copy_type cptype) const;
+    /// Implementation for the variadic @c copy function (for the sizes)
+    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
+    void copy_sizes_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
+                         edm::view<edm::schema<VARTYPES2...>> to,
+                         type::copy_type cptype) const;
+    /// Implementation for the variadic @c copy function (for the payload)
+    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
+    void copy_payload_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
+                           edm::view<edm::schema<VARTYPES2...>> to,
+                           type::copy_type cptype) const;
 
 };  // class copy
 
