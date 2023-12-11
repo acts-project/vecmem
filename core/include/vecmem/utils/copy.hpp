@@ -205,30 +205,23 @@ private:
     static bool is_contiguous(const data::vector_view<TYPE>* data,
                               std::size_t size);
     /// Implementation for the variadic @c memset function
-    template <typename... VARTYPES, std::size_t INDEX, std::size_t... Is>
-    void memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value,
-                     std::index_sequence<INDEX, Is...>) const;
+    template <std::size_t INDEX, typename... VARTYPES>
+    void memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value) const;
     /// Implementation for setting the sizes of an SoA container
-    template <typename... VARTYPES1, typename... VARTYPES2, std::size_t INDEX,
-              std::size_t... Is>
+    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
     void resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
                      edm::host<edm::schema<VARTYPES2...>>& to,
-                     type::copy_type cptype,
-                     std::index_sequence<INDEX, Is...>) const;
+                     type::copy_type cptype) const;
     /// Implementation for the variadic @c copy function (for the sizes)
-    template <typename... VARTYPES1, typename... VARTYPES2, std::size_t INDEX,
-              std::size_t... Is>
+    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
     void copy_sizes_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
                          edm::view<edm::schema<VARTYPES2...>> to,
-                         type::copy_type cptype,
-                         std::index_sequence<INDEX, Is...>) const;
+                         type::copy_type cptype) const;
     /// Implementation for the variadic @c copy function (for the payload)
-    template <typename... VARTYPES1, typename... VARTYPES2, std::size_t INDEX,
-              std::size_t... Is>
+    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
     void copy_payload_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
                            edm::view<edm::schema<VARTYPES2...>> to,
-                           type::copy_type cptype,
-                           std::index_sequence<INDEX, Is...>) const;
+                           type::copy_type cptype) const;
 
 };  // class copy
 

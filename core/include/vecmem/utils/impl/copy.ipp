@@ -365,8 +365,10 @@ copy::event_type copy::set_sizes(
     }
     // Make sure that the sizes match up.
     if (sizes.size() != data.size()) {
-        throw std::runtime_error(
-            "Incorrect size vector received for target jagged vector sizes");
+        std::ostringstream msg;
+        msg << "sizes.size() (" << sizes.size() << ") != data.size() ("
+            << data.size() << ")";
+        throw std::length_error(msg.str());
     }
     // Make sure that the target jagged vector is either resizable, or it has
     // the correct sizes/capacities already.
@@ -376,9 +378,11 @@ copy::event_type copy::set_sizes(
         if (data.host_ptr()[i].size_ptr() == nullptr) {
             perform_copy = false;
             if (data.host_ptr()[i].capacity() != sizes[i]) {
-                throw std::runtime_error(
-                    "Non-resizable jaggged vector does not match the requested "
-                    "size");
+                std::ostringstream msg;
+                msg << "data.host_ptr()[" << i << "].capacity() ("
+                    << data.host_ptr()[i].capacity() << ") != sizes[" << i
+                    << "] (" << sizes[i] << ")";
+                throw std::length_error(msg.str());
             }
         } else if (perform_copy == false) {
             throw std::runtime_error(
@@ -435,7 +439,7 @@ copy::event_type copy::memset(edm::view<edm::schema<VARTYPES...>> data,
         memset(data.payload(), value);
     } else {
         // Do the operation using the helper function, recursively.
-        memset_impl(data, value, std::index_sequence_for<VARTYPES...>{});
+        memset_impl<0>(data, value);
     }
 
     // Return a new event.
@@ -482,25 +486,27 @@ copy::event_type copy::operator()(
             if (from_view.size().ptr() != nullptr) {
                 // Check that the sizes are the same.
                 if (from_view.size().size() != to_view.size().size()) {
-                    throw std::runtime_error(
-                        "Copying between inconsistent containers");
+                    std::ostringstream msg;
+                    msg << "from_view.size().size() ("
+                        << from_view.size().size()
+                        << ") != to_view.size().size() ("
+                        << to_view.size().size() << ")";
+                    throw std::length_error(msg.str());
                 }
                 // Perform a dumb copy.
                 operator()(from_view.size(), to_view.size(), cptype);
             } else {
                 // If not, then copy the size(s) recursively.
-                copy_sizes_impl(from_view, to_view, cptype,
-                                std::index_sequence_for<VARTYPES1...>{});
+                copy_sizes_impl<0>(from_view, to_view, cptype);
             }
         }
 
-        // Create a synhronization event.
+        // Create a synchronization event.
         return create_event();
     }
 
     // If not, then do an un-optimized copy, variable-by-variable.
-    copy_payload_impl(from_view, to_view, cptype,
-                      std::index_sequence_for<VARTYPES1...>{});
+    copy_payload_impl<0>(from_view, to_view, cptype);
 
     // Return a new event.
     return create_event();
@@ -523,8 +529,7 @@ copy::event_type copy::operator()(
                   "Can only use compatible types in the copy");
 
     // Resize the output object to the correct size(s).
-    resize_impl(from_view, to_vec, cptype,
-                std::index_sequence_for<VARTYPES1...>{});
+    resize_impl<0>(from_view, to_vec, cptype);
 
     // Perform the memory copy.
     return operator()(from_view, vecmem::get_data(to_vec), cptype);
@@ -678,9 +683,9 @@ bool copy::is_contiguous(const data::vector_view<TYPE>* data,
     return true;
 }
 
-template <typename... VARTYPES, std::size_t INDEX, std::size_t... Is>
-void copy::memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value,
-                       std::index_sequence<INDEX, Is...>) const {
+template <std::size_t INDEX, typename... VARTYPES>
+void copy::memset_impl(edm::view<edm::schema<VARTYPES...>> data,
+                       int value) const {
 
     // Scalars do not have their own dedicated @c memset functions.
     if constexpr (edm::type::details::is_scalar<typename std::tuple_element<
@@ -693,17 +698,15 @@ void copy::memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value,
         memset(data.template get<INDEX>(), value);
     }
     // Recurse into the next variable.
-    if constexpr (sizeof...(Is) > 0) {
-        memset_impl(data, value, std::index_sequence<Is...>{});
+    if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {
+        memset_impl<INDEX + 1>(data, value);
     }
 }
 
-template <typename... VARTYPES1, typename... VARTYPES2, std::size_t INDEX,
-          std::size_t... Is>
+template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
 void copy::resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from_view,
                        edm::host<edm::schema<VARTYPES2...>>& to_vec,
-                       [[maybe_unused]] type::copy_type cptype,
-                       std::index_sequence<INDEX, Is...>) const {
+                       [[maybe_unused]] type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -777,20 +780,17 @@ void copy::resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from_view,
             to_vec.template get<INDEX>().resize(size);
         }
         // Call this function recursively.
-        if constexpr (sizeof...(Is) > 0) {
-            resize_impl(from_view, to_vec, cptype,
-                        std::index_sequence<Is...>{});
+        if constexpr (sizeof...(VARTYPES1) > (INDEX + 1)) {
+            resize_impl<INDEX + 1>(from_view, to_vec, cptype);
         }
     }
 }
 
-template <typename... VARTYPES1, typename... VARTYPES2, std::size_t INDEX,
-          std::size_t... Is>
+template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
 void copy::copy_sizes_impl(
     const edm::view<edm::schema<VARTYPES1...>>& from_view,
     edm::view<edm::schema<VARTYPES2...>> to_view,
-    [[maybe_unused]] type::copy_type cptype,
-    std::index_sequence<INDEX, Is...>) const {
+    [[maybe_unused]] type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -847,19 +847,17 @@ void copy::copy_sizes_impl(
             set_sizes(sizes, to_view.template get<INDEX>());
         }
         // Call this function recursively.
-        if constexpr (sizeof...(Is) > 0) {
-            copy_sizes_impl(from_view, to_view, cptype,
-                            std::index_sequence<Is...>{});
+        if constexpr (sizeof...(VARTYPES1) > (INDEX + 1)) {
+            copy_sizes_impl<INDEX + 1>(from_view, to_view, cptype);
         }
     }
 }
 
-template <typename... VARTYPES1, typename... VARTYPES2, std::size_t INDEX,
-          std::size_t... Is>
+template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
 void copy::copy_payload_impl(
     const edm::view<edm::schema<VARTYPES1...>>& from_view,
-    edm::view<edm::schema<VARTYPES2...>> to_view, type::copy_type cptype,
-    std::index_sequence<INDEX, Is...>) const {
+    edm::view<edm::schema<VARTYPES2...>> to_view,
+    type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
     // const-ness.
@@ -884,9 +882,8 @@ void copy::copy_payload_impl(
                    to_view.template get<INDEX>(), cptype);
     }
     // Recurse into the next variable.
-    if constexpr (sizeof...(Is) > 0) {
-        copy_payload_impl(from_view, to_view, cptype,
-                          std::index_sequence<Is...>{});
+    if constexpr (sizeof...(VARTYPES1) > (INDEX + 1)) {
+        copy_payload_impl<INDEX + 1>(from_view, to_view, cptype);
     }
 }
 

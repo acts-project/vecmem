@@ -141,14 +141,22 @@ TEST_F(core_edm_copy_test, host_to_fixed_device_simple) {
     vecmem::edm::host<simple_schema> host{m_resource};
     fill(host);
 
-    vecmem::edm::buffer<simple_schema> buffer{
+    // Test that a copy into a too small buffer would fail correctly.
+    vecmem::edm::buffer<simple_schema> buffer1{
+        2u, m_resource, vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(buffer1);
+    EXPECT_THROW(m_copy(vecmem::get_data(host), buffer1,
+                        vecmem::copy::type::host_to_host),
+                 std::length_error);
+
+    // Test a valid copy.
+    vecmem::edm::buffer<simple_schema> buffer2{
         static_cast<vecmem::edm::buffer<jagged_schema>::size_type>(host.size()),
         m_resource, vecmem::data::buffer_type::fixed_size};
-    m_copy.setup(buffer);
+    m_copy.setup(buffer2);
+    m_copy(vecmem::get_data(host), buffer2, vecmem::copy::type::host_to_host);
 
-    m_copy(vecmem::get_data(host), buffer, vecmem::copy::type::host_to_host);
-
-    compare(vecmem::get_data(host), vecmem::get_data(buffer));
+    compare(vecmem::get_data(host), vecmem::get_data(buffer2));
 }
 
 TEST_F(core_edm_copy_test, host_to_fixed_device_jagged) {
@@ -156,14 +164,23 @@ TEST_F(core_edm_copy_test, host_to_fixed_device_jagged) {
     vecmem::edm::host<jagged_schema> host{m_resource};
     fill(host);
 
-    vecmem::edm::buffer<jagged_schema> buffer{
+    // Test that a copy into a too small buffer would fail correctly.
+    vecmem::edm::buffer<jagged_schema> buffer1{
+        std::vector<std::size_t>{2, 0, 2}, m_resource, nullptr,
+        vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(buffer1);
+    EXPECT_THROW(m_copy(vecmem::get_data(host), buffer1,
+                        vecmem::copy::type::host_to_host),
+                 std::length_error);
+
+    // Test a valid copy.
+    vecmem::edm::buffer<jagged_schema> buffer2{
         std::vector<std::size_t>{2, 0, 3}, m_resource, nullptr,
         vecmem::data::buffer_type::fixed_size};
-    m_copy.setup(buffer);
+    m_copy.setup(buffer2);
+    m_copy(vecmem::get_data(host), buffer2, vecmem::copy::type::host_to_host);
 
-    m_copy(vecmem::get_data(host), buffer, vecmem::copy::type::host_to_host);
-
-    compare(vecmem::get_data(host), vecmem::get_data(buffer));
+    compare(vecmem::get_data(host), vecmem::get_data(buffer2));
 }
 
 TEST_F(core_edm_copy_test, host_to_resizable_device_simple) {
