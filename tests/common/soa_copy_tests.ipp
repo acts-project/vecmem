@@ -18,7 +18,7 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct(
     // Extract the parameters.
     vecmem::memory_resource& host_mr = std::get<0>(params);
     vecmem::memory_resource& device_mr = std::get<1>(params);
-    vecmem::copy& device_copy = std::get<3>(params);
+    vecmem::copy& device_cp = std::get<3>(params);
 
     // Create the "input" host container.
     typename CONTAINER::host input{host_mr};
@@ -30,17 +30,17 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct(
     typename CONTAINER::buffer device_buffer;
     vecmem::testing::make_buffer(device_buffer, device_mr, host_mr,
                                  vecmem::data::buffer_type::fixed_size);
-    device_copy.setup(device_buffer);
+    device_cp.setup(device_buffer);
 
     // Copy the data to the device.
-    device_copy(vecmem::get_data(input), device_buffer,
-                vecmem::copy::type::host_to_device);
+    device_cp(vecmem::get_data(input), device_buffer,
+              vecmem::copy::type::host_to_device);
 
     // Create the target host container.
     typename CONTAINER::host target{host_mr};
 
     // Copy the data back to the host.
-    device_copy(device_buffer, target, vecmem::copy::type::device_to_host)
+    device_cp(device_buffer, target, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Compare the two.
@@ -54,8 +54,8 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_optimal(
     // Extract the parameters.
     vecmem::memory_resource& host_mr = std::get<0>(params);
     vecmem::memory_resource& device_mr = std::get<1>(params);
-    vecmem::copy& host_copy = std::get<2>(params);
-    vecmem::copy& device_copy = std::get<3>(params);
+    vecmem::copy& host_cp = std::get<2>(params);
+    vecmem::copy& device_cp = std::get<3>(params);
 
     // Create the "input" host container.
     typename CONTAINER::host input{host_mr};
@@ -67,36 +67,35 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_optimal(
     typename CONTAINER::buffer host_buffer1;
     vecmem::testing::make_buffer(host_buffer1, host_mr, host_mr,
                                  vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer1);
+    host_cp.setup(host_buffer1);
 
     // Stage the data into the host buffer.
-    host_copy(vecmem::get_data(input), host_buffer1);
+    host_cp(vecmem::get_data(input), host_buffer1);
 
     // Create the (fixed sized) device buffer.
     typename CONTAINER::buffer device_buffer;
     vecmem::testing::make_buffer(device_buffer, device_mr, host_mr,
                                  vecmem::data::buffer_type::fixed_size);
-    device_copy.setup(device_buffer);
+    device_cp.setup(device_buffer);
 
     // Copy the data from the host buffer to the device buffer.
-    device_copy(host_buffer1, device_buffer,
-                vecmem::copy::type::host_to_device);
+    device_cp(host_buffer1, device_buffer, vecmem::copy::type::host_to_device);
 
     // Create a (fixed sized) host buffer, to stage the data back into.
     typename CONTAINER::buffer host_buffer2;
     vecmem::testing::make_buffer(host_buffer2, host_mr, host_mr,
                                  vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer2);
+    host_cp.setup(host_buffer2);
 
     // Copy the data from the device buffer to the host buffer.
-    device_copy(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
+    device_cp(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Create the target host container.
     typename CONTAINER::host target{host_mr};
 
     // Copy the data from the host buffer to the target.
-    host_copy(host_buffer2, target);
+    host_cp(host_buffer2, target);
 
     // Compare the relevant objects.
     vecmem::testing::compare(vecmem::get_data(input),
@@ -111,7 +110,7 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host(
     // Extract the parameters.
     vecmem::memory_resource& host_mr = std::get<0>(params);
     vecmem::memory_resource& device_mr = std::get<1>(params);
-    vecmem::copy& device_copy = std::get<3>(params);
+    vecmem::copy& device_cp = std::get<3>(params);
 
     // Create the "input" host container.
     typename CONTAINER::host input{host_mr};
@@ -123,17 +122,17 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host(
     typename CONTAINER::buffer device_buffer;
     vecmem::testing::make_buffer(device_buffer, device_mr, host_mr,
                                  vecmem::data::buffer_type::resizable);
-    device_copy.setup(device_buffer);
+    device_cp.setup(device_buffer);
 
     // Copy the data to the device.
-    device_copy(vecmem::get_data(input), device_buffer,
-                vecmem::copy::type::host_to_device);
+    device_cp(vecmem::get_data(input), device_buffer,
+              vecmem::copy::type::host_to_device);
 
     // Create the target host container.
     typename CONTAINER::host target{host_mr};
 
     // Copy the data back to the host.
-    device_copy(device_buffer, target, vecmem::copy::type::device_to_host)
+    device_cp(device_buffer, target, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Compare the two.
@@ -148,7 +147,7 @@ void soa_copy_tests_base<CONTAINER>::
     // Extract the parameters.
     vecmem::memory_resource& host_mr = std::get<0>(params);
     vecmem::memory_resource& device_mr = std::get<1>(params);
-    vecmem::copy& device_copy = std::get<3>(params);
+    vecmem::copy& device_cp = std::get<3>(params);
 
     // Create the "input" host container.
     typename CONTAINER::host input{host_mr};
@@ -160,11 +159,11 @@ void soa_copy_tests_base<CONTAINER>::
     typename CONTAINER::buffer device_buffer1;
     vecmem::testing::make_buffer(device_buffer1, device_mr, host_mr,
                                  vecmem::data::buffer_type::fixed_size);
-    device_copy.setup(device_buffer1);
+    device_cp.setup(device_buffer1);
 
     // Copy the data to the device.
-    device_copy(vecmem::get_data(input), device_buffer1,
-                vecmem::copy::type::host_to_device);
+    device_cp(vecmem::get_data(input), device_buffer1,
+              vecmem::copy::type::host_to_device);
 
     // Create the (resizable) device buffer.
     typename CONTAINER::buffer device_buffer2;
@@ -172,14 +171,14 @@ void soa_copy_tests_base<CONTAINER>::
                                  vecmem::data::buffer_type::resizable);
 
     // Copy the data from the fixed sized device buffer to the resizable one.
-    device_copy(device_buffer1, device_buffer2,
-                vecmem::copy::type::device_to_device);
+    device_cp(device_buffer1, device_buffer2,
+              vecmem::copy::type::device_to_device);
 
     // Create the target host container.
     typename CONTAINER::host target{host_mr};
 
     // Copy the data back to the host.
-    device_copy(device_buffer2, target, vecmem::copy::type::device_to_host)
+    device_cp(device_buffer2, target, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Compare the two.

@@ -18,9 +18,9 @@
 #include <gtest/gtest.h>
 
 /// Host memory resource to use in the tests.
-static vecmem::cuda::host_memory_resource host_mr;
+static vecmem::cuda::host_memory_resource host_resource;
 /// Device memory resource to use in the tests.
-static vecmem::cuda::device_memory_resource device_mr;
+static vecmem::cuda::device_memory_resource device_resource;
 
 /// Host copy object to use in the tests.
 static vecmem::copy host_copy;
@@ -29,8 +29,10 @@ static vecmem::cuda::copy device_copy;
 
 // Instantiate the test suites.
 INSTANTIATE_TEST_SUITE_P(cuda_soa_copy_tests_simple, soa_copy_tests_simple,
-                         testing::Values(std::tie(host_mr, device_mr, host_copy,
+                         testing::Values(std::tie(host_resource,
+                                                  device_resource, host_copy,
                                                   device_copy)));
 INSTANTIATE_TEST_SUITE_P(cuda_soa_copy_tests_jagged, soa_copy_tests_jagged,
-                         testing::Values(std::tie(host_mr, device_mr, host_copy,
+                         testing::Values(std::tie(host_resource,
+                                                  device_resource, host_copy,
                                                   device_copy)));

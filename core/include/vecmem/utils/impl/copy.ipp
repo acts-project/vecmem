@@ -788,8 +788,8 @@ void copy::resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from_view,
 
 template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
 void copy::copy_sizes_impl(
-    const edm::view<edm::schema<VARTYPES1...>>& from_view,
-    edm::view<edm::schema<VARTYPES2...>> to_view,
+    [[maybe_unused]] const edm::view<edm::schema<VARTYPES1...>>& from_view,
+    [[maybe_unused]] edm::view<edm::schema<VARTYPES2...>> to_view,
     [[maybe_unused]] type::copy_type cptype) const {
 
     // The input and output types are allowed to be different, but only by
