@@ -27,18 +27,6 @@ void fill(simple_soa_container::host& obj) {
     }
 }
 
-void fill(simple_soa_container::device& obj) {
-
-    obj.count() = 55;
-    obj.average() = 3.141592f;
-    for (std::size_t i = 0; i < obj.capacity(); ++i) {
-        const simple_soa_container::device::size_type ii =
-            obj.push_back_default();
-        obj.measurement()[ii] = 1.0f * static_cast<float>(i);
-        obj.index()[ii] = static_cast<int>(i);
-    }
-}
-
 void compare(const simple_soa_container::const_view& view1,
              const simple_soa_container::const_view& view2) {
 
@@ -57,12 +45,7 @@ void compare(const simple_soa_container::const_view& view1,
     auto compare_vector = [](const auto& lhs, const auto& rhs) {
         ASSERT_EQ(lhs.size(), rhs.size());
         for (unsigned int i = 0; i < lhs.size(); ++i) {
-            if constexpr (std::is_floating_point_v<typename std::decay_t<
-                              decltype(lhs)>::value_type>) {
-                EXPECT_FLOAT_EQ(lhs[i], rhs[i]);
-            } else {
-                EXPECT_EQ(lhs[i], rhs[i]);
-            }
+            EXPECT_EQ(lhs[i], rhs[i]);
         }
     };
     compare_vector(device1.measurement(), device2.measurement());

@@ -5,11 +5,11 @@
  *
  * Mozilla Public License Version 2.0
  */
+#pragma once
 
 // Local include(s).
 #include "jagged_soa_container_helpers.hpp"
 #include "simple_soa_container_helpers.hpp"
-#include "soa_copy_tests.hpp"
 
 template <typename CONTAINER>
 void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct(

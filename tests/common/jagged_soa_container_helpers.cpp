@@ -41,22 +41,6 @@ void fill(jagged_soa_container::host& obj) {
     }
 }
 
-void fill(jagged_soa_container::device& obj) {
-
-    obj.count() = 55;
-    obj.average() = 3.141592f;
-    for (unsigned int i = 0; i < obj.size(); ++i) {
-        obj.measurement()[i] = 1.0f * static_cast<float>(i);
-        obj.index()[i] = static_cast<int>(i);
-        for (unsigned int j = 0; j < obj.measurements()[i].capacity(); ++j) {
-            obj.measurements()[i].push_back(1.0f * static_cast<float>(i + j));
-        }
-        for (unsigned int j = 0; j < obj.indices()[i].capacity(); ++j) {
-            obj.indices()[i].push_back(static_cast<int>(i + j));
-        }
-    }
-}
-
 void compare(const jagged_soa_container::const_view& view1,
              const jagged_soa_container::const_view& view2) {
 
@@ -75,12 +59,7 @@ void compare(const jagged_soa_container::const_view& view1,
     auto compare_vector = [](const auto& lhs, const auto& rhs) {
         ASSERT_EQ(lhs.size(), rhs.size());
         for (unsigned int i = 0; i < lhs.size(); ++i) {
-            if constexpr (std::is_floating_point_v<typename std::decay_t<
-                              decltype(lhs)>::value_type>) {
-                EXPECT_FLOAT_EQ(lhs[i], rhs[i]);
-            } else {
-                EXPECT_EQ(lhs[i], rhs[i]);
-            }
+            EXPECT_EQ(lhs[i], rhs[i]);
         }
     };
     compare_vector(device1.measurement(), device2.measurement());
