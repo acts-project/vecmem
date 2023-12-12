@@ -5,15 +5,18 @@
  * Mozilla Public License Version 2.0
  */
 
+// HIP include(s).
+#include <hip/hip_runtime.h>
+
 // Local include(s).
 #include "../common/jagged_soa_container_helpers.hpp"
 #include "../common/simple_soa_container_helpers.hpp"
-#include "test_cuda_edm_kernels.hpp"
+#include "test_hip_edm_kernels.hpp"
 
 // Project include(s).
-#include "../../cuda/src/utils/cuda_error_handling.hpp"
+#include "../../hip/src/utils/hip_error_handling.hpp"
 
-__global__ void cudaSimpleFillKernel(
+__global__ void hipSimpleFillKernel(
     vecmem::testing::simple_soa_container::view view) {
 
     // Get the thread index.
@@ -24,19 +27,19 @@ __global__ void cudaSimpleFillKernel(
     vecmem::testing::fill(i, device);
 }
 
-void cudaSimpleFill(vecmem::testing::simple_soa_container::view view) {
+void hipSimpleFill(vecmem::testing::simple_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
     const unsigned int gridSize = (view.capacity() + blockSize - 1) / blockSize;
-    cudaSimpleFillKernel<<<gridSize, blockSize>>>(view);
+    hipLaunchKernelGGL(hipSimpleFillKernel, gridSize, blockSize, 0, 0, view);
 
     // Check whether it succeeded to run.
-    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
-    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
 }
 
-__global__ void cudaJaggedFillKernel(
+__global__ void hipJaggedFillKernel(
     vecmem::testing::jagged_soa_container::view view) {
 
     // Get the thread index.
@@ -47,19 +50,19 @@ __global__ void cudaJaggedFillKernel(
     vecmem::testing::fill(i, device);
 }
 
-void cudaJaggedFill(vecmem::testing::jagged_soa_container::view view) {
+void hipJaggedFill(vecmem::testing::jagged_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
     const unsigned int gridSize = (view.capacity() + blockSize - 1) / blockSize;
-    cudaJaggedFillKernel<<<gridSize, blockSize>>>(view);
+    hipLaunchKernelGGL(hipJaggedFillKernel, gridSize, blockSize, 0, 0, view);
 
     // Check whether it succeeded to run.
-    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
-    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
 }
 
-__global__ void cudaSimpleModifyKernel(
+__global__ void hipSimpleModifyKernel(
     vecmem::testing::simple_soa_container::view view) {
 
     // Get the thread index.
@@ -70,19 +73,19 @@ __global__ void cudaSimpleModifyKernel(
     vecmem::testing::modify(i, device);
 }
 
-void cudaSimpleModify(vecmem::testing::simple_soa_container::view view) {
+void hipSimpleModify(vecmem::testing::simple_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
     const unsigned int gridSize = (view.capacity() + blockSize - 1) / blockSize;
-    cudaSimpleModifyKernel<<<gridSize, blockSize>>>(view);
+    hipLaunchKernelGGL(hipSimpleModifyKernel, gridSize, blockSize, 0, 0, view);
 
     // Check whether it succeeded to run.
-    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
-    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
 }
 
-__global__ void cudaJaggedModifyKernel(
+__global__ void hipJaggedModifyKernel(
     vecmem::testing::jagged_soa_container::view view) {
 
     // Get the thread index.
@@ -93,14 +96,14 @@ __global__ void cudaJaggedModifyKernel(
     vecmem::testing::modify(i, device);
 }
 
-void cudaJaggedModify(vecmem::testing::jagged_soa_container::view view) {
+void hipJaggedModify(vecmem::testing::jagged_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
     const unsigned int gridSize = (view.capacity() + blockSize - 1) / blockSize;
-    cudaJaggedModifyKernel<<<gridSize, blockSize>>>(view);
+    hipLaunchKernelGGL(hipJaggedModifyKernel, gridSize, blockSize, 0, 0, view);
 
     // Check whether it succeeded to run.
-    VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
-    VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
 }

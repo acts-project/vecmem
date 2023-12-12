@@ -36,6 +36,8 @@ protected:
     static void modify_managed(const soa_device_test_parameters& params);
     /// Test modifying the container in device memory
     static void modify_device(const soa_device_test_parameters& params);
+    /// Test filling the container in device memory
+    static void fill_device(const soa_device_test_parameters& params);
 
 };  // class soa_device_tests_base
 

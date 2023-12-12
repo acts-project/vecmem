@@ -25,9 +25,10 @@ inline void fill(unsigned int i, simple_soa_container::device& obj) {
         obj.average() = 3.141592f;
     }
     // In the rest of the threads modify the vector variables.
-    if (i < obj.size()) {
-        obj.measurement()[i] = 1.0f * static_cast<float>(i);
-        obj.index()[i] = static_cast<int>(i);
+    if (i < obj.capacity()) {
+        unsigned int ii = obj.push_back_default();
+        obj.measurement()[ii] = 1.0f * static_cast<float>(ii);
+        obj.index()[ii] = static_cast<int>(ii);
     }
 }
 
