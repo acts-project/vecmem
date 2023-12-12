@@ -181,6 +181,14 @@ public:
     /// Type holding on to the memory managed by this object
     using memory_type = unique_alloc_ptr<char[]>;
 
+    /// Default constructor
+    buffer() = default;
+    /// Move constructor
+    buffer(buffer&&) = default;
+
+    /// Move assignment operator
+    buffer& operator=(buffer&&) = default;
+
     /// Constructor for a 1D buffer
     ///
     /// @param capacity The capacity of the 1D arrays in the buffer

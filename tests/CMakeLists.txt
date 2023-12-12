@@ -32,7 +32,17 @@ add_library( vecmem_testing_common STATIC
    "common/memory_resource_test_host_accessible.hpp"
    "common/memory_resource_test_host_accessible.ipp"
    "common/memory_resource_test_stress.hpp"
-   "common/memory_resource_test_stress.ipp" )
+   "common/memory_resource_test_stress.ipp"
+   "common/simple_soa_container.hpp"
+   "common/simple_soa_container_helpers.hpp"
+   "common/simple_soa_container_helpers.cpp"
+   "common/jagged_soa_container.hpp"
+   "common/jagged_soa_container_helpers.hpp"
+   "common/jagged_soa_container_helpers.cpp"
+   "common/soa_copy_tests.hpp"
+   "common/soa_copy_tests.ipp"
+   "common/soa_device_tests.hpp"
+   "common/soa_device_tests.ipp" )
 target_link_libraries( vecmem_testing_common
    PUBLIC vecmem::core GTest::gtest )
 
