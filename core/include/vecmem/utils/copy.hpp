@@ -12,6 +12,7 @@
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/edm/details/schema_traits.hpp"
 #include "vecmem/edm/host.hpp"
 #include "vecmem/edm/view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
@@ -87,15 +88,15 @@ public:
         type::copy_type cptype = type::unknown) const;
 
     /// Copy a 1-dimensional vector's data between two existing memory blocks
-    template <typename TYPE1, typename TYPE2>
-    event_type operator()(const data::vector_view<TYPE1>& from,
-                          data::vector_view<TYPE2> to,
+    template <typename TYPE>
+    event_type operator()(const data::vector_view<std::add_const_t<TYPE>>& from,
+                          data::vector_view<TYPE> to,
                           type::copy_type cptype = type::unknown) const;
 
     /// Copy a 1-dimensional vector's data into a vector object
-    template <typename TYPE1, typename TYPE2, typename ALLOC>
-    event_type operator()(const data::vector_view<TYPE1>& from,
-                          std::vector<TYPE2, ALLOC>& to,
+    template <typename TYPE, typename ALLOC>
+    event_type operator()(const data::vector_view<std::add_const_t<TYPE>>& from,
+                          std::vector<TYPE, ALLOC>& to,
                           type::copy_type cptype = type::unknown) const;
 
     /// Helper function for getting the size of a resizable 1D buffer
@@ -124,16 +125,18 @@ public:
         type::copy_type cptype = type::unknown) const;
 
     /// Copy a jagged vector's data between two existing allocations
-    template <typename TYPE1, typename TYPE2>
-    event_type operator()(const data::jagged_vector_view<TYPE1>& from,
-                          data::jagged_vector_view<TYPE2> to,
-                          type::copy_type cptype = type::unknown) const;
+    template <typename TYPE>
+    event_type operator()(
+        const data::jagged_vector_view<std::add_const_t<TYPE>>& from,
+        data::jagged_vector_view<TYPE> to,
+        type::copy_type cptype = type::unknown) const;
 
     /// Copy a jagged vector's data into a vector object
-    template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
-    event_type operator()(const data::jagged_vector_view<TYPE1>& from,
-                          std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to,
-                          type::copy_type cptype = type::unknown) const;
+    template <typename TYPE, typename ALLOC1, typename ALLOC2>
+    event_type operator()(
+        const data::jagged_vector_view<std::add_const_t<TYPE>>& from,
+        std::vector<std::vector<TYPE, ALLOC2>, ALLOC1>& to,
+        type::copy_type cptype = type::unknown) const;
 
     /// Helper function for getting the sizes of a resizable jagged vector
     template <typename TYPE>
@@ -161,16 +164,20 @@ public:
                       int value) const;
 
     /// Copy between two views
-    template <typename... VARTYPES1, typename... VARTYPES2>
-    event_type operator()(const edm::view<edm::schema<VARTYPES1...>>& from,
-                          edm::view<edm::schema<VARTYPES2...>> to,
-                          type::copy_type cptype = type::unknown) const;
+    template <typename... VARTYPES>
+    event_type operator()(
+        const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+            from,
+        edm::view<edm::schema<VARTYPES...>> to,
+        type::copy_type cptype = type::unknown) const;
 
     /// Copy from a view, into a host container
-    template <typename... VARTYPES1, typename... VARTYPES2>
-    event_type operator()(const edm::view<edm::schema<VARTYPES1...>>& from,
-                          edm::host<edm::schema<VARTYPES2...>>& to,
-                          type::copy_type cptype = type::unknown) const;
+    template <typename... VARTYPES>
+    event_type operator()(
+        const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+            from,
+        edm::host<edm::schema<VARTYPES...>>& to,
+        type::copy_type cptype = type::unknown) const;
 
     /// @}
 
@@ -185,17 +192,17 @@ protected:
 
 private:
     /// Helper function performing the copy of a jagged array/vector
-    template <typename TYPE1, typename TYPE2>
+    template <typename TYPE>
     void copy_views_impl(
-        const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
-        const data::vector_view<TYPE1>* from, data::vector_view<TYPE2>* to,
-        type::copy_type cptype) const;
+        const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+        const data::vector_view<std::add_const_t<TYPE>>* from,
+        data::vector_view<TYPE>* to, type::copy_type cptype) const;
     /// Helper function performing the copy of a jagged array/vector
-    template <typename TYPE1, typename TYPE2>
+    template <typename TYPE>
     void copy_views_contiguous_impl(
-        const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
-        const data::vector_view<TYPE1>* from, data::vector_view<TYPE2>* to,
-        type::copy_type cptype) const;
+        const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+        const data::vector_view<std::add_const_t<TYPE>>* from,
+        data::vector_view<TYPE>* to, type::copy_type cptype) const;
     /// Helper function for getting the sizes of a jagged vector/buffer
     template <typename TYPE>
     std::vector<typename data::vector_view<TYPE>::size_type> get_sizes_impl(
@@ -208,20 +215,23 @@ private:
     template <std::size_t INDEX, typename... VARTYPES>
     void memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value) const;
     /// Implementation for setting the sizes of an SoA container
-    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
-    void resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
-                     edm::host<edm::schema<VARTYPES2...>>& to,
-                     type::copy_type cptype) const;
+    template <std::size_t INDEX, typename... VARTYPES>
+    void resize_impl(
+        const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+            from,
+        edm::host<edm::schema<VARTYPES...>>& to, type::copy_type cptype) const;
     /// Implementation for the variadic @c copy function (for the sizes)
-    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
-    void copy_sizes_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
-                         edm::view<edm::schema<VARTYPES2...>> to,
-                         type::copy_type cptype) const;
+    template <std::size_t INDEX, typename... VARTYPES>
+    void copy_sizes_impl(
+        const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+            from,
+        edm::view<edm::schema<VARTYPES...>> to, type::copy_type cptype) const;
     /// Implementation for the variadic @c copy function (for the payload)
-    template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
-    void copy_payload_impl(const edm::view<edm::schema<VARTYPES1...>>& from,
-                           edm::view<edm::schema<VARTYPES2...>> to,
-                           type::copy_type cptype) const;
+    template <std::size_t INDEX, typename... VARTYPES>
+    void copy_payload_impl(
+        const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+            from,
+        edm::view<edm::schema<VARTYPES...>> to, type::copy_type cptype) const;
 
 };  // class copy
 

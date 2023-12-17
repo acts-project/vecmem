@@ -80,19 +80,13 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     return result;
 }
 
-template <typename TYPE1, typename TYPE2>
-copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
-                                  data::vector_view<TYPE2> to_view,
-                                  type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
+template <typename TYPE>
+copy::event_type copy::operator()(
+    const data::vector_view<std::add_const_t<TYPE>>& from_view,
+    data::vector_view<TYPE> to_view, type::copy_type cptype) const {
 
     // Get the size of the source view.
-    const typename data::vector_view<TYPE1>::size_type size =
+    const typename data::vector_view<std::add_const_t<TYPE>>::size_type size =
         get_size(from_view);
 
     // Make sure that the copy can happen.
@@ -123,37 +117,31 @@ copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
                 break;
         }
         // Perform the copy.
-        do_copy(sizeof(typename data::vector_view<TYPE2>::size_type), &size,
+        do_copy(sizeof(typename data::vector_view<TYPE>::size_type), &size,
                 to_view.size_ptr(), size_cptype);
     }
 
     // Copy the payload.
     assert(size == get_size(to_view));
-    do_copy(size * sizeof(TYPE1), from_view.ptr(), to_view.ptr(), cptype);
+    do_copy(size * sizeof(TYPE), from_view.ptr(), to_view.ptr(), cptype);
 
     // Return a new event.
     return create_event();
 }
 
-template <typename TYPE1, typename TYPE2, typename ALLOC>
-copy::event_type copy::operator()(const data::vector_view<TYPE1>& from_view,
-                                  std::vector<TYPE2, ALLOC>& to_vec,
-                                  type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
+template <typename TYPE, typename ALLOC>
+copy::event_type copy::operator()(
+    const data::vector_view<std::add_const_t<TYPE>>& from_view,
+    std::vector<TYPE, ALLOC>& to_vec, type::copy_type cptype) const {
 
     // Figure out the size of the buffer.
-    const typename data::vector_view<TYPE1>::size_type size =
+    const typename data::vector_view<std::add_const_t<TYPE>>::size_type size =
         get_size(from_view);
 
     // Make the target vector the correct size.
     to_vec.resize(size);
     // Perform the memory copy.
-    do_copy(size * sizeof(TYPE1), from_view.ptr(), to_vec.data(), cptype);
+    do_copy(size * sizeof(TYPE), from_view.ptr(), to_vec.data(), cptype);
 
     // Return a new event.
     return create_event();
@@ -253,16 +241,10 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     return result;
 }
 
-template <typename TYPE1, typename TYPE2>
+template <typename TYPE>
 copy::event_type copy::operator()(
-    const data::jagged_vector_view<TYPE1>& from_view,
-    data::jagged_vector_view<TYPE2> to_view, type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
+    const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
+    data::jagged_vector_view<TYPE> to_view, type::copy_type cptype) const {
 
     // A sanity check.
     if (from_view.size() > to_view.size()) {
@@ -293,7 +275,8 @@ copy::event_type copy::operator()(
 
     // Check whether the source and target capacities match up. We can only
     // perform the "optimised copy" if they do.
-    std::vector<typename data::vector_view<TYPE1>::size_type> capacities(size);
+    std::vector<typename data::vector_view<std::add_const_t<TYPE>>::size_type>
+        capacities(size);
     bool capacities_match = true;
     for (std::size_t i = 0; i < size; ++i) {
         if (from_view.host_ptr()[i].capacity() !=
@@ -321,23 +304,18 @@ copy::event_type copy::operator()(
     return create_event();
 }
 
-template <typename TYPE1, typename TYPE2, typename ALLOC1, typename ALLOC2>
+template <typename TYPE, typename ALLOC1, typename ALLOC2>
 copy::event_type copy::operator()(
-    const data::jagged_vector_view<TYPE1>& from_view,
-    std::vector<std::vector<TYPE2, ALLOC2>, ALLOC1>& to_vec,
+    const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
+    std::vector<std::vector<TYPE, ALLOC2>, ALLOC1>& to_vec,
     type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
 
     // Resize the output object to the correct size.
     details::resize_jagged_vector(to_vec, from_view.size());
     const auto sizes = get_sizes(from_view);
     assert(sizes.size() == to_vec.size());
-    for (typename data::jagged_vector_view<TYPE1>::size_type i = 0;
+    for (typename data::jagged_vector_view<std::add_const_t<TYPE>>::size_type
+             i = 0;
          i < from_view.size(); ++i) {
         to_vec[i].resize(sizes[i]);
     }
@@ -446,21 +424,11 @@ copy::event_type copy::memset(edm::view<edm::schema<VARTYPES...>> data,
     return create_event();
 }
 
-template <typename... VARTYPES1, typename... VARTYPES2>
+template <typename... VARTYPES>
 copy::event_type copy::operator()(
-    const edm::view<edm::schema<VARTYPES1...>>& from_view,
-    edm::view<edm::schema<VARTYPES2...>> to_view,
-    type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(sizeof...(VARTYPES1) == sizeof...(VARTYPES2),
-                  "Can only use compatible types in the copy");
-    static_assert(
-        std::conjunction_v<std::is_same<VARTYPES1, VARTYPES2>...> ||
-            std::conjunction_v<
-                edm::type::details::is_same_nc<VARTYPES1, VARTYPES2>...>,
-        "Can only use compatible types in the copy");
+    const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+        from_view,
+    edm::view<edm::schema<VARTYPES...>> to_view, type::copy_type cptype) const {
 
     // First, handle the simple case, when both views have a contiguous memory
     // layout.
@@ -512,21 +480,11 @@ copy::event_type copy::operator()(
     return create_event();
 }
 
-template <typename... VARTYPES1, typename... VARTYPES2>
+template <typename... VARTYPES>
 copy::event_type copy::operator()(
-    const edm::view<edm::schema<VARTYPES1...>>& from_view,
-    edm::host<edm::schema<VARTYPES2...>>& to_vec,
-    type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(sizeof...(VARTYPES1) == sizeof...(VARTYPES2),
-                  "Can only use compatible types in the copy");
-    static_assert(std::is_same<edm::schema<VARTYPES1...>,
-                               edm::schema<VARTYPES2...>>::value ||
-                      details::is_same_nc<edm::schema<VARTYPES1...>,
-                                          edm::schema<VARTYPES2...>>::value,
-                  "Can only use compatible types in the copy");
+    const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+        from_view,
+    edm::host<edm::schema<VARTYPES...>>& to_vec, type::copy_type cptype) const {
 
     // Resize the output object to the correct size(s).
     resize_impl<0>(from_view, to_vec, cptype);
@@ -535,17 +493,11 @@ copy::event_type copy::operator()(
     return operator()(from_view, vecmem::get_data(to_vec), cptype);
 }
 
-template <typename TYPE1, typename TYPE2>
+template <typename TYPE>
 void copy::copy_views_impl(
-    const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
-    const data::vector_view<TYPE1>* from_view,
-    data::vector_view<TYPE2>* to_view, type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
+    const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+    const data::vector_view<std::add_const_t<TYPE>>* from_view,
+    data::vector_view<TYPE>* to_view, type::copy_type cptype) const {
 
     // Some security checks.
     assert(from_view != nullptr);
@@ -570,7 +522,7 @@ void copy::copy_views_impl(
         assert(sizes[i] <= to_view[i].capacity());
 
         // Perform the copy.
-        do_copy(sizes[i] * sizeof(TYPE1), from_view[i].ptr(), to_view[i].ptr(),
+        do_copy(sizes[i] * sizeof(TYPE), from_view[i].ptr(), to_view[i].ptr(),
                 cptype);
         ++copy_ops;
     }
@@ -579,20 +531,14 @@ void copy::copy_views_impl(
     VECMEM_DEBUG_MSG(2,
                      "Copied the payload of a jagged vector of type "
                      "\"%s\" with %lu copy operation(s)",
-                     typeid(TYPE2).name(), copy_ops);
+                     typeid(TYPE).name(), copy_ops);
 }
 
-template <typename TYPE1, typename TYPE2>
+template <typename TYPE>
 void copy::copy_views_contiguous_impl(
-    const std::vector<typename data::vector_view<TYPE1>::size_type>& sizes,
-    const data::vector_view<TYPE1>* from_view,
-    data::vector_view<TYPE2>* to_view, type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(std::is_same<TYPE1, TYPE2>::value ||
-                      details::is_same_nc<TYPE1, TYPE2>::value,
-                  "Can only use compatible types in the copy");
+    const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+    const data::vector_view<std::add_const_t<TYPE>>* from_view,
+    data::vector_view<TYPE>* to_view, type::copy_type cptype) const {
 
     // Some security checks.
     assert(from_view != nullptr);
@@ -605,7 +551,7 @@ void copy::copy_views_contiguous_impl(
     const std::size_t total_size =
         std::accumulate(sizes.begin(), sizes.end(),
                         static_cast<std::size_t>(0)) *
-        sizeof(TYPE1);
+        sizeof(TYPE);
 
     // Find the first non-empty element.
     for (std::size_t i = 0; i < size; ++i) {
@@ -628,7 +574,7 @@ void copy::copy_views_contiguous_impl(
     VECMEM_DEBUG_MSG(2,
                      "Copied the payload of a jagged vector of type "
                      "\"%s\" with 1 copy operation(s)",
-                     typeid(TYPE2).name());
+                     typeid(TYPE).name());
 }
 
 template <typename TYPE>
@@ -703,45 +649,34 @@ void copy::memset_impl(edm::view<edm::schema<VARTYPES...>> data,
     }
 }
 
-template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
-void copy::resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from_view,
-                       edm::host<edm::schema<VARTYPES2...>>& to_vec,
-                       [[maybe_unused]] type::copy_type cptype) const {
+template <std::size_t INDEX, typename... VARTYPES>
+void copy::resize_impl(
+    const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+        from_view,
+    edm::host<edm::schema<VARTYPES...>>& to_vec,
+    [[maybe_unused]] type::copy_type cptype) const {
 
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(sizeof...(VARTYPES1) == sizeof...(VARTYPES2),
-                  "Can only use compatible types in the copy");
-    static_assert(std::is_same<edm::schema<VARTYPES1...>,
-                               edm::schema<VARTYPES2...>>::value ||
-                      details::is_same_nc<edm::schema<VARTYPES1...>,
-                                          edm::schema<VARTYPES2...>>::value,
-                  "Can only use compatible types in the copy");
     // The target is a host container, so the copy type can't be anything
     // targeting a device.
     assert((cptype == type::device_to_host) || (cptype == type::host_to_host) ||
            (cptype == type::unknown));
 
     // First, handle containers with no jagged vectors in them.
-    if constexpr ((std::disjunction_v<
-                       edm::type::details::is_jagged_vector<VARTYPES1>...> ==
-                   false) &&
-                  (std::disjunction_v<
-                       edm::type::details::is_jagged_vector<VARTYPES2>...> ==
-                   false)) {
+    if constexpr (std::disjunction_v<
+                      edm::type::details::is_jagged_vector<VARTYPES>...> ==
+                  false) {
         // The single size of the source container.
-        typename edm::view<edm::schema<VARTYPES1...>>::size_type size =
-            from_view.capacity();
+        typename edm::view<
+            edm::details::add_const_t<edm::schema<VARTYPES...>>>::size_type
+            size = from_view.capacity();
         // If the container is resizable, take its size.
         if (from_view.size().ptr() != nullptr) {
-            assert(
-                from_view.size().size() ==
-                sizeof(
-                    typename edm::view<edm::schema<VARTYPES1...>>::size_type));
-            do_copy(
-                sizeof(
-                    typename edm::view<edm::schema<VARTYPES1...>>::size_type),
-                from_view.size().ptr(), &size, cptype);
+            assert(from_view.size().size() ==
+                   sizeof(typename edm::view<edm::details::add_const_t<
+                              edm::schema<VARTYPES...>>>::size_type));
+            do_copy(sizeof(typename edm::view<edm::details::add_const_t<
+                               edm::schema<VARTYPES...>>>::size_type),
+                    from_view.size().ptr(), &size, cptype);
             create_event()->wait();
         }
         // Resize the target container.
@@ -754,7 +689,7 @@ void copy::resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from_view,
         // but not all vectors are jagged vectors. ;-)
         if constexpr (edm::type::details::is_jagged_vector<
                           typename std::tuple_element<
-                              INDEX, std::tuple<VARTYPES1...>>::type>::value) {
+                              INDEX, std::tuple<VARTYPES...>>::type>::value) {
             // Get the sizes of this jagged vector.
             auto sizes = get_sizes(from_view.template get<INDEX>());
             // Set the "outer size" of the jagged vector.
@@ -770,7 +705,7 @@ void copy::resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from_view,
         } else if constexpr (edm::type::details::is_vector<
                                  typename std::tuple_element<
                                      INDEX,
-                                     std::tuple<VARTYPES1...>>::type>::value) {
+                                     std::tuple<VARTYPES...>>::type>::value) {
             // Get the size of this vector.
             auto size = get_size(from_view.template get<INDEX>());
             // Resize the target vector.
@@ -780,27 +715,18 @@ void copy::resize_impl(const edm::view<edm::schema<VARTYPES1...>>& from_view,
             to_vec.template get<INDEX>().resize(size);
         }
         // Call this function recursively.
-        if constexpr (sizeof...(VARTYPES1) > (INDEX + 1)) {
+        if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {
             resize_impl<INDEX + 1>(from_view, to_vec, cptype);
         }
     }
 }
 
-template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
+template <std::size_t INDEX, typename... VARTYPES>
 void copy::copy_sizes_impl(
-    [[maybe_unused]] const edm::view<edm::schema<VARTYPES1...>>& from_view,
-    [[maybe_unused]] edm::view<edm::schema<VARTYPES2...>> to_view,
+    [[maybe_unused]] const edm::view<
+        edm::details::add_const_t<edm::schema<VARTYPES...>>>& from_view,
+    [[maybe_unused]] edm::view<edm::schema<VARTYPES...>> to_view,
     [[maybe_unused]] type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(sizeof...(VARTYPES1) == sizeof...(VARTYPES2),
-                  "Can only use compatible types in the copy");
-    static_assert(std::is_same<edm::schema<VARTYPES1...>,
-                               edm::schema<VARTYPES2...>>::value ||
-                      details::is_same_nc<edm::schema<VARTYPES1...>,
-                                          edm::schema<VARTYPES2...>>::value,
-                  "Can only use compatible types in the copy");
 
     // This should only be called for a resizable target container, with
     // a non-resizable source container.
@@ -808,15 +734,13 @@ void copy::copy_sizes_impl(
     assert(from_view.size().ptr() == nullptr);
 
     // First, handle containers with no jagged vectors in them.
-    if constexpr ((std::disjunction_v<
-                       edm::type::details::is_jagged_vector<VARTYPES1>...> ==
-                   false) &&
-                  (std::disjunction_v<
-                       edm::type::details::is_jagged_vector<VARTYPES2>...> ==
-                   false)) {
+    if constexpr (std::disjunction_v<
+                      edm::type::details::is_jagged_vector<VARTYPES>...> ==
+                  false) {
         // Size of the source container.
-        typename edm::view<edm::schema<VARTYPES1...>>::size_type size =
-            from_view.capacity();
+        typename edm::view<
+            edm::details::add_const_t<edm::schema<VARTYPES...>>>::size_type
+            size = from_view.capacity();
         // Choose the copy type.
         type::copy_type size_cptype = type::unknown;
         switch (cptype) {
@@ -832,48 +756,38 @@ void copy::copy_sizes_impl(
                 break;
         }
         // Set the size of the target container.
-        do_copy(
-            sizeof(typename edm::view<edm::schema<VARTYPES2...>>::size_type),
-            &size, to_view.size().ptr(), size_cptype);
+        do_copy(sizeof(typename edm::view<edm::details::add_const_t<
+                           edm::schema<VARTYPES...>>>::size_type),
+                &size, to_view.size().ptr(), size_cptype);
     } else {
         // For the jagged vector case we recursively copy the sizes of every
         // jagged vector variable. The rest of the variables are not resizable
         // in such a container, so they are ignored here.
         if constexpr (edm::type::details::is_jagged_vector<
                           typename std::tuple_element<
-                              INDEX, std::tuple<VARTYPES1...>>::type>::value) {
+                              INDEX, std::tuple<VARTYPES...>>::type>::value) {
             // Copy the sizes for this variable.
             const auto sizes = get_sizes(from_view.template get<INDEX>());
             set_sizes(sizes, to_view.template get<INDEX>());
         }
         // Call this function recursively.
-        if constexpr (sizeof...(VARTYPES1) > (INDEX + 1)) {
+        if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {
             copy_sizes_impl<INDEX + 1>(from_view, to_view, cptype);
         }
     }
 }
 
-template <std::size_t INDEX, typename... VARTYPES1, typename... VARTYPES2>
+template <std::size_t INDEX, typename... VARTYPES>
 void copy::copy_payload_impl(
-    const edm::view<edm::schema<VARTYPES1...>>& from_view,
-    edm::view<edm::schema<VARTYPES2...>> to_view,
-    type::copy_type cptype) const {
-
-    // The input and output types are allowed to be different, but only by
-    // const-ness.
-    static_assert(sizeof...(VARTYPES1) == sizeof...(VARTYPES2),
-                  "Can only use compatible types in the copy");
-    static_assert(std::is_same<edm::schema<VARTYPES1...>,
-                               edm::schema<VARTYPES2...>>::value ||
-                      details::is_same_nc<edm::schema<VARTYPES1...>,
-                                          edm::schema<VARTYPES2...>>::value,
-                  "Can only use compatible types in the copy");
+    const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+        from_view,
+    edm::view<edm::schema<VARTYPES...>> to_view, type::copy_type cptype) const {
 
     // Scalars do not have their own dedicated @c copy functions.
     if constexpr (edm::type::details::is_scalar<typename std::tuple_element<
-                      INDEX, std::tuple<VARTYPES1...>>::type>::value) {
+                      INDEX, std::tuple<VARTYPES...>>::type>::value) {
         do_copy(sizeof(typename std::tuple_element<
-                       INDEX, std::tuple<VARTYPES1...>>::type::type),
+                       INDEX, std::tuple<VARTYPES...>>::type::type),
                 from_view.template get<INDEX>(), to_view.template get<INDEX>(),
                 cptype);
     } else {
@@ -882,7 +796,7 @@ void copy::copy_payload_impl(
                    to_view.template get<INDEX>(), cptype);
     }
     // Recurse into the next variable.
-    if constexpr (sizeof...(VARTYPES1) > (INDEX + 1)) {
+    if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {
         copy_payload_impl<INDEX + 1>(from_view, to_view, cptype);
     }
 }
