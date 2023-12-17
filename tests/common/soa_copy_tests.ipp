@@ -33,7 +33,8 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct(
     device_cp.setup(device_buffer);
 
     // Copy the data to the device.
-    device_cp(vecmem::get_data(input), device_buffer,
+    const typename CONTAINER::data input_data = vecmem::get_data(input);
+    device_cp(vecmem::get_data(input_data), device_buffer,
               vecmem::copy::type::host_to_device);
 
     // Create the target host container.
@@ -125,7 +126,8 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host(
     device_cp.setup(device_buffer);
 
     // Copy the data to the device.
-    device_cp(vecmem::get_data(input), device_buffer,
+    const typename CONTAINER::data input_data = vecmem::get_data(input);
+    device_cp(vecmem::get_data(input_data), device_buffer,
               vecmem::copy::type::host_to_device);
 
     // Create the target host container.
