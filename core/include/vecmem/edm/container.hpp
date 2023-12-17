@@ -42,8 +42,10 @@ struct container {
     /// Host container type
     using host = interface_type<vecmem::edm::host<schema_type> >;
 
-    /// Data type
+    /// (Non-const) Data type
     using data = vecmem::edm::data<schema_type>;
+    /// (Const) Data type
+    using const_data = vecmem::edm::data<const_schema_type>;
 
     /// Buffer type
     using buffer = vecmem::edm::buffer<schema_type>;

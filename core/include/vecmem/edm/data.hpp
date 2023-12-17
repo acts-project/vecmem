@@ -59,6 +59,11 @@ public:
 
     /// Default constructor
     data() = default;
+    /// Move constructor
+    data(data&&) = default;
+
+    /// Move assignment operator
+    data& operator=(data&&) = default;
 
     /// Constructor for the data object
     ///
