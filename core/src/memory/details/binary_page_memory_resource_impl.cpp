@@ -9,6 +9,7 @@
 // Local include(s).
 #include "binary_page_memory_resource_impl.hpp"
 
+#include "../../utils/integer_math.hpp"
 #include "vecmem/utils/debug.hpp"
 
 // System include(s).
@@ -17,42 +18,6 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
-
-#ifdef VECMEM_HAVE_LZCNT_U64
-#include <intrin.h>
-#endif
-
-namespace {
-/**
- * @brief Rounds a size up to the nearest power of two, and returns the power
- * (not the size itself).
- */
-std::size_t round_up(std::size_t size) {
-    for (std::size_t i = 0; i < 32; i++) {
-        if ((static_cast<std::size_t>(1UL) << i) >= size) {
-            return i;
-        }
-    }
-
-    return 0;
-}
-
-inline std::size_t clzl(std::size_t i) {
-#if defined(VECMEM_HAVE_LZCNT_U64)
-    return static_cast<std::size_t>(_lzcnt_u64(i));
-#elif defined(VECMEM_HAVE_BUILTIN_CLZL)
-    return static_cast<std::size_t>(__builtin_clzl(i));
-#else
-    std::size_t b;
-    for (b = 0;
-         !((i << b) & (static_cast<std::size_t>(1UL)
-                       << (std::numeric_limits<std::size_t>::digits - 1UL)));
-         ++b)
-        ;
-    return b;
-#endif
-}
-}  // namespace
 
 namespace vecmem::details {
 
