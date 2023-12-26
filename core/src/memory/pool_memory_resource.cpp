@@ -14,8 +14,10 @@
 
 namespace vecmem {
 
+pool_memory_resource::options::options() = default;
+
 pool_memory_resource::pool_memory_resource(memory_resource& upstream,
-                                           const pool_options& opts)
+                                           const options& opts)
     : m_impl(std::make_unique<details::pool_memory_resource_impl>(upstream,
                                                                   opts)) {}
 

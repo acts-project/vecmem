@@ -106,7 +106,6 @@ vecmem_add_library( vecmem_core core
    "src/memory/details/pool_memory_resource_impl.hpp"
    "src/memory/pool_memory_resource.cpp"
    "include/vecmem/memory/pool_memory_resource.hpp"
-   "include/vecmem/memory/pool_options.hpp"
    # Choice memory resource.
    "src/memory/details/choice_memory_resource_impl.cpp"
    "src/memory/details/choice_memory_resource_impl.hpp"

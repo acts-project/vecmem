@@ -9,7 +9,7 @@
 
 // Local include(s).
 #include "vecmem/memory/memory_resource.hpp"
-#include "vecmem/memory/pool_options.hpp"
+#include "vecmem/memory/pool_memory_resource.hpp"
 
 // System include(s).
 #include <functional>
@@ -23,7 +23,7 @@ class pool_memory_resource_impl {
 public:
     /// Constructor, on top of another memory resource
     pool_memory_resource_impl(memory_resource& upstream,
-                              const pool_options& opts);
+                              const pool_memory_resource::options& opts);
 
     /// Destructor, freeing all allocations
     ~pool_memory_resource_impl();
@@ -38,36 +38,49 @@ private:
     /// The upstream memory resource
     std::reference_wrapper<memory_resource> m_upstream;
     /// The options for the pool memory resource
-    pool_options m_options;
+    pool_memory_resource::options m_options;
 
-    struct block_descriptor {
-        block_descriptor* next = nullptr;
-    };
-
+    /// Descriptor for a single chunk of allocated memory
     struct chunk_descriptor {
-        std::size_t size;
-        chunk_descriptor* next = nullptr;
+        /// Size of the memory chunk
+        std::size_t size = 0u;
+        /// Pointer to the beginning of the memory chunk
+        void* pointer = nullptr;
     };
 
+    /// Descriptor for a single, oversized block of memory
     struct oversized_block_descriptor {
-        std::size_t size;
-        std::size_t alignment;
-        oversized_block_descriptor* prev = nullptr;
-        oversized_block_descriptor* next = nullptr;
-        oversized_block_descriptor* next_cached = nullptr;
+        /// The size of the memory block
+        std::size_t size = 0u;
+        /// The alignment of the memory block
+        std::size_t alignment = 0u;
+        /// Pointer to the memory block
+        void* pointer = nullptr;
+
+        /// Comparison operator
+        bool operator<(const oversized_block_descriptor& other) const;
     };
 
+    /// Pool of available memory blocks of a given size/alignment
     struct pool {
-        block_descriptor* free_list = nullptr;
-        std::size_t previous_allocated_count;
+        /// Available blocks, ready for use
+        std::vector<void*> free_blocks;
+        std::size_t previous_allocated_count = 0u;
     };
 
+    /// Helper variable, with the base-2 log of the smallest block size
     const std::size_t m_smallest_block_log2;
 
+    /// Buckets containing free lists for each pooled size
     std::vector<pool> m_pools;
-    chunk_descriptor* m_allocated = nullptr;
-    oversized_block_descriptor* m_oversized = nullptr;
-    oversized_block_descriptor* m_cached_oversized = nullptr;
+    /// List of all allocations from the upstream memory resource
+    std::vector<chunk_descriptor> m_allocated;
+    /// List of all cached oversized/overaligned blocks that have been returned
+    /// to the pool to cache
+    std::vector<oversized_block_descriptor> m_cached_oversized;
+    /// List of all oversized/overaligned allocations from the upstream memory
+    /// resource
+    std::vector<oversized_block_descriptor> m_oversized;
 
 };  // class pool_memory_resource_impl
 
