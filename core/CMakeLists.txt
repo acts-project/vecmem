@@ -137,6 +137,9 @@ vecmem_add_library( vecmem_core core
    # Terminal memory resource.
    "src/memory/terminal_memory_resource.cpp"
    "include/vecmem/memory/terminal_memory_resource.hpp"
+   # Synchronized memory resource.
+   "src/memory/synchronized_memory_resource.cpp"
+   "include/vecmem/memory/synchronized_memory_resource.hpp"
    # Utilities.
    "include/vecmem/utils/copy.hpp"
    "include/vecmem/utils/impl/copy.ipp"
