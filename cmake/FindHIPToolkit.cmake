@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2023 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -29,7 +29,7 @@ if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
 endif()
 
 # Look for the ROCm/HIP header(s).
-find_path( HIP_INCLUDE_DIR
+find_path( HIPToolkit_INCLUDE_DIR
    NAMES "hip/hip_runtime.h"
          "hip/hip_runtime_api.h"
    PATHS "${HIP_ROOT_DIR}"
@@ -39,37 +39,37 @@ find_path( HIP_INCLUDE_DIR
          "/opt/rocm/hip"
    PATH_SUFFIXES "include"
    DOC "ROCm/HIP include directory" )
-mark_as_advanced( HIP_INCLUDE_DIR )
-set( HIP_INCLUDE_DIRS "${HIP_INCLUDE_DIR}" )
-list( APPEND _requiredVars HIP_INCLUDE_DIR )
+mark_as_advanced( HIPToolkit_INCLUDE_DIR )
+set( HIPToolkit_INCLUDE_DIRS "${HIPToolkit_INCLUDE_DIR}" )
+list( APPEND _requiredVars HIPToolkit_INCLUDE_DIR )
 
 # Figure out the version of HIP.
-find_file( HIP_VERSION_FILE
+find_file( HIPToolkit_VERSION_FILE
    NAMES "hip/hip_version.h"
-   HINTS "${HIP_INCLUDE_DIR}"
+   HINTS "${HIPToolkit_INCLUDE_DIR}"
    DOC "Path to hip/hip_version.h" )
-mark_as_advanced( HIP_VERSION_FILE )
-if( HIP_VERSION_FILE )
-   file( READ "${HIP_VERSION_FILE}" _versionFileContents )
+mark_as_advanced( HIPToolkit_VERSION_FILE )
+if( HIPToolkit_VERSION_FILE )
+   file( READ "${HIPToolkit_VERSION_FILE}" _versionFileContents )
    if( "${_versionFileContents}" MATCHES "HIP_VERSION_MAJOR ([0-9]+)" )
-      set( HIP_VERSION_MAJOR "${CMAKE_MATCH_1}" )
+      set( HIPToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}" )
    endif()
    if( "${_versionFileContents}" MATCHES "HIP_VERSION_MINOR ([0-9]+)" )
-      set( HIP_VERSION_MINOR "${CMAKE_MATCH_1}" )
+      set( HIPToolkit_VERSION_MINOR "${CMAKE_MATCH_1}" )
    endif()
    if( "${_versionFileContents}" MATCHES "HIP_VERSION_PATCH ([0-9]+)" )
-      set( HIP_VERSION_PATCH "${CMAKE_MATCH_1}" )
+      set( HIPToolkit_VERSION_PATCH "${CMAKE_MATCH_1}" )
    endif()
    unset( _versionFileContents )
-   set( HIP_VERSION
-        "${HIP_VERSION_MAJOR}.${HIP_VERSION_MINOR}.${HIP_VERSION_PATCH}" )
+   set( HIPToolkit_VERSION
+        "${HIPToolkit_VERSION_MAJOR}.${HIPToolkit_VERSION_MINOR}.${HIPToolkit_VERSION_PATCH}" )
 endif()
 
 # Look for the HIP runtime library.
-set( HIP_LIBRARIES )
+set( HIPToolkit_LIBRARIES )
 if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
     ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
-   find_library( HIP_amdhip64_LIBRARY
+   find_library( HIPToolkit_amdhip64_LIBRARY
       NAMES "amdhip64"
       PATHS "${HIP_ROOT_DIR}"
             ENV ROCM_PATH
@@ -78,25 +78,26 @@ if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
             "/opt/rocm/hip"
       PATH_SUFFIXES "lib" "lib64"
       DOC "AMD/HIP Runtime Library" )
-   mark_as_advanced( HIP_amdhip64_LIBRARY )
-   set( HIP_RUNTIME_LIBRARY "${HIP_amdhip64_LIBRARY}" )
-   list( APPEND HIP_LIBRARIES "${HIP_amdhip64_LIBRARY}" )
-   list( APPEND _requiredVars HIP_RUNTIME_LIBRARY )
+   mark_as_advanced( HIPToolkit_amdhip64_LIBRARY )
+   set( HIPToolkit_RUNTIME_LIBRARY "${HIPToolkit_amdhip64_LIBRARY}" )
+   list( APPEND HIPToolkit_LIBRARIES "${HIPToolkit_amdhip64_LIBRARY}" )
+   list( APPEND _requiredVars HIPToolkit_RUNTIME_LIBRARY )
 elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
         ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
-   set( HIP_RUNTIME_LIBRARY "${CUDA_cudart_LIBRARY}" )
-   list( APPEND HIP_LIBRARIES CUDA::cudart )
+   set( HIPToolkit_RUNTIME_LIBRARY "${CUDA_CUDART}" )
+   list( APPEND HIPToolkit_LIBRARIES CUDA::cudart )
 else()
-   message( SEND_ERROR "Invalid (CMAKE_)HIP_PLATFORM setting received" )
+   message( SEND_ERROR
+      "Invalid CMAKE_HIP_PLATFORM setting (${CMAKE_HIP_PLATFORM}) received" )
 endif()
 
 # Set up the compiler definitions needed to use the HIP headers.
 if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
     ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
-   set( HIP_DEFINITIONS "__HIP_PLATFORM_HCC__" )
+   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_HCC__" )
 elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
         ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
-   set( HIP_DEFINITIONS "__HIP_PLATFORM_NVCC__" )
+   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_NVCC__" )
 else()
    message( SEND_ERROR "Invalid (CMAKE_)HIP_PLATFORM setting received" )
 endif()
@@ -105,17 +106,17 @@ endif()
 include( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( HIPToolkit
    FOUND_VAR HIPToolkit_FOUND
-   REQUIRED_VARS HIP_INCLUDE_DIR ${_requiredVars}
-   VERSION_VAR HIP_VERSION )
+   REQUIRED_VARS HIPToolkit_INCLUDE_DIR ${_requiredVars}
+   VERSION_VAR HIPToolkit_VERSION )
 
 # Set up the imported target(s).
 if( NOT TARGET HIP::hiprt )
    add_library( HIP::hiprt UNKNOWN IMPORTED )
    set_target_properties( HIP::hiprt PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${HIP_INCLUDE_DIRS}"
-      IMPORTED_LOCATION "${HIP_RUNTIME_LIBRARY}"
-      INTERFACE_LINK_LIBRARIES "${HIP_LIBRARIES}"
-      INTERFACE_COMPILE_DEFINITIONS "${HIP_DEFINITIONS}" )
+      INTERFACE_INCLUDE_DIRECTORIES "${HIPToolkit_INCLUDE_DIRS}"
+      IMPORTED_LOCATION "${HIPToolkit_RUNTIME_LIBRARY}"
+      INTERFACE_LINK_LIBRARIES "${HIPToolkit_LIBRARIES}"
+      INTERFACE_COMPILE_DEFINITIONS "${HIPToolkit_DEFINITIONS}" )
 endif()
 
 # Clean up.
