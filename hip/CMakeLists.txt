@@ -4,12 +4,8 @@
 #
 # Mozilla Public License Version 2.0
 
-# Enable HIP as a language.
-enable_language( HIP )
-
 # Project include(s).
 include( vecmem-compiler-options-cpp )
-include( vecmem-compiler-options-hip )
 
 # External dependency/dependencies.
 find_package( HIPToolkit REQUIRED )
@@ -37,8 +33,7 @@ target_link_libraries( vecmem_hip
 
 # Hide the library's symbols by default.
 set_target_properties( vecmem_hip PROPERTIES
-   CXX_VISIBILITY_PRESET "hidden"
-   HIP_VISIBILITY_PRESET "hidden" )
+   CXX_VISIBILITY_PRESET "hidden" )
 
 # Test the public headers of vecmem::hip.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
