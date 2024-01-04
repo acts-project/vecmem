@@ -120,7 +120,8 @@ if( NOT DEFINED CMAKE_HIP_LINK_EXECUTABLE )
       "\"${CMAKE_HIP_HOST_LINKER}\" <FLAGS> <CMAKE_HIP_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" )
 endif()
 
-# Set up the default flags for the HIP build.
+# Set up the flags for the HIP build.
+set( CMAKE_HIP_FLAGS_INIT "${CMAKE_HIP_FLAGS_INIT} $ENV{HIPFLAGS}" )
 cmake_initialize_per_config_variable( CMAKE_HIP_FLAGS
    "Flags used by the HIP compiler" )
 set( CMAKE_HIP_FLAGS

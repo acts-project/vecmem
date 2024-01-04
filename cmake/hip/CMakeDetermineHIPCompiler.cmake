@@ -16,7 +16,7 @@ endif()
 if( NOT "$ENV{HIPCXX}" STREQUAL "" )
    # Interpret the contents of HIPCXX.
    get_filename_component( CMAKE_HIP_COMPILER_INIT "$ENV{HIPCXX}"
-      PROGRAM PROGRAM_ARGS CMAKE_HIP_FLAGS_INIT )
+      PROGRAM PROGRAM_ARGS CMAKE_HIP_FLAGS_ENV_INIT )
    if( NOT EXISTS ${CMAKE_HIP_COMPILER_INIT} )
       message( FATAL_ERROR
          "Could not find compiler set in environment variable HIPCXX:\n$ENV{HIPCXX}.\n${CMAKE_HIP_COMPILER_INIT}")
@@ -30,7 +30,7 @@ else()
             "/opt/rocm"
             "/opt/rocm/hip"
       PATH_SUFFIXES "bin" )
-   set( CMAKE_HIP_FLAGS_INIT "" )
+   set( CMAKE_HIP_FLAGS_ENV_INIT "" )
 endif()
 if( CMAKE_HIP_COMPILER_INIT )
    # Determine the type and version of the SYCL compiler.
@@ -92,36 +92,13 @@ set( CMAKE_HIP_PLATFORM "${CMAKE_HIP_PLATFORM_DEFAULT}" CACHE STRING
 set_property( CACHE CMAKE_HIP_PLATFORM
    PROPERTY STRINGS "hcc" "nvcc" "amd" "nvidia" )
 
+# Set up C++14 by default for HIP.
+set( CMAKE_HIP_STANDARD 14 CACHE STRING "C++ standard to use with HIP" )
+set_property( CACHE CMAKE_HIP_STANDARD PROPERTY STRINGS 11 14 17 )
+
 # Look for the HIP toolkit. Its variables are needed for setting up the build
 # of HIP source files.
 find_package( HIPToolkit REQUIRED QUIET )
-
-# Turn on CUDA support if we use nvcc.
-if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
-    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
-   enable_language( CUDA )
-endif()
-
-# Default (optimisation) flags. (Heavily based on the C++ compiler.)
-set( CMAKE_HIP_FLAGS_INIT
-   "${CMAKE_HIP_FLAGS_INIT} ${CMAKE_CXX_FLAGS_INIT} $ENV{HIPFLAGS}" )
-set( CMAKE_HIP_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT}" )
-set( CMAKE_HIP_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT}" )
-set( CMAKE_HIP_FLAGS_RELWITHDEBINFO_INIT
-   "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" )
-
-# Implicit include paths and libraries, based on the C++ compiler in use.
-set( CMAKE_HIP_IMPLICIT_INCLUDE_DIRECTORIES
-   "${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}" )
-set( CMAKE_HIP_IMPLICIT_LINK_LIBRARIES "${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}" )
-set( CMAKE_HIP_IMPLICIT_LINK_DIRECTORIES
-   "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}" )
-
-# Set up C++14 by default, as C++17 is not supported by the NVidia backend.
-# However let the user choose C++17 if they build for the AMD backend. They'll
-# get a clear-enough error message if they chose the wrong setting anyway.
-set( CMAKE_HIP_STANDARD 14 CACHE STRING "C++ standard to use with HIP" )
-set_property( CACHE CMAKE_HIP_STANDARD PROPERTY STRINGS 11 14 17 )
 
 # Configure variables set in this file for fast reload later on.
 configure_file( ${CMAKE_CURRENT_LIST_DIR}/CMakeHIPCompiler.cmake.in
