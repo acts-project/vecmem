@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2023 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -21,6 +21,7 @@
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/memory/identity_memory_resource.hpp"
 #include "vecmem/memory/instrumenting_memory_resource.hpp"
+#include "vecmem/memory/synchronized_memory_resource.hpp"
 #include "vecmem/memory/terminal_memory_resource.hpp"
 
 // GoogleTest include(s).
@@ -38,6 +39,9 @@ static vecmem::arena_memory_resource arena_resource(host_resource, 20000,
                                                     10000000);
 static vecmem::instrumenting_memory_resource instrumenting_resource(
     host_resource);
+static vecmem::synchronized_memory_resource synchronized_resource(
+    host_resource);
+
 static vecmem::identity_memory_resource identity_resource(host_resource);
 static vecmem::conditional_memory_resource conditional_resource(
     host_resource, [](std::size_t, std::size_t) { return true; });
@@ -53,6 +57,8 @@ static vecmem::choice_memory_resource choice_resource(
 static vecmem::debug_memory_resource debug_host_resource(host_resource);
 static vecmem::debug_memory_resource debug_binary_resource(binary_resource);
 static vecmem::debug_memory_resource debug_arena_resource(arena_resource);
+static vecmem::debug_memory_resource debug_synchronized_resource(
+    synchronized_resource);
 
 // Set up the test name generating helper object.
 static vecmem::testing::memory_resource_name_gen name_gen(
@@ -61,6 +67,7 @@ static vecmem::testing::memory_resource_name_gen name_gen(
      {&contiguous_resource, "contiguous_resource"},
      {&arena_resource, "arena_resource"},
      {&instrumenting_resource, "instrumenting_resource"},
+     {&synchronized_resource, "synchronized_resource"},
      {&identity_resource, "identity_resource"},
      {&conditional_resource, "conditional_resource"},
      {&coalescing_resource_1, "coalescing_resource_1"},
@@ -68,43 +75,48 @@ static vecmem::testing::memory_resource_name_gen name_gen(
      {&choice_resource, "choice_resource"},
      {&debug_host_resource, "debug_host_resource"},
      {&debug_binary_resource, "debug_binary_resource"},
-     {&debug_arena_resource, "debug_arena_resource"}});
+     {&debug_arena_resource, "debug_arena_resource"},
+     {&debug_synchronized_resource, "debug_synchronized_resource"}});
 
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_tests, memory_resource_test_basic,
     testing::Values(&host_resource, &binary_resource, &arena_resource,
-                    &instrumenting_resource, &identity_resource,
-                    &conditional_resource, &coalescing_resource_1,
-                    &coalescing_resource_2, &choice_resource,
-                    &debug_host_resource, &debug_binary_resource,
-                    &debug_arena_resource),
+                    &instrumenting_resource, &synchronized_resource,
+                    &identity_resource, &conditional_resource,
+                    &coalescing_resource_1, &coalescing_resource_2,
+                    &choice_resource, &debug_host_resource,
+                    &debug_binary_resource, &debug_arena_resource,
+                    &debug_synchronized_resource),
     name_gen);
 
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_tests, memory_resource_test_host_accessible,
     testing::Values(&host_resource, &binary_resource, &arena_resource,
-                    &instrumenting_resource, &identity_resource,
-                    &conditional_resource, &coalescing_resource_1,
-                    &coalescing_resource_2, &choice_resource,
-                    &debug_host_resource, &debug_binary_resource,
-                    &debug_arena_resource),
+                    &instrumenting_resource, &synchronized_resource,
+                    &identity_resource, &conditional_resource,
+                    &coalescing_resource_1, &coalescing_resource_2,
+                    &choice_resource, &debug_host_resource,
+                    &debug_binary_resource, &debug_arena_resource,
+                    &debug_synchronized_resource),
     name_gen);
 
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_tests, memory_resource_test_stress,
     testing::Values(&host_resource, &binary_resource, &arena_resource,
-                    &instrumenting_resource, &identity_resource,
-                    &conditional_resource, &coalescing_resource_1,
-                    &coalescing_resource_2, &choice_resource,
-                    &debug_host_resource, &debug_binary_resource,
-                    &debug_arena_resource),
+                    &instrumenting_resource, &synchronized_resource,
+                    &identity_resource, &conditional_resource,
+                    &coalescing_resource_1, &coalescing_resource_2,
+                    &choice_resource, &debug_host_resource,
+                    &debug_binary_resource, &debug_arena_resource,
+                    &debug_synchronized_resource),
     name_gen);
 
 INSTANTIATE_TEST_SUITE_P(
     core_memory_resource_tests, memory_resource_test_alignment,
-    testing::Values(&host_resource, &instrumenting_resource, &identity_resource,
+    testing::Values(&host_resource, &instrumenting_resource,
+                    &synchronized_resource, &identity_resource,
                     &conditional_resource, &coalescing_resource_1,
                     &coalescing_resource_2, &choice_resource,
-                    &debug_host_resource),
+                    &debug_host_resource, &debug_synchronized_resource),
     name_gen);
