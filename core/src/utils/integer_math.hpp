@@ -1,13 +1,15 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 #pragma once
 
 // System include(s).
+#include <cassert>
+#include <climits>
 #include <cstddef>
 #include <limits>
 #ifdef VECMEM_HAVE_LZCNT_U64
@@ -55,7 +57,7 @@ inline std::size_t clzl(std::size_t i) {
 ///
 inline std::size_t log2(std::size_t x) {
 
-    static constexpr std::size_t num_bits = 8 * sizeof(std::size_t);
+    static constexpr std::size_t num_bits = CHAR_BIT * sizeof(std::size_t);
     static constexpr std::size_t num_bits_minus_one = num_bits - 1;
     return num_bits_minus_one - clzl(x);
 }
@@ -84,7 +86,9 @@ inline std::size_t log2_ri(std::size_t x) {
  * (not the size itself).
  */
 inline std::size_t round_up(std::size_t size) {
-    for (std::size_t i = 0; i < 32; i++) {
+    static constexpr std::size_t SIZE_T_BITS = CHAR_BIT * sizeof(std::size_t);
+    assert((static_cast<std::size_t>(1UL) << (SIZE_T_BITS - 1)) >= size);
+    for (std::size_t i = 0; i < SIZE_T_BITS; ++i) {
         if ((static_cast<std::size_t>(1UL) << i) >= size) {
             return i;
         }

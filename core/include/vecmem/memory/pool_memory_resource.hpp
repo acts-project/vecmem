@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -31,6 +31,10 @@ class pool_memory_resource_impl;
 /// The code is a copy of @c thrust::mr::disjoint_unsynchronized_pool_resource,
 /// giving it a standard @c std::pmr::memory_resource interface. (And
 /// simplifying it in some places a little.)
+///
+/// The original code of @c thrust::mr::disjoint_unsynchronized_pool_resource
+/// is licensed under the Apache License, Version 2.0, which is available at:
+/// http://www.apache.org/licenses/LICENSE-2.0
 ///
 class pool_memory_resource final : public details::memory_resource_base {
 
