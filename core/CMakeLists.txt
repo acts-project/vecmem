@@ -101,6 +101,11 @@ vecmem_add_library( vecmem_core core
    "src/memory/details/binary_page_memory_resource_impl.hpp"
    "src/memory/binary_page_memory_resource.cpp"
    "include/vecmem/memory/binary_page_memory_resource.hpp"
+   # Pool memory resource.
+   "src/memory/details/pool_memory_resource_impl.cpp"
+   "src/memory/details/pool_memory_resource_impl.hpp"
+   "src/memory/pool_memory_resource.cpp"
+   "include/vecmem/memory/pool_memory_resource.hpp"
    # Choice memory resource.
    "src/memory/details/choice_memory_resource_impl.cpp"
    "src/memory/details/choice_memory_resource_impl.hpp"
@@ -150,7 +155,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/utils/tuple.hpp"
    "include/vecmem/utils/impl/tuple.ipp"
    "include/vecmem/utils/type_traits.hpp"
-   "include/vecmem/utils/types.hpp" )
+   "include/vecmem/utils/types.hpp"
+   "src/utils/integer_math.hpp" )
 
 # Hide the library's symbols by default.
 set_target_properties( vecmem_core PROPERTIES
