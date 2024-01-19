@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -14,6 +14,7 @@ mark_as_advanced( VECMEM_LANGUAGE_DIR )
 
 # Teach CMake about VecMem's custom language files.
 list( INSERT CMAKE_MODULE_PATH 0
+   "${VECMEM_LANGUAGE_DIR}"
    "${VECMEM_LANGUAGE_DIR}/hip"
    "${VECMEM_LANGUAGE_DIR}/sycl" )
 
@@ -48,6 +49,7 @@ macro( vecmem_check_language lang )
             "cmake_minimum_required( VERSION ${CMAKE_VERSION} )\n"
             "project( Check${lang} LANGUAGES CXX )\n"
             "list( INSERT CMAKE_MODULE_PATH 0 "
+            "      \"${VECMEM_LANGUAGE_DIR}\" "
             "      \"${VECMEM_LANGUAGE_DIR}/hip\" "
             "      \"${VECMEM_LANGUAGE_DIR}/sycl\" )\n"
             "enable_language( ${lang} )\n"

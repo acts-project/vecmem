@@ -45,8 +45,7 @@ target_link_libraries( vecmem_cuda
 
 # Hide the library's symbols by default.
 set_target_properties( vecmem_cuda PROPERTIES
-   CXX_VISIBILITY_PRESET  "hidden"
-   CUDA_VISIBILITY_PRESET "hidden" )
+   CXX_VISIBILITY_PRESET  "hidden" )
 
 # Test the public headers of vecmem::cuda.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
