@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -27,8 +27,15 @@ else()
       __compiler_intel( SYCL )
    else()
       message( WARNING "No Intel compiler configuration found in CMake! "
-         "The build will likely fail." )
+         "Setting fragile defaults by hand..." )
+      set( CMAKE_SYCL_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT}" )
+      set( CMAKE_SYCL_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT}" )
+      set( CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT
+         "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" )
    endif()
+   # Set some options by hand, which new CMake versions do automatically.
+   set( CMAKE_SYCL_COMPILE_OPTIONS_PIC "${CMAKE_CXX_COMPILE_OPTIONS_PIC}" )
+   set( CMAKE_SYCL_COMPILE_OPTIONS_PIE "${CMAKE_CXX_COMPILE_OPTIONS_PIE}" )
 endif()
 
 # Set up the dependency file generation for this platform. Note that SYCL

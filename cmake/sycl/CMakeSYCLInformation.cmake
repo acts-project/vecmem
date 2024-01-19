@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -120,7 +120,31 @@ if( NOT DEFINED CMAKE_SYCL_LINK_EXECUTABLE )
       "\"${CMAKE_SYCL_HOST_LINKER}\" <FLAGS> <CMAKE_SYCL_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>" )
 endif()
 
+# Set the include flag(s).
+if( NOT DEFINED CMAKE_INCLUDE_FLAG_SYCL )
+   set( CMAKE_INCLUDE_FLAG_SYCL "${CMAKE_INCLUDE_FLAG_CXX}" )
+endif()
+if( NOT DEFINED CMAKE_INCLUDE_SYSTEM_FLAG_SYCL )
+   set( CMAKE_INCLUDE_SYSTEM_FLAG_SYCL "${CMAKE_INCLUDE_SYSTEM_FLAG_CXX}" )
+endif()
+
+# By default don't specify standard C++ include paths, library paths and
+# libraries for the SYCL link commands.
+if( NOT DEFINED CMAKE_SYCL_IMPLICIT_INCLUDE_DIRECTORIES )
+   set( CMAKE_SYCL_IMPLICIT_INCLUDE_DIRECTORIES
+      "${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}" )
+endif()
+if( NOT DEFINED CMAKE_SYCL_IMPLICIT_LINK_LIBRARIES )
+   set( CMAKE_SYCL_IMPLICIT_LINK_LIBRARIES
+      "${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}" )
+endif()
+if( NOT DEFINED CMAKE_SYCL_IMPLICIT_LINK_DIRECTORIES )
+   set( CMAKE_SYCL_IMPLICIT_LINK_DIRECTORIES
+      "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}" )
+endif()
+
 # Set up the default flags for the SYCL build.
+set( CMAKE_SYCL_FLAGS_INIT "${CMAKE_SYCL_FLAGS_INIT} $ENV{SYCLFLAGS}" )
 cmake_initialize_per_config_variable( CMAKE_SYCL_FLAGS
    "Flags used by the SYCL compiler" )
 set( CMAKE_SYCL_FLAGS
