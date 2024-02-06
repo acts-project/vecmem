@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -9,8 +9,18 @@ include( Platform/Windows-IntelLLVM )
 include( Compiler/IntelLLVM )
 
 # Set up the variables specifying the command line arguments of the compiler.
+# Unfortunately these don't really do anything at the moment, as the CMake code
+# has pretty specific paths for the different languages with MSVC. :-(
 __windows_compiler_intel( SYCL )
 __compiler_intel_llvm( SYCL )
+
+# Because the above doesn't do much, take the C++ flags set up on Windows, and
+# use them for SYCL compilation as well.
+string( APPEND CMAKE_SYCL_FLAGS_INIT ${CMAKE_CXX_FLAGS_INIT} )
+string( APPEND CMAKE_SYCL_FLAGS_DEBUG_INIT ${CMAKE_CXX_FLAGS_DEBUG_INIT} )
+string( APPEND CMAKE_SYCL_FLAGS_RELEASE_INIT ${CMAKE_CXX_FLAGS_RELEASE_INIT} )
+string( APPEND CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT
+   ${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT} )
 
 # Set up the dependency file generation for this platform. Note that SYCL
 # compilation only works with Makefile and Ninja generators, so no check is made
