@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -96,31 +96,8 @@ else()
 endif()
 set( CMAKE_SYCL_COMPILER_ENV_VAR "SYCLCXX" )
 
-# Set how the compiler should pass include directories to the SYCL compiler.
-set( CMAKE_INCLUDE_FLAG_SYCL "${CMAKE_INCLUDE_FLAG_CXX}" )
-set( CMAKE_INCLUDE_SYSTEM_FLAG_SYCL "${CMAKE_INCLUDE_SYSTEM_FLAG_CXX}" )
-
 # Set up the linker used for components holding SYCL source code.
 set( CMAKE_SYCL_HOST_LINKER "${CMAKE_SYCL_COMPILER}" )
-
-# Flag used for building position independent code. (The same as that of the
-# C++ compiler.)
-set( CMAKE_SYCL_COMPILE_OPTIONS_PIC "${CMAKE_CXX_COMPILE_OPTIONS_PIC}" )
-
-# Default (optimisation) flags. (Heavily based on the C++ compiler.)
-set( CMAKE_SYCL_FLAGS_INIT
-   "${CMAKE_SYCL_FLAGS_INIT} ${CMAKE_CXX_FLAGS_INIT} $ENV{SYCLFLAGS}" )
-set( CMAKE_SYCL_FLAGS_DEBUG_INIT "${CMAKE_CXX_FLAGS_DEBUG_INIT}" )
-set( CMAKE_SYCL_FLAGS_RELEASE_INIT "${CMAKE_CXX_FLAGS_RELEASE_INIT}" )
-set( CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT
-   "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" )
-
-# Implicit include paths and libraries, based on the C++ compiler in use.
-set( CMAKE_SYCL_IMPLICIT_INCLUDE_DIRECTORIES
-   "${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}" )
-set( CMAKE_SYCL_IMPLICIT_LINK_LIBRARIES "${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES}" )
-set( CMAKE_SYCL_IMPLICIT_LINK_DIRECTORIES
-   "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}" )
 
 # Set up C++17 by default.
 set( CMAKE_SYCL_STANDARD 17 CACHE STRING "C++ standard to use with SYCL" )
