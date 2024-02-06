@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -28,14 +28,14 @@
 static cl::sycl::queue queue;
 
 /// Host memory resource to use in the tests.
-static vecmem::sycl::host_memory_resource host_mr{&queue};
+static vecmem::sycl::host_memory_resource sycl_host_mr{&queue};
 /// Device memory resource to use in the tests.
-static vecmem::sycl::device_memory_resource device_mr{&queue};
+static vecmem::sycl::device_memory_resource sycl_device_mr{&queue};
 /// Shared memory resource to use in the tests.
-static vecmem::sycl::shared_memory_resource shared_mr{&queue};
+static vecmem::sycl::shared_memory_resource sycl_shared_mr{&queue};
 
 /// Synchronous device copy object to use in the tests.
-static vecmem::sycl::copy copy{&queue};
+static vecmem::sycl::copy sycl_copy{&queue};
 
 /// Fill a simple SoA container with some data.
 void syclSimpleFill(vecmem::testing::simple_soa_container::view view) {
@@ -109,10 +109,12 @@ static void* syclJaggedModifyPtr = reinterpret_cast<void*>(&syclJaggedModify);
 
 // Instantiate the test suites.
 INSTANTIATE_TEST_SUITE_P(sycl_soa_device_tests_simple, soa_device_tests_simple,
-                         testing::Values(std::tie(host_mr, device_mr, shared_mr,
-                                                  copy, syclSimpleFillPtr,
+                         testing::Values(std::tie(sycl_host_mr, sycl_device_mr,
+                                                  sycl_shared_mr, sycl_copy,
+                                                  syclSimpleFillPtr,
                                                   syclSimpleModifyPtr)));
 INSTANTIATE_TEST_SUITE_P(sycl_soa_device_tests_jagged, soa_device_tests_jagged,
-                         testing::Values(std::tie(host_mr, device_mr, shared_mr,
-                                                  copy, syclJaggedFillPtr,
+                         testing::Values(std::tie(sycl_host_mr, sycl_device_mr,
+                                                  sycl_shared_mr, sycl_copy,
+                                                  syclJaggedFillPtr,
                                                   syclJaggedModifyPtr)));
