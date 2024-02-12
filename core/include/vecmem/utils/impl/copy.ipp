@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -119,10 +119,10 @@ copy::event_type copy::operator()(
         // Perform the copy.
         do_copy(sizeof(typename data::vector_view<TYPE>::size_type), &size,
                 to_view.size_ptr(), size_cptype);
+        assert(size == get_size(to_view));
     }
 
     // Copy the payload.
-    assert(size == get_size(to_view));
     do_copy(size * sizeof(TYPE), from_view.ptr(), to_view.ptr(), cptype);
 
     // Return a new event.
@@ -353,15 +353,19 @@ copy::event_type copy::set_sizes(
     bool perform_copy = true;
     for (typename data::jagged_vector_view<TYPE>::size_type i = 0;
          i < data.size(); ++i) {
+        // Perform a capacity check in all cases. Whether or not the target is
+        // resizable.
+        if (data.host_ptr()[i].capacity() < sizes[i]) {
+            std::ostringstream msg;
+            msg << "data.host_ptr()[" << i << "].capacity() ("
+                << data.host_ptr()[i].capacity() << ") < sizes[" << i << "] ("
+                << sizes[i] << ")";
+            throw std::length_error(msg.str());
+        }
+        // Make sure that the inner vectors are consistently either all
+        // resizable, or none of them are.
         if (data.host_ptr()[i].size_ptr() == nullptr) {
             perform_copy = false;
-            if (data.host_ptr()[i].capacity() != sizes[i]) {
-                std::ostringstream msg;
-                msg << "data.host_ptr()[" << i << "].capacity() ("
-                    << data.host_ptr()[i].capacity() << ") != sizes[" << i
-                    << "] (" << sizes[i] << ")";
-                throw std::length_error(msg.str());
-            }
         } else if (perform_copy == false) {
             throw std::runtime_error(
                 "Inconsistent target jagged vector view received for resizing");
