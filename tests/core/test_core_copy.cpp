@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -184,6 +184,56 @@ TEST_F(core_copy_test, resizable_vector_buffer) {
          ++reference_itr, ++copy_vec_itr) {
         EXPECT_EQ(*reference_itr, *copy_vec_itr);
     }
+}
+
+/// Tests for copying 1-dimensional, non-same-sized vector buffers
+TEST_F(core_copy_test, diff_sized_vector_buffer) {
+
+    // Set up a reference vector.
+    const vecmem::vector<int> reference = {{1, 5, 6, 74, 234, 43, 22},
+                                           &m_resource};
+
+    // Copy its data into a somewhat larger, fixed sized buffer.
+    vecmem::data::vector_buffer<int> fixed_buffer(20u, m_resource);
+    m_copy.setup(fixed_buffer);
+    ASSERT_NO_THROW(m_copy(vecmem::get_data(reference), fixed_buffer));
+
+    // Create a device vector on top of the buffer, and with its help validate
+    // the contents of the buffer.
+    vecmem::device_vector<int> fixed_vector(fixed_buffer);
+    unsigned int i = 0;
+    for (int value : reference) {
+        EXPECT_EQ(value, fixed_vector[i]);
+        ++i;
+    }
+
+    // Test that a copy into a smaller, fixed sized vector buffer would fail.
+    vecmem::data::vector_buffer<int> small_fixed_buffer(2u, m_resource);
+    m_copy.setup(small_fixed_buffer);
+    EXPECT_THROW(m_copy(vecmem::get_data(reference), small_fixed_buffer),
+                 std::exception);
+
+    // Copy its data into a somewhat larger, resizable buffer.
+    vecmem::data::vector_buffer<int> resizable_buffer(
+        20u, m_resource, vecmem::data::buffer_type::resizable);
+    m_copy.setup(resizable_buffer);
+    ASSERT_NO_THROW(m_copy(vecmem::get_data(reference), resizable_buffer));
+
+    // Create a device vector on top of the buffer, and with its help validate
+    // the contents of the buffer.
+    vecmem::device_vector<int> resizable_vector(resizable_buffer);
+    ASSERT_EQ(static_cast<unsigned int>(reference.size()),
+              static_cast<unsigned int>(resizable_vector.size()));
+    for (i = 0; i < static_cast<unsigned int>(reference.size()); ++i) {
+        EXPECT_EQ(reference[i], resizable_vector[i]);
+    }
+
+    // Test that a copy into a smaller, resizable vector buffer would fail.
+    vecmem::data::vector_buffer<int> small_resizable_buffer(
+        2u, m_resource, vecmem::data::buffer_type::resizable);
+    m_copy.setup(small_resizable_buffer);
+    EXPECT_THROW(m_copy(vecmem::get_data(reference), small_resizable_buffer),
+                 std::exception);
 }
 
 /// Tests for copying jagged vectors
@@ -410,6 +460,76 @@ TEST_F(core_copy_test, resizable_jagged_vector_buffer) {
             EXPECT_EQ(*reference_itr_itr, *copy_vec_itr_itr);
         }
     }
+}
+
+/// Tests for copying jagged, non-same-sized vector buffers
+TEST_F(core_copy_test, diff_sized_jagged_vector_buffer) {
+
+    // Create a reference vector.
+    const vecmem::jagged_vector<int> reference = {
+        {{{1, 2, 3, 4, 5}, &m_resource},
+         {{6, 7}, &m_resource},
+         {{8, 9, 10, 11}, &m_resource},
+         {{12, 13, 14, 15, 16, 17, 18}, &m_resource},
+         {{19}, &m_resource},
+         {{20}, &m_resource}},
+        &m_resource};
+
+    // Copy its data into a somewhat larger, fixed sized jagged vector buffer.
+    const std::vector<std::size_t> capacities(6, 20);
+    vecmem::data::jagged_vector_buffer<int> fixed_buffer(capacities, m_resource,
+                                                         nullptr);
+    m_copy.setup(fixed_buffer);
+    ASSERT_NO_THROW(m_copy(vecmem::get_data(reference), fixed_buffer));
+
+    // Create a device vector on top of the buffer, and with its help validate
+    // the contents of the buffer.
+    vecmem::jagged_device_vector<int> fixed_vector(fixed_buffer);
+    unsigned int i = 0;
+    for (const auto& inner_vec : reference) {
+        unsigned int j = 0;
+        for (int value : inner_vec) {
+            EXPECT_EQ(value, fixed_vector[i][j]);
+            ++j;
+        }
+        ++i;
+    }
+
+    // Test that a copy into a smaller, fixed sized vector buffer would fail.
+    const std::vector<std::size_t> small_capacities(6, 2);
+    vecmem::data::jagged_vector_buffer<int> small_fixed_buffer(
+        small_capacities, m_resource, nullptr);
+    m_copy.setup(small_fixed_buffer);
+    EXPECT_THROW(m_copy(vecmem::get_data(reference), small_fixed_buffer),
+                 std::exception);
+
+    // Copy its data into a somewhat larger, resizable jagged vector buffer.
+    vecmem::data::jagged_vector_buffer<int> resizable_buffer(
+        capacities, m_resource, nullptr, vecmem::data::buffer_type::resizable);
+    m_copy.setup(resizable_buffer);
+    ASSERT_NO_THROW(m_copy(vecmem::get_data(reference), resizable_buffer));
+
+    // Create a device vector on top of the buffer, and with its help validate
+    // the contents of the buffer.
+    vecmem::jagged_device_vector<int> resizable_vector(resizable_buffer);
+    ASSERT_EQ(static_cast<unsigned int>(reference.size()),
+              static_cast<unsigned int>(resizable_vector.size()));
+    for (i = 0; i < static_cast<unsigned int>(reference.size()); ++i) {
+        ASSERT_EQ(static_cast<unsigned int>(reference[i].size()),
+                  static_cast<unsigned int>(resizable_vector[i].size()));
+        for (unsigned int j = 0;
+             j < static_cast<unsigned int>(reference[i].size()); ++j) {
+            EXPECT_EQ(reference[i][j], resizable_vector[i][j]);
+        }
+    }
+
+    // Test that a copy into a smaller, resizable vector buffer would fail.
+    vecmem::data::jagged_vector_buffer<int> small_resizable_buffer(
+        small_capacities, m_resource, nullptr,
+        vecmem::data::buffer_type::resizable);
+    m_copy.setup(small_resizable_buffer);
+    EXPECT_THROW(m_copy(vecmem::get_data(reference), small_resizable_buffer),
+                 std::exception);
 }
 
 /// Tests with @c vecmem::copy::memset
