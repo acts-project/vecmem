@@ -8,6 +8,8 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/containers/jagged_vector.hpp"
+#include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/utils/copy.hpp"
 
@@ -23,8 +25,30 @@
 /// and memory resources.
 ///
 class copy_tests
-    : public testing::TestWithParam<std::tuple<
-          vecmem::copy&, vecmem::memory_resource&, vecmem::memory_resource&>> {
+    : public testing::TestWithParam<
+          std::tuple<vecmem::copy&, vecmem::copy&, vecmem::memory_resource&,
+                     vecmem::memory_resource&>> {
+
+public:
+    /// Set up the test fixture.
+    void SetUp() override;
+
+protected:
+    /// Access the reference 1D data (non-const)
+    vecmem::vector<int>& ref();
+    /// Access the reference 1D data (const)
+    const vecmem::vector<int>& cref() const;
+
+    /// Access the reference jagged data (non-const)
+    vecmem::jagged_vector<int>& jagged_ref();
+    /// Access the reference jagged data (const)
+    const vecmem::jagged_vector<int>& jagged_cref() const;
+
+private:
+    /// 1D reference data for the tests.
+    vecmem::vector<int> m_ref;
+    /// Jagged reference data for the tests.
+    vecmem::jagged_vector<int> m_jagged_ref;
 };
 
 // Include the implementation.
