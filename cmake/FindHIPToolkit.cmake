@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -94,10 +94,12 @@ endif()
 # Set up the compiler definitions needed to use the HIP headers.
 if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
     ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
-   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_HCC__" )
+   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_HCC__"
+                               "__HIP_PLATFORM_AMD__" )
 elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
         ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
-   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_NVCC__" )
+   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_NVCC__"
+                               "__HIP_PLATFORM_NVIDIA__" )
 else()
    message( SEND_ERROR "Invalid (CMAKE_)HIP_PLATFORM setting received" )
 endif()
