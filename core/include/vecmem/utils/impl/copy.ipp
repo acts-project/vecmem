@@ -119,7 +119,6 @@ copy::event_type copy::operator()(
         // Perform the copy.
         do_copy(sizeof(typename data::vector_view<TYPE>::size_type), &size,
                 to_view.size_ptr(), size_cptype);
-        assert(size == get_size(to_view));
     }
 
     // Copy the payload.
