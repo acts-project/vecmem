@@ -70,19 +70,36 @@ void check_contains(const vecmem::jagged_device_vector<T>& v1,
 
 void copy_tests::SetUp() {
 
-    // Access the test parameters.
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Set up the reference data.
-    m_ref = {{1, 5, 6, 74, 234, 43, 22}, &host_mr};
-    m_jagged_ref = {{{{1, 2, 3, 4, 5}, &host_mr},
-                     {{6, 7}, &host_mr},
-                     {{8, 9, 10, 11}, &host_mr},
-                     vecmem::vector<int>(&host_mr),
-                     {{12, 13, 14, 15, 16, 17, 18}, &host_mr},
-                     {{19}, &host_mr},
-                     {{20}, &host_mr}},
-                    &host_mr};
+    m_ref = {{1, 5, 6, 74, 234, 43, 22}, host_mr_ptr()};
+    m_jagged_ref = {{{{1, 2, 3, 4, 5}, host_mr_ptr()},
+                     {{6, 7}, host_mr_ptr()},
+                     {{8, 9, 10, 11}, host_mr_ptr()},
+                     vecmem::vector<int>(host_mr_ptr()),
+                     {{12, 13, 14, 15, 16, 17, 18}, host_mr_ptr()},
+                     {{19}, host_mr_ptr()},
+                     {{20}, host_mr_ptr()}},
+                    host_mr_ptr()};
+}
+
+vecmem::copy& copy_tests::main_copy() {
+    return *(std::get<0>(GetParam()));
+}
+
+vecmem::copy& copy_tests::host_copy() {
+    return *(std::get<1>(GetParam()));
+}
+
+vecmem::memory_resource& copy_tests::main_mr() {
+    return *(std::get<2>(GetParam()));
+}
+
+vecmem::memory_resource& copy_tests::host_mr() {
+    return *(std::get<3>(GetParam()));
+}
+
+vecmem::memory_resource* copy_tests::host_mr_ptr() {
+    return std::get<3>(GetParam());
 }
 
 vecmem::vector<int>& copy_tests::ref() {
@@ -104,17 +121,12 @@ const vecmem::jagged_vector<int>& copy_tests::jagged_cref() const {
 /// Test for copying 1-dimensional vectors
 TEST_P(copy_tests, vector) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Create a view of its data.
     auto reference_data = vecmem::get_data(ref());
 
     // Make a copy of this reference.
-    auto device_copy_data = main_copy.to(reference_data, main_mr);
-    auto host_copy_data = main_copy.to(device_copy_data, host_mr);
+    auto device_copy_data = main_copy().to(reference_data, main_mr());
+    auto host_copy_data = main_copy().to(device_copy_data, host_mr());
 
     // Create device vectors over the two, and check them.
     vecmem::device_vector<int> reference_vector(reference_data);
@@ -125,17 +137,12 @@ TEST_P(copy_tests, vector) {
 /// Test for copying 1-dimensional (const) vectors
 TEST_P(copy_tests, const_vector) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Create a view of its data.
     const auto reference_data = vecmem::get_data(cref());
 
     // Make a copy of this reference.
-    const auto device_copy_data = main_copy.to(reference_data, main_mr);
-    const auto host_copy_data = main_copy.to(device_copy_data, host_mr);
+    const auto device_copy_data = main_copy().to(reference_data, main_mr());
+    const auto host_copy_data = main_copy().to(device_copy_data, host_mr());
 
     // Create device vectors over the two, and check them.
     vecmem::device_vector<const int> reference_vector(reference_data);
@@ -146,33 +153,27 @@ TEST_P(copy_tests, const_vector) {
 /// Test for copying 1-dimensional, fixed size vector buffers
 TEST_P(copy_tests, fixed_vector_buffer) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::copy& host_copy = std::get<1>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Get the size of the reference vector.
     using vecmem_size_type = vecmem::device_vector<int>::size_type;
     const vecmem_size_type size = static_cast<vecmem_size_type>(cref().size());
 
     // Create non-resizable device and host buffers, with the "exact sizes".
     vecmem::data::vector_buffer<int> device_buffer(
-        size, main_mr, vecmem::data::buffer_type::fixed_size);
-    main_copy.setup(device_buffer)->wait();
+        size, main_mr(), vecmem::data::buffer_type::fixed_size);
+    main_copy().setup(device_buffer)->wait();
     vecmem::data::vector_buffer<int> host_buffer1(
-        size, host_mr, vecmem::data::buffer_type::fixed_size),
-        host_buffer2(size, host_mr, vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer1)->wait();
-    host_copy.setup(host_buffer2)->wait();
+        size, host_mr(), vecmem::data::buffer_type::fixed_size),
+        host_buffer2(size, host_mr(), vecmem::data::buffer_type::fixed_size);
+    host_copy().setup(host_buffer1)->wait();
+    host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy(vecmem::get_data(cref()), host_buffer1,
-              vecmem::copy::type::host_to_host)
+    host_copy()(vecmem::get_data(cref()), host_buffer1,
+                vecmem::copy::type::host_to_host)
         ->wait();
-    main_copy(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -184,33 +185,27 @@ TEST_P(copy_tests, fixed_vector_buffer) {
 /// Test for copying 1-dimensional, resizable vector buffers
 TEST_P(copy_tests, resizable_vector_buffer) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::copy& host_copy = std::get<1>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Get the size of the reference vector.
     using vecmem_size_type = vecmem::device_vector<int>::size_type;
     const vecmem_size_type size = static_cast<vecmem_size_type>(cref().size());
 
     // Create resizable device and host buffers, with the "exact sizes".
     vecmem::data::vector_buffer<int> device_buffer(
-        size, main_mr, vecmem::data::buffer_type::resizable);
-    main_copy.setup(device_buffer)->wait();
+        size, main_mr(), vecmem::data::buffer_type::resizable);
+    main_copy().setup(device_buffer)->wait();
     vecmem::data::vector_buffer<int> host_buffer1(
-        size, host_mr, vecmem::data::buffer_type::resizable),
-        host_buffer2(size, host_mr, vecmem::data::buffer_type::resizable);
-    host_copy.setup(host_buffer1)->wait();
-    host_copy.setup(host_buffer2)->wait();
+        size, host_mr(), vecmem::data::buffer_type::resizable),
+        host_buffer2(size, host_mr(), vecmem::data::buffer_type::resizable);
+    host_copy().setup(host_buffer1)->wait();
+    host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy(vecmem::get_data(cref()), host_buffer1,
-              vecmem::copy::type::host_to_host)
+    host_copy()(vecmem::get_data(cref()), host_buffer1,
+                vecmem::copy::type::host_to_host)
         ->wait();
-    main_copy(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -222,12 +217,6 @@ TEST_P(copy_tests, resizable_vector_buffer) {
 /// Test(s) for copying 1-dimensional, mismatched sized vector buffers
 TEST_P(copy_tests, mismatched_vector_buffer) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::copy& host_copy = std::get<1>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Get the size of the reference vector.
     using vecmem_size_type = vecmem::device_vector<int>::size_type;
     const vecmem_size_type size = static_cast<vecmem_size_type>(cref().size());
@@ -235,22 +224,24 @@ TEST_P(copy_tests, mismatched_vector_buffer) {
     // Create non-resizable device and host buffers, which are (progressively)
     // larger than needed.
     vecmem::data::vector_buffer<int> device_buffer1(
-        size + 10u, main_mr, vecmem::data::buffer_type::fixed_size);
-    main_copy.setup(device_buffer1)->wait();
+        size + 10u, main_mr(), vecmem::data::buffer_type::fixed_size);
+    main_copy().setup(device_buffer1)->wait();
     vecmem::data::vector_buffer<int> host_buffer1(
-        size, host_mr, vecmem::data::buffer_type::fixed_size),
-        host_buffer2(size + 20u, host_mr,
+        size, host_mr(), vecmem::data::buffer_type::fixed_size),
+        host_buffer2(size + 20u, host_mr(),
                      vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer1)->wait();
-    host_copy.setup(host_buffer2)->wait();
+    host_copy().setup(host_buffer1)->wait();
+    host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy(vecmem::get_data(cref()), host_buffer1,
-              vecmem::copy::type::host_to_host)
+    host_copy()(vecmem::get_data(cref()), host_buffer1,
+                vecmem::copy::type::host_to_host)
         ->wait();
-    main_copy(host_buffer1, device_buffer1, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer1,
+                vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer1, host_buffer2, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer1, host_buffer2,
+                vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -261,33 +252,35 @@ TEST_P(copy_tests, mismatched_vector_buffer) {
     // Create non-resizable device and host buffers, which are (progressively)
     // smaller than needed.
     vecmem::data::vector_buffer<int> device_buffer2(
-        size - 1u, main_mr, vecmem::data::buffer_type::fixed_size);
-    main_copy.setup(device_buffer2)->wait();
+        size - 1u, main_mr(), vecmem::data::buffer_type::fixed_size);
+    main_copy().setup(device_buffer2)->wait();
     vecmem::data::vector_buffer<int> host_buffer3(
-        size - 2u, host_mr, vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer3)->wait();
+        size - 2u, host_mr(), vecmem::data::buffer_type::fixed_size);
+    host_copy().setup(host_buffer3)->wait();
 
     // Verify that data cannot be copied around like this.
-    EXPECT_THROW(main_copy(host_buffer1, device_buffer2,
-                           vecmem::copy::type::host_to_device),
+    EXPECT_THROW(main_copy()(host_buffer1, device_buffer2,
+                             vecmem::copy::type::host_to_device),
                  std::exception);
-    EXPECT_THROW(main_copy(device_buffer2, host_buffer3,
-                           vecmem::copy::type::device_to_host),
+    EXPECT_THROW(main_copy()(device_buffer2, host_buffer3,
+                             vecmem::copy::type::device_to_host),
                  std::exception);
 
     // Create resizable device and host buffers, which are (progressively)
     // larger than needed.
     vecmem::data::vector_buffer<int> device_buffer3(
-        size + 10u, main_mr, vecmem::data::buffer_type::resizable);
-    main_copy.setup(device_buffer3)->wait();
+        size + 10u, main_mr(), vecmem::data::buffer_type::resizable);
+    main_copy().setup(device_buffer3)->wait();
     vecmem::data::vector_buffer<int> host_buffer4(
-        size + 20u, host_mr, vecmem::data::buffer_type::resizable);
-    host_copy.setup(host_buffer4)->wait();
+        size + 20u, host_mr(), vecmem::data::buffer_type::resizable);
+    host_copy().setup(host_buffer4)->wait();
 
     // Copy data around.
-    main_copy(host_buffer1, device_buffer3, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer3,
+                vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer3, host_buffer4, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer3, host_buffer4,
+                vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -299,29 +292,25 @@ TEST_P(copy_tests, mismatched_vector_buffer) {
     // fail, the device buffer will remain at size 0. So the copy back to the
     // host will succeed. (With no copy actually happening.)
     vecmem::data::vector_buffer<int> device_buffer4(
-        size - 1u, main_mr, vecmem::data::buffer_type::resizable);
-    main_copy.setup(device_buffer4)->wait();
+        size - 1u, main_mr(), vecmem::data::buffer_type::resizable);
+    main_copy().setup(device_buffer4)->wait();
 
     // Verify that data cannot be copied around like this.
-    EXPECT_THROW(main_copy(host_buffer1, device_buffer4,
-                           vecmem::copy::type::host_to_device),
+    EXPECT_THROW(main_copy()(host_buffer1, device_buffer4,
+                             vecmem::copy::type::host_to_device),
                  std::exception);
 }
 
 /// Test for copying jagged vectors
 TEST_P(copy_tests, jagged_vector) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Create a view of its data.
     auto reference_data = vecmem::get_data(jagged_ref());
 
     // Make a copy of this reference.
-    auto device_copy_data = main_copy.to(reference_data, main_mr, &host_mr);
-    auto host_copy_data = main_copy.to(device_copy_data, host_mr);
+    auto device_copy_data =
+        main_copy().to(reference_data, main_mr(), host_mr_ptr());
+    auto host_copy_data = main_copy().to(device_copy_data, host_mr());
 
     // Create device vectors over the two, and check them.
     vecmem::jagged_device_vector<int> reference_vector(reference_data);
@@ -332,17 +321,13 @@ TEST_P(copy_tests, jagged_vector) {
 /// Test for copying (const) jagged vectors
 TEST_P(copy_tests, const_jagged_vector) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Create a view of its data.
     const auto reference_data = vecmem::get_data(jagged_cref());
 
     // Make a copy of this reference.
-    auto device_copy_data = main_copy.to(reference_data, main_mr, &host_mr);
-    auto host_copy_data = main_copy.to(device_copy_data, host_mr);
+    auto device_copy_data =
+        main_copy().to(reference_data, main_mr(), host_mr_ptr());
+    auto host_copy_data = main_copy().to(device_copy_data, host_mr());
 
     // Create device vectors over the two, and check them.
     vecmem::jagged_device_vector<const int> reference_vector(reference_data);
@@ -353,35 +338,29 @@ TEST_P(copy_tests, const_jagged_vector) {
 /// Test for copying jagged, fixed size vector buffers
 TEST_P(copy_tests, fixed_jagged_vector_buffer) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::copy& host_copy = std::get<1>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Create a view of the reference data.
     const auto reference_data = vecmem::get_data(jagged_cref());
 
     // Create non-resizable device and host buffers, with the "exact sizes".
     vecmem::data::jagged_vector_buffer<int> device_buffer(
-        reference_data, main_mr, &host_mr,
+        reference_data, main_mr(), host_mr_ptr(),
         vecmem::data::buffer_type::fixed_size);
-    main_copy.setup(device_buffer)->wait();
+    main_copy().setup(device_buffer)->wait();
     vecmem::data::jagged_vector_buffer<int> host_buffer1(
-        reference_data, host_mr, nullptr,
+        reference_data, host_mr(), nullptr,
         vecmem::data::buffer_type::fixed_size),
-        host_buffer2(reference_data, host_mr, nullptr,
+        host_buffer2(reference_data, host_mr(), nullptr,
                      vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer1)->wait();
-    host_copy.setup(host_buffer2)->wait();
+    host_copy().setup(host_buffer1)->wait();
+    host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy(vecmem::get_data(jagged_cref()), host_buffer1,
-              vecmem::copy::type::host_to_host)
+    host_copy()(vecmem::get_data(jagged_cref()), host_buffer1,
+                vecmem::copy::type::host_to_host)
         ->wait();
-    main_copy(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -393,34 +372,29 @@ TEST_P(copy_tests, fixed_jagged_vector_buffer) {
 /// Test for copying jagged, resizable vector buffers
 TEST_P(copy_tests, resizable_jagged_vector_buffer) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::copy& host_copy = std::get<1>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Create a view of the reference data.
     const auto reference_data = vecmem::get_data(jagged_cref());
 
     // Create non-resizable device and host buffers, with the "exact sizes".
     vecmem::data::jagged_vector_buffer<int> device_buffer(
-        reference_data, main_mr, &host_mr,
+        reference_data, main_mr(), host_mr_ptr(),
         vecmem::data::buffer_type::resizable);
-    main_copy.setup(device_buffer)->wait();
+    main_copy().setup(device_buffer)->wait();
     vecmem::data::jagged_vector_buffer<int> host_buffer1(
-        reference_data, host_mr, nullptr, vecmem::data::buffer_type::resizable),
-        host_buffer2(reference_data, host_mr, nullptr,
+        reference_data, host_mr(), nullptr,
+        vecmem::data::buffer_type::resizable),
+        host_buffer2(reference_data, host_mr(), nullptr,
                      vecmem::data::buffer_type::resizable);
-    host_copy.setup(host_buffer1)->wait();
-    host_copy.setup(host_buffer2)->wait();
+    host_copy().setup(host_buffer1)->wait();
+    host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy(vecmem::get_data(jagged_cref()), host_buffer1,
-              vecmem::copy::type::host_to_host)
+    host_copy()(vecmem::get_data(jagged_cref()), host_buffer1,
+                vecmem::copy::type::host_to_host)
         ->wait();
-    main_copy(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -431,12 +405,6 @@ TEST_P(copy_tests, resizable_jagged_vector_buffer) {
 
 /// Test(s) for copying jagged, mismatched sized vector buffers
 TEST_P(copy_tests, mismatched_jagged_vector_buffer) {
-
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::copy& host_copy = std::get<1>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
 
     // Create a view of the reference data.
     const auto reference_data = vecmem::get_data(jagged_cref());
@@ -452,23 +420,26 @@ TEST_P(copy_tests, mismatched_jagged_vector_buffer) {
                    large_sizes2.begin(),
                    [](const auto& vec) { return vec.size() + 20u; });
     vecmem::data::jagged_vector_buffer<int> device_buffer1(
-        large_sizes1, main_mr, &host_mr, vecmem::data::buffer_type::fixed_size);
-    main_copy.setup(device_buffer1)->wait();
+        large_sizes1, main_mr(), host_mr_ptr(),
+        vecmem::data::buffer_type::fixed_size);
+    main_copy().setup(device_buffer1)->wait();
     vecmem::data::jagged_vector_buffer<int> host_buffer1(
-        reference_data, host_mr, nullptr,
+        reference_data, host_mr(), nullptr,
         vecmem::data::buffer_type::fixed_size),
-        host_buffer2(large_sizes2, host_mr, nullptr,
+        host_buffer2(large_sizes2, host_mr(), nullptr,
                      vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer1)->wait();
-    host_copy.setup(host_buffer2)->wait();
+    host_copy().setup(host_buffer1)->wait();
+    host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy(vecmem::get_data(jagged_cref()), host_buffer1,
-              vecmem::copy::type::host_to_host)
+    host_copy()(vecmem::get_data(jagged_cref()), host_buffer1,
+                vecmem::copy::type::host_to_host)
         ->wait();
-    main_copy(host_buffer1, device_buffer1, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer1,
+                vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer1, host_buffer2, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer1, host_buffer2,
+                vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -489,33 +460,38 @@ TEST_P(copy_tests, mismatched_jagged_vector_buffer) {
                        return (vec.size() >= 2u) ? vec.size() - 2u : 0u;
                    });
     vecmem::data::jagged_vector_buffer<int> device_buffer2(
-        small_sizes1, main_mr, &host_mr, vecmem::data::buffer_type::fixed_size);
-    main_copy.setup(device_buffer1)->wait();
+        small_sizes1, main_mr(), host_mr_ptr(),
+        vecmem::data::buffer_type::fixed_size);
+    main_copy().setup(device_buffer1)->wait();
     vecmem::data::jagged_vector_buffer<int> host_buffer3(
-        small_sizes2, host_mr, nullptr, vecmem::data::buffer_type::fixed_size);
-    host_copy.setup(host_buffer3)->wait();
+        small_sizes2, host_mr(), nullptr,
+        vecmem::data::buffer_type::fixed_size);
+    host_copy().setup(host_buffer3)->wait();
 
     // Verify that data cannot be copied around like this.
-    EXPECT_THROW(main_copy(host_buffer1, device_buffer2,
-                           vecmem::copy::type::host_to_device),
+    EXPECT_THROW(main_copy()(host_buffer1, device_buffer2,
+                             vecmem::copy::type::host_to_device),
                  std::exception);
-    EXPECT_THROW(main_copy(device_buffer2, host_buffer3,
-                           vecmem::copy::type::device_to_host),
+    EXPECT_THROW(main_copy()(device_buffer2, host_buffer3,
+                             vecmem::copy::type::device_to_host),
                  std::exception);
 
     // Create resizable device and host buffers, which are (progressively)
     // larger than needed.
     vecmem::data::jagged_vector_buffer<int> device_buffer3(
-        large_sizes1, main_mr, &host_mr, vecmem::data::buffer_type::resizable);
-    main_copy.setup(device_buffer3)->wait();
+        large_sizes1, main_mr(), host_mr_ptr(),
+        vecmem::data::buffer_type::resizable);
+    main_copy().setup(device_buffer3)->wait();
     vecmem::data::jagged_vector_buffer<int> host_buffer4(
-        large_sizes2, host_mr, nullptr, vecmem::data::buffer_type::resizable);
-    host_copy.setup(host_buffer4)->wait();
+        large_sizes2, host_mr(), nullptr, vecmem::data::buffer_type::resizable);
+    host_copy().setup(host_buffer4)->wait();
 
     // Copy data around.
-    main_copy(host_buffer1, device_buffer3, vecmem::copy::type::host_to_device)
+    main_copy()(host_buffer1, device_buffer3,
+                vecmem::copy::type::host_to_device)
         ->wait();
-    main_copy(device_buffer3, host_buffer4, vecmem::copy::type::device_to_host)
+    main_copy()(device_buffer3, host_buffer4,
+                vecmem::copy::type::device_to_host)
         ->wait();
 
     // Check the results.
@@ -527,32 +503,28 @@ TEST_P(copy_tests, mismatched_jagged_vector_buffer) {
     // fail, the device buffer will remain at size(s) 0. So the copy back to the
     // host will succeed. (With no copy actually happening.)
     vecmem::data::jagged_vector_buffer<int> device_buffer4(
-        small_sizes1, main_mr, &host_mr, vecmem::data::buffer_type::resizable);
-    main_copy.setup(device_buffer4)->wait();
+        small_sizes1, main_mr(), host_mr_ptr(),
+        vecmem::data::buffer_type::resizable);
+    main_copy().setup(device_buffer4)->wait();
 
     // Verify that data cannot be copied around like this.
-    EXPECT_THROW(main_copy(host_buffer1, device_buffer4,
-                           vecmem::copy::type::host_to_device),
+    EXPECT_THROW(main_copy()(host_buffer1, device_buffer4,
+                             vecmem::copy::type::host_to_device),
                  std::exception);
 }
 
 /// Tests for @c vecmem::copy::memset
 TEST_P(copy_tests, memset) {
 
-    // Access the test parameters.
-    vecmem::copy& main_copy = std::get<0>(GetParam());
-    vecmem::memory_resource& main_mr = std::get<2>(GetParam());
-    vecmem::memory_resource& host_mr = std::get<3>(GetParam());
-
     // Size for the 1-dimensional buffer(s).
     static const unsigned int BUFFER_SIZE = 10;
 
     // Test(s) with a 1-dimensional buffer.
-    vecmem::data::vector_buffer<int> device_buffer1(BUFFER_SIZE, main_mr);
-    main_copy.setup(device_buffer1)->wait();
-    main_copy.memset(device_buffer1, 5)->wait();
-    vecmem::vector<int> vector1(&host_mr);
-    main_copy(device_buffer1, vector1)->wait();
+    vecmem::data::vector_buffer<int> device_buffer1(BUFFER_SIZE, main_mr());
+    main_copy().setup(device_buffer1)->wait();
+    main_copy().memset(device_buffer1, 5)->wait();
+    vecmem::vector<int> vector1(host_mr_ptr());
+    main_copy()(device_buffer1, vector1)->wait();
     EXPECT_EQ(vector1.size(), BUFFER_SIZE);
     static const int REFERENCE = 0x05050505;
     for (int value : vector1) {
@@ -560,11 +532,12 @@ TEST_P(copy_tests, memset) {
     }
 
     vecmem::data::vector_buffer<std::tuple<unsigned int, float, double> >
-        device_buffer2(BUFFER_SIZE, main_mr);
-    main_copy.setup(device_buffer2)->wait();
-    main_copy.memset(device_buffer2, 0)->wait();
-    vecmem::vector<std::tuple<unsigned int, float, double> > vector2(&host_mr);
-    main_copy(device_buffer2, vector2)->wait();
+        device_buffer2(BUFFER_SIZE, main_mr());
+    main_copy().setup(device_buffer2)->wait();
+    main_copy().memset(device_buffer2, 0)->wait();
+    vecmem::vector<std::tuple<unsigned int, float, double> > vector2(
+        host_mr_ptr());
+    main_copy()(device_buffer2, vector2)->wait();
     EXPECT_EQ(vector2.size(), BUFFER_SIZE);
     for (const std::tuple<unsigned int, float, double>& value : vector2) {
         EXPECT_EQ(std::get<0>(value), 0u);
@@ -577,12 +550,12 @@ TEST_P(copy_tests, memset) {
                                                                  2, 7, 2, 4, 0};
 
     // Test(s) with a jagged buffer.
-    vecmem::data::jagged_vector_buffer<int> device_buffer3(JAGGED_BUFFER_SIZES,
-                                                           main_mr, &host_mr);
-    main_copy.setup(device_buffer3)->wait();
-    main_copy.memset(device_buffer3, 5)->wait();
-    vecmem::jagged_vector<int> vector3(&host_mr);
-    main_copy(device_buffer3, vector3)->wait();
+    vecmem::data::jagged_vector_buffer<int> device_buffer3(
+        JAGGED_BUFFER_SIZES, main_mr(), host_mr_ptr());
+    main_copy().setup(device_buffer3)->wait();
+    main_copy().memset(device_buffer3, 5)->wait();
+    vecmem::jagged_vector<int> vector3(host_mr_ptr());
+    main_copy()(device_buffer3, vector3)->wait();
     EXPECT_EQ(vector3.size(), JAGGED_BUFFER_SIZES.size());
     for (std::size_t i = 0; i < vector3.size(); ++i) {
         EXPECT_EQ(vector3.at(i).size(), JAGGED_BUFFER_SIZES.at(i));
@@ -592,12 +565,12 @@ TEST_P(copy_tests, memset) {
     }
 
     vecmem::data::jagged_vector_buffer<std::tuple<unsigned int, float, double> >
-        device_buffer4(JAGGED_BUFFER_SIZES, main_mr, &host_mr);
-    main_copy.setup(device_buffer4)->wait();
-    main_copy.memset(device_buffer4, 0)->wait();
+        device_buffer4(JAGGED_BUFFER_SIZES, main_mr(), host_mr_ptr());
+    main_copy().setup(device_buffer4)->wait();
+    main_copy().memset(device_buffer4, 0)->wait();
     vecmem::jagged_vector<std::tuple<unsigned int, float, double> > vector4(
-        &host_mr);
-    main_copy(device_buffer4, vector4)->wait();
+        host_mr_ptr());
+    main_copy()(device_buffer4, vector4)->wait();
     EXPECT_EQ(vector4.size(), JAGGED_BUFFER_SIZES.size());
     for (std::size_t i = 0; i < vector4.size(); ++i) {
         EXPECT_EQ(vector4.at(i).size(), JAGGED_BUFFER_SIZES.at(i));

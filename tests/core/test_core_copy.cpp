@@ -21,10 +21,12 @@
 
 // Objects used in the test(s).
 static vecmem::host_memory_resource core_host_resource;
+static vecmem::memory_resource* core_host_resource_ptr = &core_host_resource;
 static vecmem::copy core_copy;
+static vecmem::copy* core_copy_ptr = &core_copy;
 
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(core_copy_tests, copy_tests,
-                         testing::Values(std::tie(core_copy, core_copy,
-                                                  core_host_resource,
-                                                  core_host_resource)));
+                         testing::Values(std::tie(core_copy_ptr, core_copy_ptr,
+                                                  core_host_resource_ptr,
+                                                  core_host_resource_ptr)));

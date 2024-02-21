@@ -20,34 +20,66 @@
 #include <gtest/gtest.h>
 
 // System include(s).
+#include <memory>
 #include <tuple>
 #include <vector>
 
 // Objects used in the test(s).
 static vecmem::cuda::host_memory_resource cuda_host_resource;
+static vecmem::memory_resource* cuda_host_resource_ptr = &cuda_host_resource;
 static vecmem::cuda::device_memory_resource cuda_device_resource;
+static vecmem::memory_resource* cuda_device_resource_ptr =
+    &cuda_device_resource;
 static vecmem::cuda::managed_memory_resource cuda_managed_resource;
+static vecmem::memory_resource* cuda_managed_resource_ptr =
+    &cuda_managed_resource;
 static vecmem::copy cuda_host_copy;
+static vecmem::copy* cuda_host_copy_ptr = &cuda_host_copy;
 static vecmem::cuda::copy cuda_device_copy;
-static vecmem::cuda::stream_wrapper cuda_stream;
-static vecmem::cuda::async_copy cuda_async_device_copy{cuda_stream};
+static vecmem::copy* cuda_device_copy_ptr = &cuda_device_copy;
+static std::unique_ptr<vecmem::cuda::stream_wrapper> cuda_stream;
+static std::unique_ptr<vecmem::cuda::async_copy> cuda_async_device_copy;
+static vecmem::copy* cuda_async_device_copy_ptr = nullptr;
+
+/// Environment taking care of setting up and tearing down the async test types
+class AsyncCUDACopyEnvironment : public ::testing::Environment {
+public:
+    /// Set up the environment
+    void SetUp() override {
+        cuda_stream = std::make_unique<vecmem::cuda::stream_wrapper>();
+        cuda_async_device_copy =
+            std::make_unique<vecmem::cuda::async_copy>(*cuda_stream);
+        cuda_async_device_copy_ptr = cuda_async_device_copy.get();
+    }
+    /// Tear down the environment
+    void TearDown() override {
+        cuda_async_device_copy.reset();
+        cuda_stream.reset();
+        cuda_async_device_copy_ptr = nullptr;
+    }
+};
+
+/// Register the environment
+static ::testing::Environment* const async_cuda_copy_env =
+    ::testing::AddGlobalTestEnvironment(new AsyncCUDACopyEnvironment{});
 
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(
     cuda_copy_tests, copy_tests,
-    testing::Values(std::tie(cuda_device_copy, cuda_host_copy,
-                             cuda_device_resource, cuda_host_resource),
-                  //   std::tie(cuda_async_device_copy, cuda_host_copy,
-                  //            cuda_device_resource, cuda_host_resource),
-                    std::tie(cuda_device_copy, cuda_host_copy,
-                             cuda_managed_resource, cuda_host_resource),
-                  //   std::tie(cuda_async_device_copy, cuda_host_copy,
-                  //            cuda_managed_resource, cuda_host_resource),
-                    std::tie(cuda_device_copy, cuda_host_copy,
-                             cuda_managed_resource, cuda_managed_resource),
-                  //   std::tie(cuda_async_device_copy, cuda_host_copy,
-                  //            cuda_managed_resource, cuda_managed_resource),
-                    std::tie(cuda_device_copy, cuda_host_copy,
-                             cuda_device_resource, cuda_managed_resource)/*,
-                    std::tie(cuda_async_device_copy, cuda_host_copy,
-                             cuda_device_resource, cuda_managed_resource)*/));
+    testing::Values(
+        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_device_resource_ptr, cuda_host_resource_ptr),
+        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_device_resource_ptr, cuda_host_resource_ptr),
+        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_managed_resource_ptr, cuda_host_resource_ptr),
+        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_managed_resource_ptr, cuda_host_resource_ptr),
+        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_managed_resource_ptr, cuda_managed_resource_ptr),
+        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_managed_resource_ptr, cuda_managed_resource_ptr),
+        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_device_resource_ptr, cuda_managed_resource_ptr),
+        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+                 cuda_device_resource_ptr, cuda_managed_resource_ptr)));

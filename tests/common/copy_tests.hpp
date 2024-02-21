@@ -26,14 +26,25 @@
 ///
 class copy_tests
     : public testing::TestWithParam<
-          std::tuple<vecmem::copy&, vecmem::copy&, vecmem::memory_resource&,
-                     vecmem::memory_resource&>> {
+          std::tuple<vecmem::copy*&, vecmem::copy*&, vecmem::memory_resource*&,
+                     vecmem::memory_resource*&>> {
 
 public:
     /// Set up the test fixture.
     void SetUp() override;
 
 protected:
+    /// Access the "main" copy object
+    vecmem::copy& main_copy();
+    /// Access the "host" copy object
+    vecmem::copy& host_copy();
+    /// Access the "main" / "device" memory resource
+    vecmem::memory_resource& main_mr();
+    /// Access the "host" memory resource
+    vecmem::memory_resource& host_mr();
+    /// Access the "host" memory resource
+    vecmem::memory_resource* host_mr_ptr();
+
     /// Access the reference 1D data (non-const)
     vecmem::vector<int>& ref();
     /// Access the reference 1D data (const)
