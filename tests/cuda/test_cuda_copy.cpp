@@ -22,7 +22,6 @@
 // System include(s).
 #include <memory>
 #include <tuple>
-#include <vector>
 
 // Objects used in the test(s).
 static vecmem::cuda::host_memory_resource cuda_host_resource;

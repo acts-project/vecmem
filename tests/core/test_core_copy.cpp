@@ -17,7 +17,6 @@
 
 // System include(s).
 #include <tuple>
-#include <vector>
 
 // Objects used in the test(s).
 static vecmem::host_memory_resource core_host_resource;
