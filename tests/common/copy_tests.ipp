@@ -355,8 +355,7 @@ TEST_P(copy_tests, fixed_jagged_vector_buffer) {
     host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy()(vecmem::get_data(jagged_cref()), host_buffer1,
-                vecmem::copy::type::host_to_host)
+    host_copy()(reference_data, host_buffer1, vecmem::copy::type::host_to_host)
         ->wait();
     main_copy()(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
         ->wait();
@@ -389,8 +388,7 @@ TEST_P(copy_tests, resizable_jagged_vector_buffer) {
     host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy()(vecmem::get_data(jagged_cref()), host_buffer1,
-                vecmem::copy::type::host_to_host)
+    host_copy()(reference_data, host_buffer1, vecmem::copy::type::host_to_host)
         ->wait();
     main_copy()(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
         ->wait();
@@ -432,8 +430,7 @@ TEST_P(copy_tests, mismatched_jagged_vector_buffer) {
     host_copy().setup(host_buffer2)->wait();
 
     // Copy data around.
-    host_copy()(vecmem::get_data(jagged_cref()), host_buffer1,
-                vecmem::copy::type::host_to_host)
+    host_copy()(reference_data, host_buffer1, vecmem::copy::type::host_to_host)
         ->wait();
     main_copy()(host_buffer1, device_buffer1,
                 vecmem::copy::type::host_to_device)

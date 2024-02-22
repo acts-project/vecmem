@@ -119,6 +119,10 @@ copy::event_type copy::operator()(
         // Perform the copy.
         do_copy(sizeof(typename data::vector_view<TYPE>::size_type), &size,
                 to_view.size_ptr(), size_cptype);
+        // We have to wait for this to finish, since the "size" variable is not
+        // going to be available outside of this function. And asynchronous SYCL
+        // memory copies can happen from variables on the stack as well...
+        create_event()->wait();
     }
 
     // Copy the payload.
@@ -269,8 +273,10 @@ copy::event_type copy::operator()(
     const auto sizes = get_sizes(from_view);
 
     // Before even attempting the copy, make sure that the target view either
-    // has the correct sizes, or can be resized correctly.
-    set_sizes(sizes, to_view);
+    // has the correct sizes, or can be resized correctly. Captire the event
+    // marking the end of the operation. We need to wait for the copy to finish
+    // before returning from this function.
+    auto set_sizes_event = set_sizes(sizes, to_view);
 
     // Check whether the source and target capacities match up. We can only
     // perform the "optimised copy" if they do.
@@ -298,6 +304,10 @@ copy::event_type copy::operator()(
         copy_views_impl(sizes, from_view.host_ptr(), to_view.host_ptr(),
                         cptype);
     }
+
+    // Before returning, make sure that the "size set" operation has finished.
+    // Because the "sizes" variable is just about to go out of scope.
+    set_sizes_event->wait();
 
     // Return a new event.
     return create_event();
@@ -674,12 +684,18 @@ void copy::resize_impl(
             size = from_view.capacity();
         // If the container is resizable, take its size.
         if (from_view.size().ptr() != nullptr) {
+            // A small security check.
             assert(from_view.size().size() ==
                    sizeof(typename edm::view<edm::details::add_const_t<
                               edm::schema<VARTYPES...>>>::size_type));
+            // Get the exact size of the container.
             do_copy(sizeof(typename edm::view<edm::details::add_const_t<
                                edm::schema<VARTYPES...>>>::size_type),
                     from_view.size().ptr(), &size, cptype);
+            // We have to wait for this to finish, since the "size" variable is
+            // not going to be available outside of this function. And
+            // asynchronous SYCL memory copies can happen from variables on the
+            // stack as well...
             create_event()->wait();
         }
         // Resize the target container.
@@ -762,6 +778,10 @@ void copy::copy_sizes_impl(
         do_copy(sizeof(typename edm::view<edm::details::add_const_t<
                            edm::schema<VARTYPES...>>>::size_type),
                 &size, to_view.size().ptr(), size_cptype);
+        // We have to wait for this to finish, since the "size" variable is not
+        // going to be available outside of this function. And asynchronous SYCL
+        // memory copies can happen from variables on the stack as well...
+        create_event()->wait();
     } else {
         // For the jagged vector case we recursively copy the sizes of every
         // jagged vector variable. The rest of the variables are not resizable
@@ -771,7 +791,7 @@ void copy::copy_sizes_impl(
                               INDEX, std::tuple<VARTYPES...>>::type>::value) {
             // Copy the sizes for this variable.
             const auto sizes = get_sizes(from_view.template get<INDEX>());
-            set_sizes(sizes, to_view.template get<INDEX>());
+            set_sizes(sizes, to_view.template get<INDEX>())->wait();
         }
         // Call this function recursively.
         if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {
