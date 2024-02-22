@@ -7,6 +7,7 @@
 
 // Test include(s).
 #include "../common/copy_tests.hpp"
+#include "../common/soa_copy_tests.hpp"
 
 // VecMem include(s).
 #include "vecmem/memory/sycl/device_memory_resource.hpp"
@@ -39,23 +40,28 @@ static vecmem::copy* sycl_device_copy_ptr = &sycl_device_copy;
 static vecmem::sycl::async_copy sycl_async_device_copy{sycl_queue};
 static vecmem::copy* sycl_async_device_copy_ptr = &sycl_async_device_copy;
 
+/// The configurations to run the tests with.
+static const auto sycl_copy_configs = testing::Values(
+    std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr, sycl_device_resource_ptr,
+             sycl_host_resource_ptr),
+    std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
+             sycl_device_resource_ptr, sycl_host_resource_ptr),
+    std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr, sycl_shared_resource_ptr,
+             sycl_host_resource_ptr),
+    std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
+             sycl_shared_resource_ptr, sycl_host_resource_ptr),
+    std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr, sycl_shared_resource_ptr,
+             sycl_shared_resource_ptr),
+    std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
+             sycl_shared_resource_ptr, sycl_shared_resource_ptr),
+    std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr, sycl_device_resource_ptr,
+             sycl_shared_resource_ptr),
+    std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
+             sycl_device_resource_ptr, sycl_shared_resource_ptr));
+
 // Instantiate the test suite(s).
-INSTANTIATE_TEST_SUITE_P(
-    sycl_copy_tests, copy_tests,
-    testing::Values(
-        std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_device_resource_ptr, sycl_host_resource_ptr),
-        std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_device_resource_ptr, sycl_host_resource_ptr),
-        std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_shared_resource_ptr, sycl_host_resource_ptr),
-        std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_shared_resource_ptr, sycl_host_resource_ptr),
-        std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_shared_resource_ptr, sycl_shared_resource_ptr),
-        std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_shared_resource_ptr, sycl_shared_resource_ptr),
-        std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_device_resource_ptr, sycl_shared_resource_ptr),
-        std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
-                 sycl_device_resource_ptr, sycl_shared_resource_ptr)));
+INSTANTIATE_TEST_SUITE_P(sycl_copy_tests, copy_tests, sycl_copy_configs);
+INSTANTIATE_TEST_SUITE_P(sycl_soa_copy_tests_simple, soa_copy_tests_simple,
+                         sycl_copy_configs);
+INSTANTIATE_TEST_SUITE_P(sycl_soa_copy_tests_jagged, soa_copy_tests_jagged,
+                         sycl_copy_configs);

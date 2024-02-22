@@ -7,6 +7,7 @@
 
 // Test include(s).
 #include "../common/copy_tests.hpp"
+#include "../common/soa_copy_tests.hpp"
 
 // VecMem include(s).
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
@@ -62,23 +63,28 @@ public:
 static ::testing::Environment* const async_cuda_copy_env =
     ::testing::AddGlobalTestEnvironment(new AsyncCUDACopyEnvironment{});
 
+/// The configurations to run the tests with.
+static const auto cuda_copy_configs = testing::Values(
+    std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr, cuda_device_resource_ptr,
+             cuda_host_resource_ptr),
+    std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+             cuda_device_resource_ptr, cuda_host_resource_ptr),
+    std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
+             cuda_managed_resource_ptr, cuda_host_resource_ptr),
+    std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+             cuda_managed_resource_ptr, cuda_host_resource_ptr),
+    std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
+             cuda_managed_resource_ptr, cuda_managed_resource_ptr),
+    std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+             cuda_managed_resource_ptr, cuda_managed_resource_ptr),
+    std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr, cuda_device_resource_ptr,
+             cuda_managed_resource_ptr),
+    std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+             cuda_device_resource_ptr, cuda_managed_resource_ptr));
+
 // Instantiate the test suite(s).
-INSTANTIATE_TEST_SUITE_P(
-    cuda_copy_tests, copy_tests,
-    testing::Values(
-        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_device_resource_ptr, cuda_host_resource_ptr),
-        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_device_resource_ptr, cuda_host_resource_ptr),
-        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_managed_resource_ptr, cuda_host_resource_ptr),
-        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_managed_resource_ptr, cuda_host_resource_ptr),
-        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_managed_resource_ptr, cuda_managed_resource_ptr),
-        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_managed_resource_ptr, cuda_managed_resource_ptr),
-        std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_device_resource_ptr, cuda_managed_resource_ptr),
-        std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
-                 cuda_device_resource_ptr, cuda_managed_resource_ptr)));
+INSTANTIATE_TEST_SUITE_P(cuda_copy_tests, copy_tests, cuda_copy_configs);
+INSTANTIATE_TEST_SUITE_P(cuda_soa_copy_tests_simple, soa_copy_tests_simple,
+                         cuda_copy_configs);
+INSTANTIATE_TEST_SUITE_P(cuda_soa_copy_tests_jagged, soa_copy_tests_jagged,
+                         cuda_copy_configs);
