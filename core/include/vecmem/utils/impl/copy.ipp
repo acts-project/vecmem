@@ -214,9 +214,36 @@ template <typename TYPE>
 copy::event_type copy::memset(data::jagged_vector_view<TYPE> data,
                               int value) const {
 
-    // Use a very naive/expensive implementation.
-    for (std::size_t i = 0; i < data.size(); ++i) {
-        this->memset(data.host_ptr()[i], value);
+    // Do different things for jagged vectors that are contiguous in memory.
+    if (is_contiguous(data.host_ptr(), data.capacity())) {
+        // For contiguous jagged vectors we can just do a single memset
+        // operation. First, let's calculate the "total size" of the jagged
+        // vector.
+        const std::size_t total_size = std::accumulate(
+            data.host_ptr(), data.host_ptr() + data.size(),
+            static_cast<std::size_t>(0u),
+            [](std::size_t sum, const data::vector_view<TYPE>& iv) {
+                return sum + iv.capacity();
+            });
+        // Find the first "inner vector" that has a non-zero capacity.
+        for (std::size_t i = 0; i < data.size(); ++i) {
+            data::vector_view<TYPE>& iv = data.host_ptr()[i];
+            if ((iv.capacity() != 0u) && (iv.ptr() != nullptr)) {
+                // Call memset with its help.
+                do_memset(total_size * sizeof(TYPE), iv.ptr(), value);
+                return create_event();
+            }
+        }
+        // If we are still here, apparently we didn't need to do anything.
+        return vecmem::copy::create_event();
+    } else {
+        // For non-contiguous jagged vectors call memset one-by-one on the
+        // inner vectors. Note that we don't use vecmem::copy::memset here,
+        // as that would require us to wait for each memset individually.
+        for (std::size_t i = 0; i < data.size(); ++i) {
+            data::vector_view<TYPE>& iv = data.host_ptr()[i];
+            do_memset(iv.capacity() * sizeof(TYPE), iv.ptr(), value);
+        }
     }
 
     // Return a new event.

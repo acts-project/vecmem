@@ -53,10 +53,8 @@ INSTANTIATE_TEST_SUITE_P(
                  sycl_shared_resource_ptr, sycl_host_resource_ptr),
         std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr,
                  sycl_shared_resource_ptr, sycl_shared_resource_ptr),
-        // There seems to be an issue in oneAPI-2024.0.1 with the following
-        // combination, for the NVIDIA backend.
-        // std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
-        //          sycl_shared_resource_ptr, sycl_shared_resource_ptr),
+        std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
+                 sycl_shared_resource_ptr, sycl_shared_resource_ptr),
         std::tie(sycl_device_copy_ptr, sycl_host_copy_ptr,
                  sycl_device_resource_ptr, sycl_shared_resource_ptr),
         std::tie(sycl_async_device_copy_ptr, sycl_host_copy_ptr,
