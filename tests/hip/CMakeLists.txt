@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -22,6 +22,7 @@ vecmem_add_test( hip
    "test_hip_edm_copy.cpp"
    "test_hip_edm.cpp"
    "test_hip_edm_kernels.hpp" "test_hip_edm_kernels.hip"
+   "test_hip_copy.cpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/../../hip/src/utils/hip_error_handling.hpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/../../hip/src/utils/hip_error_handling.cpp"
    LINK_LIBRARIES HIP::hiprt vecmem::core vecmem::hip GTest::gtest_main
