@@ -85,51 +85,13 @@ copy::event_type copy::operator()(
     const data::vector_view<std::add_const_t<TYPE>>& from_view,
     data::vector_view<TYPE> to_view, type::copy_type cptype) const {
 
-    // Get the size of the source view.
-    const typename data::vector_view<std::add_const_t<TYPE>>::size_type size =
-        get_size(from_view);
-
-    // Make sure that the copy can happen.
-    if (to_view.capacity() < size) {
-        std::ostringstream msg;
-        msg << "Target capacity (" << to_view.capacity() << ") < source size ("
-            << size << ")";
-        throw std::length_error(msg.str());
+    // Perform the copy. Depending on whether an actual copy has been set up /
+    // performed, return either "an actual", or just a dummy event.
+    if (copy_view_impl(from_view, to_view, cptype)) {
+        return create_event();
+    } else {
+        return vecmem::copy::create_event();
     }
-
-    // Make sure that if the target view is resizable, that it would be set up
-    // for the correct size.
-    if (to_view.size_ptr() != nullptr) {
-        // Select what type of copy this should be. Keeping in mind that we copy
-        // from a variable on the host stack. So the question is just whether
-        // the target is the host, or a device.
-        type::copy_type size_cptype = type::unknown;
-        switch (cptype) {
-            case type::host_to_device:
-            case type::device_to_device:
-                size_cptype = type::host_to_device;
-                break;
-            case type::device_to_host:
-            case type::host_to_host:
-                size_cptype = type::host_to_host;
-                break;
-            default:
-                break;
-        }
-        // Perform the copy.
-        do_copy(sizeof(typename data::vector_view<TYPE>::size_type), &size,
-                to_view.size_ptr(), size_cptype);
-        // We have to wait for this to finish, since the "size" variable is not
-        // going to be available outside of this function. And asynchronous SYCL
-        // memory copies can happen from variables on the stack as well...
-        create_event()->wait();
-    }
-
-    // Copy the payload.
-    do_copy(size * sizeof(TYPE), from_view.ptr(), to_view.ptr(), cptype);
-
-    // Return a new event.
-    return create_event();
 }
 
 template <typename TYPE, typename ALLOC>
@@ -276,68 +238,13 @@ copy::event_type copy::operator()(
     const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
     data::jagged_vector_view<TYPE> to_view, type::copy_type cptype) const {
 
-    // A sanity check.
-    if (from_view.size() > to_view.size()) {
-        std::ostringstream msg;
-        msg << "from_view.size() (" << from_view.size()
-            << ") > to_view.size() (" << to_view.size() << ")";
-        throw std::length_error(msg.str());
-    }
-
-    // Check if anything needs to be done.
-    const std::size_t size = from_view.size();
-    if (size == 0) {
+    // Perform the copy. Depending on whether an actual copy has been set up /
+    // performed, return either "an actual", or just a dummy event.
+    if (copy_view_impl(from_view, to_view, cptype)) {
+        return create_event();
+    } else {
         return vecmem::copy::create_event();
     }
-
-    // Calculate the contiguous-ness of the memory allocations.
-    const bool from_is_contiguous = is_contiguous(from_view.host_ptr(), size);
-    const bool to_is_contiguous = is_contiguous(to_view.host_ptr(), size);
-    VECMEM_DEBUG_MSG(3, "from_is_contiguous = %d, to_is_contiguous = %d",
-                     from_is_contiguous, to_is_contiguous);
-
-    // Get the sizes of the source jagged vector.
-    const auto sizes = get_sizes(from_view);
-
-    // Before even attempting the copy, make sure that the target view either
-    // has the correct sizes, or can be resized correctly. Captire the event
-    // marking the end of the operation. We need to wait for the copy to finish
-    // before returning from this function.
-    auto set_sizes_event = set_sizes(sizes, to_view);
-
-    // Check whether the source and target capacities match up. We can only
-    // perform the "optimised copy" if they do.
-    std::vector<typename data::vector_view<std::add_const_t<TYPE>>::size_type>
-        capacities(size);
-    bool capacities_match = true;
-    for (std::size_t i = 0; i < size; ++i) {
-        if (from_view.host_ptr()[i].capacity() !=
-            to_view.host_ptr()[i].capacity()) {
-            capacities_match = false;
-            break;
-        }
-        capacities[i] = from_view.host_ptr()[i].capacity();
-    }
-
-    // Perform the copy as best as we can.
-    if (from_is_contiguous && to_is_contiguous && capacities_match) {
-        // Perform the copy in one go.
-        copy_views_contiguous_impl(capacities, from_view.host_ptr(),
-                                   to_view.host_ptr(), cptype);
-    } else {
-        // Do the copy as best as we can. Note that since they are not
-        // contiguous anyway, we use the sizes of the vectors here, not their
-        // capcities.
-        copy_views_impl(sizes, from_view.host_ptr(), to_view.host_ptr(),
-                        cptype);
-    }
-
-    // Before returning, make sure that the "size set" operation has finished.
-    // Because the "sizes" variable is just about to go out of scope.
-    set_sizes_event->wait();
-
-    // Return a new event.
-    return create_event();
 }
 
 template <typename TYPE, typename ALLOC1, typename ALLOC2>
@@ -474,10 +381,10 @@ copy::event_type copy::operator()(
     // layout.
     if ((from_view.payload().ptr() != nullptr) &&
         (to_view.payload().ptr() != nullptr) &&
-        (from_view.payload().size() == to_view.payload().size())) {
+        (from_view.payload().capacity() == to_view.payload().capacity())) {
 
         // If the "common size" is zero, we're done.
-        if (from_view.payload().size() == 0) {
+        if (from_view.payload().capacity() == 0) {
             return vecmem::copy::create_event();
         }
 
@@ -486,23 +393,23 @@ copy::event_type copy::operator()(
                          from_view.payload().size());
 
         // Copy the payload with a single copy operation.
-        operator()(from_view.payload(), to_view.payload(), cptype);
+        copy_view_impl(from_view.payload(), to_view.payload(), cptype);
 
         // If the target view is resizable, set its size.
         if (to_view.size().ptr() != nullptr) {
             // If the source is also resizable, the situation should be simple.
             if (from_view.size().ptr() != nullptr) {
                 // Check that the sizes are the same.
-                if (from_view.size().size() != to_view.size().size()) {
+                if (from_view.size().capacity() != to_view.size().capacity()) {
                     std::ostringstream msg;
-                    msg << "from_view.size().size() ("
-                        << from_view.size().size()
-                        << ") != to_view.size().size() ("
-                        << to_view.size().size() << ")";
+                    msg << "from_view.size().capacity() ("
+                        << from_view.size().capacity()
+                        << ") != to_view.size().capacity() ("
+                        << to_view.size().capacity() << ")";
                     throw std::length_error(msg.str());
                 }
                 // Perform a dumb copy.
-                operator()(from_view.size(), to_view.size(), cptype);
+                copy_view_impl(from_view.size(), to_view.size(), cptype);
             } else {
                 // If not, then copy the size(s) recursively.
                 copy_sizes_impl<0>(from_view, to_view, cptype);
@@ -531,6 +438,128 @@ copy::event_type copy::operator()(
 
     // Perform the memory copy.
     return operator()(from_view, vecmem::get_data(to_vec), cptype);
+}
+
+template <typename TYPE>
+bool copy::copy_view_impl(
+    const data::vector_view<std::add_const_t<TYPE>>& from_view,
+    data::vector_view<TYPE> to_view, type::copy_type cptype) const {
+
+    // Get the size of the source view.
+    const typename data::vector_view<std::add_const_t<TYPE>>::size_type size =
+        get_size(from_view);
+    // If it's zero, don't do an actual copy.
+    if (size == 0u) {
+        return false;
+    }
+
+    // Make sure that the copy can happen.
+    if (to_view.capacity() < size) {
+        std::ostringstream msg;
+        msg << "Target capacity (" << to_view.capacity() << ") < source size ("
+            << size << ")";
+        throw std::length_error(msg.str());
+    }
+
+    // Make sure that if the target view is resizable, that it would be set up
+    // for the correct size.
+    if (to_view.size_ptr() != nullptr) {
+        // Select what type of copy this should be. Keeping in mind that we copy
+        // from a variable on the host stack. So the question is just whether
+        // the target is the host, or a device.
+        type::copy_type size_cptype = type::unknown;
+        switch (cptype) {
+            case type::host_to_device:
+            case type::device_to_device:
+                size_cptype = type::host_to_device;
+                break;
+            case type::device_to_host:
+            case type::host_to_host:
+                size_cptype = type::host_to_host;
+                break;
+            default:
+                break;
+        }
+        // Perform the copy.
+        do_copy(sizeof(typename data::vector_view<TYPE>::size_type), &size,
+                to_view.size_ptr(), size_cptype);
+        // We have to wait for this to finish, since the "size" variable is not
+        // going to be available outside of this function. And asynchronous SYCL
+        // memory copies can happen from variables on the stack as well...
+        create_event()->wait();
+    }
+
+    // Copy the payload.
+    do_copy(size * sizeof(TYPE), from_view.ptr(), to_view.ptr(), cptype);
+    return true;
+}
+
+template <typename TYPE>
+bool copy::copy_view_impl(
+    const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
+    data::jagged_vector_view<TYPE> to_view, type::copy_type cptype) const {
+
+    // Sanity checks.
+    if (from_view.size() > to_view.size()) {
+        std::ostringstream msg;
+        msg << "from_view.size() (" << from_view.size()
+            << ") > to_view.size() (" << to_view.size() << ")";
+        throw std::length_error(msg.str());
+    }
+
+    // Get the "outer size" of the container.
+    const typename data::jagged_vector_view<std::add_const_t<TYPE>>::size_type
+        size = from_view.size();
+    if (size == 0u) {
+        return false;
+    }
+
+    // Calculate the contiguous-ness of the memory allocations.
+    const bool from_is_contiguous = is_contiguous(from_view.host_ptr(), size);
+    const bool to_is_contiguous = is_contiguous(to_view.host_ptr(), size);
+    VECMEM_DEBUG_MSG(3, "from_is_contiguous = %d, to_is_contiguous = %d",
+                     from_is_contiguous, to_is_contiguous);
+
+    // Get the sizes of the source jagged vector.
+    const auto sizes = get_sizes(from_view);
+
+    // Before even attempting the copy, make sure that the target view either
+    // has the correct sizes, or can be resized correctly. Captire the event
+    // marking the end of the operation. We need to wait for the copy to finish
+    // before returning from this function.
+    auto set_sizes_event = set_sizes(sizes, to_view);
+
+    // Check whether the source and target capacities match up. We can only
+    // perform the "optimised copy" if they do.
+    std::vector<typename data::vector_view<std::add_const_t<TYPE>>::size_type>
+        capacities(size);
+    bool capacities_match = true;
+    for (std::size_t i = 0; i < size; ++i) {
+        if (from_view.host_ptr()[i].capacity() !=
+            to_view.host_ptr()[i].capacity()) {
+            capacities_match = false;
+            break;
+        }
+        capacities[i] = from_view.host_ptr()[i].capacity();
+    }
+
+    // Perform the copy as best as we can.
+    if (from_is_contiguous && to_is_contiguous && capacities_match) {
+        // Perform the copy in one go.
+        copy_views_contiguous_impl(capacities, from_view.host_ptr(),
+                                   to_view.host_ptr(), cptype);
+    } else {
+        // Do the copy as best as we can. Note that since they are not
+        // contiguous anyway, we use the sizes of the vectors here, not their
+        // capcities.
+        copy_views_impl(sizes, from_view.host_ptr(), to_view.host_ptr(),
+                        cptype);
+    }
+
+    // Before returning, make sure that the "size set" operation has finished.
+    // Because the "sizes" variable is just about to go out of scope.
+    set_sizes_event->wait();
+    return true;
 }
 
 template <typename TYPE>
@@ -842,8 +871,8 @@ void copy::copy_payload_impl(
                 cptype);
     } else {
         // But vectors and jagged vectors do.
-        operator()(from_view.template get<INDEX>(),
-                   to_view.template get<INDEX>(), cptype);
+        copy_view_impl(from_view.template get<INDEX>(),
+                       to_view.template get<INDEX>(), cptype);
     }
     // Recurse into the next variable.
     if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {

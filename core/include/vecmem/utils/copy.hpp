@@ -191,6 +191,16 @@ protected:
     virtual event_type create_event() const;
 
 private:
+    /// Implementation for the 1D vector copy operator
+    template <typename TYPE>
+    bool copy_view_impl(const data::vector_view<std::add_const_t<TYPE>>& from,
+                        data::vector_view<TYPE> to,
+                        type::copy_type cptype) const;
+    /// Implementation of the jagged vector copy operator
+    template <typename TYPE>
+    bool copy_view_impl(
+        const data::jagged_vector_view<std::add_const_t<TYPE>>& from,
+        data::jagged_vector_view<TYPE> to, type::copy_type cptype) const;
     /// Helper function performing the copy of a jagged array/vector
     template <typename TYPE>
     void copy_views_impl(
