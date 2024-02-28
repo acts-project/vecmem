@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -27,7 +27,7 @@ __global__ void hipSimpleFillKernel(
     vecmem::testing::fill(i, device);
 }
 
-void hipSimpleFill(vecmem::testing::simple_soa_container::view view) {
+bool hipSimpleFill(vecmem::testing::simple_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -37,6 +37,7 @@ void hipSimpleFill(vecmem::testing::simple_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+    return true;
 }
 
 __global__ void hipJaggedFillKernel(
@@ -50,7 +51,7 @@ __global__ void hipJaggedFillKernel(
     vecmem::testing::fill(i, device);
 }
 
-void hipJaggedFill(vecmem::testing::jagged_soa_container::view view) {
+bool hipJaggedFill(vecmem::testing::jagged_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -60,6 +61,7 @@ void hipJaggedFill(vecmem::testing::jagged_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+    return true;
 }
 
 __global__ void hipSimpleModifyKernel(
@@ -73,7 +75,7 @@ __global__ void hipSimpleModifyKernel(
     vecmem::testing::modify(i, device);
 }
 
-void hipSimpleModify(vecmem::testing::simple_soa_container::view view) {
+bool hipSimpleModify(vecmem::testing::simple_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -83,6 +85,7 @@ void hipSimpleModify(vecmem::testing::simple_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+    return true;
 }
 
 __global__ void hipJaggedModifyKernel(
@@ -96,7 +99,7 @@ __global__ void hipJaggedModifyKernel(
     vecmem::testing::modify(i, device);
 }
 
-void hipJaggedModify(vecmem::testing::jagged_soa_container::view view) {
+bool hipJaggedModify(vecmem::testing::jagged_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -106,4 +109,5 @@ void hipJaggedModify(vecmem::testing::jagged_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+    return true;
 }

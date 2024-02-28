@@ -38,7 +38,7 @@ static vecmem::sycl::shared_memory_resource sycl_shared_mr{&queue};
 static vecmem::sycl::copy sycl_copy{&queue};
 
 /// Fill a simple SoA container with some data.
-void syclSimpleFill(vecmem::testing::simple_soa_container::view view) {
+bool syclSimpleFill(vecmem::testing::simple_soa_container::view view) {
 
     queue
         .submit([&view](cl::sycl::handler& h) {
@@ -50,10 +50,16 @@ void syclSimpleFill(vecmem::testing::simple_soa_container::view view) {
                 });
         })
         .wait_and_throw();
+    return true;
 }
 
 /// Fill a jagged SoA container with some data.
-void syclJaggedFill(vecmem::testing::jagged_soa_container::view view) {
+bool syclJaggedFill(vecmem::testing::jagged_soa_container::view view) {
+
+    // Skip test if FP64 instructions are not available on the device.
+    if (queue.get_device().has(cl::sycl::aspect::fp64) == false) {
+        return false;
+    }
 
     queue
         .submit([&view](cl::sycl::handler& h) {
@@ -65,10 +71,11 @@ void syclJaggedFill(vecmem::testing::jagged_soa_container::view view) {
                 });
         })
         .wait_and_throw();
+    return true;
 }
 
 /// Modify data in a simple SoA container.
-void syclSimpleModify(vecmem::testing::simple_soa_container::view view) {
+bool syclSimpleModify(vecmem::testing::simple_soa_container::view view) {
 
     queue
         .submit([&view](cl::sycl::handler& h) {
@@ -80,10 +87,16 @@ void syclSimpleModify(vecmem::testing::simple_soa_container::view view) {
                 });
         })
         .wait_and_throw();
+    return true;
 }
 
 /// Modify data in a jagged SoA container.
-void syclJaggedModify(vecmem::testing::jagged_soa_container::view view) {
+bool syclJaggedModify(vecmem::testing::jagged_soa_container::view view) {
+
+    // Skip test if FP64 instructions are not available on the device.
+    if (queue.get_device().has(cl::sycl::aspect::fp64) == false) {
+        return false;
+    }
 
     queue
         .submit([&view](cl::sycl::handler& h) {
@@ -95,6 +108,7 @@ void syclJaggedModify(vecmem::testing::jagged_soa_container::view view) {
                 });
         })
         .wait_and_throw();
+    return true;
 }
 
 /// Pointer to the function filling a simple SoA container on a SYCL device.
