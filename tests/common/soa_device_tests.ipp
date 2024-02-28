@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -18,8 +18,8 @@ void soa_device_tests_base<CONTAINER>::modify_managed(
     // Extract the needed parameters.
     vecmem::memory_resource& host_mr = std::get<0>(params);
     vecmem::memory_resource& managed_mr = std::get<2>(params);
-    void (*device_modify)(typename CONTAINER::view) =
-        reinterpret_cast<void (*)(typename CONTAINER::view)>(
+    bool (*device_modify)(typename CONTAINER::view) =
+        reinterpret_cast<bool (*)(typename CONTAINER::view)>(
             std::get<5>(params));
 
     // Create two host containers in host and managed memory.
@@ -38,7 +38,9 @@ void soa_device_tests_base<CONTAINER>::modify_managed(
     }
 
     // Run a kernel that executes the modify function on the second container.
-    (*device_modify)(vecmem::get_data(container2));
+    if ((*device_modify)(vecmem::get_data(container2)) == false) {
+        GTEST_SKIP();
+    }
 
     // Compare the two.
     vecmem::testing::compare(vecmem::get_data(container1),
@@ -53,8 +55,8 @@ void soa_device_tests_base<CONTAINER>::modify_device(
     vecmem::memory_resource& host_mr = std::get<0>(params);
     vecmem::memory_resource& device_mr = std::get<1>(params);
     vecmem::copy& copy = std::get<3>(params);
-    void (*device_modify)(typename CONTAINER::view) =
-        reinterpret_cast<void (*)(typename CONTAINER::view)>(
+    bool (*device_modify)(typename CONTAINER::view) =
+        reinterpret_cast<bool (*)(typename CONTAINER::view)>(
             std::get<5>(params));
 
     // Create a host container in host memory as a start.
@@ -79,7 +81,9 @@ void soa_device_tests_base<CONTAINER>::modify_device(
     }
 
     // Run a kernel that executes the modify function on the device buffer.
-    (*device_modify)(buffer);
+    if ((*device_modify)(buffer) == false) {
+        GTEST_SKIP();
+    }
 
     // Copy the data back to the host.
     typename CONTAINER::host container2{host_mr};
@@ -98,8 +102,8 @@ void soa_device_tests_base<CONTAINER>::fill_device(
     vecmem::memory_resource& host_mr = std::get<0>(params);
     vecmem::memory_resource& device_mr = std::get<1>(params);
     vecmem::copy& copy = std::get<3>(params);
-    void (*device_fill)(typename CONTAINER::view) =
-        reinterpret_cast<void (*)(typename CONTAINER::view)>(
+    bool (*device_fill)(typename CONTAINER::view) =
+        reinterpret_cast<bool (*)(typename CONTAINER::view)>(
             std::get<4>(params));
 
     // Create a host buffer, and fill it.
@@ -119,7 +123,9 @@ void soa_device_tests_base<CONTAINER>::fill_device(
     copy.setup(buffer2);
 
     // Run a kernel that fills the buffer.
-    (*device_fill)(buffer2);
+    if ((*device_fill)(buffer2) == false) {
+        GTEST_SKIP();
+    }
 
     // Copy the device buffer back to the host.
     typename CONTAINER::buffer buffer3;

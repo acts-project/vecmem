@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -24,7 +24,7 @@ __global__ void cudaSimpleFillKernel(
     vecmem::testing::fill(i, device);
 }
 
-void cudaSimpleFill(vecmem::testing::simple_soa_container::view view) {
+bool cudaSimpleFill(vecmem::testing::simple_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -34,6 +34,7 @@ void cudaSimpleFill(vecmem::testing::simple_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    return true;
 }
 
 __global__ void cudaJaggedFillKernel(
@@ -47,7 +48,7 @@ __global__ void cudaJaggedFillKernel(
     vecmem::testing::fill(i, device);
 }
 
-void cudaJaggedFill(vecmem::testing::jagged_soa_container::view view) {
+bool cudaJaggedFill(vecmem::testing::jagged_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -57,6 +58,7 @@ void cudaJaggedFill(vecmem::testing::jagged_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    return true;
 }
 
 __global__ void cudaSimpleModifyKernel(
@@ -70,7 +72,7 @@ __global__ void cudaSimpleModifyKernel(
     vecmem::testing::modify(i, device);
 }
 
-void cudaSimpleModify(vecmem::testing::simple_soa_container::view view) {
+bool cudaSimpleModify(vecmem::testing::simple_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -80,6 +82,7 @@ void cudaSimpleModify(vecmem::testing::simple_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    return true;
 }
 
 __global__ void cudaJaggedModifyKernel(
@@ -93,7 +96,7 @@ __global__ void cudaJaggedModifyKernel(
     vecmem::testing::modify(i, device);
 }
 
-void cudaJaggedModify(vecmem::testing::jagged_soa_container::view view) {
+bool cudaJaggedModify(vecmem::testing::jagged_soa_container::view view) {
 
     // Launch the kernel.
     const unsigned int blockSize = 256;
@@ -103,4 +106,5 @@ void cudaJaggedModify(vecmem::testing::jagged_soa_container::view view) {
     // Check whether it succeeded to run.
     VECMEM_CUDA_ERROR_CHECK(cudaGetLastError());
     VECMEM_CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+    return true;
 }
