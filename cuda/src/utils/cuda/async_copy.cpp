@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -18,6 +18,7 @@
 
 // System include(s).
 #include <cassert>
+#include <exception>
 #include <string>
 
 namespace {
@@ -26,13 +27,39 @@ namespace {
 struct cuda_event : public vecmem::abstract_event {
 
     /// Constructor with the created event.
-    cuda_event(cudaEvent_t event) : m_event(event) {}
+    cuda_event(cudaEvent_t event) : m_event(event) {
+        assert(m_event != nullptr);
+    }
     /// Destructor
-    ~cuda_event() { VECMEM_CUDA_ERROR_CHECK(cudaEventDestroy(m_event)); }
+    ~cuda_event() {
+        // Check if the user forgot to wait on this asynchronous event.
+        if (m_event != nullptr) {
+            // If so, wait implicitly now.
+            VECMEM_DEBUG_MSG(1, "Asynchronous CUDA event was not waited on!");
+            wait();
+#ifdef VECMEM_FAIL_ON_ASYNC_ERRORS
+            // If the user wants to fail on asynchronous errors, do so now.
+            std::terminate();
+#endif  // VECMEM_FAIL_ON_ASYNC_ERRORS
+        }
+    }
 
     /// Synchronize on the underlying CUDA event
     virtual void wait() override {
+        if (m_event == nullptr) {
+            return;
+        }
         VECMEM_CUDA_ERROR_CHECK(cudaEventSynchronize(m_event));
+        ignore();
+    }
+
+    /// Ignore the underlying CUDA event
+    virtual void ignore() override {
+        if (m_event == nullptr) {
+            return;
+        }
+        VECMEM_CUDA_ERROR_CHECK(cudaEventDestroy(m_event));
+        m_event = nullptr;
     }
 
     /// The CUDA event wrapped by this struct
@@ -50,7 +77,8 @@ static constexpr cudaMemcpyKind copy_type_translator[copy::type::count] = {
     cudaMemcpyHostToDevice, cudaMemcpyDeviceToHost, cudaMemcpyHostToHost,
     cudaMemcpyDeviceToDevice, cudaMemcpyDefault};
 
-/// Helper array for providing a printable name for the copy type definitions
+/// Helper array for providing a printable name for the copy type
+/// definitions
 static const std::string copy_type_printer[copy::type::count] = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};

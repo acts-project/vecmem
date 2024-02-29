@@ -54,3 +54,7 @@ option( BUILD_SHARED_LIBS
 # Decide whether warnings in the code should be treated as errors.
 option( VECMEM_FAIL_ON_WARNINGS
    "Make the build fail on compiler/linker warnings" FALSE )
+
+# Decide whether runtime asynchronous synhronization errors should be fatal.
+option( VECMEM_FAIL_ON_ASYNC_ERRORS
+   "Make the build fail on asynchronous synchronization errors" FALSE )

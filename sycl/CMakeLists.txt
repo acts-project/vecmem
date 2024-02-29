@@ -40,6 +40,11 @@ set_target_properties( vecmem_sycl PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden"
    SYCL_VISIBILITY_PRESET "hidden" )
 
+# Set up whether asynchronous synchronization errors should be fatal.
+if( VECMEM_FAIL_ON_ASYNC_ERRORS )
+   target_compile_definitions( vecmem_sycl PRIVATE VECMEM_FAIL_ON_ASYNC_ERRORS )
+endif()
+
 # Check if assertions work out of the box in the build.
 vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ASSERT
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/assert_test.sycl"
