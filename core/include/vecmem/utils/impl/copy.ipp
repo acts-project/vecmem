@@ -337,12 +337,16 @@ copy::event_type copy::setup(edm::view<SCHEMA> data) const {
 
     // Copy the data layout to the device, if needed.
     if (data.layout().ptr() != data.host_layout().ptr()) {
-        operator()(data.host_layout(), data.layout(), type::unknown);
+        assert(data.layout().capacity() > 0u);
+        [[maybe_unused]] bool did_copy =
+            copy_view_impl(data.host_layout(), data.layout(), type::unknown);
+        assert(did_copy);
     }
 
     // Initialize the "size variable(s)" correctly on the buffer.
     if (data.size().ptr() != nullptr) {
-        memset(data.size(), 0);
+        assert(data.size().capacity() > 0u);
+        do_memset(data.size().capacity() * sizeof(char), data.size().ptr(), 0);
     }
     VECMEM_DEBUG_MSG(3,
                      "Prepared an SoA container of capacity %u "
