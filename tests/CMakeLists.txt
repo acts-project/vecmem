@@ -47,6 +47,8 @@ add_library( vecmem_testing_common STATIC
    "common/soa_device_tests.ipp" )
 target_link_libraries( vecmem_testing_common
    PUBLIC vecmem::core GTest::gtest )
+set_target_properties( vecmem_testing_common PROPERTIES
+      FOLDER "vecmem/tests" )
 
 # Include the library specific tests.
 add_subdirectory( core )

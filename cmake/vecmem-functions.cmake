@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -49,7 +49,9 @@ function( vecmem_add_library fullname basename )
 
    # Make sure that the library is available as "vecmem::${basename}" in every
    # situation.
-   set_target_properties( ${fullname} PROPERTIES EXPORT_NAME ${basename} )
+   set_target_properties( ${fullname} PROPERTIES
+      EXPORT_NAME "${basename}"
+      FOLDER "vecmem" )
    add_library( vecmem::${basename} ALIAS ${fullname} )
 
    # Specify the (SO)VERSION of the library.
@@ -100,7 +102,8 @@ function( vecmem_test_public_headers library )
       target_link_libraries( "test_${_headerNormName}" PRIVATE ${library} )
       set_target_properties( "test_${_headerNormName}" PROPERTIES
          RUNTIME_OUTPUT_DIRECTORY
-         "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}" )
+         "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}"
+         FOLDER "vecmem/tests/header_tests" )
 
    endforeach()
 
@@ -125,6 +128,8 @@ function( vecmem_add_test name )
    if( ARG_LINK_LIBRARIES )
       target_link_libraries( ${test_exe_name} PRIVATE ${ARG_LINK_LIBRARIES} )
    endif()
+   set_target_properties( "vecmem_test_${name}" PROPERTIES
+      FOLDER "vecmem/tests" )
 
    # Discover all of the tests from the execuable, and set them up as individual
    # CTest tests.

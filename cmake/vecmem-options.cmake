@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -39,6 +39,9 @@ vecmem_lib_option( HIP "Build the vecmem::hip library" )
 
 # Flag specifying whether SYCL support should be built.
 vecmem_lib_option( SYCL "Build the vecmem::sycl library" )
+
+# Use folders for organizing targets in IDEs.
+set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 # Debug message output level in the code.
 set( VECMEM_DEBUG_MSG_LVL 0 CACHE STRING
