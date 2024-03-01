@@ -63,7 +63,11 @@ public:
 static ::testing::Environment* const async_cuda_copy_env =
     ::testing::AddGlobalTestEnvironment(new AsyncCUDACopyEnvironment{});
 
-/// The configurations to run the tests with.
+/// The configurations to run the tests with. Skip tests with asynchronous
+/// copies on "managed host memory" on Windows. (Using managed memory as
+/// "device memory" does seem to be fine.) There seems to be some issue with
+/// CUDA, which results in SEH exceptions when scheduling an asynchronous
+/// copy in such a setup, while a previous asynchronous copy is still running.
 static const auto cuda_copy_configs = testing::Values(
     std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr, cuda_device_resource_ptr,
              cuda_host_resource_ptr),
@@ -75,12 +79,18 @@ static const auto cuda_copy_configs = testing::Values(
              cuda_managed_resource_ptr, cuda_host_resource_ptr),
     std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
              cuda_managed_resource_ptr, cuda_managed_resource_ptr),
+#ifndef _WIN32
     std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
              cuda_managed_resource_ptr, cuda_managed_resource_ptr),
+#endif
     std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr, cuda_device_resource_ptr,
-             cuda_managed_resource_ptr),
+             cuda_managed_resource_ptr)
+#ifndef _WIN32
+        ,
     std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
-             cuda_device_resource_ptr, cuda_managed_resource_ptr));
+             cuda_device_resource_ptr, cuda_managed_resource_ptr)
+#endif
+);
 
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(cuda_copy_tests, copy_tests, cuda_copy_configs);
