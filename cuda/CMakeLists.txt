@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -46,6 +46,11 @@ target_link_libraries( vecmem_cuda
 # Hide the library's symbols by default.
 set_target_properties( vecmem_cuda PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden" )
+
+# Set up whether asynchronous synchronization errors should be fatal.
+if( VECMEM_FAIL_ON_ASYNC_ERRORS )
+   target_compile_definitions( vecmem_cuda PRIVATE VECMEM_FAIL_ON_ASYNC_ERRORS )
+endif()
 
 # Test the public headers of vecmem::cuda.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )

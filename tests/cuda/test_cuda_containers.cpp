@@ -134,7 +134,8 @@ TEST_F(cuda_containers_test, async_memory) {
                             vecmem::copy::type::host_to_device),
                     copy.to(vecmem::get_data(inputvec), device_resource),
                     outputvecdevice, stream);
-    copy(outputvecdevice, outputvechost, vecmem::copy::type::device_to_host);
+    copy(outputvecdevice, outputvechost, vecmem::copy::type::device_to_host)
+        ->ignore();
     stream.synchronize();
 
     // Check the output.
