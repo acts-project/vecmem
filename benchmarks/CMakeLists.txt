@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -34,6 +34,8 @@ add_library( vecmem_benchmark_common STATIC
    "common/make_jagged_vector.cpp" )
 target_link_libraries( vecmem_benchmark_common
    PUBLIC vecmem::core )
+set_target_properties( vecmem_benchmark_common PROPERTIES
+   FOLDER "vecmem/benchmarks" )
 
 # Include the library specific tests.
 add_subdirectory(core)

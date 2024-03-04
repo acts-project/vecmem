@@ -33,6 +33,9 @@ target_link_libraries(
    vecmem::core
 )
 
+set_target_properties( vecmem_testing_cuda_main PROPERTIES
+   FOLDER "vecmem/tests" )
+
 # Test all of the CUDA library's features.
 vecmem_add_test( cuda
    "test_cuda_memory_resources.cpp"

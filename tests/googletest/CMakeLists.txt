@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -34,6 +34,7 @@ set( CMAKE_MACOSX_RPATH TRUE )
 
 # Get it into the current directory.
 FetchContent_Populate( GoogleTest )
+set( CMAKE_FOLDER "vecmem/externals" )
 add_subdirectory( "${googletest_SOURCE_DIR}" "${googletest_BINARY_DIR}"
    EXCLUDE_FROM_ALL )
 
