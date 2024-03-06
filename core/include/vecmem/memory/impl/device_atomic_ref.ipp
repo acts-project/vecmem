@@ -7,6 +7,11 @@
  */
 #pragma once
 
+// HIP include
+#if defined(__HIP_DEVICE_COMPILE__)
+#include <hip/hip_runtime.h>
+#endif
+
 // SYCL include(s).
 #if defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
 #include <CL/sycl.hpp>
