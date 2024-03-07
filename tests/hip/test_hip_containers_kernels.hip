@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -20,7 +20,6 @@
 #include "vecmem/memory/atomic.hpp"
 #include "vecmem/memory/device_atomic_ref.hpp"
 #include "vecmem/utils/tuple.hpp"
-
 /// Kernel performing a linear transformation using the vector helper types
 __global__ void linearTransformKernel(
     vecmem::data::vector_view<const int> constants,

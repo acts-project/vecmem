@@ -52,4 +52,4 @@ bool managed_memory_resource::do_is_equal(
     return (dynamic_cast<const managed_memory_resource *>(&other) != nullptr);
 }
 
-}  // namespace vecmem::cuda
+}  // namespace vecmem::hip
