@@ -1,10 +1,15 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 #pragma once
+
+// HIP include(s)
+#if defined(__HIP_DEVICE_COMPILE__)
+#include <hip/hip_runtime.h>
+#endif
 
 // System include(s).
 #include <cassert>

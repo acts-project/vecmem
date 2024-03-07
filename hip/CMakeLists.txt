@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -17,6 +17,8 @@ vecmem_add_library( vecmem_hip hip
    "src/memory/device_memory_resource.cpp"
    "include/vecmem/memory/hip/host_memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
+   "include/vecmem/memory/hip/managed_memory_resource.hpp"
+   "src/memory/managed_memory_resource.cpp"
    # Utilities.
    "include/vecmem/utils/hip/copy.hpp"
    "src/utils/hip/copy.cpp"

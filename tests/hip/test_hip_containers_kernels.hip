@@ -1,13 +1,9 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
-
-// HIP include(s). Note that this needs to come first, as it affects how
-// other headers later on include/see system headers like <cassert>.
-#include <hip/hip_runtime.h>
 
 // Local include(s).
 #include "../../hip/src/utils/hip_error_handling.hpp"
@@ -20,6 +16,9 @@
 #include "vecmem/memory/atomic.hpp"
 #include "vecmem/memory/device_atomic_ref.hpp"
 #include "vecmem/utils/tuple.hpp"
+
+// HIP include(s).
+#include <hip/hip_runtime.h>
 
 /// Kernel performing a linear transformation using the vector helper types
 __global__ void linearTransformKernel(
