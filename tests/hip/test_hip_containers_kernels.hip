@@ -5,10 +5,6 @@
  * Mozilla Public License Version 2.0
  */
 
-// HIP include(s). Note that this needs to come first, as it affects how
-// other headers later on include/see system headers like <cassert>.
-#include <hip/hip_runtime.h>
-
 // Local include(s).
 #include "../../hip/src/utils/hip_error_handling.hpp"
 #include "test_hip_containers_kernels.hpp"
@@ -20,6 +16,10 @@
 #include "vecmem/memory/atomic.hpp"
 #include "vecmem/memory/device_atomic_ref.hpp"
 #include "vecmem/utils/tuple.hpp"
+
+// HIP include(s).
+#include <hip/hip_runtime.h>
+
 /// Kernel performing a linear transformation using the vector helper types
 __global__ void linearTransformKernel(
     vecmem::data::vector_view<const int> constants,

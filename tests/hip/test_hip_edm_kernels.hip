@@ -5,9 +5,6 @@
  * Mozilla Public License Version 2.0
  */
 
-// HIP include(s).
-#include <hip/hip_runtime.h>
-
 // Local include(s).
 #include "../common/jagged_soa_container_helpers.hpp"
 #include "../common/simple_soa_container_helpers.hpp"
@@ -15,6 +12,9 @@
 
 // Project include(s).
 #include "../../hip/src/utils/hip_error_handling.hpp"
+
+// HIP include(s).
+#include <hip/hip_runtime.h>
 
 __global__ void hipSimpleFillKernel(
     vecmem::testing::simple_soa_container::view view) {
