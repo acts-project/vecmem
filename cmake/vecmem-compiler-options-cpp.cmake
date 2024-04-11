@@ -43,7 +43,10 @@ endif()
 
 # Do not allow symbols to be missing from shared libraries.
 if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" )
-   vecmem_add_flag( CMAKE_SHARED_LINKER_FLAGS "-Wl,-undefined,error" )
+   # From AppleClang 15 onwards, the default is to fail on undefined symbols.
+   if( "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "15" )
+      vecmem_add_flag( CMAKE_SHARED_LINKER_FLAGS "-Wl,-undefined,error" )
+   endif()
 elseif( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
         ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) )
    vecmem_add_flag( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined" )
