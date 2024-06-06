@@ -38,6 +38,7 @@ set_target_properties( vecmem_testing_cuda_main PROPERTIES
 
 # Test all of the CUDA library's features.
 vecmem_add_test( cuda
+   "test_cuda_atomic_ref.cu"
    "test_cuda_memory_resources.cpp"
    "test_cuda_containers.cpp" "test_cuda_containers_kernels.cuh"
    "test_cuda_containers_kernels.cu"

@@ -9,7 +9,10 @@ include( vecmem-compiler-options-cpp )
 
 # Test all of the core library's features.
 vecmem_add_test( core
-   "test_core_allocator.cpp" "test_core_array.cpp" "test_core_containers.cpp"
+   "test_core_allocator.cpp"
+   "test_core_array.cpp"
+   "test_core_atomic_ref.cpp"
+   "test_core_containers.cpp"
    "test_core_contiguous_memory_resource.cpp" "test_core_copy.cpp"
    "test_core_device_containers.cpp" "test_core_memory_resources.cpp"
    "test_core_static_vector.cpp" "test_core_vector.cpp"
