@@ -301,6 +301,10 @@ __global__ void largeBufferTransformKernel(
     vecmem::device_vector<unsigned long> vec(data);
     assert(vec.size() == 0);
     vec.push_back(0);
+    vec.bulk_append(5);
+    vec.bulk_append(5, 2);
+    vec.bulk_append_implicit(5);
+    vec.bulk_append_implicit_unsafe(5);
 }
 
 void largeBufferTransform(vecmem::data::vector_view<unsigned long> data) {
@@ -326,6 +330,10 @@ __global__ void largeBufferTransformKernel(
     assert(vec.size() == 3);
     assert(vec.at(1).size() == 0);
     vec.at(1).push_back(0);
+    vec.at(1).bulk_append(5);
+    vec.at(1).bulk_append(5, 2);
+    vec.at(1).bulk_append_implicit(5);
+    vec.at(1).bulk_append_implicit_unsafe(5);
 }
 
 void largeBufferTransform(

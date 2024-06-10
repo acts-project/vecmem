@@ -335,3 +335,61 @@ void arrayTransform(
     VECMEM_HIP_ERROR_CHECK(hipGetLastError());
     VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
 }
+
+/// Kernel making a trivial use of the resizable vector that it receives
+__global__ void largeBufferTransformKernel(
+    vecmem::data::vector_view<unsigned long> data) {
+
+    // Add one element to the vector in just the first thread
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i != 0) {
+        return;
+    }
+    vecmem::device_vector<unsigned long> vec(data);
+    assert(vec.size() == 0);
+    vec.push_back(0);
+    vec.bulk_append(5);
+    vec.bulk_append(5, 2);
+    vec.bulk_append_implicit(5);
+    vec.bulk_append_implicit_unsafe(5);
+}
+
+void largeBufferTransform(vecmem::data::vector_view<unsigned long> data) {
+
+    // Launch the kernel.
+    hipLaunchKernelGGL(largeBufferTransformKernel, 1, 1, 0, nullptr, data);
+
+    // Check whether it succeeded to run.
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+}
+
+/// Kernel making a trivial use of the resizable jagged vector that it receives
+__global__ void largeBufferTransformKernel(
+    vecmem::data::jagged_vector_view<unsigned long> data) {
+
+    // Add one element to the vector in just the first thread
+    const std::size_t i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i != 0) {
+        return;
+    }
+    vecmem::jagged_device_vector<unsigned long> vec(data);
+    assert(vec.size() == 3);
+    assert(vec.at(1).size() == 0);
+    vec.at(1).push_back(0);
+    vec.at(1).bulk_append(5);
+    vec.at(1).bulk_append(5, 2);
+    vec.at(1).bulk_append_implicit(5);
+    vec.at(1).bulk_append_implicit_unsafe(5);
+}
+
+void largeBufferTransform(
+    vecmem::data::jagged_vector_view<unsigned long> data) {
+
+    // Launch the kernel.
+    hipLaunchKernelGGL(largeBufferTransformKernel, 1, 1, 0, nullptr, data);
+
+    // Check whether it succeeded to run.
+    VECMEM_HIP_ERROR_CHECK(hipGetLastError());
+    VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());
+}

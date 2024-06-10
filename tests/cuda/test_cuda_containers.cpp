@@ -299,16 +299,17 @@ TEST_F(cuda_containers_test, large_buffer) {
 
     // Test a (1D) vector.
     vecmem::data::vector_buffer<unsigned long> buffer1(
-        3, managed_resource, vecmem::data::buffer_type::resizable);
+        100, managed_resource, vecmem::data::buffer_type::resizable);
     m_copy.setup(buffer1);
     largeBufferTransform(buffer1);
-    EXPECT_EQ(m_copy.get_size(buffer1), 1u);
+    EXPECT_EQ(m_copy.get_size(buffer1), 21u);
 
     // Test a (2D) jagged vector.
     vecmem::data::jagged_vector_buffer<unsigned long> buffer2(
-        {3, 3, 3}, managed_resource, nullptr,
+        {100, 100, 100}, managed_resource, nullptr,
         vecmem::data::buffer_type::resizable);
     m_copy.setup(buffer2);
     largeBufferTransform(buffer2);
-    EXPECT_EQ(m_copy.get_sizes(buffer2), std::vector<unsigned int>({0, 1u, 0}));
+    EXPECT_EQ(m_copy.get_sizes(buffer2),
+              std::vector<unsigned int>({0, 21u, 0}));
 }

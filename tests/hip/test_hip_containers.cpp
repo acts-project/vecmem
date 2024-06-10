@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,6 +12,7 @@
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/hip/device_memory_resource.hpp"
 #include "vecmem/memory/hip/host_memory_resource.hpp"
+#include "vecmem/memory/hip/managed_memory_resource.hpp"
 #include "vecmem/utils/hip/copy.hpp"
 
 // GoogleTest include(s).
@@ -236,4 +237,27 @@ TEST_F(hip_containers_test, array_memory) {
     EXPECT_EQ(vec_array.at(2).at(1), 16);
     EXPECT_EQ(vec_array.at(2).at(2), 18);
     EXPECT_EQ(vec_array.at(3).size(), 0u);
+}
+
+/// Test buffers with "large" elements (for which alignment becomes important)
+TEST_F(hip_containers_test, large_buffer) {
+
+    // The memory resource(s).
+    vecmem::hip::managed_memory_resource managed_resource;
+
+    // Test a (1D) vector.
+    vecmem::data::vector_buffer<unsigned long> buffer1(
+        100, managed_resource, vecmem::data::buffer_type::resizable);
+    m_copy.setup(buffer1);
+    largeBufferTransform(buffer1);
+    EXPECT_EQ(m_copy.get_size(buffer1), 21u);
+
+    // Test a (2D) jagged vector.
+    vecmem::data::jagged_vector_buffer<unsigned long> buffer2(
+        {100, 100, 100}, managed_resource, nullptr,
+        vecmem::data::buffer_type::resizable);
+    m_copy.setup(buffer2);
+    largeBufferTransform(buffer2);
+    EXPECT_EQ(m_copy.get_sizes(buffer2),
+              std::vector<unsigned int>({0, 21u, 0}));
 }

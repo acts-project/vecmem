@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,7 +12,9 @@
 #include "vecmem/containers/array.hpp"
 #include "vecmem/containers/const_device_array.hpp"
 #include "vecmem/containers/const_device_vector.hpp"
+#include "vecmem/containers/data/jagged_vector_buffer.hpp"
 #include "vecmem/containers/device_vector.hpp"
+#include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/containers/static_array.hpp"
 #include "vecmem/containers/vector.hpp"
 #include "vecmem/memory/atomic.hpp"
@@ -507,4 +509,81 @@ TEST_F(sycl_containers_test, array_memory) {
     EXPECT_EQ(vec_array.at(2).at(1), 16);
     EXPECT_EQ(vec_array.at(2).at(2), 18);
     EXPECT_EQ(vec_array.at(3).size(), 0u);
+}
+
+/// Test buffers with "large" elements (for which alignment becomes important)
+TEST_F(sycl_containers_test, large_buffer) {
+
+    // Create the SYCL queue that we'll be using in the test.
+    cl::sycl::queue queue;
+
+    // The memory resource(s).
+    vecmem::sycl::shared_memory_resource shared_resource{&queue};
+
+    // Helper object for performing memory copies.
+    vecmem::sycl::copy copy(&queue);
+
+    // Test a (1D) vector.
+    vecmem::data::vector_buffer<unsigned long> buffer1(
+        100, shared_resource, vecmem::data::buffer_type::resizable);
+    copy.setup(buffer1);
+
+    // Run a kernel that enlarges the (1D) buffer.
+    queue
+        .submit([&buffer1](cl::sycl::handler& h) {
+            h.parallel_for<class BufferResize>(
+                cl::sycl::range<1>(1),
+                [data = vecmem::get_data(buffer1)](cl::sycl::item<1> id) {
+                    // Check if anything needs to be done.
+                    if (id[0] != 0) {
+                        return;
+                    }
+
+                    // Perform the resize operations.
+                    vecmem::device_vector<unsigned long> vec(data);
+                    assert(vec.size() == 0);
+                    vec.push_back(0);
+                    vec.bulk_append(5);
+                    vec.bulk_append(5, 2);
+                    vec.bulk_append_implicit(5);
+                    vec.bulk_append_implicit_unsafe(5);
+                });
+        })
+        .wait_and_throw();
+
+    // Check the results.
+    EXPECT_EQ(copy.get_size(buffer1), 21u);
+
+    // Test a (2D) jagged vector.
+    vecmem::data::jagged_vector_buffer<unsigned long> buffer2(
+        {100, 100, 100}, shared_resource, nullptr,
+        vecmem::data::buffer_type::resizable);
+    copy.setup(buffer2);
+
+    // Run a kernel that enlarges the (jagged) buffer.
+    queue
+        .submit([&buffer2](cl::sycl::handler& h) {
+            h.parallel_for<class JaggedBufferResize>(
+                cl::sycl::range<1>(1),
+                [data = vecmem::get_data(buffer2)](cl::sycl::item<1> id) {
+                    // Check if anything needs to be done.
+                    if (id[0] != 0) {
+                        return;
+                    }
+
+                    // Perform the resize operations.
+                    vecmem::jagged_device_vector<unsigned long> vec(data);
+                    assert(vec.size() == 3);
+                    assert(vec.at(1).size() == 0);
+                    vec.at(1).push_back(0);
+                    vec.at(1).bulk_append(5);
+                    vec.at(1).bulk_append(5, 2);
+                    vec.at(1).bulk_append_implicit(5);
+                    vec.at(1).bulk_append_implicit_unsafe(5);
+                });
+        })
+        .wait_and_throw();
+
+    // Check the results.
+    EXPECT_EQ(copy.get_sizes(buffer2), std::vector<unsigned int>({0, 21u, 0}));
 }
