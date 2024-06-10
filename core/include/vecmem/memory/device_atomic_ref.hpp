@@ -7,8 +7,8 @@
  */
 #pragma once
 
-// System include(s).
-#include <atomic>
+// vecmem includes
+#include "vecmem/memory/memory_order.hpp"
 
 namespace vecmem {
 
@@ -24,10 +24,6 @@ enum class device_address_space { global = 0, local = 1 };
 #include <CL/sycl.hpp>
 
 namespace vecmem {
-
-/// Define @c vecmem::memory_order as @c sycl::memory_order
-using memory_order = ::sycl::memory_order;
-
 namespace details {
 template <device_address_space address>
 struct sycl_address_space {};
@@ -64,10 +60,6 @@ using device_atomic_ref =
        (!defined(SYCL_LANGUAGE_VERSION)) && __cpp_lib_atomic_ref)
 
 namespace vecmem {
-
-/// Define @c vecmem::memory_order as @c std::memory_order
-using memory_order = std::memory_order;
-
 /// @c vecmem::atomic_ref equals @c std::atomic_ref in host code with C++20
 template <typename T, device_address_space = device_address_space::global>
 using device_atomic_ref = std::atomic_ref<T>;
@@ -83,17 +75,6 @@ using device_atomic_ref = std::atomic_ref<T>;
 #include <type_traits>
 
 namespace vecmem {
-
-/// Custom (dummy) definition for the memory order
-enum class memory_order {
-    relaxed = 0,
-    consume = 1,
-    acquire = 2,
-    release = 3,
-    acq_rel = 4,
-    seq_cst = 5
-};
-
 /// Class providing atomic operations for the VecMem code
 ///
 /// It is only meant to be used with primitive types. Ones that CUDA, HIP and

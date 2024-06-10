@@ -1,0 +1,42 @@
+/*
+ * VecMem project, part of the ACTS project (R&D line)
+ *
+ * (c) 2024 CERN for the benefit of the ACTS project
+ *
+ * Mozilla Public License Version 2.0
+ */
+
+#pragma once
+
+#if (defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)) && \
+    defined(VECMEM_HAVE_SYCL_ATOMIC_REF)
+// SYCL include(s).
+#include <CL/sycl.hpp>
+
+namespace vecmem {
+/// Define @c vecmem::memory_order as @c sycl::memory_order
+using memory_order = ::sycl::memory_order;
+}  // namespace vecmem
+#elif ((!defined(__CUDA_ARCH__)) && (!defined(__HIP_DEVICE_COMPILE__)) &&    \
+       (!defined(CL_SYCL_LANGUAGE_VERSION)) &&                               \
+       (!defined(SYCL_LANGUAGE_VERSION)) && defined(__cpp_lib_atomic_ref) && \
+       __cpp_lib_atomic_ref >= 201806L)
+// System include(s).
+#include <atomic>
+
+namespace vecmem {
+using memory_order = std::memory_order;
+}
+#else
+namespace vecmem {
+/// Custom (dummy) definition for the memory order
+enum class memory_order {
+    relaxed = 0,
+    consume = 1,
+    acquire = 2,
+    release = 3,
+    acq_rel = 4,
+    seq_cst = 5
+};
+}  // namespace vecmem
+#endif
