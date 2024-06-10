@@ -7,6 +7,12 @@
  */
 #pragma once
 
+#include <cassert>
+#include <cstring>
+
+// vecmem includes
+#include "vecmem/memory/memory_order.hpp"
+
 // HIP include
 #if defined(__HIP_DEVICE_COMPILE__)
 #include <hip/hip_runtime.h>
