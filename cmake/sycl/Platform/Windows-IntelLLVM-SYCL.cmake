@@ -73,3 +73,9 @@ endforeach()
 # Set the flags controlling the C++ standard used by the SYCL compiler.
 set( CMAKE_SYCL17_STANDARD_COMPILE_OPTION "/std:c++17" )
 set( CMAKE_SYCL17_EXTENSION_COMPILE_OPTION "/std:c++17" )
+
+set( CMAKE_SYCL20_STANDARD_COMPILE_OPTION "/std:c++20" )
+set( CMAKE_SYCL20_EXTENSION_COMPILE_OPTION "/std:c++20" )
+
+set( CMAKE_SYCL23_STANDARD_COMPILE_OPTION "/std:c++23" )
+set( CMAKE_SYCL23_EXTENSION_COMPILE_OPTION "/std:c++23" )
