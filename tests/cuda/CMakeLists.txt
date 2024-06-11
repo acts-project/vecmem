@@ -55,9 +55,8 @@ vecmem_add_test( cuda
    LINK_LIBRARIES CUDA::cudart vecmem::core vecmem::cuda vecmem_testing_cuda_main
                   vecmem_testing_common )
 
-# Set up a separate test that would ensure a C++17 standard. But only with
-# CUDA 11+.
-if( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "11.0" )
+# Set up a separate test if the C++17 standard is available for CUDA.
+if( "${CMAKE_CUDA_STANDARD}" VERSION_GREATER_EQUAL "17" )
    vecmem_add_test( cuda_cxx17
       "test_cuda_memory_resources.cu"
       "test_cuda_containers.cu" "test_cuda_containers_kernels.cuh"
@@ -72,6 +71,4 @@ if( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "11.0" )
       "${CMAKE_CURRENT_SOURCE_DIR}/../../cuda/src/utils/cuda_wrappers.cpp"
       LINK_LIBRARIES vecmem::core vecmem::cuda vecmem_testing_cuda_main
                      vecmem_testing_common )
-   set_target_properties( vecmem_test_cuda_cxx17 PROPERTIES
-      CUDA_STANDARD 17 )
 endif()

@@ -10,6 +10,11 @@ name: Build Tests
 # Perform the builds on every push and pull request.
 on: [ push, pull_request ]
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 # All the different build/test jobs.
 jobs:
 
@@ -32,13 +37,15 @@ jobs:
           - OS: "windows-latest"
             GENERATOR:
 
+    name: "native (${{ matrix.BUILD.TYPE }}, ${{ matrix.PLATFORM.OS }})"
+
     # The system to run on.
     runs-on: ${{ matrix.PLATFORM.OS }}
 
     # The build/test steps to execute.
     steps:
     # Use a standard checkout of the code.
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     # Run the CMake configuration.
     - name: Configure
       run: cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }}
@@ -68,33 +75,87 @@ jobs:
           - TYPE: "Debug"
             MSG_LVL: 5
         PLATFORM:
-          - NAME: "CUDA"
-            CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda:v11"
+          - NAME: "CPU"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2404:47"
+            CONTAINER_NAME: "Ubuntu 24.04"
+            CXX_STANDARD: "17"
             OPTIONS:
-          - NAME: "CUDA"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:v32"
+            NOTES:
+            RUN_TESTS: true
+          - NAME: "CPU"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2404:47"
+            CONTAINER_NAME: "Ubuntu 24.04"
+            CXX_STANDARD: "20"
             OPTIONS:
+            NOTES:
+            RUN_TESTS: true
+          - NAME: "CPU"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2404:47"
+            CONTAINER_NAME: "Ubuntu 24.04"
+            CXX_STANDARD: "23"
+            OPTIONS:
+            NOTES:
+            RUN_TESTS: true
+          - NAME: "CUDA"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:47"
+            CONTAINER_NAME: "Ubuntu 20.04"
+            CXX_STANDARD: "17"
+            OPTIONS:
+            NOTES:
+            RUN_TESTS: false
+          - NAME: "CUDA"
+            CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda:v43"
+            CONTAINER_NAME: "Ubuntu 18.04"
+            CXX_STANDARD: "17"
+            OPTIONS: -DCMAKE_CUDA_STANDARD=14
+            NOTES: CUDA C++14
+            RUN_TESTS: false
           - NAME: "HIP"
-            CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm:v11"
+            CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm:v43"
+            CONTAINER_NAME: "Ubuntu 18.04"
+            CXX_STANDARD: "17"
+            OPTIONS: -DCMAKE_HIP_STANDARD=14
+            NOTES: HIP C++14
+            RUN_TESTS: false
+          - NAME: "HIP"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_rocm:47"
+            CONTAINER_NAME: "Ubuntu 20.04"
+            CXX_STANDARD: "17"
             OPTIONS:
+            NOTES:
+            RUN_TESTS: false
           - NAME: "SYCL"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_oneapi:v20"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_oneapi:47"
+            CONTAINER_NAME: "Ubuntu 20.04"
+            CXX_STANDARD: "17"
             OPTIONS:
+            NOTES:
+            RUN_TESTS: true
         include:
           - BUILD:
               TYPE: "Release"
               MSG_LVL: 0
             PLATFORM:
               NAME: "SYCL"
-              CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda_oneapi:v32"
+              CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda_oneapi:47"
+              CONTAINER_NAME: "Ubuntu 20.04"
+              CXX_STANDARD: "17"
               OPTIONS: -DVECMEM_BUILD_CUDA_LIBRARY=FALSE
+              NOTES: "NVIDIA backend"
+              RUN_TESTS: false
           - BUILD:
               TYPE: "Release"
               MSG_LVL: 0
             PLATFORM:
               NAME: "SYCL"
-              CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm_oneapi:v32"
+              CONTAINER: "ghcr.io/acts-project/ubuntu2004_rocm_oneapi:47"
+              CONTAINER_NAME: "Ubuntu 20.04"
+              CXX_STANDARD: "17"
               OPTIONS: -DVECMEM_BUILD_HIP_LIBRARY=FALSE
+              NOTES: "AMD backend"
+              RUN_TESTS: false
+
+    name: "container (${{ matrix.BUILD.TYPE }}, ${{ matrix.PLATFORM.NAME }}, C++${{ matrix.PLATFORM.CXX_STANDARD }}, ${{ matrix.PLATFORM.CONTAINER_NAME }}${{ matrix.PLATFORM.NOTES != '' && ', ' || '' }}${{ matrix.PLATFORM.NOTES }})"
 
     # The system to run on.
     runs-on: ubuntu-latest
@@ -108,17 +169,24 @@ jobs:
     # The build/test steps to execute.
     steps:
     # Use a standard checkout of the code.
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     # Run the CMake configuration.
     - name: Configure
       run: |
         source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
-        cmake -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE -DVECMEM_BUILD_BENCHMARKING=TRUE -DVECMEM_FAIL_ON_WARNINGS=TRUE ${{ matrix.PLATFORM.OPTIONS }} -S ${GITHUB_WORKSPACE} -B build
-    # Print the configuration log for debugging
-    - name: Print CMake Configure Output
-      run: cat build/CMakeFiles/CMakeOutput.log
-    - name: Print CMake Configure Errors
-      run: cat build/CMakeFiles/CMakeError.log
+        cmake \
+          -DCMAKE_CXX_STANDARD=${{ matrix.PLATFORM.CXX_STANDARD }} \
+          -DCMAKE_CUDA_STANDARD=${{matrix.PLATFORM.CXX_STANDARD }} \
+          -DCMAKE_SYCL_STANDARD=${{ matrix.PLATFORM.CXX_STANDARD }} \
+          -DCMAKE_HIP_STANDARD=${{ matrix.PLATFORM.CXX_STANDARD }} \
+          -DCMAKE_BUILD_TYPE=${{ matrix.BUILD.TYPE }} \
+          -DVECMEM_DEBUG_MSG_LVL=${{ matrix.BUILD.MSG_LVL }} \
+          -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE \
+          -DVECMEM_BUILD_BENCHMARKING=TRUE \
+          -DVECMEM_FAIL_ON_WARNINGS=TRUE \
+          ${{ matrix.PLATFORM.OPTIONS }} \
+          -S ${GITHUB_WORKSPACE} \
+          -B build
     # Perform the build.
     - name: Build
       run: |
@@ -126,7 +194,7 @@ jobs:
         cmake --build build
     # Run the unit test(s).
     - name: Test
-      if: "matrix.PLATFORM.NAME == 'SYCL'"
+      if: "matrix.PLATFORM.RUN_TESTS == true"
       run: |
         cd build
         source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}

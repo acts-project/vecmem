@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/acts-project/format10:v11
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Check
         run: .github/check_format.sh .
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: changed

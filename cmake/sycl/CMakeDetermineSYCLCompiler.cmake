@@ -101,7 +101,7 @@ set( CMAKE_SYCL_HOST_LINKER "${CMAKE_SYCL_COMPILER}" )
 
 # Set up C++17 by default.
 set( CMAKE_SYCL_STANDARD 17 CACHE STRING "C++ standard to use with SYCL" )
-set_property( CACHE CMAKE_SYCL_STANDARD PROPERTY STRINGS 17 )
+set_property( CACHE CMAKE_SYCL_STANDARD PROPERTY STRINGS 17 20 23 )
 
 # Configure variables set in this file for fast reload later on.
 configure_file( ${CMAKE_CURRENT_LIST_DIR}/CMakeSYCLCompiler.cmake.in

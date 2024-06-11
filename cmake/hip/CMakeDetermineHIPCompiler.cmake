@@ -94,7 +94,7 @@ set_property( CACHE CMAKE_HIP_PLATFORM
 
 # Set up C++14 by default for HIP.
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "C++ standard to use with HIP" )
-set_property( CACHE CMAKE_HIP_STANDARD PROPERTY STRINGS 11 14 17 )
+set_property( CACHE CMAKE_HIP_STANDARD PROPERTY STRINGS 11 14 17 20 23 )
 
 # Look for the HIP toolkit. Its variables are needed for setting up the build
 # of HIP source files.
