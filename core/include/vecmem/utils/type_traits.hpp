@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -113,5 +113,45 @@ auto max(T&& t, Ts&&... ts) {
     return std::max(std::forward<T>(t), max(std::forward<Ts>(ts)...));
 }
 
+/// Type trait that indicates whether a given type is an implicit lifetime
+/// type.
+///
+/// @note The definition of "implicit lifetime type" differs a lot across C++
+/// standards, as does the implementation of this type trait. In C++17 and
+/// earlier, the concept of such types did not exist. In C++20, these types
+/// were defined but no type trait for them was available. In C++23, a type
+/// trait is available.
+///
+/// @warning On pre-C++17 translation units, this type trait is always assumed
+/// to be true.
+///
+/// @{
+#if defined(__cpp_lib_is_implicit_lifetime) && \
+    __cpp_lib_is_implicit_lifetime >= 202302L
+template <class TYPE>
+using is_implicit_lifetime = std::is_implicit_lifetime<TYPE>;
+#define VECMEM_HAVE_IS_IMPLICIT_LIFETIME
+#elif defined(__cpp_lib_is_aggregate) && __cpp_lib_is_aggregate >= 201703L
+// Implementation taken directly from P2674R1.
+template <class TYPE>
+struct is_implicit_lifetime
+    : disjunction<
+          std::is_scalar<TYPE>, std::is_array<TYPE>, std::is_aggregate<TYPE>,
+          conjunction<
+              std::is_trivially_destructible<TYPE>,
+              disjunction<std::is_trivially_default_constructible<TYPE>,
+                          std::is_trivially_copy_constructible<TYPE>,
+                          std::is_trivially_move_constructible<TYPE>>>> {};
+#define VECMEM_HAVE_IS_IMPLICIT_LIFETIME
+#else
+// If we are on such an old version of C++, we're basically in the wild west,
+// so we allow the user to do whatever they want.
+template <class TYPE>
+using is_implicit_lifetime = std::true_type;
+#endif
+
+template <class TYPE>
+constexpr bool is_implicit_lifetime_v = is_implicit_lifetime<TYPE>::value;
+/// @}
 }  // namespace details
 }  // namespace vecmem

@@ -11,6 +11,8 @@
 
 // System include(s).
 #include <cassert>
+#include <memory>
+#include <type_traits>
 
 namespace vecmem {
 
@@ -226,6 +228,86 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::push_back(
 }
 
 template <typename TYPE>
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::bulk_append(size_type n)
+    -> size_type {
+    // This can only be done on a resizable vector.
+    assert(m_size != nullptr);
+
+    static_assert(std::is_default_constructible<TYPE>::value,
+                  "Type `T` in `device_vector<T>::bulk_append` is not a "
+                  "default-constructible type.");
+
+    device_atomic_ref<size_type> asize(*m_size);
+    const size_type index = asize.fetch_add(n);
+    assert((index + n) <= m_capacity);
+
+    for (size_type i = 0; i < n; ++i) {
+        construct(index + i, value_type());
+    }
+
+    return index;
+}
+
+template <typename TYPE>
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::bulk_append(size_type n,
+                                                             const_reference v)
+    -> size_type {
+    // This can only be done on a resizable vector.
+    assert(m_size != nullptr);
+
+    static_assert(std::is_copy_constructible<TYPE>::value,
+                  "Type `TYPE` in device_vector<T>::bulk_append(SIZE, TYPE)` "
+                  "must be copy-constructible.");
+
+    device_atomic_ref<size_type> asize(*m_size);
+    const size_type index = asize.fetch_add(n);
+    assert((index + n) <= m_capacity);
+
+    for (size_type i = 0; i < n; ++i) {
+        construct(index + i, value_type(v));
+    }
+
+    return index;
+}
+
+template <typename TYPE>
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::bulk_append_implicit(
+    size_type n) -> size_type {
+    // This can only be done on a resizable vector.
+    assert(m_size != nullptr);
+
+    static_assert(details::is_implicit_lifetime<TYPE>::value,
+                  "Type `TYPE` in `device_vector<T>::bulk_append_implicit` is "
+                  "not an implicit lifetype type, so slots cannot be safely "
+                  "reserved. Note that the definition of implicit lifetimes "
+                  "differs between C++<=17, C++20, and C++>=23.");
+
+    device_atomic_ref<size_type> asize(*m_size);
+    const size_type index = asize.fetch_add(n);
+    assert((index + n) <= m_capacity);
+
+#if defined(__cpp_lib_start_lifetime_as) && \
+    __cpp_lib_start_lifetime_as >= 202207L
+    std::start_lifetime_as_array<TYPE>(m_ptr[index], n);
+#endif
+
+    return index;
+}
+
+template <typename TYPE>
+VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::bulk_append_implicit_unsafe(
+    size_type n) -> size_type {
+    // This can only be done on a resizable vector.
+    assert(m_size != nullptr);
+
+    device_atomic_ref<size_type> asize(*m_size);
+    const size_type index = asize.fetch_add(n);
+    assert((index + n) <= m_capacity);
+
+    return index;
+}
+
+template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::pop_back() -> size_type {
 
     // This can only be done on a resizable vector.
@@ -296,6 +378,34 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize(size_type new_size,
     }
 
     // Set the new size for the vector.
+    asize.store(new_size);
+}
+
+template <typename TYPE>
+VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize_implicit(
+    size_type new_size) {
+    // This can only be done on a resizable vector.
+    assert(m_size != nullptr);
+
+    static_assert(details::is_implicit_lifetime<TYPE>::value,
+                  "Type `TYPE` in `device_vector<T>::resize_implicit` is not "
+                  "an implicit lifetype type, so slots cannot be safely "
+                  "reserved. Note that the definition of implicit lifetimes "
+                  "differs between C++<=17, C++20, and C++>=23.");
+
+    device_atomic_ref<size_type> asize(*m_size);
+    assert(new_size <= m_capacity);
+    asize.store(new_size);
+}
+
+template <typename TYPE>
+VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize_implicit_unsafe(
+    size_type new_size) {
+    // This can only be done on a resizable vector.
+    assert(m_size != nullptr);
+
+    device_atomic_ref<size_type> asize(*m_size);
+    assert(new_size <= m_capacity);
     asize.store(new_size);
 }
 
