@@ -168,6 +168,36 @@ public:
     VECMEM_HOST_AND_DEVICE
     size_type push_back(const_reference value);
 
+    /// Default-construct a given number of elements at the end of the vector.
+    ///
+    /// @note This function runs in Θ(n) time, performing n default
+    /// constructions.
+    VECMEM_HOST_AND_DEVICE size_type bulk_append(size_type n);
+
+    /// Copy-construct a given number of elements at the end of the vector,
+    /// copying the given object.
+    ///
+    /// @note This function runs in Θ(n) time, performing n copy constructions.
+    VECMEM_HOST_AND_DEVICE size_type bulk_append(size_type n,
+                                                 const_reference v);
+
+    /// Reserve a fixed number of slots in the array in a standards-conformant
+    /// way.
+    ///
+    /// @note This function runs in Θ(1) time.
+    ///
+    /// @warning This method is only standards-conformant in C++20 and later.
+    VECMEM_HOST_AND_DEVICE size_type bulk_append_implicit(size_type n);
+
+    /// Reserve a fixed number of slots in the array in a way that technically
+    /// is ill-formed.
+    ///
+    /// @note This function runs in Θ(1) time.
+    ///
+    /// @warning This method requires that the client guarantees that the array
+    /// elements reserved are given a proper lifetime before they are used.
+    VECMEM_HOST_AND_DEVICE size_type bulk_append_implicit_unsafe(size_type n);
+
     /// Remove the last element of the vector (not thread-safe)
     VECMEM_HOST_AND_DEVICE
     size_type pop_back();
@@ -182,6 +212,17 @@ public:
     /// (not thread-safe)
     VECMEM_HOST_AND_DEVICE
     void resize(size_type new_size, const_reference value);
+
+    /// Resize a vector of implicit lifetime types
+    ///
+    /// @note This function runs in Θ(1) time.
+    VECMEM_HOST_AND_DEVICE void resize_implicit(size_type new_size);
+
+    /// Resize a vector in constant time, unsafely deallocating non-implicit
+    /// lifetime types.
+    ///
+    /// @note This function runs in Θ(1) time.
+    VECMEM_HOST_AND_DEVICE void resize_implicit_unsafe(size_type new_size);
 
     /// @}
 

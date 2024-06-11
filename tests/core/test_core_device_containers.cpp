@@ -17,6 +17,7 @@
 #include "vecmem/memory/contiguous_memory_resource.hpp"
 #include "vecmem/memory/host_memory_resource.hpp"
 #include "vecmem/utils/copy.hpp"
+#include "vecmem/utils/type_traits.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
@@ -180,46 +181,182 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
 
     device_vector.assign(20, 123);
     EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(20));
+
+    for (int value : device_vector) {
+        EXPECT_EQ(value, 123);
+    }
+
+    auto n1 = device_vector.bulk_append_implicit(2);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(22));
+    for (decltype(n1) i = 0; i < 2; ++i) {
+        device_vector.at(n1 + i) = 123;
+    }
+
+    auto n2 = device_vector.bulk_append_implicit_unsafe(2);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(24));
+    for (decltype(n2) i = 0; i < 2; ++i) {
+        device_vector.at(n2 + i) = 123;
+    }
+
+    auto n3 = device_vector.bulk_append(2);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(26));
+    for (decltype(n3) i = 0; i < 2; ++i) {
+        device_vector.at(n3 + i) = 123;
+    }
+
+    device_vector.bulk_append(3, 123);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(29));
+
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(29));
     for (int value : device_vector) {
         EXPECT_EQ(value, 123);
     }
 
     device_vector.resize(40, 234);
     EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(40));
-    for (vector_size_type i = 0; i < 20; ++i) {
+    for (vector_size_type i = 0; i < 29; ++i) {
         EXPECT_EQ(device_vector[i], 123);
     }
-    for (vector_size_type i = 20; i < 40; ++i) {
+    for (vector_size_type i = 29; i < 40; ++i) {
         EXPECT_EQ(device_vector[i], 234);
     }
-    device_vector.resize(25);
-    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(25));
-    for (vector_size_type i = 0; i < 20; ++i) {
+    device_vector.resize(35);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(35));
+    for (vector_size_type i = 0; i < 29; ++i) {
         EXPECT_EQ(device_vector[i], 123);
     }
-    for (vector_size_type i = 20; i < 25; ++i) {
+    for (vector_size_type i = 29; i < 35; ++i) {
         EXPECT_EQ(device_vector[i], 234);
     }
 
     device_vector.pop_back();
-    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(24));
-    for (vector_size_type i = 0; i < 20; ++i) {
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(34));
+    for (vector_size_type i = 0; i < 29; ++i) {
         EXPECT_EQ(device_vector[i], 123);
     }
-    for (vector_size_type i = 20; i < 24; ++i) {
+    for (vector_size_type i = 29; i < 34; ++i) {
         EXPECT_EQ(device_vector[i], 234);
     }
 
     // Copy the modified data back into the "host vector", and check if that
     // succeeded.
     m_copy(resizable_buffer, host_vector);
-    EXPECT_EQ(host_vector.size(), 24);
-    for (std::size_t i = 0; i < 20; ++i) {
+    EXPECT_EQ(host_vector.size(), 34);
+    for (std::size_t i = 0; i < 29; ++i) {
         EXPECT_EQ(host_vector[i], 123);
     }
-    for (std::size_t i = 20; i < 24; ++i) {
+    for (std::size_t i = 29; i < 34; ++i) {
         EXPECT_EQ(host_vector[i], 234);
     }
+}
+
+/// Test(s) for a "resizable" @c vecmem::data::vector_buffer with non-trivial
+/// types
+TEST_F(core_device_container_test, resizable_vector_buffer_nontrivial) {
+#ifdef VECMEM_HAVE_IS_IMPLICIT_LIFETIME
+    class nontrivial_class {
+    public:
+        nontrivial_class() = delete;
+        nontrivial_class(const nontrivial_class&) = delete;
+        nontrivial_class(nontrivial_class&& o) { m_value = o.m_value; };
+
+        nontrivial_class(int v) : m_value(v) {}
+
+        int get() { return m_value; }
+
+        nontrivial_class& operator=(int v) {
+            m_value = v;
+            return *this;
+        }
+
+    private:
+        int m_value;
+    };
+
+    static_assert(!vecmem::details::is_implicit_lifetime_v<nontrivial_class>,
+                  "This test is designed to ensure that the type "
+                  "`nontrivial_class` is not an implicit lifetime type.");
+
+    // Helper local type definitions.
+    typedef typename vecmem::data::vector_buffer<nontrivial_class>::size_type
+        buffer_size_type;
+    typedef typename vecmem::device_vector<nontrivial_class>::size_type
+        vector_size_type;
+
+    // Create a resizable buffer from that data.
+    static constexpr buffer_size_type BUFFER_SIZE = 100;
+    vecmem::data::vector_buffer<nontrivial_class> resizable_buffer(
+        BUFFER_SIZE, m_resource, vecmem::data::buffer_type::resizable);
+    m_copy.setup(resizable_buffer);
+    EXPECT_EQ(resizable_buffer.capacity(), BUFFER_SIZE);
+    EXPECT_EQ(resizable_buffer.size(), 0);
+
+    // Create a "device vector" on top of that resizable data.
+    vecmem::device_vector<nontrivial_class> device_vector(resizable_buffer);
+
+    // Perform some simple tests as a start.
+    EXPECT_EQ(device_vector.size(), 0);
+    EXPECT_EQ(device_vector.capacity(), BUFFER_SIZE);
+    EXPECT_EQ(device_vector.max_size(), BUFFER_SIZE);
+
+    device_vector.resize_implicit_unsafe(BUFFER_SIZE);
+    for (decltype(device_vector)::size_type i = 0; i < BUFFER_SIZE; ++i) {
+        device_vector.at(i) = -100;
+    }
+    device_vector.resize_implicit_unsafe(10);
+    EXPECT_EQ(device_vector.size(), 10);
+
+    for (decltype(device_vector)::size_type i = 0; i < 10; ++i) {
+        device_vector.at(i) = static_cast<int>(i) + static_cast<int>(1);
+    }
+
+    for (decltype(device_vector)::size_type i = 0; i < 10; ++i) {
+        EXPECT_EQ(device_vector[static_cast<vector_size_type>(i)].get(), i + 1);
+    }
+
+    // Modify the device vector in different ways, and check that it would work
+    // as expected.
+    device_vector.clear();
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(0));
+
+    device_vector.emplace_back(10);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(1));
+    EXPECT_EQ(device_vector.at(0).get(), 10);
+
+    device_vector.emplace_back(15);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(2));
+    EXPECT_EQ(device_vector.back().get(), 15);
+
+    device_vector.resize_implicit_unsafe(20);
+    for (decltype(device_vector)::size_type i = 0; i < 20; ++i) {
+        device_vector.at(i) = 123;
+    }
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(20));
+
+    for (nontrivial_class& value : device_vector) {
+        EXPECT_EQ(value.get(), 123);
+    }
+
+    auto n1 = device_vector.bulk_append_implicit_unsafe(9);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(29));
+    for (decltype(device_vector)::size_type i = 0; i < 9; ++i) {
+        device_vector.at(n1 + i) = 123;
+    }
+
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(29));
+    for (nontrivial_class& value : device_vector) {
+        EXPECT_EQ(value.get(), 123);
+    }
+
+    device_vector.resize_implicit_unsafe(40);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(40));
+    device_vector.resize_implicit_unsafe(35);
+    EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(35));
+#else
+    // This test is meaningless without a good definition of implicit lifetime
+    // types.
+    GTEST_SKIP()
+#endif
 }
 
 /// Test(s) for a "resizable" @c vecmem::data::jagged_vector_buffer
