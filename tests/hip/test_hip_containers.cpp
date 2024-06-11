@@ -259,5 +259,5 @@ TEST_F(hip_containers_test, large_buffer) {
     m_copy.setup(buffer2);
     largeBufferTransform(buffer2);
     EXPECT_EQ(m_copy.get_sizes(buffer2),
-              std::vector<unsigned int>({0, 21u, 0}));
+              std::vector<unsigned int>({5u, 21u, 10u}));
 }

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -135,13 +135,13 @@ using is_implicit_lifetime = std::is_implicit_lifetime<TYPE>;
 // Implementation taken directly from P2674R1.
 template <class TYPE>
 struct is_implicit_lifetime
-    : std::disjunction<
+    : disjunction<
           std::is_scalar<TYPE>, std::is_array<TYPE>, std::is_aggregate<TYPE>,
-          std::conjunction<
+          conjunction<
               std::is_trivially_destructible<TYPE>,
-              std::disjunction<std::is_trivially_default_constructible<TYPE>,
-                               std::is_trivially_copy_constructible<TYPE>,
-                               std::is_trivially_move_constructible<TYPE>>>> {};
+              disjunction<std::is_trivially_default_constructible<TYPE>,
+                          std::is_trivially_copy_constructible<TYPE>,
+                          std::is_trivially_move_constructible<TYPE>>>> {};
 #define VECMEM_HAVE_IS_IMPLICIT_LIFETIME
 #else
 // If we are on such an old version of C++, we're basically in the wild west,

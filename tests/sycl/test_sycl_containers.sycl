@@ -575,15 +575,18 @@ TEST_F(sycl_containers_test, large_buffer) {
                     vecmem::jagged_device_vector<unsigned long> vec(data);
                     assert(vec.size() == 3);
                     assert(vec.at(1).size() == 0);
+                    vec.at(0).resize_implicit(5);
                     vec.at(1).push_back(0);
                     vec.at(1).bulk_append(5);
                     vec.at(1).bulk_append(5, 2);
                     vec.at(1).bulk_append_implicit(5);
                     vec.at(1).bulk_append_implicit_unsafe(5);
+                    vec.at(2).resize_implicit_unsafe(10);
                 });
         })
         .wait_and_throw();
 
     // Check the results.
-    EXPECT_EQ(copy.get_sizes(buffer2), std::vector<unsigned int>({0, 21u, 0}));
+    EXPECT_EQ(copy.get_sizes(buffer2),
+              std::vector<unsigned int>({5u, 21u, 10u}));
 }

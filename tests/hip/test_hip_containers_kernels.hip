@@ -376,11 +376,13 @@ __global__ void largeBufferTransformKernel(
     vecmem::jagged_device_vector<unsigned long> vec(data);
     assert(vec.size() == 3);
     assert(vec.at(1).size() == 0);
+    vec.at(0).resize_implicit(5);
     vec.at(1).push_back(0);
     vec.at(1).bulk_append(5);
     vec.at(1).bulk_append(5, 2);
     vec.at(1).bulk_append_implicit(5);
     vec.at(1).bulk_append_implicit_unsafe(5);
+    vec.at(2).resize_implicit_unsafe(10);
 }
 
 void largeBufferTransform(

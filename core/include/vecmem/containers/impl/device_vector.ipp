@@ -276,7 +276,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::bulk_append_implicit(
     // This can only be done on a resizable vector.
     assert(m_size != nullptr);
 
-    static_assert(details::is_implicit_lifetime_v<TYPE>,
+    static_assert(details::is_implicit_lifetime<TYPE>::value,
                   "Type `TYPE` in `device_vector<T>::bulk_append_implicit` is "
                   "not an implicit lifetype type, so slots cannot be safely "
                   "reserved. Note that the definition of implicit lifetimes "
@@ -387,7 +387,7 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize_implicit(
     // This can only be done on a resizable vector.
     assert(m_size != nullptr);
 
-    static_assert(details::is_implicit_lifetime_v<TYPE>,
+    static_assert(details::is_implicit_lifetime<TYPE>::value,
                   "Type `TYPE` in `device_vector<T>::resize_implicit` is not "
                   "an implicit lifetype type, so slots cannot be safely "
                   "reserved. Note that the definition of implicit lifetimes "
