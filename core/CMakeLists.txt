@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -309,6 +309,12 @@ if( VECMEM_HAVE_STD_ALIGNED_ALLOC )
    target_compile_definitions( vecmem_core
       PRIVATE VECMEM_HAVE_STD_ALIGNED_ALLOC )
 endif()
+
+# This is a (hopefully) temporary workaround for fixing the CI builds on
+# Windows. See https://github.com/actions/runner-images/issues/10004 for more
+# details.
+target_compile_definitions( vecmem_core
+   PRIVATE _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR )
 
 # Test the public headers of vecmem::core.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
