@@ -58,3 +58,6 @@ option( VECMEM_FAIL_ON_WARNINGS
 # Decide whether runtime asynchronous synhronization errors should be fatal.
 option( VECMEM_FAIL_ON_ASYNC_ERRORS
    "Make the build fail on asynchronous synchronization errors" FALSE )
+
+# Build the project's documentation.
+option( VECMEM_BUILD_DOCS "Build the project's documentation" OFF )

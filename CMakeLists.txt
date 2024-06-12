@@ -60,9 +60,14 @@ endif()
 # Set up the packaging of the project.
 include( vecmem-packaging )
 
-# Set up Doxygen documentation creation for the project.
-find_package( Doxygen )
-if( DOXYGEN_FOUND )
+# Set up Doxygen documentation creation for the project, if requested.
+if( VECMEM_BUILD_DOCS )
+
+   # This requires / uses Doxygen and doxygen-awesome-css.
+   find_package( Doxygen REQUIRED )
+   add_subdirectory( cmake/doxygen-awesome-css )
+
+   # Set up how to build the Doxygen documentation.
    set( DOXYGEN_JAVADOC_AUTOBRIEF TRUE )
    set( DOXYGEN_USE_MDFILE_AS_MAINPAGE
       "${CMAKE_CURRENT_SOURCE_DIR}/README.md" )
@@ -81,6 +86,13 @@ if( DOXYGEN_FOUND )
       "${CMAKE_CURRENT_SOURCE_DIR}/tests"
       "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"
       "${CMAKE_CURRENT_SOURCE_DIR}/build" )
+   set( DOXYGEN_GENERATE_TREEVIEW FALSE )
+   set( DOXYGEN_DISABLE_INDEX FALSE )
+   set( DOXYGEN_FULL_SIDEBAR FALSE )
+   set( DOXYGEN_HTML_EXTRA_STYLESHEET
+      "${doxygenawesomecss_SOURCE_DIR}/doxygen-awesome.css" )
+
+   # Set up the "vecmem_docs" target.
    doxygen_add_docs( vecmem_docs
       "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMENT "Generating Doxygen pages" )
