@@ -31,3 +31,11 @@ vecmem_add_test( core
    "test_core_edm_host.cpp"
    "test_core_edm_view.cpp"
    LINK_LIBRARIES vecmem::core GTest::gtest_main vecmem_testing_common )
+
+# Add UBSAN for the tests, if it's available.
+include( CheckCXXCompilerFlag )
+check_cxx_compiler_flag( "-fsanitize=undefined" VECMEM_HAVE_UBSAN )
+if( VECMEM_HAVE_UBSAN )
+   target_compile_options( vecmem_test_core PRIVATE "-fsanitize=undefined" )
+   target_link_options( vecmem_test_core PRIVATE "-fsanitize=undefined" )
+endif()

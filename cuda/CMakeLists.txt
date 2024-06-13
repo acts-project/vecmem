@@ -46,6 +46,12 @@ target_link_libraries( vecmem_cuda
 # Hide the library's symbols by default.
 set_target_properties( vecmem_cuda PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden" )
+include( CheckCXXCompilerFlag )
+check_cxx_compiler_flag(
+   "-fvisibility-ms-compat" VECMEM_HAVE_VISIBILITY_MS_COMPAT )
+if( VECMEM_HAVE_VISIBILITY_MS_COMPAT )
+   target_compile_options( vecmem_cuda PRIVATE "-fvisibility-ms-compat" )
+endif()
 
 # Set up whether asynchronous synchronization errors should be fatal.
 if( VECMEM_FAIL_ON_ASYNC_ERRORS )

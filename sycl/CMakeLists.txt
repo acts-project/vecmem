@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -39,6 +39,12 @@ target_link_libraries( vecmem_sycl PUBLIC vecmem::core )
 set_target_properties( vecmem_sycl PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden"
    SYCL_VISIBILITY_PRESET "hidden" )
+vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_VISIBILITY_MS_COMPAT
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/empty.sycl"
+   CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-fvisibility-ms-compat )
+if( VECMEM_HAVE_SYCL_VISIBILITY_MS_COMPAT )
+   target_compile_options( vecmem_sycl PRIVATE "-fvisibility-ms-compat" )
+endif()
 
 # Set up whether asynchronous synchronization errors should be fatal.
 if( VECMEM_FAIL_ON_ASYNC_ERRORS )

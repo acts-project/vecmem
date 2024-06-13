@@ -161,6 +161,12 @@ vecmem_add_library( vecmem_core core
 # Hide the library's symbols by default.
 set_target_properties( vecmem_core PROPERTIES
    CXX_VISIBILITY_PRESET "hidden" )
+include( CheckCXXCompilerFlag )
+check_cxx_compiler_flag(
+   "-fvisibility-ms-compat" VECMEM_HAVE_VISIBILITY_MS_COMPAT )
+if( VECMEM_HAVE_VISIBILITY_MS_COMPAT )
+   target_compile_options( vecmem_core PRIVATE "-fvisibility-ms-compat" )
+endif()
 
 # Generate a version header for the project.
 configure_file( "cmake/version.hpp.in"
