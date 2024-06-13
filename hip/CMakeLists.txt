@@ -36,6 +36,12 @@ target_link_libraries( vecmem_hip
 # Hide the library's symbols by default.
 set_target_properties( vecmem_hip PROPERTIES
    CXX_VISIBILITY_PRESET "hidden" )
+include( CheckCXXCompilerFlag )
+check_cxx_compiler_flag(
+   "-fvisibility-ms-compat" VECMEM_HAVE_VISIBILITY_MS_COMPAT )
+if( VECMEM_HAVE_VISIBILITY_MS_COMPAT )
+   target_compile_options( vecmem_hip PRIVATE "-fvisibility-ms-compat" )
+endif()
 
 # Test the public headers of vecmem::hip.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )

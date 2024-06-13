@@ -56,6 +56,15 @@ vecmem_add_test( cuda
    LINK_LIBRARIES CUDA::cudart vecmem::core vecmem::cuda vecmem_testing_cuda_main
                   vecmem_testing_common )
 
+# Add UBSAN for the tests, if it's available.
+include( CheckCXXCompilerFlag )
+check_cxx_compiler_flag( "-fsanitize=undefined" VECMEM_HAVE_UBSAN )
+if( VECMEM_HAVE_UBSAN )
+   target_compile_options( vecmem_test_cuda PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=undefined> )
+   target_link_options( vecmem_test_cuda PRIVATE "-fsanitize=undefined" )
+endif()
+
 # Set up a separate test if the C++17 standard is available for CUDA.
 if( "${CMAKE_CUDA_STANDARD}" VERSION_GREATER_EQUAL "17" )
    vecmem_add_test( cuda_cxx17

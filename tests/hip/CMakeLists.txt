@@ -27,6 +27,15 @@ vecmem_add_test( hip
    LINK_LIBRARIES HIP::hiprt vecmem::core vecmem::hip GTest::gtest_main
                   vecmem_testing_common )
 
+# Add UBSAN for the tests, if it's available.
+include( CheckCXXCompilerFlag )
+check_cxx_compiler_flag( "-fsanitize=undefined" VECMEM_HAVE_UBSAN )
+if( VECMEM_HAVE_UBSAN )
+   target_compile_options( vecmem_test_hip PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=undefined> )
+   target_link_options( vecmem_test_hip PRIVATE "-fsanitize=undefined" )
+endif()
+
 # The executable's source code needs to be built into position independent
 # code in certain HIP + GCC combinations. But not most of them... Still, for
 # the test executable let's just take the hit, and always use PIC.
