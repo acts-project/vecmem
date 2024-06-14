@@ -316,12 +316,6 @@ if( VECMEM_HAVE_STD_ALIGNED_ALLOC )
       PRIVATE VECMEM_HAVE_STD_ALIGNED_ALLOC )
 endif()
 
-# This is a (hopefully) temporary workaround for fixing the CI builds on
-# Windows. See https://github.com/actions/runner-images/issues/10004 for more
-# details.
-target_compile_definitions( vecmem_core
-   PRIVATE _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR )
-
 # Test the public headers of vecmem::core.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
    file( GLOB_RECURSE vecmem_core_public_headers
