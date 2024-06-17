@@ -11,7 +11,8 @@
 
 /// Function name to use for printout operations
 #ifndef VECMEM_PRINTF
-#if defined(SYCL_LANGUAGE_VERSION) || defined(CL_SYCL_LANGUAGE_VERSION)
+#if defined(SYCL_LANGUAGE_VERSION) || \
+    defined(CL_SYCL_LANGUAGE_VERSION) && defined(VECMEM_SYCL_PRINTF_FUNCTION)
 #define VECMEM_PRINTF VECMEM_SYCL_PRINTF_FUNCTION
 #else
 #define VECMEM_PRINTF printf

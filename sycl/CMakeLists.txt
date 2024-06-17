@@ -87,6 +87,34 @@ if( NOT VECMEM_HAVE_SYCL_ASSERT )
    endif()
 endif()
 
+# Test which printf function(s) is/are available.
+vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ext_oneapi_printf_test.sycl" )
+vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ONEAPI_PRINTF
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/oneapi_printf_test.sycl" )
+
+# Set up the appropriate flag with its help.
+if( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
+   target_compile_definitions( vecmem_sycl PUBLIC
+      VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ext::oneapi::experimental::printf )
+elseif( VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
+   target_compile_definitions( vecmem_sycl PUBLIC
+      VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ONEAPI::experimental::printf )
+else()
+   message( WARNING "No valid printf function found for SYCL."
+      " Enabling debug messages will likely not work in device code." )
+   target_compile_definitions( vecmem_sycl PUBLIC
+      VECMEM_SYCL_PRINTF_FUNCTION=printf VECMEM_MSG_ATTRIBUTES= )
+endif()
+
+# Test whether sycl::atomic_ref is available.
+vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ATOMIC_REF
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/atomic_ref_test.sycl" )
+if( VECMEM_HAVE_SYCL_ATOMIC_REF )
+   target_compile_definitions( vecmem_sycl PUBLIC
+      VECMEM_HAVE_SYCL_ATOMIC_REF )
+endif()
+
 # Check if sycl::queue::memset is available, and set a compiler option
 # accordingly.
 vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_MEMSET
