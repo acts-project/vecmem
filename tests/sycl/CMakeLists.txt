@@ -25,7 +25,7 @@ vecmem_add_test( sycl
 include( CheckCXXCompilerFlag )
 check_cxx_compiler_flag( "-fsanitize=undefined" VECMEM_HAVE_UBSAN )
 vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_UBSAN
-   "${CMAKE_CURRENT_SOURCE_DIR}/../../sycl/cmake/empty.sycl"
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/empty_ubsan.sycl"
    CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-fsanitize=undefined )
 if( VECMEM_HAVE_UBSAN AND VECMEM_HAVE_SYCL_UBSAN )
    target_compile_options( vecmem_test_sycl PRIVATE "-fsanitize=undefined" )
