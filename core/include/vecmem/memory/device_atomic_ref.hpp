@@ -115,7 +115,7 @@ public:
 
     /// Constructor, with a pointer to the managed variable
     VECMEM_HOST_AND_DEVICE
-    device_atomic_ref(reference ref);
+    explicit device_atomic_ref(reference ref);
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE
     device_atomic_ref(const device_atomic_ref& parent);
