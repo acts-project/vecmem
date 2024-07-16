@@ -260,10 +260,12 @@ TEST_P(copy_tests, mismatched_vector_buffer) {
 
     // Verify that data cannot be copied around like this.
     EXPECT_THROW(main_copy()(host_buffer1, device_buffer2,
-                             vecmem::copy::type::host_to_device),
+                             vecmem::copy::type::host_to_device)
+                     ->wait(),
                  std::exception);
     EXPECT_THROW(main_copy()(device_buffer2, host_buffer3,
-                             vecmem::copy::type::device_to_host),
+                             vecmem::copy::type::device_to_host)
+                     ->wait(),
                  std::exception);
 
     // Create resizable device and host buffers, which are (progressively)
@@ -297,7 +299,8 @@ TEST_P(copy_tests, mismatched_vector_buffer) {
 
     // Verify that data cannot be copied around like this.
     EXPECT_THROW(main_copy()(host_buffer1, device_buffer4,
-                             vecmem::copy::type::host_to_device),
+                             vecmem::copy::type::host_to_device)
+                     ->wait(),
                  std::exception);
 }
 
@@ -467,10 +470,12 @@ TEST_P(copy_tests, mismatched_jagged_vector_buffer) {
 
     // Verify that data cannot be copied around like this.
     EXPECT_THROW(main_copy()(host_buffer1, device_buffer2,
-                             vecmem::copy::type::host_to_device),
+                             vecmem::copy::type::host_to_device)
+                     ->wait(),
                  std::exception);
     EXPECT_THROW(main_copy()(device_buffer2, host_buffer3,
-                             vecmem::copy::type::device_to_host),
+                             vecmem::copy::type::device_to_host)
+                     ->wait(),
                  std::exception);
 
     // Create resizable device and host buffers, which are (progressively)
@@ -506,7 +511,8 @@ TEST_P(copy_tests, mismatched_jagged_vector_buffer) {
 
     // Verify that data cannot be copied around like this.
     EXPECT_THROW(main_copy()(host_buffer1, device_buffer4,
-                             vecmem::copy::type::host_to_device),
+                             vecmem::copy::type::host_to_device)
+                     ->wait(),
                  std::exception);
 }
 
