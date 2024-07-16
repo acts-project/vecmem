@@ -139,7 +139,7 @@ TEST_F(core_jagged_vector_view_test, filter) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         {10, 10, 10, 10, 10, 10}, m_mem, nullptr,
         vecmem::data::buffer_type::resizable);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     // Fill the jagged vector buffer with just the odd elements.
     vecmem::jagged_device_vector device_vec(output_data);
@@ -153,7 +153,7 @@ TEST_F(core_jagged_vector_view_test, filter) {
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 6);
@@ -178,14 +178,14 @@ TEST_F(core_jagged_vector_view_test, empty) {
     // Create a resizable buffer for a jagged vector.
     vecmem::data::jagged_vector_buffer<int> output_data(
         {}, m_mem, nullptr, vecmem::data::buffer_type::resizable);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     vecmem::jagged_device_vector device_vec(output_data);
     EXPECT_EQ(device_vec.size(), 0);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 0);
@@ -198,14 +198,14 @@ TEST_F(core_jagged_vector_view_test, empty_fixed) {
     // Create a resizable buffer for a jagged vector.
     vecmem::data::jagged_vector_buffer<int> output_data(
         {}, m_mem, nullptr, vecmem::data::buffer_type::fixed_size);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     vecmem::jagged_device_vector device_vec(output_data);
     EXPECT_EQ(device_vec.size(), 0);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 0);
@@ -219,14 +219,14 @@ TEST_F(core_jagged_vector_view_test, sizeless) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         std::vector<std::size_t>(3, 0), m_mem, nullptr,
         vecmem::data::buffer_type::resizable);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     vecmem::jagged_device_vector device_vec(output_data);
     EXPECT_EQ(device_vec.size(), 3);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 3);
@@ -243,14 +243,14 @@ TEST_F(core_jagged_vector_view_test, sizeless_fixed) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         std::vector<std::size_t>(3, 0), m_mem, nullptr,
         vecmem::data::buffer_type::fixed_size);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     vecmem::jagged_device_vector device_vec(output_data);
     EXPECT_EQ(device_vec.size(), 3);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 3);

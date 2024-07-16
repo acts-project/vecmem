@@ -85,7 +85,7 @@ TEST_F(core_device_container_test, vector_buffer) {
 
     // Create an "owning copy" of the host vector's memory.
     vecmem::data::vector_buffer<int> device_data(host_data.size(), m_resource);
-    m_copy(vecmem::get_data(host_vector), device_data);
+    m_copy(vecmem::get_data(host_vector), device_data)->wait();
 
     // Do some basic tests.
     EXPECT_EQ(device_data.size(), host_vector.size());
@@ -150,9 +150,9 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
     static constexpr buffer_size_type BUFFER_SIZE = 100;
     vecmem::data::vector_buffer<int> resizable_buffer(
         BUFFER_SIZE, m_resource, vecmem::data::buffer_type::resizable);
-    m_copy.setup(resizable_buffer);
+    m_copy.setup(resizable_buffer)->wait();
     EXPECT_EQ(resizable_buffer.capacity(), BUFFER_SIZE);
-    m_copy(vecmem::get_data(host_vector), resizable_buffer);
+    m_copy(vecmem::get_data(host_vector), resizable_buffer)->wait();
     EXPECT_EQ(resizable_buffer.size(), host_vector.size());
 
     // Create a "device vector" on top of that resizable data.
@@ -240,7 +240,7 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
 
     // Copy the modified data back into the "host vector", and check if that
     // succeeded.
-    m_copy(resizable_buffer, host_vector);
+    m_copy(resizable_buffer, host_vector)->wait();
     EXPECT_EQ(host_vector.size(), 34);
     for (std::size_t i = 0; i < 29; ++i) {
         EXPECT_EQ(host_vector[i], 123);
@@ -287,7 +287,7 @@ TEST_F(core_device_container_test, resizable_vector_buffer_nontrivial) {
     static constexpr buffer_size_type BUFFER_SIZE = 100;
     vecmem::data::vector_buffer<nontrivial_class> resizable_buffer(
         BUFFER_SIZE, m_resource, vecmem::data::buffer_type::resizable);
-    m_copy.setup(resizable_buffer);
+    m_copy.setup(resizable_buffer)->wait();
     EXPECT_EQ(resizable_buffer.capacity(), BUFFER_SIZE);
     EXPECT_EQ(resizable_buffer.size(), 0);
 
@@ -366,7 +366,7 @@ TEST_F(core_device_container_test, resizable_jagged_vector_buffer) {
     vecmem::data::jagged_vector_buffer<int> jagged_buffer(
         std::vector<std::size_t>({0, 16, 10, 15, 8, 3, 0, 0, 55, 2}),
         m_resource, nullptr, vecmem::data::buffer_type::resizable);
-    m_copy.setup(jagged_buffer);
+    m_copy.setup(jagged_buffer)->wait();
 
     // Create a device vector on top of the buffer.
     vecmem::jagged_device_vector<int> device_vec(jagged_buffer);
@@ -426,7 +426,7 @@ TEST_F(core_device_container_test, conversions) {
     // Create a dummy vector buffer.
     vecmem::data::vector_buffer<int> buffer1d1{
         10, m_resource, vecmem::data::buffer_type::resizable};
-    m_copy.setup(buffer1d1);
+    m_copy.setup(buffer1d1)->wait();
 
     // Check that some conversions compile and work correctly.
     vecmem::data::vector_view<int> view1d1 = buffer1d1;
@@ -459,7 +459,7 @@ TEST_F(core_device_container_test, conversions) {
     vecmem::data::jagged_vector_buffer<int> buffer2d1(
         std::vector<std::size_t>({0, 16, 10, 15, 8, 3, 0, 0, 55, 2}),
         m_resource, nullptr, vecmem::data::buffer_type::resizable);
-    m_copy.setup(buffer2d1);
+    m_copy.setup(buffer2d1)->wait();
 
     // Check that some conversions compile and work correctly.
     vecmem::data::jagged_vector_view<int> view2d1 = buffer2d1;

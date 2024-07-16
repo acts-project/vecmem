@@ -112,7 +112,7 @@ TEST_F(core_edm_buffer_test, get_data) {
     // Construct a resizable, simple buffer.
     vecmem::edm::buffer<simple_schema> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer2.size(), 0);
+    m_copy.memset(buffer2.size(), 0)->wait();
 
     // Make views of it.
     vecmem::edm::view<simple_schema> view4 = vecmem::get_data(buffer2);
@@ -192,7 +192,7 @@ TEST_F(core_edm_buffer_test, get_data) {
     // Construct a resizable, jagged buffer.
     vecmem::edm::buffer<jagged_schema> buffer4{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer4.size(), 0);
+    m_copy.memset(buffer4.size(), 0)->wait();
 
     // Make views of it.
     vecmem::edm::view<jagged_schema> view10 = vecmem::get_data(buffer4);
@@ -279,7 +279,7 @@ TEST_F(core_edm_buffer_test, device) {
     // Construct a resizable, simple buffer.
     vecmem::edm::buffer<simple_schema> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer2.size(), 0);
+    m_copy.memset(buffer2.size(), 0)->wait();
 
     // Make a device container on top of it.
     vecmem::edm::device<simple_schema> device2{buffer2};
@@ -362,7 +362,7 @@ TEST_F(core_edm_buffer_test, device) {
     // Construct a resizable, jagged buffer.
     vecmem::edm::buffer<jagged_schema> buffer4{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer4.size(), 0);
+    m_copy.memset(buffer4.size(), 0)->wait();
 
     // Make a device container on top of it.
     vecmem::edm::device<jagged_schema> device4{buffer4};
