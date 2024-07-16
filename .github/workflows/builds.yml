@@ -157,6 +157,11 @@ jobs:
 
     name: "container (${{ matrix.BUILD.TYPE }}, ${{ matrix.PLATFORM.NAME }}, C++${{ matrix.PLATFORM.CXX_STANDARD }}, ${{ matrix.PLATFORM.CONTAINER_NAME }}${{ matrix.PLATFORM.NOTES != '' && ', ' || '' }}${{ matrix.PLATFORM.NOTES }})"
 
+    # Hack to continue using checkout (for now) on Ubuntu 18.04.
+    # see: https://github.blog/changelog/2024-03-07-github-actions-all-actions-will-run-on-node20-instead-of-node16-by-default/
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
     # The system to run on.
     runs-on: ubuntu-latest
     container: ${{ matrix.PLATFORM.CONTAINER }}
