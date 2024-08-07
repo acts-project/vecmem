@@ -7,6 +7,9 @@
  */
 #pragma once
 
+// System include(s).
+#include <cassert>
+
 namespace vecmem {
 namespace details {
 
