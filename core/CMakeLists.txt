@@ -327,6 +327,22 @@ if( VECMEM_HAVE_STD_ALIGNED_ALLOC )
       PRIVATE VECMEM_HAVE_STD_ALIGNED_ALLOC )
 endif()
 
+# Check if vecmem::posix_device_atomic_ref is usable.
+set( CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" )
+check_cxx_source_compiles( "
+   #include <vecmem/memory/details/posix_device_atomic_ref.hpp>
+   int main() {
+      int foo = 0;
+      vecmem::posix_device_atomic_ref<int> ref{foo};
+      return 0;
+   }
+   " VECMEM_SUPPORT_POSIX_ATOMIC_REF )
+if( VECMEM_SUPPORT_POSIX_ATOMIC_REF )
+   target_compile_definitions( vecmem_core
+      PUBLIC VECMEM_SUPPORT_POSIX_ATOMIC_REF )
+endif()
+unset( CMAKE_REQUIRED_INCLUDES )
+
 # Test the public headers of vecmem::core.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
    file( GLOB vecmem_core_public_headers
