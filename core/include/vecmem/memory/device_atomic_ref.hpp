@@ -43,17 +43,31 @@ using device_atomic_ref = sycl::custom_device_atomic_ref<T, address>;
 }  // namespace vecmem
 
 #endif  // defined(VECMEM_HAVE_SYCL_ATOMIC_REF)
-#elif defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+#elif defined(__CUDA_ARCH__)
 
 // Local include(s).
 #include "vecmem/memory/details/cuda_device_atomic_ref.hpp"
 
 namespace vecmem {
 
-/// Use @c vecmem::cuda::device_atomic_ref in CUDA and HIP device code
+/// Use @c vecmem::cuda::device_atomic_ref in CUDA device code
 template <typename T,
           device_address_space address = device_address_space::global>
 using device_atomic_ref = cuda::device_atomic_ref<T, address>;
+
+}  // namespace vecmem
+
+#elif defined(__HIP_DEVICE_COMPILE__)
+
+// Local include(s).
+#include "vecmem/memory/details/hip_device_atomic_ref.hpp"
+
+namespace vecmem {
+
+/// Use @c vecmem::hip::device_atomic_ref in HIP device code
+template <typename T,
+          device_address_space address = device_address_space::global>
+using device_atomic_ref = hip::device_atomic_ref<T, address>;
 
 }  // namespace vecmem
 

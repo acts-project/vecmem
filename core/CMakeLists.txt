@@ -66,6 +66,7 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/impl/dummy_device_atomic_ref.ipp"
    "include/vecmem/memory/details/cuda_device_atomic_ref.hpp"
    "include/vecmem/memory/impl/cuda_device_atomic_ref.ipp"
+   "include/vecmem/memory/details/hip_device_atomic_ref.hpp"
    "include/vecmem/memory/details/sycl_builtin_device_atomic_ref.hpp"
    "include/vecmem/memory/details/sycl_custom_device_atomic_ref.hpp"
    "include/vecmem/memory/impl/sycl_custom_device_atomic_ref.ipp"
