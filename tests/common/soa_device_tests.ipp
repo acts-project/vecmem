@@ -69,9 +69,10 @@ void soa_device_tests_base<CONTAINER>::modify_device(
     typename CONTAINER::buffer buffer;
     vecmem::testing::make_buffer(buffer, device_mr, host_mr,
                                  vecmem::data::buffer_type::fixed_size);
-    copy.setup(buffer);
+    copy.setup(buffer)->wait();
     copy(vecmem::get_data(container1), buffer,
-         vecmem::copy::type::host_to_device);
+         vecmem::copy::type::host_to_device)
+        ->wait();
 
     // Modify the container in host memory, using a simple for loop.
     auto data1 = vecmem::get_data(container1);
@@ -87,7 +88,7 @@ void soa_device_tests_base<CONTAINER>::modify_device(
 
     // Copy the data back to the host.
     typename CONTAINER::host container2{host_mr};
-    copy(buffer, container2);
+    copy(buffer, container2)->wait();
 
     // Compare the two.
     vecmem::testing::compare(vecmem::get_data(container1),
@@ -110,7 +111,7 @@ void soa_device_tests_base<CONTAINER>::fill_device(
     typename CONTAINER::buffer buffer1;
     vecmem::testing::make_buffer(buffer1, host_mr, host_mr,
                                  vecmem::data::buffer_type::resizable);
-    copy.setup(buffer1);
+    copy.setup(buffer1)->wait();
     typename CONTAINER::device device1{buffer1};
     for (unsigned int i = 0; i < device1.capacity(); ++i) {
         vecmem::testing::fill(i, device1);
@@ -120,7 +121,7 @@ void soa_device_tests_base<CONTAINER>::fill_device(
     typename CONTAINER::buffer buffer2;
     vecmem::testing::make_buffer(buffer2, device_mr, host_mr,
                                  vecmem::data::buffer_type::resizable);
-    copy.setup(buffer2);
+    copy.setup(buffer2)->wait();
 
     // Run a kernel that fills the buffer.
     if ((*device_fill)(buffer2) == false) {
@@ -131,8 +132,8 @@ void soa_device_tests_base<CONTAINER>::fill_device(
     typename CONTAINER::buffer buffer3;
     vecmem::testing::make_buffer(buffer3, host_mr, host_mr,
                                  vecmem::data::buffer_type::resizable);
-    copy.setup(buffer3);
-    copy(buffer2, buffer3, vecmem::copy::type::device_to_host);
+    copy.setup(buffer3)->wait();
+    copy(buffer2, buffer3, vecmem::copy::type::device_to_host)->wait();
 
     // Compare the two containers.
     vecmem::testing::compare(buffer1, buffer3);

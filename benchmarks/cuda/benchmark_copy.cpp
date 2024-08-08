@@ -54,11 +54,11 @@ void jaggedVectorUnknownHtoDCopy(::benchmark::State& state) {
     const data::jagged_vector_data<int> source_data = get_data(source);
     // Create the "destination buffer".
     data::jagged_vector_buffer<int> dest(sizes, device_mr, &host_mr);
-    cuda_copy.setup(dest);
+    cuda_copy.setup(dest)->wait();
 
     // Perform the copy benchmark.
     for (auto _ : state) {
-        cuda_copy(source_data, dest);
+        cuda_copy(source_data, dest)->wait();
     }
 }
 // Set up the benchmark.
@@ -87,11 +87,11 @@ void jaggedVectorKnownHtoDCopy(::benchmark::State& state) {
     const data::jagged_vector_data<int> source_data = get_data(source);
     // Create the "destination buffer".
     data::jagged_vector_buffer<int> dest(sizes, device_mr, &host_mr);
-    cuda_copy.setup(dest);
+    cuda_copy.setup(dest)->wait();
 
     // Perform the copy benchmark.
     for (auto _ : state) {
-        cuda_copy(source_data, dest, copy::type::host_to_device);
+        cuda_copy(source_data, dest, copy::type::host_to_device)->wait();
     }
 }
 // Set up the benchmark.
@@ -116,7 +116,7 @@ void jaggedVectorUnknownDtoHCopy(::benchmark::State& state) {
 
     // Create the "source buffer".
     data::jagged_vector_buffer<int> source(sizes, device_mr, &host_mr);
-    cuda_copy.setup(source);
+    cuda_copy.setup(source)->wait();
     // Create the "destination vector".
     jagged_vector<int> dest =
         vecmem::benchmark::make_jagged_vector(sizes, host_mr);
@@ -124,7 +124,7 @@ void jaggedVectorUnknownDtoHCopy(::benchmark::State& state) {
 
     // Perform the copy benchmark.
     for (auto _ : state) {
-        cuda_copy(source, dest_data);
+        cuda_copy(source, dest_data)->wait();
     }
 }
 // Set up the benchmark.
@@ -149,7 +149,7 @@ void jaggedVectorKnownDtoHCopy(::benchmark::State& state) {
 
     // Create the "source buffer".
     data::jagged_vector_buffer<int> source(sizes, device_mr, &host_mr);
-    cuda_copy.setup(source);
+    cuda_copy.setup(source)->wait();
     // Create the "destination vector".
     jagged_vector<int> dest =
         vecmem::benchmark::make_jagged_vector(sizes, host_mr);
@@ -157,7 +157,7 @@ void jaggedVectorKnownDtoHCopy(::benchmark::State& state) {
 
     // Perform the copy benchmark.
     for (auto _ : state) {
-        cuda_copy(source, dest_data, copy::type::device_to_host);
+        cuda_copy(source, dest_data, copy::type::device_to_host)->wait();
     }
 }
 // Set up the benchmark.
