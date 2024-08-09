@@ -40,18 +40,17 @@ constexpr int memorder_to_posix_builtin(memory_order o) {
 }  // namespace details
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE
-posix_device_atomic_ref<T, address>::posix_device_atomic_ref(reference ref)
+VECMEM_HOST posix_device_atomic_ref<T, address>::posix_device_atomic_ref(
+    reference ref)
     : m_ptr(&ref) {}
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE
-posix_device_atomic_ref<T, address>::posix_device_atomic_ref(
+VECMEM_HOST posix_device_atomic_ref<T, address>::posix_device_atomic_ref(
     const posix_device_atomic_ref& parent)
     : m_ptr(parent.m_ptr) {}
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::operator=(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::operator=(
     value_type data) const -> value_type {
 
     store(data);
@@ -59,21 +58,21 @@ VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::operator=(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE void posix_device_atomic_ref<T, address>::store(
+VECMEM_HOST void posix_device_atomic_ref<T, address>::store(
     value_type data, memory_order order) const {
 
     __atomic_store_n(m_ptr, data, details::memorder_to_posix_builtin(order));
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::load(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::load(
     memory_order order) const -> value_type {
 
     return __atomic_load_n(m_ptr, details::memorder_to_posix_builtin(order));
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::exchange(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::exchange(
     value_type data, memory_order order) const -> value_type {
 
     return __atomic_exchange_n(m_ptr, data,
@@ -81,8 +80,7 @@ VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::exchange(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE bool
-posix_device_atomic_ref<T, address>::compare_exchange_strong(
+VECMEM_HOST bool posix_device_atomic_ref<T, address>::compare_exchange_strong(
     reference expected, value_type desired, memory_order order) const {
 
     if (order == memory_order::acq_rel) {
@@ -97,8 +95,7 @@ posix_device_atomic_ref<T, address>::compare_exchange_strong(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE bool
-posix_device_atomic_ref<T, address>::compare_exchange_strong(
+VECMEM_HOST bool posix_device_atomic_ref<T, address>::compare_exchange_strong(
     reference expected, value_type desired, memory_order success,
     memory_order failure) const {
 
@@ -112,7 +109,7 @@ posix_device_atomic_ref<T, address>::compare_exchange_strong(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_add(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_add(
     value_type data, memory_order order) const -> value_type {
 
     return __atomic_fetch_add(m_ptr, data,
@@ -120,7 +117,7 @@ VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_add(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_sub(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_sub(
     value_type data, memory_order order) const -> value_type {
 
     return __atomic_fetch_add(m_ptr, -data,
@@ -128,7 +125,7 @@ VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_sub(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_and(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_and(
     value_type data, memory_order order) const -> value_type {
 
     return __atomic_fetch_and(m_ptr, data,
@@ -136,7 +133,7 @@ VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_and(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_or(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_or(
     value_type data, memory_order order) const -> value_type {
 
     return __atomic_fetch_or(m_ptr, data,
@@ -144,7 +141,7 @@ VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_or(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto posix_device_atomic_ref<T, address>::fetch_xor(
+VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_xor(
     value_type data, memory_order order) const -> value_type {
 
     return __atomic_fetch_xor(m_ptr, data,

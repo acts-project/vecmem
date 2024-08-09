@@ -10,7 +10,6 @@
 // Local include(s).
 #include "vecmem/memory/details/device_address_space.hpp"
 #include "vecmem/memory/memory_order.hpp"
-#include "vecmem/utils/types.hpp"
 
 // System include(s).
 #include <type_traits>
@@ -53,10 +52,8 @@ public:
     /// @}
 
     /// Constructor, with a pointer to the managed variable
-    VECMEM_HOST_AND_DEVICE
     explicit custom_device_atomic_ref(reference ref);
     /// Copy constructor
-    VECMEM_HOST_AND_DEVICE
     custom_device_atomic_ref(const custom_device_atomic_ref& parent);
 
     /// Disable the assignment operator
@@ -70,29 +67,23 @@ public:
     ///
     /// @see vecmem::device_atomic_ref::store
     ///
-    VECMEM_HOST_AND_DEVICE
     value_type operator=(value_type data) const;
 
     /// Set the variable to the desired value
-    VECMEM_HOST_AND_DEVICE
     void store(value_type data,
                memory_order order = memory_order::seq_cst) const;
     /// Get the value of the variable
-    VECMEM_HOST_AND_DEVICE
     value_type load(memory_order order = memory_order::seq_cst) const;
 
     /// Exchange the current value of the variable with a different one
-    VECMEM_HOST_AND_DEVICE
     value_type exchange(value_type data,
                         memory_order order = memory_order::seq_cst) const;
 
     /// Compare against the current value, and exchange only if different
-    VECMEM_HOST_AND_DEVICE
     bool compare_exchange_strong(reference expected, value_type desired,
                                  memory_order success,
                                  memory_order failure) const;
     /// Compare against the current value, and exchange only if different
-    VECMEM_HOST_AND_DEVICE
     bool compare_exchange_strong(
         reference expected, value_type desired,
         memory_order order = memory_order::seq_cst) const;
@@ -103,24 +94,19 @@ public:
     /// @{
 
     /// Add a chosen value to the stored variable
-    VECMEM_HOST_AND_DEVICE
     value_type fetch_add(value_type data,
                          memory_order order = memory_order::seq_cst) const;
     /// Substitute a chosen value from the stored variable
-    VECMEM_HOST_AND_DEVICE
     value_type fetch_sub(value_type data,
                          memory_order order = memory_order::seq_cst) const;
 
     /// Replace the current value with the specified value AND-ed to it
-    VECMEM_HOST_AND_DEVICE
     value_type fetch_and(value_type data,
                          memory_order order = memory_order::seq_cst) const;
     /// Replace the current value with the specified value OR-d to it
-    VECMEM_HOST_AND_DEVICE
     value_type fetch_or(value_type data,
                         memory_order order = memory_order::seq_cst) const;
     /// Replace the current value with the specified value XOR-d to it
-    VECMEM_HOST_AND_DEVICE
     value_type fetch_xor(value_type data,
                          memory_order order = memory_order::seq_cst) const;
 

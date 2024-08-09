@@ -7,6 +7,9 @@
  */
 #pragma once
 
+// System include(s).
+#include <cassert>
+
 namespace vecmem {
 namespace cuda {
 
@@ -28,12 +31,25 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::operator=(
     return data;
 }
 
+// Only invoke __threadfence() during device code compilation. Without this,
+// nvcc gets upset about calling this **device only** function from a function
+// labeled HOST_AND_DEVICE. Allow an outside source to set the macro, so that
+// vecmem::hip::device_atomic_ref could have its own logic for setting it up
+// correctly.
+#ifndef __VECMEM_THREADFENCE
+#ifdef __CUDA_ARCH__
+#define __VECMEM_THREADFENCE __threadfence()
+#else
+#define __VECMEM_THREADFENCE
+#endif  // defined(__CUDA_ARCH__)
+#endif  // not defined(__VECMEM_THREADFENCE)
+
 template <typename T, device_address_space address>
 VECMEM_HOST_AND_DEVICE void device_atomic_ref<T, address>::store(
     value_type data, memory_order) const {
 
     volatile pointer addr = m_ptr;
-    __threadfence();
+    __VECMEM_THREADFENCE;
     *addr = data;
 }
 
@@ -42,11 +58,13 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::load(
     memory_order) const -> value_type {
 
     volatile pointer addr = m_ptr;
-    __threadfence();
+    __VECMEM_THREADFENCE;
     const value_type value = *addr;
-    __threadfence();
+    __VECMEM_THREADFENCE;
     return value;
 }
+
+#undef __VECMEM_THREADFENCE
 
 template <typename T, device_address_space address>
 VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::exchange(
