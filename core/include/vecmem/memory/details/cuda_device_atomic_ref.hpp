@@ -20,6 +20,12 @@ namespace cuda {
 
 /// Custom implementation for atomic operations in CUDA device code
 ///
+/// @note All member functions are declared @c VECMEM_HOST_DEVICE, because
+///       this class may be used from functions that also carry that setup.
+///       (Like functions in @c vecmem::device_vector.) Even though this class
+///       cannot be used in host code, CUDA and HIP are sensitive to these
+///       sort of declarations being consistent.
+///
 /// @tparam T Type to perform atomic operations on
 /// @tparam address The device address space to use
 ///

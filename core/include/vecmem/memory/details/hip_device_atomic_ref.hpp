@@ -10,6 +10,14 @@
 // HIP include(s).
 #include <hip/hip_runtime.h>
 
+// Set up __VECMEM_THREADFENCE correctly for the vecmem::hip::device_atomic_ref
+// code.
+#ifdef __HIP_DEVICE_COMPILE__
+#define __VECMEM_THREADFENCE __threadfence()
+#else
+#define __VECMEM_THREADFENCE
+#endif  // defined(__HIP_DEVICE_COMPILE__)
+
 // Local include(s).
 #include "vecmem/memory/details/cuda_device_atomic_ref.hpp"
 

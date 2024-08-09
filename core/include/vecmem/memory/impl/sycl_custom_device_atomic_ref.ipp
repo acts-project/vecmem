@@ -61,48 +61,46 @@ struct custom_address_space<device_address_space::local> {
         ARG1, ARG2)
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE
 custom_device_atomic_ref<T, address>::custom_device_atomic_ref(reference ref)
     : m_ptr(&ref) {}
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE
 custom_device_atomic_ref<T, address>::custom_device_atomic_ref(
     const custom_device_atomic_ref& parent)
     : m_ptr(parent.m_ptr) {}
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::operator=(
-    value_type data) const -> value_type {
+auto custom_device_atomic_ref<T, address>::operator=(value_type data) const
+    -> value_type {
 
     store(data);
     return data;
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE void custom_device_atomic_ref<T, address>::store(
-    value_type data, memory_order) const {
+void custom_device_atomic_ref<T, address>::store(value_type data,
+                                                 memory_order) const {
 
     __VECMEM_SYCL_ATOMIC_CALL1(store, m_ptr, data);
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::load(
-    memory_order) const -> value_type {
+auto custom_device_atomic_ref<T, address>::load(memory_order) const
+    -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL0(load, m_ptr);
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::exchange(
-    value_type data, memory_order) const -> value_type {
+auto custom_device_atomic_ref<T, address>::exchange(value_type data,
+                                                    memory_order) const
+    -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL1(exchange, m_ptr, data);
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE bool
-custom_device_atomic_ref<T, address>::compare_exchange_strong(
+bool custom_device_atomic_ref<T, address>::compare_exchange_strong(
     reference expected, value_type desired, memory_order order) const {
 
     if (order == memory_order::acq_rel) {
@@ -117,8 +115,7 @@ custom_device_atomic_ref<T, address>::compare_exchange_strong(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE bool
-custom_device_atomic_ref<T, address>::compare_exchange_strong(
+bool custom_device_atomic_ref<T, address>::compare_exchange_strong(
     reference expected, value_type desired, memory_order,
     memory_order failure) const {
 
@@ -131,36 +128,41 @@ custom_device_atomic_ref<T, address>::compare_exchange_strong(
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::fetch_add(
-    value_type data, memory_order) const -> value_type {
+auto custom_device_atomic_ref<T, address>::fetch_add(value_type data,
+                                                     memory_order) const
+    -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_add, m_ptr, data);
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::fetch_sub(
-    value_type data, memory_order order) const -> value_type {
+auto custom_device_atomic_ref<T, address>::fetch_sub(value_type data,
+                                                     memory_order order) const
+    -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_sub, m_ptr, data);
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::fetch_and(
-    value_type data, memory_order) const -> value_type {
+auto custom_device_atomic_ref<T, address>::fetch_and(value_type data,
+                                                     memory_order) const
+    -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_and, m_ptr, data);
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::fetch_or(
-    value_type data, memory_order) const -> value_type {
+auto custom_device_atomic_ref<T, address>::fetch_or(value_type data,
+                                                    memory_order) const
+    -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_or, m_ptr, data);
 }
 
 template <typename T, device_address_space address>
-VECMEM_HOST_AND_DEVICE auto custom_device_atomic_ref<T, address>::fetch_xor(
-    value_type data, memory_order) const -> value_type {
+auto custom_device_atomic_ref<T, address>::fetch_xor(value_type data,
+                                                     memory_order) const
+    -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_xor, m_ptr, data);
 }

@@ -43,7 +43,7 @@ using device_atomic_ref = sycl::custom_device_atomic_ref<T, address>;
 }  // namespace vecmem
 
 #endif  // defined(VECMEM_HAVE_SYCL_ATOMIC_REF)
-#elif defined(__CUDA_ARCH__)
+#elif defined(__CUDACC__)
 
 // Local include(s).
 #include "vecmem/memory/details/cuda_device_atomic_ref.hpp"
@@ -57,7 +57,7 @@ using device_atomic_ref = cuda::device_atomic_ref<T, address>;
 
 }  // namespace vecmem
 
-#elif defined(__HIP_DEVICE_COMPILE__)
+#elif defined(__HIPCC__)
 
 // Local include(s).
 #include "vecmem/memory/details/hip_device_atomic_ref.hpp"
@@ -111,6 +111,7 @@ using device_atomic_ref = dummy_device_atomic_ref<T, address>;
 
 #endif
 
+// Test that the selected class would fulfill the atomic_ref concept.
 #if __cpp_concepts >= 201907L
 #include "vecmem/concepts/atomic_ref.hpp"
 static_assert(
