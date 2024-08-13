@@ -162,7 +162,7 @@ VECMEM_HOST auto make_buffer_views(
     // then only the jagged vectors are resizable, the "normal vectors" are not.
     // But the received "sizes" variable would be hard to set up like that
     // outside of this function, so the logic has to sit here.
-    return make_tuple(buffer_alloc<TYPES>::make_view(
+    return vecmem::make_tuple(buffer_alloc<TYPES>::make_view(
         capacities,
         ((has_jagged_vector && (!std::get<INDICES>(is_jagged_vector)))
              ? nullptr
