@@ -8,18 +8,23 @@
 cmake_minimum_required( VERSION 3.11 )
 include( FetchContent )
 
-# Silence FetchContent warnings with CMake >=3.24.
+# Silence various FetchContent warnings up to CMake 3.30.X.
 if( POLICY CMP0135 )
    cmake_policy( SET CMP0135 NEW )
+endif()
+if( POLICY CMP0169 )
+   cmake_policy( SET CMP0169 OLD )
 endif()
 
 # Tell the user what's happening.
 message( STATUS "Building GoogleTest as part of the VecMem project" )
 
 # Declare where to get GoogleTest from.
-FetchContent_Declare( GoogleTest
-   URL "https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz"
-   URL_MD5 "c8340a482851ef6a3fe618a082304cfc" )
+set( VECMEM_GOOGLETEST_SOURCE
+   "URL;https://github.com/google/googletest/archive/refs/tags/v1.15.2.tar.gz;URL_MD5;7e11f6cfcf6498324ac82d567dcb891e"
+   CACHE STRING "Source for GoogleTest, when built as part of VecMem" )
+mark_as_advanced( VECMEM_GOOGLETEST_SOURCE )
+FetchContent_Declare( GoogleTest ${VECMEM_GOOGLETEST_SOURCE} )
 
 # Options used in the build of GoogleTest.
 set( BUILD_GMOCK FALSE CACHE BOOL "Turn off the build of GMock" )
