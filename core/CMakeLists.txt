@@ -60,8 +60,8 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/details/is_aligned.hpp"
    "src/memory/details/is_aligned.cpp"
    # Atomic reference(s).
+   "include/vecmem/memory/device_address_space.hpp"
    "include/vecmem/memory/device_atomic_ref.hpp"
-   "include/vecmem/memory/details/device_address_space.hpp"
    "include/vecmem/memory/details/dummy_device_atomic_ref.hpp"
    "include/vecmem/memory/impl/dummy_device_atomic_ref.ipp"
    "include/vecmem/memory/details/cuda_device_atomic_ref.hpp"

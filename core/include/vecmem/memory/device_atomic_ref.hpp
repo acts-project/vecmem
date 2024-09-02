@@ -8,7 +8,7 @@
 #pragma once
 
 // Local include(s).
-#include "vecmem/memory/details/device_address_space.hpp"
+#include "vecmem/memory/device_address_space.hpp"
 
 // System include(s).
 #include <atomic>
