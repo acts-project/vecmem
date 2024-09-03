@@ -52,8 +52,6 @@ vecmem_add_library( vecmem_core core
    # Memory management.
    "include/vecmem/memory/atomic.hpp"
    "include/vecmem/memory/impl/atomic.ipp"
-   "include/vecmem/memory/device_atomic_ref.hpp"
-   "include/vecmem/memory/impl/device_atomic_ref.ipp"
    "include/vecmem/memory/polymorphic_allocator.hpp"
    "include/vecmem/memory/memory_resource.hpp"
    "include/vecmem/memory/details/unique_alloc_deleter.hpp"
@@ -61,6 +59,19 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/memory/unique_ptr.hpp"
    "include/vecmem/memory/details/is_aligned.hpp"
    "src/memory/details/is_aligned.cpp"
+   # Atomic reference(s).
+   "include/vecmem/memory/device_address_space.hpp"
+   "include/vecmem/memory/device_atomic_ref.hpp"
+   "include/vecmem/memory/details/dummy_device_atomic_ref.hpp"
+   "include/vecmem/memory/impl/dummy_device_atomic_ref.ipp"
+   "include/vecmem/memory/details/cuda_device_atomic_ref.hpp"
+   "include/vecmem/memory/impl/cuda_device_atomic_ref.ipp"
+   "include/vecmem/memory/details/hip_device_atomic_ref.hpp"
+   "include/vecmem/memory/details/sycl_builtin_device_atomic_ref.hpp"
+   "include/vecmem/memory/details/sycl_custom_device_atomic_ref.hpp"
+   "include/vecmem/memory/impl/sycl_custom_device_atomic_ref.ipp"
+   "include/vecmem/memory/details/posix_device_atomic_ref.hpp"
+   "include/vecmem/memory/impl/posix_device_atomic_ref.ipp"
    # EDM types.
    "include/vecmem/edm/container.hpp"
    "include/vecmem/edm/buffer.hpp"
@@ -316,11 +327,27 @@ if( VECMEM_HAVE_STD_ALIGNED_ALLOC )
       PRIVATE VECMEM_HAVE_STD_ALIGNED_ALLOC )
 endif()
 
+# Check if vecmem::posix_device_atomic_ref is usable.
+set( CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" )
+check_cxx_source_compiles( "
+   #include <vecmem/memory/details/posix_device_atomic_ref.hpp>
+   int main() {
+      int foo = 0;
+      vecmem::posix_device_atomic_ref<int> ref{foo};
+      return 0;
+   }
+   " VECMEM_SUPPORT_POSIX_ATOMIC_REF )
+if( VECMEM_SUPPORT_POSIX_ATOMIC_REF )
+   target_compile_definitions( vecmem_core
+      PUBLIC VECMEM_SUPPORT_POSIX_ATOMIC_REF )
+endif()
+unset( CMAKE_REQUIRED_INCLUDES )
+
 # Test the public headers of vecmem::core.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
-   file( GLOB_RECURSE vecmem_core_public_headers
+   file( GLOB vecmem_core_public_headers
       RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
-      "include/*/*.hpp" )
+      "include/vecmem/*/*.hpp" )
    list( APPEND vecmem_core_public_headers "vecmem/version.hpp" )
    vecmem_test_public_headers( vecmem_core ${vecmem_core_public_headers} )
 endif()
