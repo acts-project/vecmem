@@ -11,6 +11,7 @@ enable_language( SYCL )
 include( vecmem-compiler-options-cpp )
 include( vecmem-compiler-options-sycl )
 include( vecmem-check-sycl-code-compiles )
+include( vecmem-check-sycl-source-compiles )
 
 # Set up the build of the VecMem SYCL library.
 vecmem_add_library( vecmem_sycl sycl
@@ -39,8 +40,11 @@ target_link_libraries( vecmem_sycl PUBLIC vecmem::core )
 set_target_properties( vecmem_sycl PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden"
    SYCL_VISIBILITY_PRESET "hidden" )
-vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_VISIBILITY_MS_COMPAT
-   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/empty.sycl"
+vecmem_check_sycl_source_compiles( "
+   #include <CL/sycl.hpp>
+   int main() { return 0; }
+   "
+   VECMEM_HAVE_SYCL_VISIBILITY_MS_COMPAT
    CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-fvisibility-ms-compat )
 if( VECMEM_HAVE_SYCL_VISIBILITY_MS_COMPAT )
    target_compile_options( vecmem_sycl PRIVATE "-fvisibility-ms-compat" )
@@ -89,15 +93,30 @@ endif()
 
 # Check if sycl::queue::memset is available, and set a compiler option
 # accordingly.
-vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_MEMSET
-   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/memset_test.sycl" )
+vecmem_check_sycl_source_compiles( "
+   #include <CL/sycl.hpp>
+   int main() {
+       cl::sycl::queue queue;
+       queue.memset(nullptr, 0, 100);
+       return 0;
+   }
+   " VECMEM_HAVE_SYCL_MEMSET )
 if( VECMEM_HAVE_SYCL_MEMSET )
    target_compile_definitions( vecmem_sycl PRIVATE VECMEM_HAVE_SYCL_MEMSET )
 endif()
 
 # Check if sycl::local_accessor is available.
-vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_LOCAL_ACCESSOR
-   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/local_accessor_test.sycl" )
+vecmem_check_sycl_source_compiles( "
+   #include <CL/sycl.hpp>
+   int main() {
+       cl::sycl::queue queue;
+       queue.submit([](cl::sycl::handler& h) {
+           cl::sycl::local_accessor<int> dummy(10, h);
+           (void)dummy;
+       }).wait_and_throw();
+       return 0;
+   }
+   " VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )
 if( VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )
    target_compile_definitions( vecmem_sycl INTERFACE
       VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )

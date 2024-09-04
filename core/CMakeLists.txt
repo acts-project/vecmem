@@ -6,7 +6,7 @@
 
 # Project include(s).
 include( vecmem-compiler-options-cpp )
-include( vecmem-check-sycl-code-compiles )
+include( vecmem-check-sycl-source-compiles )
 
 # Set up the build of the VecMem core library.
 vecmem_add_library( vecmem_core core
@@ -259,10 +259,32 @@ endif()
 if( VECMEM_BUILD_SYCL_LIBRARY )
 
    # Test which printf function(s) is/are available.
-   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ext_oneapi_printf_test.sycl" )
-   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ONEAPI_PRINTF
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/oneapi_printf_test.sycl" )
+   vecmem_check_sycl_source_compiles( "
+      #include <CL/sycl.hpp>
+      #ifdef __SYCL_DEVICE_ONLY__
+      #define VECMEM_MSG_ATTRIBUTES __attribute__((opencl_constant))
+      #else
+      #define VECMEM_MSG_ATTRIBUTES
+      #endif
+      int main() {
+          const VECMEM_MSG_ATTRIBUTES char __msg[] = \"Test message %i\";
+          cl::sycl::ext::oneapi::experimental::printf(__msg, 20);
+          return 0;
+      }
+      " VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
+   vecmem_check_sycl_source_compiles( "
+      #include <CL/sycl.hpp>
+      #ifdef __SYCL_DEVICE_ONLY__
+      #define VECMEM_MSG_ATTRIBUTES __attribute__((opencl_constant))
+      #else
+      #define VECMEM_MSG_ATTRIBUTES
+      #endif
+      int main() {
+          const VECMEM_MSG_ATTRIBUTES char __msg[] = \"Test message %i\";
+          cl::sycl::ONEAPI::experimental::printf(__msg, 20);
+          return 0;
+      }
+      " VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
 
    # Set up the appropriate flag with its help.
    if( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
@@ -279,8 +301,19 @@ if( VECMEM_BUILD_SYCL_LIBRARY )
    endif()
 
    # Test whether sycl::atomic_ref is available.
-   vecmem_check_sycl_code_compiles( VECMEM_HAVE_SYCL_ATOMIC_REF
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/atomic_ref_test.sycl" )
+   vecmem_check_sycl_source_compiles( "
+      #include <CL/sycl.hpp>
+      int main() {
+          int dummy = 0;
+          cl::sycl::atomic_ref<int, sycl::memory_order::relaxed,
+                              cl::sycl::memory_scope::device,
+                              cl::sycl::access::address_space::global_space>
+              atomic_dummy(dummy);
+          atomic_dummy.store(3);
+          atomic_dummy.fetch_add(1);
+          return 0;
+      }
+      " VECMEM_HAVE_SYCL_ATOMIC_REF )
    if( VECMEM_HAVE_SYCL_ATOMIC_REF )
       target_compile_definitions( vecmem_core PUBLIC
          VECMEM_HAVE_SYCL_ATOMIC_REF )
