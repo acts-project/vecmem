@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -9,8 +9,6 @@ include( CPack )
 
 # Export the configuration of the project.
 include( CMakePackageConfigHelpers )
-set( CMAKE_INSTALL_CMAKEDIR
-   "${CMAKE_INSTALL_LIBDIR}/cmake/vecmem-${PROJECT_VERSION}" )
 install( EXPORT vecmem-exports
    NAMESPACE "vecmem::"
    FILE "vecmem-config-targets.cmake"
@@ -31,7 +29,10 @@ install( FILES
    DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
 
 # Install the "language helper" files.
-install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-language.cmake"
+install( FILES
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-language.cmake"
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-sycl-code-compiles.cmake"
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-sycl-source-compiles.cmake"
    DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/hip"
                    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sycl"

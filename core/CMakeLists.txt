@@ -200,6 +200,13 @@ target_compile_options( vecmem_core PUBLIC
    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CXX>>:/Zc:__cplusplus>
    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<COMPILE_LANGUAGE:CUDA>>:-Xcompiler /Zc:__cplusplus> )
 
+# Set up the public definitions for vecmem::core, which require configuration
+# tests to be made with the C++/SYCL/etc. compilers.
+include( "cmake/vecmem-setup-core.cmake" )
+vecmem_setup_core( vecmem_core )
+install( FILES "cmake/vecmem-setup-core.cmake"
+   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
+
 # Figure out where to get <memory_resource> from.
 include( CheckCXXSourceCompiles )
 check_cxx_source_compiles( "
@@ -239,6 +246,7 @@ else()
    endif()
 endif()
 
+# Figure out whether or not to include the default resource polyfill.
 check_cxx_source_compiles( "
    #include <${pmr_include}>
    int main() {
@@ -247,77 +255,11 @@ check_cxx_source_compiles( "
          return 0;
    }
   " VECMEM_HAVE_DEFAULT_RESOURCE)
-
 if(NOT VECMEM_HAVE_DEFAULT_RESOURCE)
    target_sources( vecmem_core
       PRIVATE "src/memory/default_resource_polyfill.cpp" )
    source_group( "src\\\\memory"
       FILES "src/memory/default_resource_polyfill.cpp" )
-endif()
-
-# Figure out how to use various SYCL features.
-if( VECMEM_BUILD_SYCL_LIBRARY )
-
-   # Test which printf function(s) is/are available.
-   vecmem_check_sycl_source_compiles( "
-      #include <CL/sycl.hpp>
-      #ifdef __SYCL_DEVICE_ONLY__
-      #define VECMEM_MSG_ATTRIBUTES __attribute__((opencl_constant))
-      #else
-      #define VECMEM_MSG_ATTRIBUTES
-      #endif
-      int main() {
-          const VECMEM_MSG_ATTRIBUTES char __msg[] = \"Test message %i\";
-          cl::sycl::ext::oneapi::experimental::printf(__msg, 20);
-          return 0;
-      }
-      " VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
-   vecmem_check_sycl_source_compiles( "
-      #include <CL/sycl.hpp>
-      #ifdef __SYCL_DEVICE_ONLY__
-      #define VECMEM_MSG_ATTRIBUTES __attribute__((opencl_constant))
-      #else
-      #define VECMEM_MSG_ATTRIBUTES
-      #endif
-      int main() {
-          const VECMEM_MSG_ATTRIBUTES char __msg[] = \"Test message %i\";
-          cl::sycl::ONEAPI::experimental::printf(__msg, 20);
-          return 0;
-      }
-      " VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
-
-   # Set up the appropriate flag with its help.
-   if( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
-      target_compile_definitions( vecmem_core PUBLIC
-         VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ext::oneapi::experimental::printf )
-   elseif( VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
-      target_compile_definitions( vecmem_core PUBLIC
-         VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ONEAPI::experimental::printf )
-   else()
-      message( WARNING "No valid printf function found for SYCL."
-         " Enabling debug messages will likely not work in device code." )
-      target_compile_definitions( vecmem_core PUBLIC
-         VECMEM_SYCL_PRINTF_FUNCTION=printf VECMEM_MSG_ATTRIBUTES= )
-   endif()
-
-   # Test whether sycl::atomic_ref is available.
-   vecmem_check_sycl_source_compiles( "
-      #include <CL/sycl.hpp>
-      int main() {
-          int dummy = 0;
-          cl::sycl::atomic_ref<int, sycl::memory_order::relaxed,
-                              cl::sycl::memory_scope::device,
-                              cl::sycl::access::address_space::global_space>
-              atomic_dummy(dummy);
-          atomic_dummy.store(3);
-          atomic_dummy.fetch_add(1);
-          return 0;
-      }
-      " VECMEM_HAVE_SYCL_ATOMIC_REF )
-   if( VECMEM_HAVE_SYCL_ATOMIC_REF )
-      target_compile_definitions( vecmem_core PUBLIC
-         VECMEM_HAVE_SYCL_ATOMIC_REF )
-   endif()
 endif()
 
 # Test whether we have CLZ builtins.
@@ -359,22 +301,6 @@ if( VECMEM_HAVE_STD_ALIGNED_ALLOC )
    target_compile_definitions( vecmem_core
       PRIVATE VECMEM_HAVE_STD_ALIGNED_ALLOC )
 endif()
-
-# Check if vecmem::posix_device_atomic_ref is usable.
-set( CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" )
-check_cxx_source_compiles( "
-   #include <vecmem/memory/details/posix_device_atomic_ref.hpp>
-   int main() {
-      int foo = 0;
-      vecmem::posix_device_atomic_ref<int> ref{foo};
-      return 0;
-   }
-   " VECMEM_SUPPORT_POSIX_ATOMIC_REF )
-if( VECMEM_SUPPORT_POSIX_ATOMIC_REF )
-   target_compile_definitions( vecmem_core
-      PUBLIC VECMEM_SUPPORT_POSIX_ATOMIC_REF )
-endif()
-unset( CMAKE_REQUIRED_INCLUDES )
 
 # Test the public headers of vecmem::core.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
