@@ -105,22 +105,12 @@ if( VECMEM_HAVE_SYCL_MEMSET )
    target_compile_definitions( vecmem_sycl PRIVATE VECMEM_HAVE_SYCL_MEMSET )
 endif()
 
-# Check if sycl::local_accessor is available.
-vecmem_check_sycl_source_compiles( "
-   #include <CL/sycl.hpp>
-   int main() {
-       cl::sycl::queue queue;
-       queue.submit([](cl::sycl::handler& h) {
-           cl::sycl::local_accessor<int> dummy(10, h);
-           (void)dummy;
-       }).wait_and_throw();
-       return 0;
-   }
-   " VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )
-if( VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )
-   target_compile_definitions( vecmem_sycl INTERFACE
-      VECMEM_HAVE_SYCL_LOCAL_ACCESSOR )
-endif()
+# Set up the public definitions for vecmem::sycl, which require configuration
+# tests to be made with the C++/SYCL/etc. compilers.
+include( "cmake/vecmem-setup-sycl.cmake" )
+vecmem_setup_sycl( vecmem_sycl )
+install( FILES "cmake/vecmem-setup-sycl.cmake"
+   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
 
 # Test the public headers of vecmem::sycl.
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )

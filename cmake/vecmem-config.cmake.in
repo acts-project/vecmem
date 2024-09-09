@@ -61,3 +61,7 @@ unset( vecmem_REQUIRED_LIBS )
 # (Post-)Configure the targets.
 include( vecmem-setup-core )
 vecmem_setup_core( vecmem::core )
+if( TARGET vecmem::sycl )
+   include( vecmem-setup-sycl )
+   vecmem_setup_sycl( vecmem::sycl )
+endif()
