@@ -52,6 +52,9 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct() {
                 vecmem::copy::type::host_to_device)
         ->wait();
 
+    // Check the size of the device buffer.
+    EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
+
     // Create the target host container.
     typename CONTAINER::host target{host_mr()};
 
@@ -134,6 +137,9 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host() {
                 vecmem::copy::type::host_to_device)
         ->wait();
 
+    // Check the size of the device buffer.
+    EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
+
     // Create the target host container.
     typename CONTAINER::host target{host_mr()};
 
@@ -166,6 +172,9 @@ void soa_copy_tests_base<
                 vecmem::copy::type::host_to_device)
         ->wait();
 
+    // Check the size of the device buffer.
+    EXPECT_EQ(input.size(), main_copy().get_size(device_buffer1));
+
     // Create the (resizable) device buffer.
     typename CONTAINER::buffer device_buffer2;
     vecmem::testing::make_buffer(device_buffer2, main_mr(), host_mr(),
@@ -175,6 +184,9 @@ void soa_copy_tests_base<
     main_copy()(device_buffer1, device_buffer2,
                 vecmem::copy::type::device_to_device)
         ->wait();
+
+    // Check the size of the device buffer.
+    EXPECT_EQ(input.size(), main_copy().get_size(device_buffer2));
 
     // Create the target host container.
     typename CONTAINER::host target{host_mr()};
