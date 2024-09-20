@@ -444,6 +444,45 @@ copy::event_type copy::operator()(
     return operator()(from_view, vecmem::get_data(to_vec), cptype);
 }
 
+template <typename... VARTYPES>
+typename edm::view<edm::schema<VARTYPES...>>::size_type copy::get_size(
+    const edm::view<edm::schema<VARTYPES...>>& data) const {
+
+    // Start by taking the capacity of the container.
+    typename edm::view<edm::schema<VARTYPES...>>::size_type size =
+        data.capacity();
+
+    // If there are jagged vectors in the container and/or the container is not
+    // resizable, we're done. It is done in two separate if statements to avoid
+    // MSVC trying to be too smart, and giving a warning...
+    if constexpr (std::disjunction_v<
+                      edm::type::details::is_jagged_vector<VARTYPES>...>) {
+        return size;
+    } else {
+        // All the rest is put into an else block, to avoid MSVC trying to be
+        // too smart, and giving a warning about unreachable code...
+        if (data.size().ptr() == nullptr) {
+            return size;
+        }
+
+        // A small security check.
+        assert(data.size().size() ==
+               sizeof(typename edm::view<edm::schema<VARTYPES...>>::size_type));
+
+        // Get the exact size of the container.
+        do_copy(sizeof(typename edm::view<edm::schema<VARTYPES...>>::size_type),
+                data.size().ptr(), &size, type::unknown);
+        // We have to wait for this to finish, since the "size" variable is
+        // not going to be available outside of this function. And
+        // asynchronous SYCL memory copies can happen from variables on the
+        // stack as well...
+        create_event()->wait();
+
+        // Return what we got.
+        return size;
+    }
+}
+
 template <typename TYPE>
 bool copy::copy_view_impl(
     const data::vector_view<std::add_const_t<TYPE>>& from_view,

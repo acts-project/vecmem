@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -178,6 +178,11 @@ public:
             from,
         edm::host<edm::schema<VARTYPES...>>& to,
         type::copy_type cptype = type::unknown) const;
+
+    /// Get the (outer) size of a resizable SoA container
+    template <typename... VARTYPES>
+    typename edm::view<edm::schema<VARTYPES...>>::size_type get_size(
+        const edm::view<edm::schema<VARTYPES...>>& data) const;
 
     /// @}
 
