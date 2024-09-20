@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -12,9 +12,14 @@ set( vecmem_VERSION "@PROJECT_VERSION@" )
 set_and_check( vecmem_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@" )
 set_and_check( vecmem_LIBRARY_DIR "@PACKAGE_CMAKE_INSTALL_LIBDIR@" )
 set_and_check( vecmem_CMAKE_DIR "@PACKAGE_CMAKE_INSTALL_CMAKEDIR@" )
+set_and_check( vecmem_LANGUAGE_FILE
+   "${vecmem_CMAKE_DIR}/vecmem-check-language.cmake" )
 
 # Include the file listing all the imported targets and options.
 include( "${vecmem_CMAKE_DIR}/vecmem-config-targets.cmake" )
+
+# Add the current directory to CMAKE_MODULE_PATH.
+list( APPEND CMAKE_MODULE_PATH "${vecmem_CMAKE_DIR}" )
 
 # Set up additional variables, based on the imported targets. These are mostly
 # just here for handling COMPONENT arguments for find_package(...).
@@ -53,10 +58,10 @@ find_package_handle_standard_args( vecmem REQUIRED_VARS
 # Clean up.
 unset( vecmem_REQUIRED_LIBS )
 
-# Set up the "language helper code" coming with the installation, if the
-# user asks for it.
-set_and_check( vecmem_LANGUAGE_FILE
-   "${vecmem_CMAKE_DIR}/vecmem-check-language.cmake" )
-if( "${vecmem_FIND_COMPONENTS}" MATCHES "LANGUAGE" )
-   include( "${vecmem_LANGUAGE_FILE}" )
+# (Post-)Configure the targets.
+include( vecmem-setup-core )
+vecmem_setup_core( vecmem::core )
+if( TARGET vecmem::sycl )
+   include( vecmem-setup-sycl )
+   vecmem_setup_sycl( vecmem::sycl )
 endif()

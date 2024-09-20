@@ -12,6 +12,10 @@ project( vecmem VERSION 1.8.0 LANGUAGES CXX )
 include( GNUInstallDirs )
 include( CTest )
 
+# Set the location of the installed CMake files.
+set( CMAKE_INSTALL_CMAKEDIR
+   "${CMAKE_INSTALL_LIBDIR}/cmake/vecmem-${PROJECT_VERSION}" )
+
 # Explicitly set the output directory for the binaries. Such that if this
 # project is included by another project, the main project's configuration would
 # win out.
