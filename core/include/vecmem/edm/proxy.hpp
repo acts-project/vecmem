@@ -24,6 +24,8 @@ class proxy;
 /// This class implements a "view" of a single element in an SoA container.
 ///
 /// @tparam ...VARTYPES The variable types to store in the proxy object
+/// @tparam PTYPE       The type of the proxy (host or device)
+/// @tparam CTYPE       The access mode of the proxy (const or non-const)
 ///
 template <typename... VARTYPES, details::proxy_type PTYPE,
           details::proxy_access CTYPE>

@@ -34,6 +34,7 @@ class host;
 /// variables in the client code.
 ///
 /// @tparam ...VARTYPES The variable types to store in the host container
+/// @tparam INTERFACE    The interface type to use for the container('s proxies)
 ///
 template <typename... VARTYPES, template <typename> class INTERFACE>
 class host<schema<VARTYPES...>, INTERFACE> {

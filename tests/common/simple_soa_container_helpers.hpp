@@ -28,7 +28,7 @@ inline void fill(unsigned int i, simple_soa_container::device& obj) {
     if (i < obj.capacity()) {
         unsigned int ii = obj.push_back_default();
         obj.measurement()[ii] = 1.0f * static_cast<float>(ii);
-        obj.index()[ii] = static_cast<int>(ii);
+        obj.at(ii).index() = static_cast<int>(ii);
     }
 }
 
@@ -43,7 +43,7 @@ inline void modify(unsigned int i, simple_soa_container::device& obj) {
     }
     // In the rest of the threads modify the vector variables.
     if (i < obj.size()) {
-        obj.measurement()[i] *= 2.0f;
+        obj.at(i).measurement() *= 2.0f;
         obj.index()[i] += 10;
     }
 }

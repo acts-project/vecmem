@@ -150,16 +150,16 @@ TEST_F(core_edm_host_test, device) {
 
     // Create a non-const device object for it, and check its contents.
     auto data1 = vecmem::get_data(host1);
-    vecmem::edm::device<schema> device1{data1};
+    vecmem::edm::device<schema, interface> device1{data1};
     compare(device1, host1);
 
     // Create constant device objects for it, and check their contents.
     auto data2 = [](const vecmem::edm::host<schema, interface>& host) {
         return vecmem::get_data(host);
     }(host1);
-    vecmem::edm::device<const_schema> device2{data2};
+    vecmem::edm::device<const_schema, interface> device2{data2};
     compare(device2, host1);
-    vecmem::edm::device<const_schema> device3{data1};
+    vecmem::edm::device<const_schema, interface> device3{data1};
     compare(device3, host1);
 }
 

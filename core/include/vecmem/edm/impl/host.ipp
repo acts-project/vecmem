@@ -105,8 +105,8 @@ host<schema<VARTYPES...>, INTERFACE>::at(size_type index) {
                                 ") >= size (" + std::to_string(size()) + ")");
     }
 
-    // Create the proxy.
-    return proxy_type{*this, index};
+    // Use the unprotected function.
+    return this->operator[](index);
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
@@ -119,8 +119,8 @@ host<schema<VARTYPES...>, INTERFACE>::at(size_type index) const {
                                 ") >= size (" + std::to_string(size()) + ")");
     }
 
-    // Create the proxy.
-    return const_proxy_type{*this, index};
+    // Use the unprotected function.
+    return this->operator[](index);
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>

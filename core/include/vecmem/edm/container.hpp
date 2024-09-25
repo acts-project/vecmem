@@ -52,9 +52,11 @@ struct container {
 #endif  // __cplusplus >= 201700L
 
     /// (Non-const) Device container type
-    using device = interface_type<vecmem::edm::device<schema_type>>;
+    using device =
+        interface_type<vecmem::edm::device<schema_type, interface_type>>;
     /// (Const) Device container type
-    using const_device = interface_type<vecmem::edm::device<const_schema_type>>;
+    using const_device =
+        interface_type<vecmem::edm::device<const_schema_type, interface_type>>;
 
     /// (Non-const) View type
     using view = vecmem::edm::view<schema_type>;
