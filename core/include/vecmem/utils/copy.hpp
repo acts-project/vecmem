@@ -172,11 +172,11 @@ public:
         type::copy_type cptype = type::unknown) const;
 
     /// Copy from a view, into a host container
-    template <typename... VARTYPES>
+    template <typename... VARTYPES, template <typename> class INTERFACE>
     event_type operator()(
         const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
             from,
-        edm::host<edm::schema<VARTYPES...>>& to,
+        edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
         type::copy_type cptype = type::unknown) const;
 
     /// Get the (outer) size of a resizable SoA container
@@ -230,11 +230,13 @@ private:
     template <std::size_t INDEX, typename... VARTYPES>
     void memset_impl(edm::view<edm::schema<VARTYPES...>> data, int value) const;
     /// Implementation for setting the sizes of an SoA container
-    template <std::size_t INDEX, typename... VARTYPES>
+    template <std::size_t INDEX, typename... VARTYPES,
+              template <typename> class INTERFACE>
     void resize_impl(
         const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
             from,
-        edm::host<edm::schema<VARTYPES...>>& to, type::copy_type cptype) const;
+        edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
+        type::copy_type cptype) const;
     /// Implementation for the variadic @c copy function (for the sizes)
     template <std::size_t INDEX, typename... VARTYPES>
     void copy_sizes_impl(

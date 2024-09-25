@@ -17,13 +17,14 @@
 namespace vecmem {
 namespace edm {
 
-template <typename... VARTYPES>
-VECMEM_HOST host<schema<VARTYPES...>>::host(memory_resource& resource)
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST host<schema<VARTYPES...>, INTERFACE>::host(
+    memory_resource& resource)
     : m_data{details::host_alloc<VARTYPES>::make(resource)...},
       m_resource{resource} {}
 
-template <typename... VARTYPES>
-VECMEM_HOST std::size_t host<schema<VARTYPES...>>::size() const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST std::size_t host<schema<VARTYPES...>, INTERFACE>::size() const {
 
     // Make sure that there are some (jagged) vector types in the container.
     static_assert(
@@ -35,8 +36,9 @@ VECMEM_HOST std::size_t host<schema<VARTYPES...>>::size() const {
         m_data, std::index_sequence_for<VARTYPES...>{});
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST void host<schema<VARTYPES...>>::resize(std::size_t size) {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::resize(
+    std::size_t size) {
 
     // Make sure that there are some (jagged) vector types in the container.
     static_assert(
@@ -48,8 +50,9 @@ VECMEM_HOST void host<schema<VARTYPES...>>::resize(std::size_t size) {
                                       std::index_sequence_for<VARTYPES...>{});
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST void host<schema<VARTYPES...>>::reserve(std::size_t size) {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::reserve(
+    std::size_t size) {
 
     // Make sure that there are some (jagged) vector types in the container.
     static_assert(
@@ -61,10 +64,10 @@ VECMEM_HOST void host<schema<VARTYPES...>>::reserve(std::size_t size) {
                                        std::index_sequence_for<VARTYPES...>{});
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
 VECMEM_HOST typename details::host_type_at<INDEX, VARTYPES...>::return_type
-host<schema<VARTYPES...>>::get() {
+host<schema<VARTYPES...>, INTERFACE>::get() {
 
     // For scalar types we don't return the array, but rather a
     // reference to the single scalar held by the array.
@@ -76,11 +79,11 @@ host<schema<VARTYPES...>>::get() {
     }
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
 VECMEM_HOST
     typename details::host_type_at<INDEX, VARTYPES...>::const_return_type
-    host<schema<VARTYPES...>>::get() const {
+    host<schema<VARTYPES...>, INTERFACE>::get() const {
 
     // For scalar types we don't return the array, but rather a
     // reference to the single scalar held by the array.
@@ -92,22 +95,67 @@ VECMEM_HOST
     }
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST typename host<schema<VARTYPES...>>::tuple_type&
-host<schema<VARTYPES...>>::variables() {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST typename host<schema<VARTYPES...>, INTERFACE>::proxy_type
+host<schema<VARTYPES...>, INTERFACE>::at(size_type index) {
+
+    // Make sure that the index is within bounds.
+    if (index >= size()) {
+        throw std::out_of_range("index (" + std::to_string(index) +
+                                ") >= size (" + std::to_string(size()) + ")");
+    }
+
+    // Create the proxy.
+    return proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST typename host<schema<VARTYPES...>, INTERFACE>::const_proxy_type
+host<schema<VARTYPES...>, INTERFACE>::at(size_type index) const {
+
+    // Make sure that the index is within bounds.
+    if (index >= size()) {
+        throw std::out_of_range("index (" + std::to_string(index) +
+                                ") >= size (" + std::to_string(size()) + ")");
+    }
+
+    // Create the proxy.
+    return const_proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST typename host<schema<VARTYPES...>, INTERFACE>::proxy_type
+host<schema<VARTYPES...>, INTERFACE>::operator[](size_type index) {
+
+    // Create the proxy.
+    return proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST typename host<schema<VARTYPES...>, INTERFACE>::const_proxy_type
+host<schema<VARTYPES...>, INTERFACE>::operator[](size_type index) const {
+
+    // Create the proxy.
+    return const_proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST typename host<schema<VARTYPES...>, INTERFACE>::tuple_type&
+host<schema<VARTYPES...>, INTERFACE>::variables() {
 
     return m_data;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST const typename host<schema<VARTYPES...>>::tuple_type&
-host<schema<VARTYPES...>>::variables() const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST const typename host<schema<VARTYPES...>, INTERFACE>::tuple_type&
+host<schema<VARTYPES...>, INTERFACE>::variables() const {
 
     return m_data;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST memory_resource& host<schema<VARTYPES...>>::resource() const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST memory_resource& host<schema<VARTYPES...>, INTERFACE>::resource()
+    const {
 
     return m_resource;
 }
@@ -115,17 +163,18 @@ VECMEM_HOST memory_resource& host<schema<VARTYPES...>>::resource() const {
 }  // namespace edm
 
 /// Helper function terminal node
-template <typename... VARTYPES>
-VECMEM_HOST void get_data_impl(edm::host<edm::schema<VARTYPES...>>&,
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST void get_data_impl(edm::host<edm::schema<VARTYPES...>, INTERFACE>&,
                                edm::data<edm::schema<VARTYPES...>>&,
                                memory_resource&, std::index_sequence<>) {}
 
 /// Helper function recursive node
-template <typename... VARTYPES, std::size_t I, std::size_t... Is>
-VECMEM_HOST void get_data_impl(edm::host<edm::schema<VARTYPES...>>& host,
-                               edm::data<edm::schema<VARTYPES...>>& data,
-                               memory_resource& mr,
-                               std::index_sequence<I, Is...>) {
+template <typename... VARTYPES, template <typename> class INTERFACE,
+          std::size_t I, std::size_t... Is>
+VECMEM_HOST void get_data_impl(
+    edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
+    edm::data<edm::schema<VARTYPES...>>& data, memory_resource& mr,
+    std::index_sequence<I, Is...>) {
 
     if constexpr (edm::type::details::is_jagged_vector_v<
                       typename std::tuple_element<
@@ -152,9 +201,10 @@ VECMEM_HOST void get_data_impl(edm::host<edm::schema<VARTYPES...>>& host,
     get_data_impl(host, data, mr, std::index_sequence<Is...>{});
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST edm::data<edm::schema<VARTYPES...>> get_data(
-    edm::host<edm::schema<VARTYPES...>>& host, memory_resource* resource) {
+    edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
+    memory_resource* resource) {
 
     // Create the result object.
     edm::data<edm::schema<VARTYPES...>> result;
@@ -178,16 +228,17 @@ VECMEM_HOST edm::data<edm::schema<VARTYPES...>> get_data(
 }
 
 /// Helper function terminal node
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST void get_data_impl(
-    const edm::host<edm::schema<VARTYPES...>>&,
+    const edm::host<edm::schema<VARTYPES...>, INTERFACE>&,
     edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>&,
     memory_resource&, std::index_sequence<>) {}
 
 /// Helper function recursive node
-template <typename... VARTYPES, std::size_t I, std::size_t... Is>
+template <typename... VARTYPES, template <typename> class INTERFACE,
+          std::size_t I, std::size_t... Is>
 VECMEM_HOST void get_data_impl(
-    const edm::host<edm::schema<VARTYPES...>>& host,
+    const edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
     edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>& data,
     memory_resource& mr, std::index_sequence<I, Is...>) {
 
@@ -216,9 +267,9 @@ VECMEM_HOST void get_data_impl(
     get_data_impl(host, data, mr, std::index_sequence<Is...>{});
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>
-get_data(const edm::host<edm::schema<VARTYPES...>>& host,
+get_data(const edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
          memory_resource* resource) {
 
     // Create the result object.
