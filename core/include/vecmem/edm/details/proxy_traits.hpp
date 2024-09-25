@@ -86,51 +86,6 @@ struct proxy_var_type<type::scalar<VTYPE>, PTYPE, proxy_access::non_constant> {
     }
 };
 
-#if __cplusplus >= 201700L
-
-/// Constant access to a vector variable from a host container
-template <typename VTYPE>
-struct proxy_var_type<type::vector<VTYPE>, proxy_type::host,
-                      proxy_access::constant> {
-
-    /// Vector elements are kept by value in the proxy
-    using type = VTYPE;
-    /// They are returned as a const reference even on non-const access
-    using return_type = std::add_lvalue_reference_t<std::add_const_t<type>>;
-    /// They are returned as a const reference on const access
-    using const_return_type = return_type;
-
-    /// Helper function constructing a vector proxy variable
-    VECMEM_HOST
-    static return_type make(typename vector<VTYPE>::size_type i,
-                            const vector<VTYPE>& vec) {
-        return vec.at(i);
-    }
-};
-
-/// Non-const access to a vector variable from a host container
-template <typename VTYPE>
-struct proxy_var_type<type::vector<VTYPE>, proxy_type::host,
-                      proxy_access::non_constant> {
-
-    /// Vector elements are kept by lvalue reference in the proxy
-    using type = std::add_lvalue_reference_t<VTYPE>;
-    /// They are returned as a non-const lvalue reference on non-const access
-    using return_type = type;
-    /// They are returned as a const reference on const access
-    using const_return_type =
-        std::add_lvalue_reference_t<std::add_const_t<VTYPE>>;
-
-    /// Helper function constructing a vector proxy variable
-    VECMEM_HOST
-    static return_type make(typename vector<VTYPE>::size_type i,
-                            vector<VTYPE>& vec) {
-        return vec.at(i);
-    }
-};
-
-#endif  // __cplusplus >= 201700L
-
 /// Constant access to a vector variable from a device container
 template <typename VTYPE>
 struct proxy_var_type<type::vector<VTYPE>, proxy_type::device,
@@ -175,7 +130,107 @@ struct proxy_var_type<type::vector<VTYPE>, proxy_type::device,
     }
 };
 
+/// Constant access to a jagged vector variable from a device container
+template <typename VTYPE>
+struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
+                      proxy_access::constant> {
+
+    /// Jagged vector elements are kept by constant device vectors in the proxy
+    using type = device_vector<std::add_const_t<VTYPE>>;
+    /// They are returned as a const reference to the device vector even in
+    /// non-const access
+    using return_type = std::add_lvalue_reference_t<std::add_const_t<type>>;
+    /// They are returned as a const reference to the device vector on const
+    /// access
+    using const_return_type = return_type;
+
+    /// Helper function constructing a vector proxy variable
+    VECMEM_HOST_AND_DEVICE
+    static return_type make(
+        typename jagged_device_vector<std::add_const_t<VTYPE>>::size_type i,
+        const jagged_device_vector<std::add_const_t<VTYPE>>& vec) {
+
+        return vec.at(i);
+    }
+};
+
+/// Non-const access to a jagged vector variable from a device container
+template <typename VTYPE>
+struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
+                      proxy_access::non_constant> {
+
+    /// Jagged vector elements are kept by non-const device vectors in the proxy
+    using type = device_vector<VTYPE>;
+    /// They are returned as non-const lvalue references to the non-const device
+    /// vector in non-const access
+    using return_type = std::add_lvalue_reference_t<type>;
+    /// They are returned as const references to the non-const device vector in
+    /// const access
+    using const_return_type = std::add_lvalue_reference_t<
+        std::add_const_t<device_vector<std::add_const_t<VTYPE>>>>;
+
+    /// Helper function constructing a vector proxy variable
+    VECMEM_HOST_AND_DEVICE
+    static return_type make(typename jagged_device_vector<VTYPE>::size_type i,
+                            jagged_device_vector<VTYPE>& vec) {
+
+        return vec.at(i);
+    }
+};
+
 #if __cplusplus >= 201700L
+
+/// Constant access to a vector variable from a host container
+template <typename VTYPE>
+struct proxy_var_type<type::vector<VTYPE>, proxy_type::host,
+                      proxy_access::constant> {
+
+    /// Vector elements are kept by value in the proxy
+    using type =
+        typename proxy_var_type<edm::type::vector<VTYPE>, proxy_type::device,
+                                proxy_access::constant>::type;
+    /// They are returned as a const reference even on non-const access
+    using return_type =
+        typename proxy_var_type<edm::type::vector<VTYPE>, proxy_type::device,
+                                proxy_access::constant>::return_type;
+    /// They are returned as a const reference on const access
+    using const_return_type =
+        typename proxy_var_type<edm::type::vector<VTYPE>, proxy_type::device,
+                                proxy_access::constant>::const_return_type;
+
+    /// Helper function constructing a vector proxy variable
+    VECMEM_HOST
+    static return_type make(typename vector<VTYPE>::size_type i,
+                            const vector<VTYPE>& vec) {
+        return vec.at(i);
+    }
+};
+
+/// Non-const access to a vector variable from a host container
+template <typename VTYPE>
+struct proxy_var_type<type::vector<VTYPE>, proxy_type::host,
+                      proxy_access::non_constant> {
+
+    /// Vector elements are kept by lvalue reference in the proxy
+    using type =
+        typename proxy_var_type<edm::type::vector<VTYPE>, proxy_type::device,
+                                proxy_access::non_constant>::type;
+    /// They are returned as a non-const lvalue reference on non-const access
+    using return_type =
+        typename proxy_var_type<edm::type::vector<VTYPE>, proxy_type::device,
+                                proxy_access::non_constant>::return_type;
+    /// They are returned as a const reference on const access
+    using const_return_type =
+        typename proxy_var_type<edm::type::vector<VTYPE>, proxy_type::device,
+                                proxy_access::non_constant>::const_return_type;
+
+    /// Helper function constructing a vector proxy variable
+    VECMEM_HOST
+    static return_type make(typename vector<VTYPE>::size_type i,
+                            vector<VTYPE>& vec) {
+        return vec.at(i);
+    }
+};
 
 /// Constant access to a jagged vector variable from a host container
 template <typename VTYPE>
@@ -223,54 +278,6 @@ struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::host,
 
 #endif  // __cplusplus >= 201700L
 
-/// Constant access to a jagged vector variable from a device container
-template <typename VTYPE>
-struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
-                      proxy_access::constant> {
-
-    /// Jagged vector elements are kept by constant device vectors in the proxy
-    using type = device_vector<std::add_const_t<VTYPE>>;
-    /// They are returned as a const reference to the device vector even in
-    /// non-const access
-    using return_type = std::add_lvalue_reference_t<std::add_const_t<type>>;
-    /// They are returned as a const reference to the device vector on const
-    /// access
-    using const_return_type = return_type;
-
-    /// Helper function constructing a vector proxy variable
-    VECMEM_HOST_AND_DEVICE
-    static return_type make(
-        typename jagged_device_vector<std::add_const_t<VTYPE>>::size_type i,
-        const jagged_device_vector<std::add_const_t<VTYPE>>& vec) {
-
-        return vec.at(i);
-    }
-};
-
-/// Non-const access to a jagged vector variable from a device container
-template <typename VTYPE>
-struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
-                      proxy_access::non_constant> {
-
-    /// Jagged vector elements are kept by non-const device vectors in the proxy
-    using type = device_vector<VTYPE>;
-    /// They are returned as non-const lvalue references to the non-const device
-    /// vector in non-const access
-    using return_type = std::add_lvalue_reference_t<type>;
-    /// They are returned as const references to the non-const device vector in
-    /// const access
-    using const_return_type =
-        std::add_lvalue_reference_t<std::add_const_t<type>>;
-
-    /// Helper function constructing a vector proxy variable
-    VECMEM_HOST_AND_DEVICE
-    static type make(typename jagged_device_vector<VTYPE>::size_type i,
-                     jagged_device_vector<VTYPE>& vec) {
-
-        return vec.at(i);
-    }
-};
-
 /// Proxy types for one element of a type pack
 template <std::size_t INDEX, proxy_type PTYPE, proxy_access CTYPE,
           typename... VARTYPES>
@@ -291,77 +298,14 @@ struct proxy_var_type_at {
 
 /// @}
 
-/// @name Traits for creating the proxy variables
+/// @name Traits for creating the proxy data tuples
 /// @{
 
 /// Technical base class for the @c proxy_data_creator traits
 template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
 struct proxy_data_creator;
 
-#if __cplusplus >= 201700L
-
-template <typename VARTYPE>
-struct proxy_data_creator<schema<VARTYPE>, proxy_type::host,
-                          proxy_access::constant> {
-
-    /// Make all other instantiations of the struct friends
-    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
-    friend struct proxy_data_creator;
-
-    /// Proxy tuple type created by the helper
-    using proxy_tuple_type =
-        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
-                                      proxy_access::constant>::type>;
-
-    /// Construct the tuple used by the proxy
-    template <typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make(std::size_t i,
-                                             const CONTAINER& c) {
-        return make_impl<0>(i, c);
-    }
-
-private:
-    template <std::size_t INDEX, typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i,
-                                                  const CONTAINER& c) {
-
-        return {
-            proxy_var_type<VARTYPE, proxy_type::host, proxy_access::constant>::
-                make(i, c.template get<INDEX>())};
-    }
-};
-
-template <typename VARTYPE>
-struct proxy_data_creator<schema<VARTYPE>, proxy_type::host,
-                          proxy_access::non_constant> {
-
-    /// Make all other instantiations of the struct friends
-    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
-    friend struct proxy_data_creator;
-
-    /// Proxy tuple type created by the helper
-    using proxy_tuple_type =
-        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
-                                      proxy_access::non_constant>::type>;
-
-    /// Construct the tuple used by the proxy
-    template <typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make(std::size_t i, CONTAINER& c) {
-        return make_impl<0>(i, c);
-    }
-
-private:
-    template <std::size_t INDEX, typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i, CONTAINER& c) {
-
-        return {proxy_var_type<
-            VARTYPE, proxy_type::host,
-            proxy_access::non_constant>::make(i, c.template get<INDEX>())};
-    }
-};
-
-#endif  // __cplusplus >= 201700L
-
+/// Helper class making the data tuple for a constant device proxy
 template <typename VARTYPE>
 struct proxy_data_creator<schema<VARTYPE>, proxy_type::device,
                           proxy_access::constant> {
@@ -393,6 +337,7 @@ private:
     }
 };
 
+/// Helper class making the data tuple for a non-const device proxy
 template <typename VARTYPE>
 struct proxy_data_creator<schema<VARTYPE>, proxy_type::device,
                           proxy_access::non_constant> {
@@ -424,82 +369,7 @@ private:
     }
 };
 
-#if __cplusplus >= 201700L
-
-template <typename VARTYPE, typename... VARTYPES>
-struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, proxy_type::host,
-                          proxy_access::constant> {
-
-    /// Make all other instantiations of the struct friends
-    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
-    friend struct proxy_data_creator;
-
-    /// Proxy tuple type created by the helper
-    using proxy_tuple_type =
-        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
-                                      proxy_access::constant>::type,
-              typename proxy_var_type<VARTYPES, proxy_type::host,
-                                      proxy_access::constant>::type...>;
-
-    /// Construct the tuple used by the proxy
-    template <typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make(std::size_t i,
-                                             const CONTAINER& c) {
-        return make_impl<0>(i, c);
-    }
-
-private:
-    template <std::size_t INDEX, typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i,
-                                                  const CONTAINER& c) {
-
-        return proxy_tuple_type(
-            proxy_var_type<VARTYPE, proxy_type::host, proxy_access::constant>::
-                make(i, c.template get<INDEX>()),
-            proxy_data_creator<
-                schema<VARTYPES...>, proxy_type::host,
-                proxy_access::constant>::template make_impl<INDEX + 1>(i, c));
-    }
-};
-
-template <typename VARTYPE, typename... VARTYPES>
-struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, proxy_type::host,
-                          proxy_access::non_constant> {
-
-    /// Make all other instantiations of the struct friends
-    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
-    friend struct proxy_data_creator;
-
-    /// Proxy tuple type created by the helper
-    using proxy_tuple_type =
-        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
-                                      proxy_access::non_constant>::type,
-              typename proxy_var_type<VARTYPES, proxy_type::host,
-                                      proxy_access::non_constant>::type...>;
-
-    /// Construct the tuple used by the proxy
-    template <typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make(std::size_t i, CONTAINER& c) {
-        return make_impl<0>(i, c);
-    }
-
-private:
-    template <std::size_t INDEX, typename CONTAINER>
-    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i, CONTAINER& c) {
-
-        return proxy_tuple_type(
-            proxy_var_type<
-                VARTYPE, proxy_type::host,
-                proxy_access::non_constant>::make(i, c.template get<INDEX>()),
-            proxy_data_creator<
-                schema<VARTYPES...>, proxy_type::host,
-                proxy_access::non_constant>::template make_impl<INDEX + 1>(i,
-                                                                           c));
-    }
-};
-
-#endif  // __cplusplus >= 201700L
-
+/// Helper class making the data tuple for a constant device proxy
 template <typename VARTYPE, typename... VARTYPES>
 struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, proxy_type::device,
                           proxy_access::constant> {
@@ -537,6 +407,7 @@ private:
     }
 };
 
+/// Helper class making the data tuple for a non-const device proxy
 template <typename VARTYPE, typename... VARTYPES>
 struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, proxy_type::device,
                           proxy_access::non_constant> {
@@ -574,6 +445,146 @@ private:
                                                                            c));
     }
 };
+
+#if __cplusplus >= 201700L
+
+/// Helper class making the data tuple for a constant host proxy
+template <typename VARTYPE>
+struct proxy_data_creator<schema<VARTYPE>, proxy_type::host,
+                          proxy_access::constant> {
+
+    /// Make all other instantiations of the struct friends
+    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
+    friend struct proxy_data_creator;
+
+    /// Proxy tuple type created by the helper
+    using proxy_tuple_type =
+        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
+                                      proxy_access::constant>::type>;
+
+    /// Construct the tuple used by the proxy
+    template <typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make(std::size_t i,
+                                             const CONTAINER& c) {
+        return make_impl<0>(i, c);
+    }
+
+private:
+    template <std::size_t INDEX, typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i,
+                                                  const CONTAINER& c) {
+
+        return {
+            proxy_var_type<VARTYPE, proxy_type::host, proxy_access::constant>::
+                make(i, c.template get<INDEX>())};
+    }
+};
+
+/// Helper class making the data tuple for a non-const host proxy
+template <typename VARTYPE>
+struct proxy_data_creator<schema<VARTYPE>, proxy_type::host,
+                          proxy_access::non_constant> {
+
+    /// Make all other instantiations of the struct friends
+    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
+    friend struct proxy_data_creator;
+
+    /// Proxy tuple type created by the helper
+    using proxy_tuple_type =
+        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
+                                      proxy_access::non_constant>::type>;
+
+    /// Construct the tuple used by the proxy
+    template <typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make(std::size_t i, CONTAINER& c) {
+        return make_impl<0>(i, c);
+    }
+
+private:
+    template <std::size_t INDEX, typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i, CONTAINER& c) {
+
+        return {proxy_var_type<
+            VARTYPE, proxy_type::host,
+            proxy_access::non_constant>::make(i, c.template get<INDEX>())};
+    }
+};
+
+/// Helper class making the data tuple for a constant host proxy
+template <typename VARTYPE, typename... VARTYPES>
+struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, proxy_type::host,
+                          proxy_access::constant> {
+
+    /// Make all other instantiations of the struct friends
+    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
+    friend struct proxy_data_creator;
+
+    /// Proxy tuple type created by the helper
+    using proxy_tuple_type =
+        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
+                                      proxy_access::constant>::type,
+              typename proxy_var_type<VARTYPES, proxy_type::host,
+                                      proxy_access::constant>::type...>;
+
+    /// Construct the tuple used by the proxy
+    template <typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make(std::size_t i,
+                                             const CONTAINER& c) {
+        return make_impl<0>(i, c);
+    }
+
+private:
+    template <std::size_t INDEX, typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i,
+                                                  const CONTAINER& c) {
+
+        return proxy_tuple_type(
+            proxy_var_type<VARTYPE, proxy_type::host, proxy_access::constant>::
+                make(i, c.template get<INDEX>()),
+            proxy_data_creator<
+                schema<VARTYPES...>, proxy_type::host,
+                proxy_access::constant>::template make_impl<INDEX + 1>(i, c));
+    }
+};
+
+/// Helper class making the data tuple for a non-const host proxy
+template <typename VARTYPE, typename... VARTYPES>
+struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, proxy_type::host,
+                          proxy_access::non_constant> {
+
+    /// Make all other instantiations of the struct friends
+    template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
+    friend struct proxy_data_creator;
+
+    /// Proxy tuple type created by the helper
+    using proxy_tuple_type =
+        tuple<typename proxy_var_type<VARTYPE, proxy_type::host,
+                                      proxy_access::non_constant>::type,
+              typename proxy_var_type<VARTYPES, proxy_type::host,
+                                      proxy_access::non_constant>::type...>;
+
+    /// Construct the tuple used by the proxy
+    template <typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make(std::size_t i, CONTAINER& c) {
+        return make_impl<0>(i, c);
+    }
+
+private:
+    template <std::size_t INDEX, typename CONTAINER>
+    VECMEM_HOST static proxy_tuple_type make_impl(std::size_t i, CONTAINER& c) {
+
+        return proxy_tuple_type(
+            proxy_var_type<
+                VARTYPE, proxy_type::host,
+                proxy_access::non_constant>::make(i, c.template get<INDEX>()),
+            proxy_data_creator<
+                schema<VARTYPES...>, proxy_type::host,
+                proxy_access::non_constant>::template make_impl<INDEX + 1>(i,
+                                                                           c));
+    }
+};
+
+#endif  // __cplusplus >= 201700L
 
 /// @}
 

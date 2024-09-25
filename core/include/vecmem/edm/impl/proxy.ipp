@@ -16,7 +16,11 @@ VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PTYPE, CTYPE>::proxy(
     PARENT& parent, typename PARENT::size_type index)
     : m_data{
           details::proxy_data_creator<schema<VARTYPES...>, PTYPE, CTYPE>::make(
-              index, parent)} {}
+              index, parent)} {
+
+    static_assert(CTYPE == details::proxy_access::non_constant,
+                  "This constructor is meant for non-const proxies.");
+}
 
 template <typename... VARTYPES, details::proxy_type PTYPE,
           details::proxy_access CTYPE>
@@ -25,7 +29,11 @@ VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PTYPE, CTYPE>::proxy(
     const PARENT& parent, typename PARENT::size_type index)
     : m_data{
           details::proxy_data_creator<schema<VARTYPES...>, PTYPE, CTYPE>::make(
-              index, parent)} {}
+              index, parent)} {
+
+    static_assert(CTYPE == details::proxy_access::constant,
+                  "This constructor is meant for constant proxies.");
+}
 
 template <typename... VARTYPES, details::proxy_type PTYPE,
           details::proxy_access CTYPE>
