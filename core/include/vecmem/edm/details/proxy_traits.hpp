@@ -52,9 +52,9 @@ template <typename VTYPE, proxy_type PTYPE>
 struct proxy_var_type<type::scalar<VTYPE>, PTYPE, proxy_access::constant> {
 
     /// The scalar is kept by value in the proxy
-    using type = VTYPE;
+    using type = std::add_lvalue_reference_t<std::add_const_t<VTYPE>>;
     /// It is returned as a const reference even on non-const access
-    using return_type = std::add_lvalue_reference_t<std::add_const_t<type>>;
+    using return_type = type;
     /// It is returned as a const reference on const access
     using const_return_type = return_type;
 
@@ -92,9 +92,9 @@ struct proxy_var_type<type::vector<VTYPE>, proxy_type::device,
                       proxy_access::constant> {
 
     /// Vector elements are kept by value in the proxy
-    using type = VTYPE;
+    using type = std::add_lvalue_reference_t<std::add_const_t<VTYPE>>;
     /// They are returned as a const reference even on non-const access
-    using return_type = std::add_lvalue_reference_t<std::add_const_t<type>>;
+    using return_type = type;
     /// They are returned as a const reference on const access
     using const_return_type = return_type;
 
