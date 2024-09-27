@@ -24,37 +24,46 @@ static host_memory_resource host_mr;
 /// The copy object to use in the benchmark(s).
 static copy host_copy;
 
-BENCHMARK_CAPTURE(simple_soa_direct_h2d_copy_benchmark, host_fixed_buffer,
-                  host_mr, host_mr, host_copy, data::buffer_type::fixed_size)
-    ->Range(1UL, 1UL << 26);
-BENCHMARK_CAPTURE(simple_soa_direct_h2d_copy_benchmark, host_resizable_buffer,
-                  host_mr, host_mr, host_copy, data::buffer_type::resizable)
-    ->Range(1UL, 1UL << 26);
+//
+// Helper macro(s) for setting up all the different benchmarks.
+//
+#define CONFIGURE_BENCHMARK(BM) BM->Range(1UL, 1UL << 26)
 
-BENCHMARK_CAPTURE(simple_soa_optimal_h2d_copy_benchmark, host_fixed_buffer,
-                  host_mr, host_mr, host_copy, host_copy,
-                  data::buffer_type::fixed_size)
-    ->Range(1UL, 1UL << 26);
-BENCHMARK_CAPTURE(simple_soa_optimal_h2d_copy_benchmark, host_resizable_buffer,
-                  host_mr, host_mr, host_copy, host_copy,
-                  data::buffer_type::resizable)
-    ->Range(1UL, 1UL << 26);
+//
+// Set up all the different benchmarks.
+//
 
-BENCHMARK_CAPTURE(simple_soa_direct_d2h_copy_benchmark, host, host_mr, host_mr,
-                  host_copy)
-    ->Range(1UL, 1UL << 26);
-BENCHMARK_CAPTURE(simple_soa_optimal_d2h_copy_benchmark, host, host_mr, host_mr,
-                  host_copy, host_copy)
-    ->Range(1UL, 1UL << 26);
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_soa_direct_h2d_copy_benchmark,
+                                      host_fixed_buffer, host_mr, host_mr,
+                                      host_copy,
+                                      data::buffer_type::fixed_size));
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_soa_direct_h2d_copy_benchmark,
+                                      host_resizable_buffer, host_mr, host_mr,
+                                      host_copy, data::buffer_type::resizable));
 
-BENCHMARK_CAPTURE(simple_aos_h2d_copy_benchmark, host_fixed_buffer, host_mr,
-                  host_mr, host_copy, data::buffer_type::fixed_size)
-    ->Range(1UL, 1UL << 26);
-BENCHMARK_CAPTURE(simple_aos_h2d_copy_benchmark, host_resizable_buffer, host_mr,
-                  host_mr, host_copy, data::buffer_type::resizable)
-    ->Range(1UL, 1UL << 26);
-BENCHMARK_CAPTURE(simple_aos_d2h_copy_benchmark, host, host_mr, host_mr,
-                  host_copy)
-    ->Range(1UL, 1UL << 26);
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_soa_optimal_h2d_copy_benchmark,
+                                      host_fixed_buffer, host_mr, host_mr,
+                                      host_copy, host_copy,
+                                      data::buffer_type::fixed_size));
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_soa_optimal_h2d_copy_benchmark,
+                                      host_resizable_buffer, host_mr, host_mr,
+                                      host_copy, host_copy,
+                                      data::buffer_type::resizable));
+
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_soa_direct_d2h_copy_benchmark,
+                                      host, host_mr, host_mr, host_copy));
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_soa_optimal_d2h_copy_benchmark,
+                                      host, host_mr, host_mr, host_copy,
+                                      host_copy));
+
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_aos_h2d_copy_benchmark,
+                                      host_fixed_buffer, host_mr, host_mr,
+                                      host_copy,
+                                      data::buffer_type::fixed_size));
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_aos_h2d_copy_benchmark,
+                                      host_resizable_buffer, host_mr, host_mr,
+                                      host_copy, data::buffer_type::resizable));
+CONFIGURE_BENCHMARK(BENCHMARK_CAPTURE(simple_aos_d2h_copy_benchmark, host,
+                                      host_mr, host_mr, host_copy));
 
 }  // namespace vecmem::benchmark
