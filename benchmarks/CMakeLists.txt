@@ -31,7 +31,9 @@ add_library( vecmem_benchmark_common STATIC
    "common/make_jagged_sizes.hpp"
    "common/make_jagged_sizes.cpp"
    "common/make_jagged_vector.hpp"
-   "common/make_jagged_vector.cpp" )
+   "common/make_jagged_vector.cpp"
+   "common/simple_aos_container.hpp"
+   "common/simple_soa_container.hpp" )
 target_link_libraries( vecmem_benchmark_common
    PUBLIC vecmem::core )
 set_target_properties( vecmem_benchmark_common PROPERTIES
