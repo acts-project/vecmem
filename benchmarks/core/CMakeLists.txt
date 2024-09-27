@@ -10,7 +10,8 @@ include( vecmem-compiler-options-cpp )
 # Set up the benchmark(s) for the core library.
 add_executable( vecmem_benchmark_core
     "benchmark_core.cpp"
-    "benchmark_copy.cpp" )
+    "benchmark_copy.cpp"
+    "benchmark_edm_copy.cpp" )
 
 target_link_libraries(
     vecmem_benchmark_core
