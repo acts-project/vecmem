@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -17,8 +17,8 @@
 namespace vecmem {
 namespace edm {
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE device<schema<VARTYPES...>>::device(
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE device<schema<VARTYPES...>, INTERFACE>::device(
     const view<schema_type>& view)
     : m_capacity{view.capacity()},
       m_size{details::device_size_pointer<vecmem::details::disjunction_v<
@@ -30,8 +30,8 @@ VECMEM_HOST_AND_DEVICE device<schema<VARTYPES...>>::device(
         m_capacity, m_data, std::index_sequence_for<VARTYPES...>{}));
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::size() const
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>, INTERFACE>::size() const
     -> size_type {
 
     // Check that all variables have the correct capacities.
@@ -41,9 +41,9 @@ VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::size() const
     return (m_size == nullptr ? m_capacity : *m_size);
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::capacity() const
-    -> size_type {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>, INTERFACE>::capacity()
+    const -> size_type {
 
     // Check that all variables have the correct capacities.
     assert(details::device_capacities_match<VARTYPES...>(
@@ -52,9 +52,9 @@ VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::capacity() const
     return m_capacity;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::push_back_default()
-    -> size_type {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto
+device<schema<VARTYPES...>, INTERFACE>::push_back_default() -> size_type {
 
     // There must be no jagged vector variables for this to work.
     static_assert(!vecmem::details::disjunction<
@@ -83,43 +83,86 @@ VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::push_back_default()
     return index;
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
 VECMEM_HOST_AND_DEVICE
     typename details::device_type_at<INDEX, VARTYPES...>::return_type
-    device<schema<VARTYPES...>>::get() {
+    device<schema<VARTYPES...>, INTERFACE>::get() {
 
     return details::device_get<tuple_element_t<INDEX, tuple<VARTYPES...>>>::get(
         vecmem::get<INDEX>(m_data));
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
 VECMEM_HOST_AND_DEVICE
     typename details::device_type_at<INDEX, VARTYPES...>::const_return_type
-    device<schema<VARTYPES...>>::get() const {
+    device<schema<VARTYPES...>, INTERFACE>::get() const {
 
     return details::device_get<tuple_element_t<INDEX, tuple<VARTYPES...>>>::get(
         vecmem::get<INDEX>(m_data));
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::variables()
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE
+    typename device<schema<VARTYPES...>, INTERFACE>::proxy_type
+    device<schema<VARTYPES...>, INTERFACE>::at(size_type index) {
+
+    // Make sure that the index is within bounds.
+    assert(index < size());
+
+    // Use the unprotected function.
+    return this->operator[](index);
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE
+    typename device<schema<VARTYPES...>, INTERFACE>::const_proxy_type
+    device<schema<VARTYPES...>, INTERFACE>::at(size_type index) const {
+
+    // Make sure that the index is within bounds.
+    assert(index < size());
+
+    // Use the unprotected function.
+    return this->operator[](index);
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE
+    typename device<schema<VARTYPES...>, INTERFACE>::proxy_type
+    device<schema<VARTYPES...>, INTERFACE>::operator[](size_type index) {
+
+    // Create the proxy.
+    return proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE
+    typename device<schema<VARTYPES...>, INTERFACE>::const_proxy_type
+    device<schema<VARTYPES...>, INTERFACE>::operator[](size_type index) const {
+
+    // Create the proxy.
+    return const_proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>, INTERFACE>::variables()
     -> tuple_type& {
 
     return m_data;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>>::variables() const
-    -> const tuple_type& {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>, INTERFACE>::variables()
+    const -> const tuple_type& {
 
     return m_data;
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX, std::size_t... Is>
-VECMEM_HOST_AND_DEVICE void device<schema<VARTYPES...>>::construct_default(
+VECMEM_HOST_AND_DEVICE void
+device<schema<VARTYPES...>, INTERFACE>::construct_default(
     size_type index, std::index_sequence<INDEX, Is...>) {
 
     // Construct the new element in this variable, if it's a vector.
@@ -128,18 +171,20 @@ VECMEM_HOST_AND_DEVICE void device<schema<VARTYPES...>>::construct_default(
     construct_default(index, std::index_sequence<Is...>{});
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE void device<schema<VARTYPES...>>::construct_default(
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE void
+device<schema<VARTYPES...>, INTERFACE>::construct_default(
     size_type, std::index_sequence<>) {}
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <typename T>
-VECMEM_HOST_AND_DEVICE void device<schema<VARTYPES...>>::construct_vector(
-    size_type, T&) {}
+VECMEM_HOST_AND_DEVICE void
+device<schema<VARTYPES...>, INTERFACE>::construct_vector(size_type, T&) {}
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <typename T>
-VECMEM_HOST_AND_DEVICE void device<schema<VARTYPES...>>::construct_vector(
+VECMEM_HOST_AND_DEVICE void
+device<schema<VARTYPES...>, INTERFACE>::construct_vector(
     size_type index, device_vector<T>& vec) {
 
     vec.construct(index, {});

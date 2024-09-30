@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -8,6 +8,7 @@
 
 // Local include(s).
 #include "vecmem/edm/details/device_traits.hpp"
+#include "vecmem/edm/proxy.hpp"
 #include "vecmem/edm/schema.hpp"
 #include "vecmem/edm/view.hpp"
 #include "vecmem/utils/tuple.hpp"
@@ -19,8 +20,8 @@
 namespace vecmem {
 namespace edm {
 
-/// Technical base type for @c device<schema<VARTYPES...>>
-template <typename T>
+/// Technical base type for @c device<schema<VARTYPES...>,INTERFACE>
+template <typename T, template <typename> class I>
 class device;
 
 /// Structure-of-Arrays device container
@@ -31,8 +32,8 @@ class device;
 ///
 /// @tparam ...VARTYPES The variable types stored in the container
 ///
-template <typename... VARTYPES>
-class device<schema<VARTYPES...>> {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+class device<schema<VARTYPES...>, INTERFACE> {
 
     // Sanity check(s).
     static_assert(sizeof...(VARTYPES) > 0,
@@ -47,6 +48,17 @@ public:
     using size_pointer = typename view<schema_type>::size_pointer;
     /// The tuple type holding all of the the individual "device objects"
     using tuple_type = tuple<typename details::device_type<VARTYPES>::type...>;
+    /// The type of the interface used for the proxy objects
+    template <typename T>
+    using interface_type = INTERFACE<T>;
+    /// The type of the (non-const) proxy objects for the container elements
+    using proxy_type =
+        interface_type<proxy<schema_type, details::proxy_type::device,
+                             details::proxy_access::non_constant>>;
+    /// The type of the (const) proxy objects for the container elements
+    using const_proxy_type =
+        interface_type<proxy<schema_type, details::proxy_type::device,
+                             details::proxy_access::constant>>;
 
     /// @name Constructors and assignment operators
     /// @{
@@ -81,6 +93,40 @@ public:
     VECMEM_HOST_AND_DEVICE
         typename details::device_type_at<INDEX, VARTYPES...>::const_return_type
         get() const;
+
+    /// Get a proxy object for a specific variable (non-const)
+    ///
+    /// While also checking that the index is within bounds.
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    proxy_type at(size_type index);
+    /// Get a proxy object for a specific variable (const)
+    ///
+    /// While also checking that the index is within bounds.
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    const_proxy_type at(size_type index) const;
+
+    /// Get a proxy object for a specific variable (non-const)
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    proxy_type operator[](size_type index);
+    /// Get a proxy object for a specific variable (const)
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    const_proxy_type operator[](size_type index) const;
 
     /// @}
 

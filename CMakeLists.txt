@@ -86,6 +86,8 @@ if( VECMEM_BUILD_DOCS )
       "${CMAKE_CURRENT_SOURCE_DIR}/cuda/include"
       "${CMAKE_CURRENT_SOURCE_DIR}/hip/include"
       "${CMAKE_CURRENT_SOURCE_DIR}/sycl/include" )
+   set( DOXYGEN_PREDEFINED
+      "__cplusplus=201700L" )
    set( DOXYGEN_EXCLUDE
       "${CMAKE_CURRENT_SOURCE_DIR}/tests"
       "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"

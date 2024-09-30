@@ -74,6 +74,22 @@ struct tuple<T, Ts...> {
     VECMEM_HOST_AND_DEVICE constexpr tuple(U &&head, Us &&... tail)
         : m_head(std::forward<U>(head)), m_tail(std::forward<Us>(tail)...) {}
 
+    /// "Concatenation" constructor
+    ///
+    /// It is used in the @c vecmem::edm code while constructing some of the
+    /// internal tuples of the objects.
+    ///
+    /// @param head The first element to be stored in the tuple
+    /// @param tail The rest of the elements to be stored in the tuple
+    ///
+    template <typename U, typename... Us,
+              std::enable_if_t<vecmem::details::conjunction<
+                                   std::is_constructible<T, U &&>,
+                                   std::is_constructible<Ts, Us &&>...>::value,
+                               bool> = true>
+    VECMEM_HOST_AND_DEVICE constexpr tuple(U &&head, tuple<Us...> &&tail)
+        : m_head(std::forward<U>(head)), m_tail(std::move(tail)) {}
+
     /// The first/head element of the tuple
     T m_head;
     /// The rest of the tuple elements

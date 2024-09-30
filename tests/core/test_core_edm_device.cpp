@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -14,6 +14,14 @@
 // System include(s).
 #include <vector>
 
+namespace {
+
+/// Dummy container interface for the test
+template <typename BASE>
+struct interface {};
+
+}  // namespace
+
 TEST(core_edm_device_test, construct) {
 
     using schema =
@@ -25,9 +33,9 @@ TEST(core_edm_device_test, construct) {
     vecmem::edm::view<schema> view1{};
     vecmem::edm::view<const_schema> view2{};
 
-    vecmem::edm::device<schema> device1{view1};
-    vecmem::edm::device<const_schema> device2{view1};
-    vecmem::edm::device<const_schema> device3{view2};
+    vecmem::edm::device<schema, interface> device1{view1};
+    vecmem::edm::device<const_schema, interface> device2{view1};
+    vecmem::edm::device<const_schema, interface> device3{view2};
 }
 
 TEST(core_edm_device_test, members) {
@@ -44,8 +52,8 @@ TEST(core_edm_device_test, members) {
     view.get<0>() = &value1;
     view.get<1>() = {static_cast<unsigned int>(value2.size()), value2.data()};
 
-    vecmem::edm::device<schema> device1{view};
-    vecmem::edm::device<const_schema> device2{view};
+    vecmem::edm::device<schema, interface> device1{view};
+    vecmem::edm::device<const_schema, interface> device2{view};
 
     EXPECT_EQ(device2.get<0>(), value1);
     ASSERT_EQ(device2.get<1>().size(), value2.size());

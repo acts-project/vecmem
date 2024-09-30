@@ -431,11 +431,12 @@ copy::event_type copy::operator()(
     return create_event();
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 copy::event_type copy::operator()(
     const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
         from_view,
-    edm::host<edm::schema<VARTYPES...>>& to_vec, type::copy_type cptype) const {
+    edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
+    type::copy_type cptype) const {
 
     // Resize the output object to the correct size(s).
     resize_impl<0>(from_view, to_vec, cptype);
@@ -761,11 +762,12 @@ void copy::memset_impl(edm::view<edm::schema<VARTYPES...>> data,
     }
 }
 
-template <std::size_t INDEX, typename... VARTYPES>
+template <std::size_t INDEX, typename... VARTYPES,
+          template <typename> class INTERFACE>
 void copy::resize_impl(
     const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
         from_view,
-    edm::host<edm::schema<VARTYPES...>>& to_vec,
+    edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
     [[maybe_unused]] type::copy_type cptype) const {
 
     // The target is a host container, so the copy type can't be anything

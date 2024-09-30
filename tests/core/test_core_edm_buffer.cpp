@@ -42,6 +42,10 @@ protected:
     using jagged_const_schema =
         vecmem::edm::details::add_const_t<jagged_schema>;
 
+    /// Dummy container interface for the test
+    template <typename BASE>
+    struct interface {};
+
     /// Memory resource for the test(s)
     vecmem::host_memory_resource m_resource;
     /// Copy object for the test(s)
@@ -246,7 +250,7 @@ TEST_F(core_edm_buffer_test, device) {
         CAPACITY, m_resource, vecmem::data::buffer_type::fixed_size};
 
     // Make a device container on top of it.
-    vecmem::edm::device<simple_schema> device1{buffer1};
+    vecmem::edm::device<simple_schema, interface> device1{buffer1};
     ASSERT_EQ(device1.size(), CAPACITY);
     ASSERT_EQ(device1.capacity(), CAPACITY);
     auto check_fixed_vector = [&](const auto& v) {
@@ -282,7 +286,7 @@ TEST_F(core_edm_buffer_test, device) {
     m_copy.memset(buffer2.size(), 0);
 
     // Make a device container on top of it.
-    vecmem::edm::device<simple_schema> device2{buffer2};
+    vecmem::edm::device<simple_schema, interface> device2{buffer2};
     ASSERT_EQ(device2.size(), 0u);
     ASSERT_EQ(device2.capacity(), CAPACITY);
     auto check_resizable_vector = [&](const auto& v) {
@@ -324,7 +328,7 @@ TEST_F(core_edm_buffer_test, device) {
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
 
     // Make a device container on top of it.
-    vecmem::edm::device<jagged_schema> device3{buffer3};
+    vecmem::edm::device<jagged_schema, interface> device3{buffer3};
     ASSERT_EQ(device3.size(), CAPACITY);
     ASSERT_EQ(device3.capacity(), CAPACITY);
     auto check_fixed_jagged = [&](const auto& v) {
@@ -365,7 +369,7 @@ TEST_F(core_edm_buffer_test, device) {
     m_copy.memset(buffer4.size(), 0);
 
     // Make a device container on top of it.
-    vecmem::edm::device<jagged_schema> device4{buffer4};
+    vecmem::edm::device<jagged_schema, interface> device4{buffer4};
     ASSERT_EQ(device4.size(), CAPACITY);
     ASSERT_EQ(device4.capacity(), CAPACITY);
     auto check_resizable_jagged = [&](const auto& v) {
