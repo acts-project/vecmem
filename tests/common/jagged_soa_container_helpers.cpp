@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -36,7 +36,7 @@ void fill(jagged_soa_container::host& obj) {
         }
         obj.indices()[i].resize(5 + i);
         for (std::size_t j = 0; j < obj.indices()[i].size(); ++j) {
-            obj.indices()[i][j] = static_cast<int>(i + j);
+            obj[i].indices()[j] = static_cast<int>(i + j);
         }
     }
 }
