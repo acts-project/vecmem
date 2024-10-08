@@ -85,7 +85,8 @@ TEST_F(hip_containers_test, device_memory) {
                               vecmem::copy::type::host_to_device),
                     m_copy.to(vecmem::get_data(inputvec), device_resource),
                     outputvecdevice);
-    m_copy(outputvecdevice, outputvechost, vecmem::copy::type::device_to_host);
+    m_copy(outputvecdevice, outputvechost, vecmem::copy::type::device_to_host)
+        ->wait();
 
     // Check the output.
     EXPECT_EQ(inputvec.size(), outputvec.size());
@@ -132,7 +133,7 @@ TEST_F(hip_containers_test, atomic_device_memory) {
     atomicTransform(ITERATIONS, vec_on_device);
 
     // Copy it back to the host.
-    m_copy(vec_on_device, vec);
+    m_copy(vec_on_device, vec)->wait();
 
     // Check the output.
     for (int value : vec) {
@@ -164,7 +165,7 @@ TEST_F(hip_containers_test, atomic_local_ref) {
     atomicLocalRef(NUMBLOCKS, BLOCKSIZE, device_buffer);
 
     // Copy data back to the host.
-    m_copy(device_buffer, host_vector);
+    m_copy(device_buffer, host_vector)->wait();
 
     // Check the output.
     for (std::size_t i = 0; i < NUMBLOCKS; ++i) {
@@ -189,14 +190,14 @@ TEST_F(hip_containers_test, extendable_memory) {
     vecmem::data::vector_buffer<int> output_buffer(
         static_cast<vecmem::data::vector_buffer<int>::size_type>(input.size()),
         device_resource, vecmem::data::buffer_type::resizable);
-    m_copy.setup(output_buffer);
+    m_copy.setup(output_buffer)->wait();
 
     // Run the filtering kernel.
     filterTransform(vecmem::get_data(input), output_buffer);
 
     // Copy the output into the host's memory.
     vecmem::vector<int> output(&host_resource);
-    m_copy(output_buffer, output);
+    m_copy(output_buffer, output)->wait();
 
     // Check its contents.
     EXPECT_EQ(output.size(), 89);
@@ -248,7 +249,7 @@ TEST_F(hip_containers_test, large_buffer) {
     // Test a (1D) vector.
     vecmem::data::vector_buffer<unsigned long> buffer1(
         100, managed_resource, vecmem::data::buffer_type::resizable);
-    m_copy.setup(buffer1);
+    m_copy.setup(buffer1)->wait();
     largeBufferTransform(buffer1);
     EXPECT_EQ(m_copy.get_size(buffer1), 21u);
 
@@ -256,7 +257,7 @@ TEST_F(hip_containers_test, large_buffer) {
     vecmem::data::jagged_vector_buffer<unsigned long> buffer2(
         {100, 100, 100}, managed_resource, nullptr,
         vecmem::data::buffer_type::resizable);
-    m_copy.setup(buffer2);
+    m_copy.setup(buffer2)->wait();
     largeBufferTransform(buffer2);
     EXPECT_EQ(m_copy.get_sizes(buffer2),
               std::vector<unsigned int>({5u, 21u, 10u}));

@@ -407,7 +407,7 @@ TEST_F(sycl_containers_test, extendable_memory) {
     vecmem::data::vector_buffer<int> output_buffer(
         static_cast<vecmem::data::vector_buffer<int>::size_type>(input.size()),
         device_resource, vecmem::data::buffer_type::resizable);
-    copy.setup(output_buffer);
+    copy.setup(output_buffer)->wait();
 
     // Run a kernel that filters the elements of the input vector.
     queue
@@ -440,7 +440,7 @@ TEST_F(sycl_containers_test, extendable_memory) {
 
     // Copy the output into the host's memory.
     vecmem::vector<int> output(&host_resource);
-    copy(output_buffer, output);
+    copy(output_buffer, output)->wait();
 
     // Check its contents.
     EXPECT_EQ(output.size(), static_cast<vecmem::vector<int>::size_type>(89));
@@ -526,7 +526,7 @@ TEST_F(sycl_containers_test, large_buffer) {
     // Test a (1D) vector.
     vecmem::data::vector_buffer<unsigned long> buffer1(
         100, shared_resource, vecmem::data::buffer_type::resizable);
-    copy.setup(buffer1);
+    copy.setup(buffer1)->wait();
 
     // Run a kernel that enlarges the (1D) buffer.
     queue
@@ -558,7 +558,7 @@ TEST_F(sycl_containers_test, large_buffer) {
     vecmem::data::jagged_vector_buffer<unsigned long> buffer2(
         {100, 100, 100}, shared_resource, nullptr,
         vecmem::data::buffer_type::resizable);
-    copy.setup(buffer2);
+    copy.setup(buffer2)->wait();
 
     // Run a kernel that enlarges the (jagged) buffer.
     queue
