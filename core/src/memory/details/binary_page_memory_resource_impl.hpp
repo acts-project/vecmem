@@ -24,21 +24,36 @@ namespace vecmem::details {
 /// Implementation of @c vecmem::binary_page_memory_resource
 struct binary_page_memory_resource_impl {
     /**
-     * @brief The minimum size (log_2) of pages in our buddy allocator.
-     *
-     * The default value of 10 indicates that the size is equal to 2^10=1024
-     * bytes.
-     */
-    static constexpr std::size_t min_page_size = 10;
-
-    /**
      * @brief The minimum size (log_2) of superpages in our buddy allocator.
      *
      * The default value of 20 indicates the the default size is equal to
-     * 2^20=1048576 bytes, but is can potentially be higher.
+     * 2^20=1048576 bytes.
      *
+     * @note Pages can (counterintuitively) be smaller than this value. This
+     * happens if an allocation is so small that the allocation size plus the
+     * delta is smaller than the minimum page size. The minimum superpage size
+     * indicates the size of the superpage above which we will not
+     * optimistically overallocate.
      */
-    static constexpr std::size_t new_page_size = 20;
+    static constexpr std::size_t min_superpage_size = 20;
+
+    /**
+     * @brief The maximum difference (log_2) between the size of the superpage
+     * and its smallest page.
+     *
+     * The default value of 8 indicates that there are at most 8 orders of
+     * magnitude (log_2) between the size of the superpage, and the smallest
+     * page in it.
+     */
+    static constexpr std::size_t delta_superpage_size = 8;
+
+    /**
+     * @brief The minimum size (log_2) of pages in our buddy allocator.
+     *
+     * The default value of 2 indicates that the size is equal to 2^8=256
+     * bytes.
+     */
+    static constexpr std::size_t min_page_size = 8;
 
     /// Constructor, on top of another memory resource
     binary_page_memory_resource_impl(memory_resource &upstream);
@@ -76,6 +91,11 @@ struct binary_page_memory_resource_impl {
          * superpage.
          */
         std::size_t m_size;
+
+        /**
+         * @brief The size of the smallest page in this superpage.
+         */
+        std::size_t m_min_page_size;
 
         /**
          * @brief Total number of pages in this superpage.
@@ -131,6 +151,16 @@ struct binary_page_memory_resource_impl {
         page_ref &operator=(page_ref &&) = default;
 
         /**
+         * @brief Equality operator of pages.
+         */
+        bool operator==(const page_ref &) const;
+
+        /**
+         * @brief Inquality operator of pages.
+         */
+        bool operator!=(const page_ref &) const;
+
+        /**
          * @brief Return the size (log_2) of the page referenced.
          */
         std::size_t get_size() const;
@@ -155,6 +185,18 @@ struct binary_page_memory_resource_impl {
          * @brief Obtain a reference to this page's left child.
          */
         page_ref right_child() const;
+
+        /**
+         * @brief Obtain a reference to this page's parent, if such a node
+         * exists.
+         */
+        std::optional<page_ref> parent() const;
+
+        /**
+         * @brief Obtain a reference to this page's sibling, if such a node
+         * exists.
+         */
+        std::optional<page_ref> sibling() const;
 
         /**
          * @brief Unsplit the current page, potentially unsplitting its

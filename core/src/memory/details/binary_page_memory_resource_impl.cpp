@@ -67,14 +67,7 @@ void *binary_page_memory_resource_impl::allocate(std::size_t size,
         throw std::bad_alloc();
     }
 
-    /*
-     * If the page is split (but its children are all free), we will first
-     * need to unsplit it.
-     */
-    if (cand->get_state() == page_state::SPLIT) {
-        VECMEM_DEBUG_MSG(5, "Candidate page is split and must be unsplit");
-        cand->unsplit();
-    }
+    assert(cand->get_state() == page_state::VACANT);
 
     /*
      * Keep splitting the page until we have reached our target size.
@@ -144,7 +137,7 @@ void binary_page_memory_resource_impl::deallocate(void *p, std::size_t s,
      * the memory gives us the offset from the first page of that size, which
      * allows us to easily find the page we're looking for.
      */
-    std::size_t goal = std::max(min_page_size, round_up(s));
+    std::size_t goal = std::max(sp->get().m_min_page_size, round_up(s));
     std::size_t p_min = 0;
     for (; page_ref(sp->get(), p_min).get_size() > goal; p_min = 2 * p_min + 1)
         ;
@@ -152,18 +145,42 @@ void binary_page_memory_resource_impl::deallocate(void *p, std::size_t s,
         static_cast<std::byte *>(p) - sp->get().m_memory.get();
 
     /*
-     * Finally, change the state of the page to vacant.
+     * Change the state of the page to vacant.
      */
-    page_ref(*sp,
-             p_min + static_cast<std::size_t>(
+    page_ref page(
+        *sp, p_min + static_cast<std::size_t>(
                          diff / (static_cast<std::ptrdiff_t>(
-                                    static_cast<std::size_t>(1UL) << goal))))
-        .change_state_occupied_to_vacant();
+                                    static_cast<std::size_t>(1UL) << goal))));
+
+    page.change_state_occupied_to_vacant();
+
+    /*
+     * Finally, check if our sibling is also free; if it is, we can unsplit the
+     * parent page. We move up to find the largest parent that is entirely
+     * free, so we can unsplit _all_ that memory.
+     */
+    page_ref largest_vacant_page = page;
+
+    while (true) {
+        if (std::optional<page_ref> sibling = largest_vacant_page.sibling();
+            sibling && sibling->get_state() == page_state::VACANT) {
+            largest_vacant_page = *(largest_vacant_page.parent());
+        } else {
+            break;
+        }
+    }
+
+    if (largest_vacant_page != page) {
+        largest_vacant_page.unsplit();
+
+        assert(page.get_state() == page_state::NON_EXTANT);
+    }
 }
 
 std::optional<binary_page_memory_resource_impl::page_ref>
 binary_page_memory_resource_impl::find_free_page(std::size_t size) {
     bool candidate_sp_found;
+    std::size_t search_size = size;
 
     /*
      * We will look for a free page by looking at all the pages of the exact
@@ -184,7 +201,7 @@ binary_page_memory_resource_impl::find_free_page(std::size_t size) {
              * support the page size we're looking for. If not, we will never
              * find such a page in this superpage.
              */
-            if (size <= sp.m_size) {
+            if (size >= sp.m_min_page_size && search_size <= sp.m_size) {
                 candidate_sp_found = true;
 
                 /*
@@ -192,7 +209,7 @@ binary_page_memory_resource_impl::find_free_page(std::size_t size) {
                  * can possibly find pages of the correct size.
                  */
                 std::size_t i = 0;
-                for (; page_ref(sp, i).get_size() > size; i = 2 * i + 1)
+                for (; page_ref(sp, i).get_size() > search_size; i = 2 * i + 1)
                     ;
                 std::size_t j = 2 * i + 1;
 
@@ -216,7 +233,7 @@ binary_page_memory_resource_impl::find_free_page(std::size_t size) {
         /*
          * If we find nothing, look for a page twice as big.
          */
-        size++;
+        search_size++;
     } while (candidate_sp_found);
 
     /*
@@ -229,13 +246,21 @@ void binary_page_memory_resource_impl::allocate_upstream(std::size_t size) {
     /*
      * Add our new page to the list of root pages.
      */
-    m_superpages.emplace_back(std::max(size, new_page_size), m_upstream);
+    if (size >= min_superpage_size) {
+        m_superpages.emplace_back(size, m_upstream);
+    } else {
+        m_superpages.emplace_back(
+            std::min(size + delta_superpage_size, min_superpage_size),
+            m_upstream);
+    }
 }
 
 binary_page_memory_resource_impl::superpage::superpage(
     std::size_t size, memory_resource &resource)
     : m_size(size),
-      m_num_pages((2UL << (m_size - min_page_size)) - 1),
+      m_min_page_size((assert(m_size - delta_superpage_size >= min_page_size),
+                       m_size - delta_superpage_size)),
+      m_num_pages((2UL << (m_size - m_min_page_size)) - 1),
       m_pages(std::make_unique<page_state[]>(m_num_pages)),
       m_memory(make_unique_alloc<std::byte[]>(
           resource, static_cast<std::size_t>(1UL) << m_size)) {
@@ -323,16 +348,55 @@ void *binary_page_memory_resource_impl::page_ref::get_addr() const {
                        (static_cast<std::size_t>(1UL) << get_size())]);
 }
 
+bool binary_page_memory_resource_impl::page_ref::operator==(
+    const page_ref &o) const {
+    return &(m_superpage.get()) == &(o.m_superpage.get()) && m_page == o.m_page;
+}
+
+bool binary_page_memory_resource_impl::page_ref::operator!=(
+    const page_ref &o) const {
+    return !(operator==(o));
+}
+
 binary_page_memory_resource_impl::page_ref
 binary_page_memory_resource_impl::page_ref::left_child() const {
     return {m_superpage, 2 * m_page + 1};
 }
+
 binary_page_memory_resource_impl::page_ref
 binary_page_memory_resource_impl::page_ref::right_child() const {
     return {m_superpage, 2 * m_page + 2};
 }
 
+std::optional<binary_page_memory_resource_impl::page_ref>
+binary_page_memory_resource_impl::page_ref::parent() const {
+    if (m_page == 0) {
+        return std::nullopt;
+    } else if (m_page % 2 == 0) {
+        return page_ref{m_superpage, (m_page - 2) / 2};
+    } else {
+        return page_ref{m_superpage, (m_page - 1) / 2};
+    }
+}
+
+std::optional<binary_page_memory_resource_impl::page_ref>
+binary_page_memory_resource_impl::page_ref::sibling() const {
+    if (m_page == 0) {
+        return std::nullopt;
+    } else if (m_page % 2 == 0) {
+        return page_ref{m_superpage, m_page - 1};
+    } else {
+        return page_ref{m_superpage, m_page + 1};
+    }
+}
+
 void binary_page_memory_resource_impl::page_ref::unsplit() {
+    assert(get_state() == page_state::SPLIT);
+    assert(left_child().get_state() == page_state::SPLIT ||
+           left_child().get_state() == page_state::VACANT);
+    assert(right_child().get_state() == page_state::SPLIT ||
+           right_child().get_state() == page_state::VACANT);
+
     if (left_child().get_state() == page_state::SPLIT) {
         left_child().unsplit();
     }
