@@ -8,7 +8,7 @@
 // Local include(s).
 #include "vecmem/utils/metal/device_wrapper.hpp"
 #include "get_device.h"
-#include "opaque_device.hpp"
+#include "opaque_device.h"
 #include "vecmem/utils/debug.hpp"
 
 // System import(s).

@@ -18,7 +18,7 @@ vecmem_add_library( vecmem_metal metal
    # Utilities.
    "include/vecmem/utils/metal/device_wrapper.hpp"
    "src/utils/device_wrapper.mm"
-   "src/utils/opaque_device.hpp"
+   "src/utils/opaque_device.h"
    "src/utils/get_device.h"
    "src/utils/get_device.mm" )
 target_link_libraries( vecmem_metal PUBLIC vecmem::core )

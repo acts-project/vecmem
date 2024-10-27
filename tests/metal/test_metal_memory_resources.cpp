@@ -10,12 +10,14 @@
 #include "../common/memory_resource_test_basic.hpp"
 #include "../common/memory_resource_test_host_accessible.hpp"
 #include "vecmem/memory/metal/shared_memory_resource.hpp"
+#include "vecmem/utils/metal/device_wrapper.hpp"
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
 
 // Memory resources.
-static vecmem::metal::shared_memory_resource shared_resource;
+static vecmem::metal::device_wrapper metal_device;
+static vecmem::metal::shared_memory_resource shared_resource{metal_device};
 
 // Instantiate the allocation tests on all of the resources.
 INSTANTIATE_TEST_SUITE_P(metal_basic_memory_resource_tests,

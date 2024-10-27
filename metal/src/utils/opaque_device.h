@@ -7,7 +7,7 @@
 #pragma once
 
 // System import(s).
-#include <Metal/Metal.h>
+#import <Metal/Metal.h>
 
 namespace vecmem::metal::details {
 
