@@ -96,7 +96,7 @@ TEST_F(hip_jagged_containers_test, set_in_kernel) {
     vecmem::hip::device_memory_resource device_resource;
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         output_data_host, device_resource, &m_mem);
-    copy.setup(output_data_device);
+    copy.setup(output_data_device)->wait();
 
     // Run the linear transformation.
     linearTransform(copy.to(vecmem::get_data(m_constants), device_resource,
@@ -105,7 +105,8 @@ TEST_F(hip_jagged_containers_test, set_in_kernel) {
                             vecmem::copy::type::host_to_device),
                     output_data_device);
     copy(output_data_device, output_data_host,
-         vecmem::copy::type::device_to_host);
+         vecmem::copy::type::device_to_host)
+        ->wait();
 
     // Check the results.
     EXPECT_EQ(output[0][0], 214);
@@ -146,13 +147,13 @@ TEST_F(hip_jagged_containers_test, set_in_contiguous_kernel) {
     vecmem::hip::device_memory_resource device_resource;
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         output_data_host, device_resource, &m_mem);
-    copy.setup(output_data_device);
+    copy.setup(output_data_device)->wait();
 
     // Run the linear transformation.
     linearTransform(copy.to(vecmem::get_data(m_constants), device_resource),
                     copy.to(vecmem::get_data(input), device_resource, &m_mem),
                     output_data_device);
-    copy(output_data_device, output_data_host);
+    copy(output_data_device, output_data_host)->wait();
 
     // Check the results.
     EXPECT_EQ(output[0][0], 214);
@@ -184,14 +185,14 @@ TEST_F(hip_jagged_containers_test, filter) {
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         {10, 10, 10, 10, 10, 10}, device_resource, &m_mem,
         vecmem::data::buffer_type::resizable);
-    copy.setup(output_data_device);
+    copy.setup(output_data_device)->wait();
 
     // Run the filtering.
     filterTransform(vecmem::get_data(m_vec), 5, output_data_device);
 
     // Copy the filtered output back into the host's memory.
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data_device, output);
+    copy(output_data_device, output)->wait();
 
     // Check the output. Note that the order of elements in the "inner vectors"
     // is not fixed. And for the single-element and empty vectors I just decided
@@ -224,14 +225,14 @@ TEST_F(hip_jagged_containers_test, zero_capacity) {
     vecmem::data::jagged_vector_buffer<int> managed_data(
         {0, 1, 200, 1, 100, 2}, m_mem, nullptr,
         vecmem::data::buffer_type::resizable);
-    copy.setup(managed_data);
+    copy.setup(managed_data)->wait();
 
     // Run the vector filling.
     fillTransform(managed_data);
 
     // Get the data into a host vector.
     vecmem::jagged_vector<int> host_vector(&m_mem);
-    copy(managed_data, host_vector);
+    copy(managed_data, host_vector)->wait();
 
     // Check the contents of the vector.
     EXPECT_EQ(host_vector.size(), 6);
@@ -246,13 +247,13 @@ TEST_F(hip_jagged_containers_test, zero_capacity) {
     vecmem::data::jagged_vector_buffer<int> device_data(
         {0, 1, 200, 1, 100, 2}, device_resource, &m_mem,
         vecmem::data::buffer_type::resizable);
-    copy.setup(device_data);
+    copy.setup(device_data)->wait();
 
     // Run the vector filling.
     fillTransform(device_data);
 
     // Get the data into the host vector.
-    copy(device_data, host_vector);
+    copy(device_data, host_vector)->wait();
 
     // Check the contents of the vector.
     EXPECT_EQ(host_vector.size(), 6);
@@ -274,7 +275,7 @@ TEST_F(hip_jagged_containers_test, empty) {
     // Create a resizable buffer for a jagged vector.
     vecmem::data::jagged_vector_buffer<int> output_data(
         {}, device_resource, &m_mem, vecmem::data::buffer_type::resizable);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
@@ -294,11 +295,11 @@ TEST_F(hip_jagged_containers_test, empty_fixed) {
     // Create a resizable buffer for a jagged vector.
     vecmem::data::jagged_vector_buffer<int> output_data(
         {}, device_resource, &m_mem, vecmem::data::buffer_type::fixed_size);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 0);
@@ -315,14 +316,14 @@ TEST_F(hip_jagged_containers_test, sizeless) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         std::vector<std::size_t>(3, 0), device_resource, &m_mem,
         vecmem::data::buffer_type::resizable);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     // Run the vector filling.
     fillTransform(output_data);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 3);
@@ -342,14 +343,14 @@ TEST_F(hip_jagged_containers_test, sizeless_fixed) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         std::vector<std::size_t>(3, 0), device_resource, &m_mem,
         vecmem::data::buffer_type::fixed_size);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     // Run the vector filling.
     fillTransform(output_data);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 3);
@@ -369,14 +370,14 @@ TEST_F(hip_jagged_containers_test, partially_sizeless) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         {10, 0, 10, 0, 10, 0}, device_resource, &m_mem,
         vecmem::data::buffer_type::resizable);
-    copy.setup(output_data);
+    copy.setup(output_data)->wait();
 
     // Run the vector filling.
     fillTransform(output_data);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 6);
@@ -399,15 +400,15 @@ TEST_F(hip_jagged_containers_test, partially_sizeless_fixed) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         {10, 0, 10, 0, 10, 0}, device_resource, &m_mem,
         vecmem::data::buffer_type::fixed_size);
-    copy.setup(output_data);
-    copy.memset(output_data, 0);
+    copy.setup(output_data)->wait();
+    copy.memset(output_data, 0)->wait();
 
     // Run the vector filling.
     fillTransform(output_data);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
-    copy(output_data, output);
+    copy(output_data, output)->wait();
 
     // Check the output.
     EXPECT_EQ(output.size(), 6);
