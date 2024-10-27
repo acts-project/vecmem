@@ -25,16 +25,21 @@ device_wrapper::device_wrapper()
 
     // Create a (default) new Metal device.
     m_managedDevice->m_device = MTLCreateSystemDefaultDevice();
-    assert(m_managedDevice->m_device != nil);
+    if (m_managedDevice->m_device != nil) {
 
-    // Grab a bare pointer to the object.
-    m_device = (__bridge void*)m_managedDevice->m_device;
+        // Grab a bare pointer to the object.
+        m_device = (__bridge void*)m_managedDevice->m_device;
 
-    // Tell the user what happened.
-    VECMEM_DEBUG_MSG(
-        1, "Created an \"owning wrapper\" around device: %s",
-        [[details::get_device(*this) name]
-            cStringUsingEncoding:[NSString defaultCStringEncoding]]);
+        // Tell the user what happened.
+        VECMEM_DEBUG_MSG(
+            1, "Created an \"owning wrapper\" around device: %s",
+            [[details::get_device(*this) name]
+                cStringUsingEncoding:[NSString defaultCStringEncoding]]);
+
+    } else {
+        // Tell the user what happened.
+        VECMEM_DEBUG_MSG(1, "No Metal device was found");
+    }
 }
 
 device_wrapper::device_wrapper(void* device)
