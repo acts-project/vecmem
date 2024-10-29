@@ -20,7 +20,7 @@ _binary=${CLANG_FORMAT_BINARY:-clang-format}
 $_binary --version
 
 cd $1
-find . \( -iname '*.cpp' -or -iname '*.hpp' -or -iname '*.ipp' -or -iname '*.cu' -or -iname '*.cuh' -or -iname '*.hip' -or -iname '*.sycl' \) \
+find . \( -iname '*.cpp' -or -iname '*.hpp' -or -iname '*.ipp' -or -iname '*.cu' -or -iname '*.cuh' -or -iname '*.hip' -or -iname '*.sycl' -or -iname '*.h' -or -iname '*.mm' -or -iname '*.metal' \) \
        -and -not -path "./*build*/*" \
        -and -not -path "./thirdparty/*" \
   | xargs $_binary -i -style=file
@@ -32,9 +32,9 @@ if ! [ -z $CI ] || ! [ -z $GITHUB_ACTIONS ]; then
     cp --parents $f changed
   done
 fi
-    
+
 echo "clang-format done"
-    
+
 set +e
 git diff --exit-code --stat
 result=$?

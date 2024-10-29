@@ -49,6 +49,9 @@ endif()
 if( VECMEM_BUILD_SYCL_LIBRARY )
    add_subdirectory( sycl )
 endif()
+if( VECMEM_BUILD_METAL_LIBRARY )
+   add_subdirectory( metal )
+endif()
 
 # Set up the test(s).
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )

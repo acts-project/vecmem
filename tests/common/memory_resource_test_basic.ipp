@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,8 +12,9 @@
 TEST_P(memory_resource_test_basic, allocations) {
 
     vecmem::memory_resource* resource = GetParam();
-    for (std::size_t size = 0; size < 100000; size += 1000) {
+    for (std::size_t size = 1000; size < 100000; size += 1000) {
         void* ptr = resource->allocate(size);
+        ASSERT_NE(ptr, nullptr);
         resource->deallocate(ptr, size);
     }
 }
