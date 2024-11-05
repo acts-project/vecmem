@@ -25,11 +25,11 @@ function( vecmem_setup_sycl libName )
 
       # Check if sycl::local_accessor is available.
       vecmem_check_sycl_source_compiles( "
-         #include <CL/sycl.hpp>
+         #include <sycl/sycl.hpp>
          int main() {
-             cl::sycl::queue queue;
-             queue.submit([](cl::sycl::handler& h) {
-                 cl::sycl::local_accessor<int> dummy(10, h);
+             ::sycl::queue queue;
+             queue.submit([](::sycl::handler& h) {
+                 ::sycl::local_accessor<int> dummy(10, h);
                  (void)dummy;
              }).wait_and_throw();
              return 0;

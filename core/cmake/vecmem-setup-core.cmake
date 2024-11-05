@@ -44,7 +44,7 @@ function( vecmem_setup_core libName )
 
       # Test which SYCL printf function(s) is/are available.
       vecmem_check_sycl_source_compiles( "
-         #include <CL/sycl.hpp>
+         #include <sycl/sycl.hpp>
          #ifdef __SYCL_DEVICE_ONLY__
          #  define VECMEM_MSG_ATTRIBUTES __attribute__((opencl_constant))
          #else
@@ -52,12 +52,12 @@ function( vecmem_setup_core libName )
          #endif
          int main() {
              const VECMEM_MSG_ATTRIBUTES char __msg[] = \"Test message %i\";
-             cl::sycl::ext::oneapi::experimental::printf(__msg, 20);
+             ::sycl::ext::oneapi::experimental::printf(__msg, 20);
              return 0;
          }
          " VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
       vecmem_check_sycl_source_compiles( "
-         #include <CL/sycl.hpp>
+         #include <sycl/sycl.hpp>
          #ifdef __SYCL_DEVICE_ONLY__
          #  define VECMEM_MSG_ATTRIBUTES __attribute__((opencl_constant))
          #else
@@ -65,7 +65,7 @@ function( vecmem_setup_core libName )
          #endif
          int main() {
              const VECMEM_MSG_ATTRIBUTES char __msg[] = \"Test message %i\";
-             cl::sycl::ONEAPI::experimental::printf(__msg, 20);
+             ::sycl::ONEAPI::experimental::printf(__msg, 20);
              return 0;
          }
          " VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
@@ -73,10 +73,10 @@ function( vecmem_setup_core libName )
       # Set up the appropriate flag based on these checks.
       if( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
          target_compile_definitions( ${libName} INTERFACE
-            $<BUILD_INTERFACE:VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ext::oneapi::experimental::printf> )
+            $<BUILD_INTERFACE:VECMEM_SYCL_PRINTF_FUNCTION=::sycl::ext::oneapi::experimental::printf> )
       elseif( VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
          target_compile_definitions( ${libName} INTERFACE
-            $<BUILD_INTERFACE:VECMEM_SYCL_PRINTF_FUNCTION=cl::sycl::ONEAPI::experimental::printf> )
+            $<BUILD_INTERFACE:VECMEM_SYCL_PRINTF_FUNCTION=::sycl::ONEAPI::experimental::printf> )
       else()
          message( WARNING "No valid printf function found for SYCL."
             " Enabling debug messages will likely not work in device code." )
@@ -87,12 +87,12 @@ function( vecmem_setup_core libName )
 
       # Test whether sycl::atomic_ref is available.
       vecmem_check_sycl_source_compiles( "
-         #include <CL/sycl.hpp>
+         #include <sycl/sycl.hpp>
          int main() {
              int dummy = 0;
-             cl::sycl::atomic_ref<int, sycl::memory_order::relaxed,
-                                 cl::sycl::memory_scope::device,
-                                 cl::sycl::access::address_space::global_space>
+             ::sycl::atomic_ref<int, sycl::memory_order::relaxed,
+                               ::sycl::memory_scope::device,
+                               ::sycl::access::address_space::global_space>
                  atomic_dummy(dummy);
              atomic_dummy.store(3);
              atomic_dummy.fetch_add(1);
