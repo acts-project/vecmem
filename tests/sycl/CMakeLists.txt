@@ -31,7 +31,7 @@ vecmem_check_sycl_source_compiles( "
    int main() { return 0; }
    " VECMEM_HAVE_SYCL_UBSAN
    CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-fsanitize=undefined )
-if( VECMEM_HAVE_UBSAN AND VECMEM_HAVE_SYCL_UBSAN )
+if( VECMEM_HAVE_UBSAN AND VECMEM_HAVE_SYCL_UBSAN AND VECMEM_TEST_UBSAN )
    target_compile_options( vecmem_test_sycl PRIVATE "-fsanitize=undefined" )
    target_link_options( vecmem_test_sycl PRIVATE "-fsanitize=undefined" )
 endif()

@@ -32,6 +32,8 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY
 # Flags controlling the meta-build system.
 option( VECMEM_USE_SYSTEM_LIBS "Use system libraries by default" FALSE )
 option( VECMEM_BUILD_TESTING "Build the unit tests of VecMem" TRUE )
+option( VECMEM_TEST_UBSAN "Use the undefined behavior sanitizer for the tests"
+   TRUE )
 
 # Include the VecMem CMake code.
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )

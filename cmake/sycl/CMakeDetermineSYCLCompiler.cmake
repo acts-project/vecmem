@@ -24,16 +24,15 @@ if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
    endif()
 
    # Determine the type and version of the SYCL compiler.
-   execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}" "--version"
-      OUTPUT_VARIABLE _syclVersionOutput
-      ERROR_VARIABLE _syclVersionError
-      RESULT_VARIABLE _syclVersionResult )
-   if( NOT ${_syclVersionResult} EQUAL 0 )
-      execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}"
-                               "--hipsycl-version"
+   foreach( _version_cmdl "--acpp-version" "--version" "--hipsycl-version" )
+      execute_process( COMMAND "${CMAKE_SYCL_COMPILER_INIT}" "${_version_cmdl}"
          OUTPUT_VARIABLE _syclVersionOutput
+         ERROR_VARIABLE _syclVersionError
          RESULT_VARIABLE _syclVersionResult )
-   endif()
+      if( ${_syclVersionResult} EQUAL 0 )
+         break()
+      endif()
+   endforeach()
    if( ${_syclVersionResult} EQUAL 0 )
       if( "${_syclVersionOutput}" MATCHES "ComputeCpp" )
          set( CMAKE_SYCL_COMPILER_ID "ComputeCpp" CACHE STRING
@@ -47,6 +46,10 @@ if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
          set( CMAKE_SYCL_COMPILER_ID "IntelLLVM" CACHE STRING
             "Identifier for the SYCL compiler in use" )
          set( _syclVersionRegex "clang version ([0-9\.]+)" )
+      elseif( "${_syclVersionOutput}" MATCHES "AdaptiveCpp" )
+         set( CMAKE_SYCL_COMPILER_ID "AdaptiveCpp" CACHE STRING
+            "Identifier for the SYCL compiler in use" )
+         set( _syclVersionRegex "AdaptiveCpp version: ([0-9\.]+)" )
       elseif( "${_syclVersionOutput}" MATCHES "hipSYCL" )
          set( CMAKE_SYCL_COMPILER_ID "hipSYCL" CACHE STRING
             "Identifier for the SYCL compiler in use" )
