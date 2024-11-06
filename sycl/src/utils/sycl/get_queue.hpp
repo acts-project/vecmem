@@ -14,11 +14,11 @@
 
 namespace vecmem::sycl::details {
 
-/// Helper function for getting a @c cl::sycl::queue out of
+/// Helper function for getting a @c ::sycl::queue out of
 /// @c vecmem::sycl::queue_wrapper (non-const)
 ::sycl::queue& get_queue(vecmem::sycl::queue_wrapper& queue);
 
-/// Helper function for getting a @c cl::sycl::queue out of
+/// Helper function for getting a @c ::sycl::queue out of
 /// @c vecmem::sycl::queue_wrapper (const)
 const ::sycl::queue& get_queue(const vecmem::sycl::queue_wrapper& queue);
 

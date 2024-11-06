@@ -14,22 +14,21 @@
 
 // SYCL include(s).
 #if defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 #endif
 
 /// Helpers for explicit calls to the SYCL atomic functions
 #if defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
 #define __VECMEM_SYCL_ATOMIC_CALL0(FNAME, PTR) \
-    cl::sycl::atomic_##FNAME<value_type>(      \
-        cl::sycl::atomic<value_type>(cl::sycl::global_ptr<value_type>(PTR)))
-#define __VECMEM_SYCL_ATOMIC_CALL1(FNAME, PTR, ARG1)                         \
-    cl::sycl::atomic_##FNAME<value_type>(                                    \
-        cl::sycl::atomic<value_type>(cl::sycl::global_ptr<value_type>(PTR)), \
-        ARG1)
-#define __VECMEM_SYCL_ATOMIC_CALL2(FNAME, PTR, ARG1, ARG2)                   \
-    cl::sycl::atomic_##FNAME<value_type>(                                    \
-        cl::sycl::atomic<value_type>(cl::sycl::global_ptr<value_type>(PTR)), \
-        ARG1, ARG2)
+    ::sycl::atomic_##FNAME<value_type>(        \
+        ::sycl::atomic<value_type>(::sycl::global_ptr<value_type>(PTR)))
+#define __VECMEM_SYCL_ATOMIC_CALL1(FNAME, PTR, ARG1) \
+    ::sycl::atomic_##FNAME<value_type>(              \
+        ::sycl::atomic<value_type>(::sycl::global_ptr<value_type>(PTR)), ARG1)
+#define __VECMEM_SYCL_ATOMIC_CALL2(FNAME, PTR, ARG1, ARG2)                     \
+    ::sycl::atomic_##FNAME<value_type>(                                        \
+        ::sycl::atomic<value_type>(::sycl::global_ptr<value_type>(PTR)), ARG1, \
+        ARG2)
 #endif
 
 namespace vecmem {

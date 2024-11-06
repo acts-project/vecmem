@@ -41,7 +41,7 @@ set_target_properties( vecmem_sycl PROPERTIES
    CXX_VISIBILITY_PRESET  "hidden"
    SYCL_VISIBILITY_PRESET "hidden" )
 vecmem_check_sycl_source_compiles( "
-   #include <CL/sycl.hpp>
+   #include <sycl/sycl.hpp>
    int main() { return 0; }
    "
    VECMEM_HAVE_SYCL_VISIBILITY_MS_COMPAT
@@ -94,9 +94,9 @@ endif()
 # Check if sycl::queue::memset is available, and set a compiler option
 # accordingly.
 vecmem_check_sycl_source_compiles( "
-   #include <CL/sycl.hpp>
+   #include <sycl/sycl.hpp>
    int main() {
-       cl::sycl::queue queue;
+       ::sycl::queue queue;
        queue.memset(nullptr, 0, 100);
        return 0;
    }

@@ -27,7 +27,7 @@ vecmem_add_test( sycl
 # Add UBSAN for the tests, if it's available.
 check_cxx_compiler_flag( "-fsanitize=undefined" VECMEM_HAVE_UBSAN )
 vecmem_check_sycl_source_compiles( "
-   #include <CL/sycl.hpp>
+   #include <sycl/sycl.hpp>
    int main() { return 0; }
    " VECMEM_HAVE_SYCL_UBSAN
    CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-fsanitize=undefined )

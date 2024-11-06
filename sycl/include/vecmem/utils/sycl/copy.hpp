@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -25,7 +25,7 @@ struct copy_data;
 ///
 /// Unlike @c vecmem::cuda::copy and @c vecmem::hip::copy, this object does
 /// have a state. As USM memory operations in SYCL happen through a
-/// @c cl::sycl::queue object. So this object needs to point to a valid
+/// @c ::sycl::queue object. So this object needs to point to a valid
 /// queue object itself.
 ///
 class copy : public vecmem::copy {
