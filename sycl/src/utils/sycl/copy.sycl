@@ -15,6 +15,7 @@
 #include "vecmem/utils/sycl/copy.hpp"
 
 // System include(s).
+#include <algorithm>
 #include <vector>
 
 namespace vecmem::sycl {
@@ -71,7 +72,9 @@ void copy::do_memset(std::size_t size, void* ptr, int value) const {
         .memset(ptr, value, size)
         .wait_and_throw();
 #else
-    const std::vector<int> dummy(size / sizeof(int) + 1, value);
+    std::vector<int> dummy(size / sizeof(int) + 1);
+    std::fill_n(reinterpret_cast<unsigned char*>(dummy.data()), size,
+                static_cast<unsigned char>(value));
     details::get_queue(m_data->m_queue)
         .memcpy(ptr, dummy.data(), size)
         .wait_and_throw();
