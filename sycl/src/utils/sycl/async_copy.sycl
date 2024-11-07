@@ -7,7 +7,7 @@
  */
 
 // SYCL include(s).
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 // VecMem include(s).
 #include "get_queue.hpp"
@@ -24,7 +24,7 @@ namespace {
 struct sycl_event : public vecmem::abstract_event {
 
     /// Constructor with a SYCL event
-    sycl_event(const std::vector<cl::sycl::event>& events) : m_events(events) {}
+    sycl_event(const std::vector<::sycl::event>& events) : m_events(events) {}
     /// Destructor
     ~sycl_event() {
         // Check if the user forgot to wait on this asynchronous event.
@@ -41,7 +41,7 @@ struct sycl_event : public vecmem::abstract_event {
 
     /// Synchronize on the underlying SYCL event
     virtual void wait() override {
-        cl::sycl::event::wait_and_throw(m_events);
+        ::sycl::event::wait_and_throw(m_events);
         ignore();
     }
 
@@ -49,7 +49,7 @@ struct sycl_event : public vecmem::abstract_event {
     virtual void ignore() override { m_events.clear(); }
 
     /// The managed SYCL event
-    std::vector<cl::sycl::event> m_events;
+    std::vector<::sycl::event> m_events;
 
 };  // struct sycl_event
 
@@ -60,7 +60,7 @@ namespace details {
 
 struct async_copy_data {
     queue_wrapper m_queue;
-    std::vector<cl::sycl::event> m_events;
+    std::vector<::sycl::event> m_events;
 };
 
 }  // namespace details

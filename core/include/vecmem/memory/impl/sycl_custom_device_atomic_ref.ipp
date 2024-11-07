@@ -8,7 +8,7 @@
 #pragma once
 
 // SYCL include(s).
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 namespace vecmem {
 namespace sycl {
@@ -19,43 +19,43 @@ struct custom_address_space {};
 
 template <>
 struct custom_address_space<device_address_space::global> {
-    static constexpr cl::sycl::access::address_space add =
-        cl::sycl::access::address_space::global_space;
+    static constexpr ::sycl::access::address_space add =
+        ::sycl::access::address_space::global_space;
 
     template <typename T>
-    using ptr_t = cl::sycl::global_ptr<T>;
+    using ptr_t = ::sycl::global_ptr<T>;
 };
 
 template <>
 struct custom_address_space<device_address_space::local> {
-    static constexpr cl::sycl::access::address_space add =
-        cl::sycl::access::address_space::local_space;
+    static constexpr ::sycl::access::address_space add =
+        ::sycl::access::address_space::local_space;
     template <typename T>
-    using ptr_t = cl::sycl::local_ptr<T>;
+    using ptr_t = ::sycl::local_ptr<T>;
 };
 
 }  // namespace details
 
 #define __VECMEM_SYCL_ATOMIC_CALL0(FNAME, PTR)                               \
-    cl::sycl::atomic_##FNAME<value_type,                                     \
-                             details::custom_address_space<address>::add>(   \
-        cl::sycl::atomic<value_type,                                         \
-                         details::custom_address_space<address>::add>(       \
+    ::sycl::atomic_##FNAME<value_type,                                       \
+                           details::custom_address_space<address>::add>(     \
+        ::sycl::atomic<value_type,                                           \
+                       details::custom_address_space<address>::add>(         \
             typename details::custom_address_space<address>::template ptr_t< \
                 value_type>(PTR)))
 #define __VECMEM_SYCL_ATOMIC_CALL1(FNAME, PTR, ARG1)                         \
-    cl::sycl::atomic_##FNAME<value_type,                                     \
-                             details::custom_address_space<address>::add>(   \
-        cl::sycl::atomic<value_type,                                         \
-                         details::custom_address_space<address>::add>(       \
+    ::sycl::atomic_##FNAME<value_type,                                       \
+                           details::custom_address_space<address>::add>(     \
+        ::sycl::atomic<value_type,                                           \
+                       details::custom_address_space<address>::add>(         \
             typename details::custom_address_space<address>::template ptr_t< \
                 value_type>(PTR)),                                           \
         ARG1)
 #define __VECMEM_SYCL_ATOMIC_CALL2(FNAME, PTR, ARG1, ARG2)                   \
-    cl::sycl::atomic_##FNAME<value_type,                                     \
-                             details::custom_address_space<address>::add>(   \
-        cl::sycl::atomic<value_type,                                         \
-                         details::custom_address_space<address>::add>(       \
+    ::sycl::atomic_##FNAME<value_type,                                       \
+                           details::custom_address_space<address>::add>(     \
+        ::sycl::atomic<value_type,                                           \
+                       details::custom_address_space<address>::add>(         \
             typename details::custom_address_space<address>::template ptr_t< \
                 value_type>(PTR)),                                           \
         ARG1, ARG2)

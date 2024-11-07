@@ -5,6 +5,9 @@
  * Mozilla Public License Version 2.0
  */
 
+// SYCL include(s).
+#include <sycl/sycl.hpp>
+
 // Local include(s).
 #include "../common/jagged_soa_container.hpp"
 #include "../common/jagged_soa_container_helpers.hpp"
@@ -21,11 +24,8 @@
 // GoogleTest include(s).
 #include <gtest/gtest.h>
 
-// SYCL include(s).
-#include <CL/sycl.hpp>
-
 /// SYCL queue to use in the tests.
-static cl::sycl::queue queue;
+static ::sycl::queue queue;
 
 /// Host memory resource to use in the tests.
 static vecmem::sycl::host_memory_resource sycl_host_mr{&queue};
@@ -41,10 +41,9 @@ static vecmem::sycl::copy sycl_copy{&queue};
 bool syclSimpleFill(vecmem::testing::simple_soa_container::view view) {
 
     queue
-        .submit([&view](cl::sycl::handler& h) {
+        .submit([&view](::sycl::handler& h) {
             h.parallel_for<class edm_simple_fill>(
-                cl::sycl::range<1>{view.capacity()},
-                [view](cl::sycl::id<1> id) {
+                ::sycl::range<1>{view.capacity()}, [view](::sycl::id<1> id) {
                     vecmem::testing::simple_soa_container::device device{view};
                     vecmem::testing::fill(id[0], device);
                 });
@@ -57,15 +56,14 @@ bool syclSimpleFill(vecmem::testing::simple_soa_container::view view) {
 bool syclJaggedFill(vecmem::testing::jagged_soa_container::view view) {
 
     // Skip test if FP64 instructions are not available on the device.
-    if (queue.get_device().has(cl::sycl::aspect::fp64) == false) {
+    if (queue.get_device().has(::sycl::aspect::fp64) == false) {
         return false;
     }
 
     queue
-        .submit([&view](cl::sycl::handler& h) {
+        .submit([&view](::sycl::handler& h) {
             h.parallel_for<class edm_jagged_fill>(
-                cl::sycl::range<1>{view.capacity()},
-                [view](cl::sycl::id<1> id) {
+                ::sycl::range<1>{view.capacity()}, [view](::sycl::id<1> id) {
                     vecmem::testing::jagged_soa_container::device device{view};
                     vecmem::testing::fill(id[0], device);
                 });
@@ -78,10 +76,9 @@ bool syclJaggedFill(vecmem::testing::jagged_soa_container::view view) {
 bool syclSimpleModify(vecmem::testing::simple_soa_container::view view) {
 
     queue
-        .submit([&view](cl::sycl::handler& h) {
+        .submit([&view](::sycl::handler& h) {
             h.parallel_for<class edm_simple_modify>(
-                cl::sycl::range<1>{view.capacity()},
-                [view](cl::sycl::id<1> id) {
+                ::sycl::range<1>{view.capacity()}, [view](::sycl::id<1> id) {
                     vecmem::testing::simple_soa_container::device device{view};
                     vecmem::testing::modify(id[0], device);
                 });
@@ -94,15 +91,14 @@ bool syclSimpleModify(vecmem::testing::simple_soa_container::view view) {
 bool syclJaggedModify(vecmem::testing::jagged_soa_container::view view) {
 
     // Skip test if FP64 instructions are not available on the device.
-    if (queue.get_device().has(cl::sycl::aspect::fp64) == false) {
+    if (queue.get_device().has(::sycl::aspect::fp64) == false) {
         return false;
     }
 
     queue
-        .submit([&view](cl::sycl::handler& h) {
+        .submit([&view](::sycl::handler& h) {
             h.parallel_for<class edm_jagged_modify>(
-                cl::sycl::range<1>{view.capacity()},
-                [view](cl::sycl::id<1> id) {
+                ::sycl::range<1>{view.capacity()}, [view](::sycl::id<1> id) {
                     vecmem::testing::jagged_soa_container::device device{view};
                     vecmem::testing::modify(id[0], device);
                 });

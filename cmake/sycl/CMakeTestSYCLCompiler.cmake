@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -17,7 +17,7 @@ endif()
 # Try to use the HIP compiler.
 file( WRITE
    "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.sycl"
-   "#include <CL/sycl.hpp>\n"
+   "#include <sycl/sycl.hpp>\n"
    "int main() {\n"
    "#if (!defined(CL_SYCL_LANGUAGE_VERSION)) &&"
    "    (!defined(SYCL_LANGUAGE_VERSION))\n"

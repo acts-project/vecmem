@@ -11,7 +11,7 @@
 #include "vecmem/memory/device_address_space.hpp"
 
 // SYCL include(s).
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 namespace vecmem {
 namespace sycl {
@@ -27,23 +27,20 @@ struct builtin_address_space {};
 /// Specialization for global device memory
 template <>
 struct builtin_address_space<device_address_space::global> {
-    static constexpr cl::sycl::memory_order ord =
-        cl::sycl::memory_order::relaxed;
-    static constexpr cl::sycl::memory_scope scp =
-        cl::sycl::memory_scope::device;
-    static constexpr cl::sycl::access::address_space add =
-        cl::sycl::access::address_space::global_space;
+    static constexpr ::sycl::memory_order ord = ::sycl::memory_order::relaxed;
+    static constexpr ::sycl::memory_scope scp = ::sycl::memory_scope::device;
+    static constexpr ::sycl::access::address_space add =
+        ::sycl::access::address_space::global_space;
 };
 
 /// Specialization for local device memory
 template <>
 struct builtin_address_space<device_address_space::local> {
-    static constexpr cl::sycl::memory_order ord =
-        cl::sycl::memory_order::relaxed;
-    static constexpr cl::sycl::memory_scope scp =
-        cl::sycl::memory_scope::work_group;
-    static constexpr cl::sycl::access::address_space add =
-        cl::sycl::access::address_space::local_space;
+    static constexpr ::sycl::memory_order ord = ::sycl::memory_order::relaxed;
+    static constexpr ::sycl::memory_scope scp =
+        ::sycl::memory_scope::work_group;
+    static constexpr ::sycl::access::address_space add =
+        ::sycl::access::address_space::local_space;
 };
 
 }  // namespace details
@@ -52,9 +49,9 @@ struct builtin_address_space<device_address_space::local> {
 template <typename T,
           device_address_space address = device_address_space::global>
 using builtin_device_atomic_ref =
-    cl::sycl::atomic_ref<T, details::builtin_address_space<address>::ord,
-                         details::builtin_address_space<address>::scp,
-                         details::builtin_address_space<address>::add>;
+    ::sycl::atomic_ref<T, details::builtin_address_space<address>::ord,
+                       details::builtin_address_space<address>::scp,
+                       details::builtin_address_space<address>::add>;
 
 }  // namespace sycl
 }  // namespace vecmem

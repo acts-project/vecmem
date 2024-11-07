@@ -73,7 +73,7 @@ device<schema<VARTYPES...>, INTERFACE>::push_back_default() -> size_type {
     // Increment the size of the container at first. So that we would "claim"
     // the index from other threads.
     device_atomic_ref<size_type> asize(*m_size);
-    const size_type index = asize.fetch_add(1);
+    const size_type index = asize.fetch_add(1u);
     assert(index < m_capacity);
 
     // Construct the new elements in all of the vector variables.

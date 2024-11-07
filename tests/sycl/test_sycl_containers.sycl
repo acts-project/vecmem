@@ -6,7 +6,7 @@
  */
 
 // SYCL include(s).
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 // Local include(s).
 #include "vecmem/containers/array.hpp"
@@ -37,7 +37,7 @@ class sycl_containers_test : public testing::Test {};
 TEST_F(sycl_containers_test, shared_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // The shared memory resource.
     vecmem::sycl::shared_memory_resource resource(&queue);
@@ -54,13 +54,13 @@ TEST_F(sycl_containers_test, shared_memory) {
 
     // Perform a linear transformation using the vecmem vector helper types.
     queue
-        .submit([&constants, &inputvec, &outputvec](cl::sycl::handler& h) {
+        .submit([&constants, &inputvec, &outputvec](::sycl::handler& h) {
             // Run the kernel.
             h.parallel_for<class LinearTransform1>(
-                cl::sycl::range<1>(inputvec.size()),
+                ::sycl::range<1>(inputvec.size()),
                 [constants = vecmem::get_data(constants),
                  input = vecmem::get_data(inputvec),
-                 output = vecmem::get_data(outputvec)](cl::sycl::id<1> id) {
+                 output = vecmem::get_data(outputvec)](::sycl::id<1> id) {
                     // Skip invalid indices.
                     const vecmem::device_vector<int>::size_type i =
                         static_cast<vecmem::device_vector<int>::size_type>(
@@ -102,7 +102,7 @@ TEST_F(sycl_containers_test, shared_memory) {
 TEST_F(sycl_containers_test, device_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // The memory resources.
     vecmem::sycl::host_memory_resource host_resource(&queue);
@@ -139,14 +139,13 @@ TEST_F(sycl_containers_test, device_memory) {
     // Perform a linear transformation using the vecmem vector helper types.
     queue
         .submit([&const_data, &input_data,
-                 &outputvecdevice](cl::sycl::handler& h) {
+                 &outputvecdevice](::sycl::handler& h) {
             // Run the kernel.
             h.parallel_for<class LinearTransform2>(
-                cl::sycl::range<1>(input_data.size()),
+                ::sycl::range<1>(input_data.size()),
                 [constants = vecmem::get_data(const_data),
                  input = vecmem::get_data(input_data),
-                 output =
-                     vecmem::get_data(outputvecdevice)](cl::sycl::id<1> id) {
+                 output = vecmem::get_data(outputvecdevice)](::sycl::id<1> id) {
                     // Skip invalid indices.
                     const vecmem::device_vector<int>::size_type i =
                         static_cast<vecmem::device_vector<int>::size_type>(
@@ -185,7 +184,7 @@ TEST_F(sycl_containers_test, device_memory) {
 TEST_F(sycl_containers_test, atomic_shared_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // The memory resources.
     vecmem::sycl::shared_memory_resource resource(&queue);
@@ -198,10 +197,10 @@ TEST_F(sycl_containers_test, atomic_shared_memory) {
 
     // Do very basic atomic modifications on the buffer.
     queue
-        .submit([&buffer](cl::sycl::handler& h) {
+        .submit([&buffer](::sycl::handler& h) {
             h.parallel_for<class AtomicSharedTests>(
-                cl::sycl::range<1>(buffer.size() * ITERATIONS),
-                [buffer = vecmem::get_data(buffer)](cl::sycl::item<1> id) {
+                ::sycl::range<1>(buffer.size() * ITERATIONS),
+                [buffer = vecmem::get_data(buffer)](::sycl::item<1> id) {
                     // Check if anything needs to be done.
                     const std::size_t i = id[0];
                     if (i >= buffer.size() * ITERATIONS) {
@@ -216,7 +215,7 @@ TEST_F(sycl_containers_test, atomic_shared_memory) {
                     vecmem::atomic<int> a(ptr);
                     a.fetch_add(4);
                     a.fetch_sub(2);
-                    a.fetch_and(0xffffffff);
+                    a.fetch_and(0x7fffffff);
                     a.fetch_or(0x00000000);
 
                     // Do the same simple stuff with it using
@@ -224,7 +223,7 @@ TEST_F(sycl_containers_test, atomic_shared_memory) {
                     vecmem::device_atomic_ref<int> a2(*ptr);
                     a2.fetch_add(4);
                     a2.fetch_sub(2);
-                    a2.fetch_and(0xffffffff);
+                    a2.fetch_and(0x7fffffff);
                     a2.fetch_or(0x00000000);
                 });
         })
@@ -240,7 +239,7 @@ TEST_F(sycl_containers_test, atomic_shared_memory) {
 TEST_F(sycl_containers_test, atomic_device_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // The memory resources.
     vecmem::sycl::host_memory_resource host_resource(&queue);
@@ -261,11 +260,10 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
 
     // Do very basic atomic modifications on the buffer.
     queue
-        .submit([&device_buffer](cl::sycl::handler& h) {
+        .submit([&device_buffer](::sycl::handler& h) {
             h.parallel_for<class AtomicDeviceTests>(
-                cl::sycl::range<1>(device_buffer.size() * ITERATIONS),
-                [buffer =
-                     vecmem::get_data(device_buffer)](cl::sycl::item<1> id) {
+                ::sycl::range<1>(device_buffer.size() * ITERATIONS),
+                [buffer = vecmem::get_data(device_buffer)](::sycl::item<1> id) {
                     // Check if anything needs to be done.
                     const std::size_t i = id[0];
                     if (i >= buffer.size() * ITERATIONS) {
@@ -280,7 +278,7 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
                     vecmem::atomic<int> a(ptr);
                     a.fetch_add(4);
                     a.fetch_sub(2);
-                    a.fetch_and(0xffffffff);
+                    a.fetch_and(0x7fffffff);
                     a.fetch_or(0x00000000);
 
                     // Do the same simple stuff with it using
@@ -288,7 +286,7 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
                     vecmem::device_atomic_ref<int> a2(*ptr);
                     a2.fetch_add(4);
                     a2.fetch_sub(2);
-                    a2.fetch_and(0xffffffff);
+                    a2.fetch_and(0x7fffffff);
                     a2.fetch_or(0x00000000);
                 });
         })
@@ -307,11 +305,11 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
 TEST_F(sycl_containers_test, atomic_local_ref) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // Skip test if not running on a gpu.
-    if (queue.get_device().get_info<cl::sycl::info::device::device_type>() !=
-        cl::sycl::info::device_type::gpu) {
+    if (queue.get_device().get_info<::sycl::info::device::device_type>() !=
+        ::sycl::info::device_type::gpu) {
         GTEST_SKIP();
     }
 
@@ -337,13 +335,13 @@ TEST_F(sycl_containers_test, atomic_local_ref) {
 
     // Do basic atomic addition on local memory.
     queue
-        .submit([&device_buffer](cl::sycl::handler& h) {
+        .submit([&device_buffer](::sycl::handler& h) {
             vecmem::sycl::local_accessor<int> shared(1, h);
 
             h.parallel_for<class AtomicLocalRefTests>(
-                cl::sycl::nd_range<1>(BLOCKSIZE * NUMBLOCKS, BLOCKSIZE),
+                ::sycl::nd_range<1>(BLOCKSIZE * NUMBLOCKS, BLOCKSIZE),
                 [buffer = vecmem::get_data(device_buffer),
-                 shared](cl::sycl::nd_item<1> item) {
+                 shared](::sycl::nd_item<1> item) {
                     // Do simple stuff using local atomic ref
                     const int i = item.get_group_linear_id();
 
@@ -359,7 +357,7 @@ TEST_F(sycl_containers_test, atomic_local_ref) {
                         atom(shared[0]);
                     atom.fetch_add(2 * i);
                     atom.fetch_sub(i);
-                    atom.fetch_and(0xffffffff);
+                    atom.fetch_and(0x7fffffff);
                     atom.fetch_or(0x00000000);
 
                     // Wait for work to be done
@@ -387,7 +385,7 @@ TEST_F(sycl_containers_test, atomic_local_ref) {
 TEST_F(sycl_containers_test, extendable_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // The memory resources.
     vecmem::sycl::host_memory_resource host_resource(&queue);
@@ -411,12 +409,11 @@ TEST_F(sycl_containers_test, extendable_memory) {
 
     // Run a kernel that filters the elements of the input vector.
     queue
-        .submit([&input, &output_buffer](cl::sycl::handler& h) {
+        .submit([&input, &output_buffer](::sycl::handler& h) {
             h.parallel_for<class FilterTests>(
-                cl::sycl::range<1>(input.size()),
+                ::sycl::range<1>(input.size()),
                 [input = vecmem::get_data(input),
-                 output =
-                     vecmem::get_data(output_buffer)](cl::sycl::item<1> id) {
+                 output = vecmem::get_data(output_buffer)](::sycl::item<1> id) {
                     // Check if anything needs to be done.
                     const vecmem::device_vector<int>::size_type i =
                         static_cast<vecmem::device_vector<int>::size_type>(
@@ -453,7 +450,7 @@ TEST_F(sycl_containers_test, extendable_memory) {
 TEST_F(sycl_containers_test, array_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // The memory resource(s).
     vecmem::sycl::shared_memory_resource shared_resource(&queue);
@@ -473,10 +470,9 @@ TEST_F(sycl_containers_test, array_memory) {
     // Run a kernel on it that multiplies each element in the array of vectors
     // by 2.
     queue
-        .submit([&vec_data](cl::sycl::handler& h) {
+        .submit([&vec_data](::sycl::handler& h) {
             h.parallel_for<class ArrayVecTest>(
-                cl::sycl::range<2>(4, 4),
-                [data = vec_data](cl::sycl::item<2> id) {
+                ::sycl::range<2>(4, 4), [data = vec_data](::sycl::item<2> id) {
                     // Check if anything needs to be done.
                     if (id[0] >= data.size()) {
                         return;
@@ -515,7 +511,7 @@ TEST_F(sycl_containers_test, array_memory) {
 TEST_F(sycl_containers_test, large_buffer) {
 
     // Create the SYCL queue that we'll be using in the test.
-    cl::sycl::queue queue;
+    ::sycl::queue queue;
 
     // The memory resource(s).
     vecmem::sycl::shared_memory_resource shared_resource{&queue};
@@ -530,10 +526,10 @@ TEST_F(sycl_containers_test, large_buffer) {
 
     // Run a kernel that enlarges the (1D) buffer.
     queue
-        .submit([&buffer1](cl::sycl::handler& h) {
+        .submit([&buffer1](::sycl::handler& h) {
             h.parallel_for<class BufferResize>(
-                cl::sycl::range<1>(1),
-                [data = vecmem::get_data(buffer1)](cl::sycl::item<1> id) {
+                ::sycl::range<1>(1),
+                [data = vecmem::get_data(buffer1)](::sycl::item<1> id) {
                     // Check if anything needs to be done.
                     if (id[0] != 0) {
                         return;
@@ -562,10 +558,10 @@ TEST_F(sycl_containers_test, large_buffer) {
 
     // Run a kernel that enlarges the (jagged) buffer.
     queue
-        .submit([&buffer2](cl::sycl::handler& h) {
+        .submit([&buffer2](::sycl::handler& h) {
             h.parallel_for<class JaggedBufferResize>(
-                cl::sycl::range<1>(1),
-                [data = vecmem::get_data(buffer2)](cl::sycl::item<1> id) {
+                ::sycl::range<1>(1),
+                [data = vecmem::get_data(buffer2)](::sycl::item<1> id) {
                     // Check if anything needs to be done.
                     if (id[0] != 0) {
                         return;

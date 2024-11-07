@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -197,7 +197,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::emplace_back(Args&&... args)
     // Increment the size of the vector at first. So that we would "claim" the
     // index from other threads.
     device_atomic_ref<size_type> asize(*m_size);
-    const size_type index = asize.fetch_add(1);
+    const size_type index = asize.fetch_add(1u);
     assert(index < m_capacity);
 
     // Instantiate the new value.
@@ -217,7 +217,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::push_back(
     // Increment the size of the vector at first. So that we would "claim" the
     // index from other threads.
     device_atomic_ref<size_type> asize(*m_size);
-    const size_type index = asize.fetch_add(1);
+    const size_type index = asize.fetch_add(1u);
     assert(index < m_capacity);
 
     // Instantiate the new value.
@@ -315,7 +315,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::pop_back() -> size_type {
 
     // Decrement the size of the vector, and remember this new size.
     device_atomic_ref<size_type> asize(*m_size);
-    const size_type new_size = asize.fetch_sub(1) - 1;
+    const size_type new_size = asize.fetch_sub(1u) - 1;
 
     // Remove the last element.
     destruct(new_size);

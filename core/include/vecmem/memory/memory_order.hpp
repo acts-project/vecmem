@@ -14,7 +14,7 @@
 #if (defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)) && \
     defined(VECMEM_HAVE_SYCL_ATOMIC_REF)
 // SYCL include(s).
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 #endif
 
 namespace vecmem {
