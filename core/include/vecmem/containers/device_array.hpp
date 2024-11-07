@@ -61,12 +61,12 @@ public:
 
     /// Constructor, on top of a previously allocated/filled block of memory
     VECMEM_HOST_AND_DEVICE
-    device_array(const data::vector_view<value_type>& data);
+    explicit device_array(const data::vector_view<value_type>& data);
     /// Construct a const device array from a non-const data object
     template <
         typename OTHERTYPE,
         std::enable_if_t<details::is_same_nc<T, OTHERTYPE>::value, bool> = true>
-    VECMEM_HOST_AND_DEVICE device_array(
+    VECMEM_HOST_AND_DEVICE explicit device_array(
         const data::vector_view<OTHERTYPE>& data);
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE

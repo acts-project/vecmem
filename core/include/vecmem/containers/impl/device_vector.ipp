@@ -29,20 +29,6 @@ VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
 }
 
 template <typename TYPE>
-template <typename OTHERTYPE,
-          std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value, bool> >
-VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
-    const data::vector_view<OTHERTYPE>& data)
-    : m_capacity(data.capacity()), m_size(data.size_ptr()), m_ptr(data.ptr()) {
-
-    VECMEM_DEBUG_MSG(5,
-                     "Created vecmem::device_vector with capacity %u and "
-                     "size pointer %p from pointer %p",
-                     m_capacity, static_cast<const void*>(m_size),
-                     static_cast<const void*>(m_ptr));
-}
-
-template <typename TYPE>
 VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
     const device_vector& parent)
     : m_capacity(parent.m_capacity),

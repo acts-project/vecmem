@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -66,11 +66,14 @@ struct tuple<T, Ts...> {
     /// @param head The first element to be stored in the tuple
     /// @param tail The rest of the elements to be stored in the tuple
     ///
-    template <typename U, typename... Us,
-              std::enable_if_t<vecmem::details::conjunction<
-                                   std::is_constructible<T, U &&>,
-                                   std::is_constructible<Ts, Us &&>...>::value,
-                               bool> = true>
+    template <
+        typename U, typename... Us,
+        std::enable_if_t<
+            vecmem::details::conjunction<
+                vecmem::details::negation<std::is_same<tuple<T, Ts...>, U>>,
+                std::is_constructible<T, U &&>,
+                std::is_constructible<Ts, Us &&>...>::value,
+            bool> = true>
     VECMEM_HOST_AND_DEVICE constexpr tuple(U &&head, Us &&... tail)
         : m_head(std::forward<U>(head)), m_tail(std::forward<Us>(tail)...) {}
 

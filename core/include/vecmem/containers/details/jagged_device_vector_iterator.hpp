@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -40,7 +40,7 @@ public:
     /// Type of the data object that we have an array of
     typedef data::vector_view<TYPE> data_type;
     /// Pointer to the data object
-    typedef const data_type* data_pointer;
+    typedef std::add_pointer_t<std::add_const_t<data_type>> data_pointer;
 
     /// @}
 
@@ -70,7 +70,7 @@ public:
         /// the existence of this type as possible.
         ///
         VECMEM_HOST_AND_DEVICE
-        pointer(const data_pointer data);
+        explicit pointer(const data_pointer data);
 
         /// Return a pointer to a device vector (non-const)
         VECMEM_HOST_AND_DEVICE
@@ -92,7 +92,7 @@ public:
     jagged_device_vector_iterator();
     /// Constructor from an underlying data object
     VECMEM_HOST_AND_DEVICE
-    jagged_device_vector_iterator(data_pointer data);
+    explicit jagged_device_vector_iterator(data_pointer data);
     /// Constructor from a slightly different underlying data object
     template <typename OTHERTYPE,
               std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value,
@@ -189,7 +189,7 @@ namespace std {
 /// of @c vecmem::details::jagged_device_vector_iterator.
 ///
 template <typename T>
-struct iterator_traits<vecmem::details::jagged_device_vector_iterator<T> > {
+struct iterator_traits<vecmem::details::jagged_device_vector_iterator<T>> {
     typedef
         typename vecmem::details::jagged_device_vector_iterator<T>::value_type
             value_type;
