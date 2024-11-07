@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -89,7 +89,7 @@ public:
     /// Can only be used if the user chose a non-default value for the size
     /// template parameter.
     ///
-    array(memory_resource& resource);
+    explicit array(memory_resource& resource);
 
     /// Constructor with a size and a memory resource to use
     ///

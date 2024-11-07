@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -77,7 +77,8 @@ public:
     static_vector();
     /// Construct a vector with a specific size
     VECMEM_HOST_AND_DEVICE
-    static_vector(size_type size, const_reference value = value_type());
+    explicit static_vector(size_type size,
+                           const_reference value = value_type());
     /// Construct a vector with values coming from a pair of iterators
     template <
         typename InputIt,

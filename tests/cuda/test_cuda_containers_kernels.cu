@@ -270,8 +270,11 @@ __global__ void arrayTransformKernel(
     }
 
     // Create the "device type".
-    vecmem::static_array<vecmem::device_vector<int>, 4> vec{data[0], data[1],
-                                                            data[2], data[3]};
+    vecmem::static_array<vecmem::device_vector<int>, 4> vec{
+        vecmem::device_vector<int>{data[0]},
+        vecmem::device_vector<int>{data[1]},
+        vecmem::device_vector<int>{data[2]},
+        vecmem::device_vector<int>{data[3]}};
 
     // Perform the transformation.
     vec[i][j] *= 2;

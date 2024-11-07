@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -78,13 +78,7 @@ public:
 
     /// Constructor, on top of a previously allocated/filled block of memory
     VECMEM_HOST_AND_DEVICE
-    device_vector(const data::vector_view<value_type>& data);
-    /// Construct a const device vector from a non-const data object
-    template <typename OTHERTYPE,
-              std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value,
-                               bool> = true>
-    VECMEM_HOST_AND_DEVICE device_vector(
-        const data::vector_view<OTHERTYPE>& data);
+    explicit device_vector(const data::vector_view<value_type>& data);
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE
     device_vector(const device_vector& parent);

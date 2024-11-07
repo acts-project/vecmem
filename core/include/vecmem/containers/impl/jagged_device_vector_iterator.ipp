@@ -85,21 +85,21 @@ template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto jagged_device_vector_iterator<TYPE>::operator*()
     const -> reference {
 
-    return *m_ptr;
+    return reference{*m_ptr};
 }
 
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto
 jagged_device_vector_iterator<TYPE>::operator->() const -> pointer {
 
-    return m_ptr;
+    return pointer{m_ptr};
 }
 
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto jagged_device_vector_iterator<TYPE>::operator[](
     difference_type n) const -> reference {
 
-    return *(*this + n);
+    return reference{*(*this + n)};
 }
 
 template <typename TYPE>

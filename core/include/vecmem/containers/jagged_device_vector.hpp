@@ -78,7 +78,7 @@ public:
      * object.
      */
     VECMEM_HOST_AND_DEVICE
-    jagged_device_vector(data::jagged_vector_view<T> data);
+    explicit jagged_device_vector(data::jagged_vector_view<T> data);
 
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE

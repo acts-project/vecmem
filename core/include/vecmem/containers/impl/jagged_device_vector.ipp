@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -49,7 +49,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::at(size_type pos)
     assert(pos < m_size);
 
     // Return a reference to the vector element.
-    return m_ptr[pos];
+    return reference{m_ptr[pos]};
 }
 
 template <typename T>
@@ -60,7 +60,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::at(size_type pos) const
     assert(pos < m_size);
 
     // Return a reference to the vector element.
-    return m_ptr[pos];
+    return const_reference{m_ptr[pos]};
 }
 
 template <typename T>
@@ -68,7 +68,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::operator[](size_type pos)
     -> reference {
 
     // Return a reference to the vector element.
-    return m_ptr[pos];
+    return reference{m_ptr[pos]};
 }
 
 template <typename T>
@@ -76,7 +76,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::operator[](
     size_type pos) const -> const_reference {
 
     // Return a reference to the vector element.
-    return m_ptr[pos];
+    return const_reference{m_ptr[pos]};
 }
 
 template <typename T>
@@ -86,7 +86,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::front() -> reference {
     assert(m_size > 0);
 
     // Return a reference to the first element of the vector.
-    return m_ptr[0];
+    return reference{m_ptr[0]};
 }
 
 template <typename T>
@@ -97,7 +97,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::front() const
     assert(m_size > 0);
 
     // Return a reference to the first element of the vector.
-    return m_ptr[0];
+    return const_reference{m_ptr[0]};
 }
 
 template <typename T>
@@ -107,7 +107,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::back() -> reference {
     assert(m_size > 0);
 
     // Return a reference to the last element of the vector.
-    return m_ptr[m_size - 1];
+    return reference{m_ptr[m_size - 1]};
 }
 
 template <typename T>
@@ -118,7 +118,7 @@ VECMEM_HOST_AND_DEVICE auto jagged_device_vector<T>::back() const
     assert(m_size > 0);
 
     // Return a reference to the last element of the vector.
-    return m_ptr[m_size - 1];
+    return const_reference{m_ptr[m_size - 1]};
 }
 
 template <typename T>
