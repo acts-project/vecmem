@@ -15,6 +15,7 @@
 #include "vecmem/utils/sycl/async_copy.hpp"
 
 // System include(s).
+#include <algorithm>
 #include <exception>
 #include <vector>
 
@@ -111,7 +112,9 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
     // We can not perform this operation asynchronously, since the data used
     // in the copy only exists as long as this function is executing. So we
     // don't record this event, but rather wait it out right here.
-    const std::vector<int> dummy(size / sizeof(int) + 1, value);
+    std::vector<int> dummy(size / sizeof(int) + 1);
+    std::fill_n(reinterpret_cast<unsigned char*>(dummy.data()), size,
+                static_cast<unsigned char>(value));
     details::get_queue(m_data->m_queue)
         .memcpy(ptr, dummy.data(), size)
         .wait_and_throw();
