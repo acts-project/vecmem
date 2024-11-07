@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022-2023 CERN for the benefit of the ACTS project
+ * (c) 2022-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -44,7 +44,7 @@ namespace details {
  */
 template <typename T, typename... Ts, typename P, typename... Ps>
 std::tuple<std::add_pointer_t<T>, std::add_pointer_t<Ts>...>
-aligned_multiple_placement_helper(void *p, std::size_t q, P n, Ps... ps) {
+aligned_multiple_placement_helper(void *p, std::size_t q, P n, Ps &&... ps) {
     /*
      * We start out by calculating the size of the current region.
      */
@@ -134,7 +134,7 @@ aligned_multiple_placement_helper(void *p, std::size_t q, P n, Ps... ps) {
 
 template <typename... Ts, typename... Ps>
 std::tuple<vecmem::unique_alloc_ptr<char[]>, std::add_pointer_t<Ts>...>
-aligned_multiple_placement(vecmem::memory_resource &r, Ps... ps) {
+aligned_multiple_placement(vecmem::memory_resource &r, Ps &&... ps) {
     /*
      * First, we will assert that we have exactly as many template arguments as
      * we have positional arguments, barring the memory resource. This is very
