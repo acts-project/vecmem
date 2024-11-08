@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -9,8 +9,7 @@
 #include "../../cuda/src/utils/cuda_error_handling.hpp"
 #include "../../cuda/src/utils/cuda_wrappers.hpp"
 #include "test_cuda_containers_kernels.cuh"
-#include "vecmem/containers/const_device_array.hpp"
-#include "vecmem/containers/const_device_vector.hpp"
+#include "vecmem/containers/device_array.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/containers/static_array.hpp"
@@ -34,12 +33,12 @@ __global__ void linearTransformKernel(
     }
 
     // Create the helper containers.
-    const vecmem::const_device_array<int, 2> constantarray1(constants);
+    const vecmem::device_array<const int, 2> constantarray1(constants);
     const vecmem::static_array<int, 2> constantarray2 = {constantarray1[0],
                                                          constantarray1[1]};
     auto tuple1 = vecmem::make_tuple(constantarray1[0], constantarray1[1]);
     auto tuple2 = vecmem::tie(constantarray1, constantarray2);
-    const vecmem::const_device_vector<int> inputvec(input);
+    const vecmem::device_vector<const int> inputvec(input);
     vecmem::device_vector<int> outputvec(output);
 
     // Perform the linear transformation.
@@ -166,7 +165,7 @@ __global__ void filterTransformKernel(
     }
 
     // Set up the vector objects.
-    const vecmem::const_device_vector<int> inputvec(input);
+    const vecmem::device_vector<const int> inputvec(input);
     vecmem::device_vector<int> outputvec(output);
 
     // Add this thread's element, if it passes the selection.
