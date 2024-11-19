@@ -1,14 +1,12 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 
 // Local include(s).
 #include "vecmem/containers/array.hpp"
-#include "vecmem/containers/const_device_array.hpp"
-#include "vecmem/containers/const_device_vector.hpp"
 #include "vecmem/containers/device_array.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/static_array.hpp"
@@ -38,7 +36,7 @@ protected:
 /// Test(s) for @c vecmem::const_device_vector
 TEST_F(core_container_test, const_device_vector) {
 
-    const vecmem::const_device_vector<int> test_vector(
+    const vecmem::device_vector<const int> test_vector(
         vecmem::get_data(m_reference_vector));
     EXPECT_EQ(test_vector.size(), m_reference_vector.size());
     EXPECT_EQ(test_vector.empty(), m_reference_vector.empty());
@@ -47,8 +45,8 @@ TEST_F(core_container_test, const_device_vector) {
     EXPECT_EQ(std::accumulate(test_vector.begin(), test_vector.end(), 0),
               std::accumulate(test_vector.rbegin(), test_vector.rend(), 0));
     for (std::size_t i = 0; i < m_reference_vector.size(); ++i) {
-        const vecmem::const_device_vector<int>::size_type ii =
-            static_cast<vecmem::const_device_vector<int>::size_type>(i);
+        const vecmem::device_vector<const int>::size_type ii =
+            static_cast<vecmem::device_vector<const int>::size_type>(i);
         EXPECT_EQ(test_vector.at(ii), m_reference_vector.at(i));
         EXPECT_EQ(test_vector[ii], m_reference_vector[i]);
     }
@@ -66,8 +64,8 @@ TEST_F(core_container_test, device_vector) {
     EXPECT_EQ(std::accumulate(test_vector.begin(), test_vector.end(), 0),
               std::accumulate(test_vector.rbegin(), test_vector.rend(), 0));
     for (std::size_t i = 0; i < m_reference_vector.size(); ++i) {
-        const vecmem::const_device_vector<int>::size_type ii =
-            static_cast<vecmem::const_device_vector<int>::size_type>(i);
+        const vecmem::device_vector<int>::size_type ii =
+            static_cast<vecmem::device_vector<int>::size_type>(i);
         EXPECT_EQ(test_vector.at(ii), m_reference_vector.at(i));
         EXPECT_EQ(test_vector[ii], m_reference_vector[i]);
     }
@@ -97,7 +95,7 @@ TEST_F(core_container_test, array) {
 /// Test(s) for @c vecmem::const_device_array
 TEST_F(core_container_test, const_device_array) {
 
-    const vecmem::const_device_array<int, 9> test_array(
+    const vecmem::device_array<const int, 9> test_array(
         vecmem::get_data(m_reference_vector));
     EXPECT_EQ(test_array.size(), m_reference_vector.size());
     EXPECT_EQ(test_array.empty(), m_reference_vector.empty());

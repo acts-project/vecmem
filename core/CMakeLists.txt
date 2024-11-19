@@ -13,8 +13,6 @@ vecmem_add_library( vecmem_core core
    # STL mimicking containers.
    "include/vecmem/containers/array.hpp"
    "include/vecmem/containers/impl/array.ipp"
-   "include/vecmem/containers/const_device_array.hpp"
-   "include/vecmem/containers/const_device_vector.hpp"
    "include/vecmem/containers/device_array.hpp"
    "include/vecmem/containers/impl/device_array.ipp"
    "include/vecmem/containers/device_vector.hpp"
