@@ -11,6 +11,7 @@
 #include "vecmem/edm/details/schema_traits.hpp"
 
 // System include(s).
+#include <string>
 #include <tuple>
 #include <type_traits>
 
