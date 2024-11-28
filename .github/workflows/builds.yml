@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2023 CERN for the benefit of the ACTS project
+# (c) 2021-2024 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -104,15 +104,15 @@ jobs:
             NOTES:
             RUN_TESTS: false
           - NAME: "CUDA"
-            CONTAINER: "ghcr.io/acts-project/ubuntu1804_cuda:v43"
-            CONTAINER_NAME: "Ubuntu 18.04"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:51"
+            CONTAINER_NAME: "Ubuntu 20.04"
             CXX_STANDARD: "17"
             OPTIONS: -DCMAKE_CUDA_STANDARD=14
             NOTES: CUDA C++14
             RUN_TESTS: false
           - NAME: "HIP"
-            CONTAINER: "ghcr.io/acts-project/ubuntu1804_rocm:v43"
-            CONTAINER_NAME: "Ubuntu 18.04"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_rocm:51"
+            CONTAINER_NAME: "Ubuntu 20.04"
             CXX_STANDARD: "17"
             OPTIONS: -DCMAKE_HIP_STANDARD=14
             NOTES: HIP C++14
@@ -174,7 +174,7 @@ jobs:
     # The build/test steps to execute.
     steps:
     # Use a standard checkout of the code.
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     # Run the CMake configuration.
     - name: Configure
       run: |
