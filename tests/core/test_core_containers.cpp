@@ -71,6 +71,35 @@ TEST_F(core_container_test, device_vector) {
     }
 }
 
+/// Test(s) for @c vecmem::device_vector
+TEST_F(core_container_test, device_vector_iterators) {
+
+    using V = vecmem::device_vector<int>;
+    V test_vector(vecmem::get_data(m_reference_vector));
+
+    V::const_iterator itfc1 = test_vector.cbegin();
+    V::const_iterator itfc2 = test_vector.cend();
+    V::iterator itfn1 = test_vector.begin();
+    V::iterator itfn2 = test_vector.end();
+    V::const_reverse_iterator itrc1 = test_vector.crbegin();
+    V::const_reverse_iterator itrc2 = test_vector.crend();
+    V::reverse_iterator itrn1 = test_vector.rbegin();
+    V::reverse_iterator itrn2 = test_vector.rend();
+
+    EXPECT_EQ(itfn1, itfc1);
+    EXPECT_EQ(itfc1, itfn1);
+    EXPECT_NE(itfn2, itfc1);
+    EXPECT_NE(itfc1, itfn2);
+    EXPECT_EQ(itrn1, itrc1);
+    EXPECT_EQ(itrc1, itrn1);
+    EXPECT_NE(itrn2, itrc1);
+    EXPECT_NE(itrc1, itrn2);
+    EXPECT_EQ(itfc2, itfn2);
+    EXPECT_NE(itfc2, itfn1);
+    EXPECT_EQ(itrc2, itrn2);
+    EXPECT_NE(itrc2, itrn1);
+}
+
 /// Test(s) for @c vecmem::static_vector
 TEST_F(core_container_test, static_vector) {
 

@@ -157,16 +157,16 @@ reverse_iterator<Iterator>::to_pointer(T itr) {
     return itr.operator->();
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE bool operator==(const reverse_iterator<T>& itr1,
-                                       const reverse_iterator<T>& itr2) {
+template <typename T1, typename T2>
+VECMEM_HOST_AND_DEVICE bool operator==(const reverse_iterator<T1>& itr1,
+                                       const reverse_iterator<T2>& itr2) {
 
     return (itr1.base() == itr2.base());
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE bool operator!=(const reverse_iterator<T>& itr1,
-                                       const reverse_iterator<T>& itr2) {
+template <typename T1, typename T2>
+VECMEM_HOST_AND_DEVICE bool operator!=(const reverse_iterator<T1>& itr1,
+                                       const reverse_iterator<T2>& itr2) {
 
     return !(itr1 == itr2);
 }
