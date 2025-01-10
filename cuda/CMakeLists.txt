@@ -36,9 +36,7 @@ vecmem_add_library( vecmem_cuda cuda
    "src/utils/select_device.hpp"
    "src/utils/select_device.cpp"
    "include/vecmem/utils/cuda/stream_wrapper.hpp"
-   "src/utils/stream_wrapper.cpp"
-   "src/utils/opaque_stream.hpp"
-   "src/utils/opaque_stream.cpp" )
+   "src/utils/stream_wrapper.cpp" )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )

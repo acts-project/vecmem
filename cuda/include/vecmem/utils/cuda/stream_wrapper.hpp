@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,11 +15,6 @@
 
 namespace vecmem {
 namespace cuda {
-
-/// @brief Namespace for types that should not be used directly by clients
-namespace details {
-class opaque_stream;
-}
 
 /// Wrapper class for @c cudaStream_t
 ///
@@ -68,11 +63,15 @@ public:
     VECMEM_CUDA_EXPORT
     void synchronize();
 
+    /// Get the name of the device that the stream operates on
+    VECMEM_CUDA_EXPORT
+    std::string device_name() const;
+
 private:
-    /// Bare pointer to the wrapped @c cudaStream_t object
-    void* m_stream;
-    /// Smart pointer to the managed @c cudaStream_t object
-    std::shared_ptr<details::opaque_stream> m_managedStream;
+    /// Structure holding the internals of the class
+    struct impl;
+    /// Pointer to the internal structure
+    std::unique_ptr<impl> m_impl;
 
 };  // class stream_wrapper
 
