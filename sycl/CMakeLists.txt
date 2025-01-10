@@ -32,8 +32,7 @@ vecmem_add_library( vecmem_sycl sycl
    "include/vecmem/utils/sycl/queue_wrapper.hpp"
    "src/utils/sycl/queue_wrapper.sycl"
    "src/utils/sycl/get_queue.hpp"
-   "src/utils/sycl/get_queue.sycl"
-   "src/utils/sycl/opaque_queue.hpp" )
+   "src/utils/sycl/get_queue.sycl" )
 target_link_libraries( vecmem_sycl PUBLIC vecmem::core )
 
 # Hide the library's symbols by default.

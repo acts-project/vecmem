@@ -1,127 +1,155 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 
 // Local include(s).
-#include "get_queue.hpp"
-#include "opaque_queue.hpp"
 #include "vecmem/utils/debug.hpp"
 #include "vecmem/utils/sycl/queue_wrapper.hpp"
 
 // SYCL include(s).
 #include <sycl/sycl.hpp>
 
+// System include(s).
+#include <cassert>
+
 namespace vecmem::sycl {
 
-queue_wrapper::queue_wrapper()
-    : m_queue(nullptr),
-      m_managedQueue(std::make_unique<details::opaque_queue>()) {
+struct queue_wrapper::impl {
+    /// Bare pointer to the wrapped @c ::sycl::queue object
+    ::sycl::queue* m_queue = nullptr;
+    /// Smart pointer to the managed @c ::sycl::queue object
+    std::shared_ptr<::sycl::queue> m_managedQueue;
+};
 
-    m_queue = m_managedQueue.get();
+queue_wrapper::queue_wrapper() : m_impl{std::make_unique<impl>()} {
+
+    m_impl->m_managedQueue = std::make_shared<::sycl::queue>();
+    m_impl->m_queue = m_impl->m_managedQueue.get();
     VECMEM_DEBUG_MSG(1,
                      "Created an \"owning wrapper\" around a queue on "
                      "device: %s",
-                     details::get_queue(*this)
-                         .get_device()
+                     m_impl->m_queue->get_device()
                          .get_info<::sycl::info::device::name>()
                          .c_str());
 }
 
-queue_wrapper::queue_wrapper(void* queue) : m_queue(queue), m_managedQueue() {
+queue_wrapper::queue_wrapper(void* queue) : m_impl{std::make_unique<impl>()} {
 
+    assert(queue != nullptr);
+    m_impl->m_queue = static_cast<::sycl::queue*>(queue);
     VECMEM_DEBUG_MSG(3,
                      "Created a \"view wrapper\" around a queue on "
                      "device: %s",
-                     details::get_queue(*this)
-                         .get_device()
+                     m_impl->m_queue->get_device()
                          .get_info<::sycl::info::device::name>()
                          .c_str());
 }
 
 queue_wrapper::queue_wrapper(const queue_wrapper& parent)
-    : m_queue(nullptr), m_managedQueue() {
+    : m_impl{std::make_unique<impl>()} {
 
-    // Check whether the parent owns its own queue or not.
-    if (parent.m_managedQueue) {
-        // If so, make a copy of it, and own that copy in this object as well.
-        m_managedQueue =
-            std::make_unique<details::opaque_queue>(*(parent.m_managedQueue));
-        m_queue = m_managedQueue.get();
-    } else {
-        // If not, then let's just point at the same queue that somebody else
-        // owns.
-        m_queue = parent.m_queue;
-    }
+    *m_impl = *(parent.m_impl);
 }
 
-queue_wrapper::queue_wrapper(queue_wrapper&& parent)
-    : m_queue(nullptr), m_managedQueue(std::move(parent.m_managedQueue)) {
+queue_wrapper::queue_wrapper(queue_wrapper&& parent) = default;
 
-    // Set the bare pointer.
-    if (m_managedQueue) {
-        m_queue = m_managedQueue.get();
-    } else {
-        m_queue = parent.m_queue;
-    }
-}
-
-queue_wrapper::~queue_wrapper() {}
+queue_wrapper::~queue_wrapper() = default;
 
 queue_wrapper& queue_wrapper::operator=(const queue_wrapper& rhs) {
 
     // Avoid self-assignment.
-    if (this == &rhs) {
-        return *this;
-    }
-
-    // Check whether the copied object owns its own queue or not.
-    if (rhs.m_managedQueue) {
-        // If so, make a copy of it, and own that copy in this object as well.
-        m_managedQueue =
-            std::make_unique<details::opaque_queue>(*(rhs.m_managedQueue));
-        m_queue = m_managedQueue.get();
-    } else {
-        // If not, then let's just point at the same queue that somebody else
-        // owns.
-        m_queue = rhs.m_queue;
+    if (this != &rhs) {
+        *m_impl = *(rhs.m_impl);
     }
 
     // Return this object.
     return *this;
 }
 
-queue_wrapper& queue_wrapper::operator=(queue_wrapper&& rhs) {
-
-    // Avoid self-assignment.
-    if (this == &rhs) {
-        return *this;
-    }
-
-    // Move the managed queue object.
-    m_managedQueue = std::move(rhs.m_managedQueue);
-
-    // Set the bare pointer.
-    if (m_managedQueue) {
-        m_queue = m_managedQueue.get();
-    } else {
-        m_queue = rhs.m_queue;
-    }
-
-    // Return this object.
-    return *this;
-}
+queue_wrapper& queue_wrapper::operator=(queue_wrapper&& rhs) = default;
 
 void* queue_wrapper::queue() {
 
-    return m_queue;
+    return m_impl->m_queue;
 }
 
 const void* queue_wrapper::queue() const {
 
-    return m_queue;
+    return m_impl->m_queue;
+}
+
+void queue_wrapper::synchronize() {
+
+    assert(m_impl->m_queue != nullptr);
+    m_impl->m_queue->wait_and_throw();
+}
+
+std::string queue_wrapper::device_name() const {
+
+    assert(m_impl->m_queue != nullptr);
+    return m_impl->m_queue->get_device().get_info<::sycl::info::device::name>();
+}
+
+bool queue_wrapper::is_cpu() const {
+
+    assert(m_impl->m_queue != nullptr);
+    return m_impl->m_queue->get_device().is_cpu();
+}
+
+bool queue_wrapper::is_gpu() const {
+
+    assert(m_impl->m_queue != nullptr);
+    return m_impl->m_queue->get_device().is_gpu();
+}
+
+bool queue_wrapper::is_accelerator() const {
+
+    assert(m_impl->m_queue != nullptr);
+    return m_impl->m_queue->get_device().is_accelerator();
+}
+
+bool queue_wrapper::is_opencl() const {
+
+#if SYCL_BACKEND_OPENCL
+    assert(m_impl->m_queue != nullptr);
+    return (m_impl->m_queue->get_backend() == ::sycl::backend::opencl);
+#else
+    return false;
+#endif
+}
+
+bool queue_wrapper::is_level0() const {
+
+#if SYCL_EXT_ONEAPI_BACKEND_LEVEL_ZERO
+    assert(m_impl->m_queue != nullptr);
+    return (m_impl->m_queue->get_backend() ==
+            ::sycl::backend::ext_oneapi_level_zero);
+#else
+    return false;
+#endif
+}
+
+bool queue_wrapper::is_cuda() const {
+
+#if SYCL_EXT_ONEAPI_BACKEND_CUDA
+    assert(m_impl->m_queue != nullptr);
+    return (m_impl->m_queue->get_backend() == ::sycl::backend::ext_oneapi_cuda);
+#else
+    return false;
+#endif
+}
+
+bool queue_wrapper::is_hip() const {
+
+#if SYCL_EXT_ONEAPI_BACKEND_HIP
+    assert(m_impl->m_queue != nullptr);
+    return (m_impl->m_queue->get_backend() == ::sycl::backend::ext_oneapi_hip);
+#else
+    return false;
+#endif
 }
 
 }  // namespace vecmem::sycl
