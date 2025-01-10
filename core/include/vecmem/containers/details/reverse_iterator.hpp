@@ -126,13 +126,13 @@ private:
 };  // class reverse_iterator
 
 /// Comparison operator for reverse iterators
-template <typename T>
-VECMEM_HOST_AND_DEVICE bool operator==(const reverse_iterator<T>& itr1,
-                                       const reverse_iterator<T>& itr2);
+template <typename T1, typename T2>
+VECMEM_HOST_AND_DEVICE bool operator==(const reverse_iterator<T1>& itr1,
+                                       const reverse_iterator<T2>& itr2);
 /// Comparison operator for reverse iterators
-template <typename T>
-VECMEM_HOST_AND_DEVICE bool operator!=(const reverse_iterator<T>& itr1,
-                                       const reverse_iterator<T>& itr2);
+template <typename T1, typename T2>
+VECMEM_HOST_AND_DEVICE bool operator!=(const reverse_iterator<T1>& itr1,
+                                       const reverse_iterator<T2>& itr2);
 
 }  // namespace details
 }  // namespace vecmem
