@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -29,7 +29,7 @@ int get_device() {
 cudaStream_t get_stream(const stream_wrapper& stream) {
 
     assert(stream.stream() != nullptr);
-    return reinterpret_cast<cudaStream_t>(stream.stream());
+    return static_cast<cudaStream_t>(stream.stream());
 }
 
 }  // namespace vecmem::cuda::details

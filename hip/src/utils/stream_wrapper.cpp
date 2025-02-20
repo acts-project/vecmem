@@ -1,42 +1,43 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 
 // Local include(s).
-#include "vecmem/utils/cuda/stream_wrapper.hpp"
+#include "vecmem/utils/hip/stream_wrapper.hpp"
 
-#include "cuda_error_handling.hpp"
-#include "cuda_wrappers.hpp"
+#include "get_device.hpp"
 #include "get_device_name.hpp"
+#include "get_stream.hpp"
+#include "hip_error_handling.hpp"
 #include "select_device.hpp"
 
 // VecMem include(s).
 #include "vecmem/utils/debug.hpp"
 
-// CUDA include(s).
-#include <cuda_runtime_api.h>
+// HIP include(s).
+#include <hip/hip_runtime_api.h>
 
 // System include(s).
 #include <cassert>
 
-namespace vecmem::cuda {
+namespace vecmem::hip {
 namespace details {
 
-/// Struct responsible for managing the lifetime of a CUDA stream
+/// Struct responsible for managing the lifetime of a HIP stream
 struct stream_owner {
 
     /// Constructor
     stream_owner() : m_stream(nullptr) {
-        VECMEM_CUDA_ERROR_CHECK(cudaStreamCreate(&m_stream));
+        VECMEM_HIP_ERROR_CHECK(hipStreamCreate(&m_stream));
     }
     /// Destructor
     ~stream_owner() {
         // Don't check the return value of the stream destruction. This is
         // because if the holder of this stream is only destroyed during the
-        // termination of the application in which it was created, the CUDA
+        // termination of the application in which it was created, the HIP
         // runtime may have already deleted all streams by the time that this
         // function would try to delete it.
         //
@@ -44,23 +45,21 @@ struct stream_owner {
         // this destructor is executed as part of the final operations of an
         // application, would be too platform specific and fragile of an
         // operation.
-        cudaStreamDestroy(m_stream);
+        (void)hipStreamDestroy(m_stream);
     }
 
     /// The managed stream
-    cudaStream_t m_stream;
+    hipStream_t m_stream;
 
 };  // struct stream_owner
 
 }  // namespace details
 
 struct stream_wrapper::impl {
-    /// Bare pointer to the wrapped @c cudaStream_t object
-    cudaStream_t m_stream = nullptr;
-    /// Smart pointer to the managed @c cudaStream_t object
+    /// Bare pointer to the wrapped @c hipStream_t object
+    hipStream_t m_stream = nullptr;
+    /// Smart pointer to the managed @c hipStream_t object
     std::shared_ptr<details::stream_owner> m_managedStream;
-    /// Device identifier for the stream
-    int m_device = INVALID_DEVICE;
 };
 
 stream_wrapper::stream_wrapper(int device) : m_impl{std::make_unique<impl>()} {
@@ -72,7 +71,6 @@ stream_wrapper::stream_wrapper(int device) : m_impl{std::make_unique<impl>()} {
     // Construct the stream.
     m_impl->m_managedStream = std::make_shared<details::stream_owner>();
     m_impl->m_stream = m_impl->m_managedStream->m_stream;
-    m_impl->m_device = dev_selector.device();
 
     // Tell the user what happened.
     VECMEM_DEBUG_MSG(1, "Created stream on device: %s",
@@ -83,7 +81,7 @@ stream_wrapper::stream_wrapper(void* stream)
     : m_impl{std::make_unique<impl>()} {
 
     assert(stream != nullptr);
-    m_impl->m_stream = static_cast<cudaStream_t>(stream);
+    m_impl->m_stream = static_cast<hipStream_t>(stream);
 }
 
 stream_wrapper::stream_wrapper(const stream_wrapper& parent)
@@ -114,16 +112,14 @@ void* stream_wrapper::stream() const {
 void stream_wrapper::synchronize() {
 
     assert(m_impl->m_stream != nullptr);
-    VECMEM_CUDA_ERROR_CHECK(cudaStreamSynchronize(m_impl->m_stream));
+    VECMEM_HIP_ERROR_CHECK(hipStreamSynchronize(m_impl->m_stream));
 }
 
 std::string stream_wrapper::device_name() const {
 
-    if (m_impl->m_device == INVALID_DEVICE) {
-        return "Unknown";
-    } else {
-        return details::get_device_name(m_impl->m_device);
-    }
+    int device = INVALID_DEVICE;
+    VECMEM_HIP_ERROR_CHECK(hipStreamGetDevice(m_impl->m_stream, &device));
+    return details::get_device_name(device);
 }
 
-}  // namespace vecmem::cuda
+}  // namespace vecmem::hip

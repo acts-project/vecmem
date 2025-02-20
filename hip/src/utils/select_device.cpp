@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -25,6 +25,11 @@ select_device::select_device(int device) : m_device(get_device()) {
 select_device::~select_device() {
 
     VECMEM_HIP_ERROR_CHECK(hipSetDevice(m_device));
+}
+
+int select_device::device() const {
+
+    return m_device;
 }
 
 }  // namespace vecmem::hip::details
