@@ -54,11 +54,12 @@ public:
     /// The type of the (non-const) proxy objects for the container elements
     using proxy_type =
         interface_type<proxy<schema_type, details::proxy_domain::device,
-                             details::proxy_access::non_constant>>;
+                             details::proxy_access::non_constant,
+                             details::proxy_type::reference>>;
     /// The type of the (const) proxy objects for the container elements
-    using const_proxy_type =
-        interface_type<proxy<schema_type, details::proxy_domain::device,
-                             details::proxy_access::constant>>;
+    using const_proxy_type = interface_type<
+        proxy<schema_type, details::proxy_domain::device,
+              details::proxy_access::constant, details::proxy_type::reference>>;
 
     /// @name Constructors and assignment operators
     /// @{

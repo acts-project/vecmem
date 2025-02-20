@@ -15,9 +15,9 @@
 namespace vecmem {
 namespace edm {
 
-/// Technical base type for @c proxy<schema<VARTYPES...>,PTYPE,CTYPE>
+/// Technical base type for @c proxy<schema<VARTYPES...>,PDOMAIN,PACCESS,PTYPE>
 template <typename T, details::proxy_domain PDOMAIN,
-          details::proxy_access PACCESS>
+          details::proxy_access PACCESS, details::proxy_type PTYPE>
 class proxy;
 
 /// Structure-of-Arrays element proxy
@@ -25,12 +25,13 @@ class proxy;
 /// This class implements a "view" of a single element in an SoA container.
 ///
 /// @tparam ...VARTYPES The variable types to store in the proxy object
-/// @tparam PTYPE       The type of the proxy (host or device)
-/// @tparam CTYPE       The access mode of the proxy (const or non-const)
+/// @tparam PDOMAIN     The "domain" of the proxy (host or device)
+/// @tparam PACCESS     The access mode of the proxy (const or non-const)
+/// @tparam PTYPE       The type of the proxy (reference or standalone)
 ///
 template <typename... VARTYPES, details::proxy_domain PDOMAIN,
-          details::proxy_access PACCESS>
-class proxy<schema<VARTYPES...>, PDOMAIN, PACCESS> {
+          details::proxy_access PACCESS, details::proxy_type PTYPE>
+class proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE> {
 
 public:
     /// The schema describing the host's payload
@@ -39,10 +40,11 @@ public:
     static constexpr details::proxy_domain proxy_domain = PDOMAIN;
     /// The access mode of the proxy (const or non-const)
     static constexpr details::proxy_access access_type = PACCESS;
+    /// The type of the proxy (reference or standalone)
+    static constexpr details::proxy_type proxy_type = PTYPE;
     /// The tuple type holding all of the the proxied variables
-    using tuple_type =
-        tuple<typename details::proxy_var_type<VARTYPES, proxy_domain,
-                                               access_type>::type...>;
+    using tuple_type = tuple<typename details::proxy_var_type<
+        VARTYPES, proxy_domain, access_type, proxy_type>::type...>;
 
     /// @name Constructors and assignment operators
     /// @{
@@ -75,13 +77,13 @@ public:
     /// Get a specific variable (non-const)
     template <std::size_t INDEX>
     VECMEM_HOST_AND_DEVICE
-        typename details::proxy_var_type_at<INDEX, PDOMAIN, PACCESS,
+        typename details::proxy_var_type_at<INDEX, PDOMAIN, PACCESS, PTYPE,
                                             VARTYPES...>::return_type
         get();
     /// Get a specific variable (const)
     template <std::size_t INDEX>
     VECMEM_HOST_AND_DEVICE
-        typename details::proxy_var_type_at<INDEX, PDOMAIN, PACCESS,
+        typename details::proxy_var_type_at<INDEX, PDOMAIN, PACCESS, PTYPE,
                                             VARTYPES...>::const_return_type
         get() const;
 
