@@ -69,6 +69,46 @@ public:
     VECMEM_HOST_AND_DEVICE proxy(const PARENT& parent,
                                  typename PARENT::size_type index);
 
+    /// Copy constructor
+    ///
+    /// @tparam OPDOMAIN The domain of the other proxy
+    /// @tparam OPACCESS The access mode of the other proxy
+    /// @tparam OPTYPE   The type of the other proxy
+    ///
+    /// @param other The proxy to copy
+    ///
+    template <details::proxy_domain OPDOMAIN, details::proxy_access OPACCESS,
+              details::proxy_type OPTYPE>
+    VECMEM_HOST_AND_DEVICE proxy(
+        const proxy<schema<VARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other);
+
+    /// Construct a proxy from a list of variables
+    ///
+    /// This is mainly meant for "standalone proxies", but technically would
+    /// work for any type of a proxy.
+    ///
+    /// @param data The list of variables to proxy
+    ///
+    VECMEM_HOST_AND_DEVICE proxy(
+        typename details::proxy_var_type<VARTYPES, proxy_domain, access_type,
+                                         proxy_type>::type... data);
+
+    /// Assignment operator
+    ///
+    /// @tparam OPDOMAIN The domain of the other proxy
+    /// @tparam OPACCESS The access mode of the other proxy
+    /// @tparam OPTYPE   The type of the other proxy
+    ///
+    /// @param other The proxy to copy
+    ///
+    /// @return A reference to the proxy object
+    ///
+    template <details::proxy_domain OPDOMAIN, details::proxy_access OPACCESS,
+              details::proxy_type OPTYPE>
+    VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>&
+    operator=(
+        const proxy<schema<VARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other);
+
     /// @}
 
     /// @name Variable accessor functions
@@ -86,6 +126,18 @@ public:
         typename details::proxy_var_type_at<INDEX, PDOMAIN, PACCESS, PTYPE,
                                             VARTYPES...>::const_return_type
         get() const;
+
+    /// @}
+
+    /// @name Function(s) meant for internal use by other VecMem types
+    /// @{
+
+    /// Direct (non-const) access to the underlying tuple of variables
+    VECMEM_HOST_AND_DEVICE
+    tuple_type& variables();
+    /// Direct (const) access to the underlying tuple of variables
+    VECMEM_HOST_AND_DEVICE
+    const tuple_type& variables() const;
 
     /// @}
 

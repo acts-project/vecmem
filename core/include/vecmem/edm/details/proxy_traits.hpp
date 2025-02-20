@@ -61,7 +61,7 @@ template <typename VTYPE, proxy_domain PDOMAIN>
 struct proxy_var_type<type::scalar<VTYPE>, PDOMAIN, proxy_access::constant,
                       proxy_type::reference> {
 
-    /// The scalar is kept by value in the proxy
+    /// The scalar is kept by constant lvalue reference in the proxy
     using type = std::add_lvalue_reference_t<std::add_const_t<VTYPE>>;
     /// It is returned as a const reference even on non-const access
     using return_type = type;
@@ -91,6 +91,26 @@ struct proxy_var_type<type::scalar<VTYPE>, PDOMAIN, proxy_access::non_constant,
     /// Helper function constructing a scalar proxy variable
     template <typename ITYPE>
     VECMEM_HOST_AND_DEVICE static type make(ITYPE, return_type variable) {
+        return variable;
+    }
+};
+
+/// Standalone scalar variable (both host and device, const and non-const)
+template <typename VTYPE, proxy_domain PDOMAIN, proxy_access PACCESS>
+struct proxy_var_type<type::scalar<VTYPE>, PDOMAIN, PACCESS,
+                      proxy_type::standalone> {
+
+    /// The scalar is kept by value in the proxy
+    using type = std::remove_cv_t<VTYPE>;
+    /// It is returned as a const reference even on non-const access
+    using return_type = std::add_lvalue_reference_t<type>;
+    /// It is returned as a const reference on const access
+    using const_return_type =
+        std::add_lvalue_reference_t<std::add_const_t<type>>;
+
+    /// Helper function constructing a scalar proxy variable
+    template <typename ITYPE>
+    VECMEM_HOST_AND_DEVICE static type make(ITYPE, const_return_type variable) {
         return variable;
     }
 };
@@ -131,6 +151,27 @@ struct proxy_var_type<type::vector<VTYPE>, PDOMAIN, proxy_access::non_constant,
     /// Helper function constructing a vector proxy variable
     template <typename ITYPE, typename VECTYPE>
     VECMEM_HOST_AND_DEVICE static type make(ITYPE i, VECTYPE& vec) {
+
+        return vec.at(i);
+    }
+};
+
+/// Standalone vector variable (both host and device, const and non-const)
+template <typename VTYPE, proxy_domain PDOMAIN, proxy_access PACCESS>
+struct proxy_var_type<type::vector<VTYPE>, PDOMAIN, PACCESS,
+                      proxy_type::standalone> {
+
+    /// The scalar is kept by value in the proxy
+    using type = std::remove_cv_t<VTYPE>;
+    /// It is returned as a const reference even on non-const access
+    using return_type = std::add_lvalue_reference_t<type>;
+    /// It is returned as a const reference on const access
+    using const_return_type =
+        std::add_lvalue_reference_t<std::add_const_t<type>>;
+
+    /// Helper function constructing a vector proxy variable
+    template <typename ITYPE, typename VECTYPE>
+    VECMEM_HOST_AND_DEVICE static type make(ITYPE i, const VECTYPE& vec) {
 
         return vec.at(i);
     }
@@ -225,6 +266,28 @@ struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_domain::host,
     VECMEM_HOST
     static type make(typename jagged_vector<VTYPE>::size_type i,
                      jagged_vector<VTYPE>& vec) {
+
+        return vec.at(i);
+    }
+};
+
+/// Standalone host jagged vector variable (const and non-const)
+template <typename VTYPE, proxy_access PACCESS>
+struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_domain::host, PACCESS,
+                      proxy_type::standalone> {
+
+    /// Jagged vector elements are kept by constant reference in the proxy
+    using type = vector<VTYPE>;
+    /// They are returned as a const reference even on non-const access
+    using return_type = std::add_lvalue_reference_t<type>;
+    /// They are returned as a const reference on const access
+    using const_return_type =
+        std::add_lvalue_reference_t<std::add_const_t<type>>;
+
+    /// Helper function constructing a vector proxy variable
+    VECMEM_HOST
+    static type make(typename jagged_vector<VTYPE>::size_type i,
+                     const jagged_vector<VTYPE>& vec) {
 
         return vec.at(i);
     }

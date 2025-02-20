@@ -59,6 +59,11 @@ public:
     using const_proxy_type = interface_type<
         proxy<schema_type, details::proxy_domain::host,
               details::proxy_access::constant, details::proxy_type::reference>>;
+    /// Type type of standalone proxy objects for the container
+    using object_type =
+        interface_type<proxy<schema_type, details::proxy_domain::host,
+                             details::proxy_access::non_constant,
+                             details::proxy_type::standalone>>;
 
     /// @name Constructors and assignment operators
     /// @{
@@ -81,6 +86,8 @@ public:
     /// Reserve memory for the container
     VECMEM_HOST
     void reserve(size_type size);
+    /// Add a new element to the container
+    VECMEM_HOST void push_back(const object_type& element);
 
     /// Get the vector of a specific variable (non-const)
     template <std::size_t INDEX>
