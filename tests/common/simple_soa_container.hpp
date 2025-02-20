@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -18,8 +18,11 @@ template <typename BASE>
 class simple_soa_interface : public BASE {
 
 public:
-    /// Inherit the base class's constructor(s)
+    /// @name Inherit the base class's constructor(s) and operator(s)
+    /// @{
     using BASE::BASE;
+    using BASE::operator=;
+    /// @}
 
     /// Global "count" of something (non-const)
     VECMEM_HOST_AND_DEVICE
