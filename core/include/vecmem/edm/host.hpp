@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -52,11 +52,11 @@ public:
     using interface_type = INTERFACE<T>;
     /// The type of the (non-const) proxy objects for the container elements
     using proxy_type =
-        interface_type<proxy<schema_type, details::proxy_type::host,
+        interface_type<proxy<schema_type, details::proxy_domain::host,
                              details::proxy_access::non_constant>>;
     /// The type of the (const) proxy objects for the container elements
     using const_proxy_type =
-        interface_type<proxy<schema_type, details::proxy_type::host,
+        interface_type<proxy<schema_type, details::proxy_domain::host,
                              details::proxy_access::constant>>;
 
     /// @name Constructors and assignment operators

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2024 CERN for the benefit of the ACTS project
+ * (c) 2024-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -24,8 +24,8 @@ namespace vecmem {
 namespace edm {
 namespace details {
 
-/// @brief The type of the proxy to use for a given container variable
-enum class proxy_type {
+/// @brief The "domain" of the proxy to use for a given container variable
+enum class proxy_domain {
     /// Proxy for a host container element
     host,
     /// Proxy for a device container element
@@ -44,12 +44,12 @@ enum class proxy_access {
 /// @{
 
 /// Technical base class for the @c proxy_var_type traits
-template <typename VTYPE, proxy_type PTYPE, proxy_access CTYPE>
+template <typename VTYPE, proxy_domain PDOMAIN, proxy_access PACCESS>
 struct proxy_var_type;
 
 /// Constant access to a scalar variable (both host and device)
-template <typename VTYPE, proxy_type PTYPE>
-struct proxy_var_type<type::scalar<VTYPE>, PTYPE, proxy_access::constant> {
+template <typename VTYPE, proxy_domain PDOMAIN>
+struct proxy_var_type<type::scalar<VTYPE>, PDOMAIN, proxy_access::constant> {
 
     /// The scalar is kept by value in the proxy
     using type = std::add_lvalue_reference_t<std::add_const_t<VTYPE>>;
@@ -66,8 +66,9 @@ struct proxy_var_type<type::scalar<VTYPE>, PTYPE, proxy_access::constant> {
 };
 
 /// Non-const access to a scalar variable (both host and device)
-template <typename VTYPE, proxy_type PTYPE>
-struct proxy_var_type<type::scalar<VTYPE>, PTYPE, proxy_access::non_constant> {
+template <typename VTYPE, proxy_domain PDOMAIN>
+struct proxy_var_type<type::scalar<VTYPE>, PDOMAIN,
+                      proxy_access::non_constant> {
 
     /// The scalar is kept by lvalue reference in the proxy
     using type = std::add_lvalue_reference_t<VTYPE>;
@@ -85,8 +86,8 @@ struct proxy_var_type<type::scalar<VTYPE>, PTYPE, proxy_access::non_constant> {
 };
 
 /// Constant access to a vector variable (both host and device)
-template <typename VTYPE, proxy_type PTYPE>
-struct proxy_var_type<type::vector<VTYPE>, PTYPE, proxy_access::constant> {
+template <typename VTYPE, proxy_domain PDOMAIN>
+struct proxy_var_type<type::vector<VTYPE>, PDOMAIN, proxy_access::constant> {
 
     /// Vector elements are kept by value in the proxy
     using type = std::add_lvalue_reference_t<std::add_const_t<VTYPE>>;
@@ -104,8 +105,9 @@ struct proxy_var_type<type::vector<VTYPE>, PTYPE, proxy_access::constant> {
 };
 
 /// Non-const access to a vector variable (both host and device)
-template <typename VTYPE, proxy_type PTYPE>
-struct proxy_var_type<type::vector<VTYPE>, PTYPE, proxy_access::non_constant> {
+template <typename VTYPE, proxy_domain PDOMAIN>
+struct proxy_var_type<type::vector<VTYPE>, PDOMAIN,
+                      proxy_access::non_constant> {
 
     /// Vector elements are kept by lvalue reference in the proxy
     using type = std::add_lvalue_reference_t<VTYPE>;
@@ -125,7 +127,7 @@ struct proxy_var_type<type::vector<VTYPE>, PTYPE, proxy_access::non_constant> {
 
 /// Constant access to a jagged vector variable from a device container
 template <typename VTYPE>
-struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
+struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_domain::device,
                       proxy_access::constant> {
 
     /// Jagged vector elements are kept by constant device vectors in the proxy
@@ -149,7 +151,7 @@ struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
 
 /// Non-const access to a jagged vector variable from a device container
 template <typename VTYPE>
-struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
+struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_domain::device,
                       proxy_access::non_constant> {
 
     /// Jagged vector elements are kept by non-const device vectors in the proxy
@@ -175,7 +177,7 @@ struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::device,
 
 /// Constant access to a jagged vector variable from a host container
 template <typename VTYPE>
-struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::host,
+struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_domain::host,
                       proxy_access::constant> {
 
     /// Jagged vector elements are kept by constant reference in the proxy
@@ -196,7 +198,7 @@ struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::host,
 
 /// Non-const access to a jagged vector variable from a host container
 template <typename VTYPE>
-struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::host,
+struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_domain::host,
                       proxy_access::non_constant> {
 
     /// Jagged vector elements are kept by non-const lvalue reference in the
@@ -220,21 +222,21 @@ struct proxy_var_type<type::jagged_vector<VTYPE>, proxy_type::host,
 #endif  // __cplusplus >= 201700L
 
 /// Proxy types for one element of a type pack
-template <std::size_t INDEX, proxy_type PTYPE, proxy_access CTYPE,
+template <std::size_t INDEX, proxy_domain PDOMAIN, proxy_access PACCESS,
           typename... VARTYPES>
 struct proxy_var_type_at {
     /// Type of the variable held by the proxy
     using type =
         typename proxy_var_type<tuple_element_t<INDEX, tuple<VARTYPES...>>,
-                                PTYPE, CTYPE>::type;
+                                PDOMAIN, PACCESS>::type;
     /// Return type on non-const access to the proxy
     using return_type =
         typename proxy_var_type<tuple_element_t<INDEX, tuple<VARTYPES...>>,
-                                PTYPE, CTYPE>::return_type;
+                                PDOMAIN, PACCESS>::return_type;
     /// Return type on const access to the proxy
     using const_return_type =
         typename proxy_var_type<tuple_element_t<INDEX, tuple<VARTYPES...>>,
-                                PTYPE, CTYPE>::const_return_type;
+                                PDOMAIN, PACCESS>::const_return_type;
 };
 
 /// @}
@@ -243,20 +245,21 @@ struct proxy_var_type_at {
 /// @{
 
 /// Technical base class for the @c proxy_data_creator traits
-template <typename SCHEMA, proxy_type PTYPE, proxy_access CTYPE>
+template <typename SCHEMA, proxy_domain PDOMAIN, proxy_access PACCESS>
 struct proxy_data_creator;
 
 /// Helper class making the data tuple for a constant device proxy
-template <typename VARTYPE, proxy_type PTYPE>
-struct proxy_data_creator<schema<VARTYPE>, PTYPE, proxy_access::constant> {
+template <typename VARTYPE, proxy_domain PDOMAIN>
+struct proxy_data_creator<schema<VARTYPE>, PDOMAIN, proxy_access::constant> {
 
     /// Make all other instantiations of the struct friends
-    template <typename, proxy_type, proxy_access>
+    template <typename, proxy_domain, proxy_access>
     friend struct proxy_data_creator;
 
     /// Proxy tuple type created by the helper
-    using proxy_tuple_type = tuple<
-        typename proxy_var_type<VARTYPE, PTYPE, proxy_access::constant>::type>;
+    using proxy_tuple_type =
+        tuple<typename proxy_var_type<VARTYPE, PDOMAIN,
+                                      proxy_access::constant>::type>;
 
     /// Construct the tuple used by the proxy
     template <typename ITYPE, typename CONTAINER>
@@ -270,22 +273,23 @@ private:
     VECMEM_HOST_AND_DEVICE static proxy_tuple_type make_impl(
         ITYPE i, const CONTAINER& c) {
 
-        return {proxy_var_type<VARTYPE, PTYPE, proxy_access::constant>::make(
+        return {proxy_var_type<VARTYPE, PDOMAIN, proxy_access::constant>::make(
             i, c.template get<INDEX>())};
     }
 };
 
 /// Helper class making the data tuple for a non-const device proxy
-template <typename VARTYPE, proxy_type PTYPE>
-struct proxy_data_creator<schema<VARTYPE>, PTYPE, proxy_access::non_constant> {
+template <typename VARTYPE, proxy_domain PDOMAIN>
+struct proxy_data_creator<schema<VARTYPE>, PDOMAIN,
+                          proxy_access::non_constant> {
 
     /// Make all other instantiations of the struct friends
-    template <typename, proxy_type, proxy_access>
+    template <typename, proxy_domain, proxy_access>
     friend struct proxy_data_creator;
 
     /// Proxy tuple type created by the helper
     using proxy_tuple_type =
-        tuple<typename proxy_var_type<VARTYPE, PTYPE,
+        tuple<typename proxy_var_type<VARTYPE, PDOMAIN,
                                       proxy_access::non_constant>::type>;
 
     /// Construct the tuple used by the proxy
@@ -300,24 +304,24 @@ private:
                                                              CONTAINER& c) {
 
         return {
-            proxy_var_type<VARTYPE, PTYPE, proxy_access::non_constant>::make(
+            proxy_var_type<VARTYPE, PDOMAIN, proxy_access::non_constant>::make(
                 i, c.template get<INDEX>())};
     }
 };
 
 /// Helper class making the data tuple for a constant device proxy
-template <typename VARTYPE, typename... VARTYPES, proxy_type PTYPE>
-struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, PTYPE,
+template <typename VARTYPE, typename... VARTYPES, proxy_domain PDOMAIN>
+struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, PDOMAIN,
                           proxy_access::constant> {
 
     /// Make all other instantiations of the struct friends
-    template <typename, proxy_type, proxy_access>
+    template <typename, proxy_domain, proxy_access>
     friend struct proxy_data_creator;
 
     /// Proxy tuple type created by the helper
     using proxy_tuple_type = tuple<
-        typename proxy_var_type<VARTYPE, PTYPE, proxy_access::constant>::type,
-        typename proxy_var_type<VARTYPES, PTYPE,
+        typename proxy_var_type<VARTYPE, PDOMAIN, proxy_access::constant>::type,
+        typename proxy_var_type<VARTYPES, PDOMAIN,
                                 proxy_access::constant>::type...>;
 
     /// Construct the tuple used by the proxy
@@ -333,28 +337,28 @@ private:
         ITYPE i, const CONTAINER& c) {
 
         return proxy_tuple_type(
-            proxy_var_type<VARTYPE, PTYPE, proxy_access::constant>::make(
+            proxy_var_type<VARTYPE, PDOMAIN, proxy_access::constant>::make(
                 i, c.template get<INDEX>()),
             proxy_data_creator<
-                schema<VARTYPES...>, PTYPE,
+                schema<VARTYPES...>, PDOMAIN,
                 proxy_access::constant>::template make_impl<INDEX + 1>(i, c));
     }
 };
 
 /// Helper class making the data tuple for a non-const device proxy
-template <typename VARTYPE, typename... VARTYPES, proxy_type PTYPE>
-struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, PTYPE,
+template <typename VARTYPE, typename... VARTYPES, proxy_domain PDOMAIN>
+struct proxy_data_creator<schema<VARTYPE, VARTYPES...>, PDOMAIN,
                           proxy_access::non_constant> {
 
     /// Make all other instantiations of the struct friends
-    template <typename, proxy_type, proxy_access>
+    template <typename, proxy_domain, proxy_access>
     friend struct proxy_data_creator;
 
     /// Proxy tuple type created by the helper
     using proxy_tuple_type =
-        tuple<typename proxy_var_type<VARTYPE, PTYPE,
+        tuple<typename proxy_var_type<VARTYPE, PDOMAIN,
                                       proxy_access::non_constant>::type,
-              typename proxy_var_type<VARTYPES, PTYPE,
+              typename proxy_var_type<VARTYPES, PDOMAIN,
                                       proxy_access::non_constant>::type...>;
 
     /// Construct the tuple used by the proxy
@@ -369,10 +373,10 @@ private:
                                                              CONTAINER& c) {
 
         return proxy_tuple_type(
-            proxy_var_type<VARTYPE, PTYPE, proxy_access::non_constant>::make(
+            proxy_var_type<VARTYPE, PDOMAIN, proxy_access::non_constant>::make(
                 i, c.template get<INDEX>()),
             proxy_data_creator<
-                schema<VARTYPES...>, PTYPE,
+                schema<VARTYPES...>, PDOMAIN,
                 proxy_access::non_constant>::template make_impl<INDEX + 1>(i,
                                                                            c));
     }
