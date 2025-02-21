@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2025 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -85,7 +85,7 @@ if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
 elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
         ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    set( HIPToolkit_RUNTIME_LIBRARY "${CUDA_CUDART}" )
-   list( APPEND HIPToolkit_LIBRARIES CUDA::cudart )
+   list( APPEND HIPToolkit_LIBRARIES CUDA::cudart CUDA::cuda_driver )
 else()
    message( SEND_ERROR
       "Invalid CMAKE_HIP_PLATFORM setting (${CMAKE_HIP_PLATFORM}) received" )
