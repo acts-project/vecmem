@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -92,6 +92,22 @@ struct tuple<T, Ts...> {
                                bool> = true>
     VECMEM_HOST_AND_DEVICE constexpr tuple(U &&head, tuple<Us...> &&tail)
         : m_head(std::forward<U>(head)), m_tail(std::move(tail)) {}
+
+    /// Assignment operator from a (slightly) different tuple type
+    ///
+    /// @param parent The parent to copy
+    ///
+    template <typename U, typename... Us,
+              std::enable_if_t<
+                  (!std::is_same<tuple<T, Ts...>, tuple<U, Us...>>::value) &&
+                      sizeof...(Ts) == sizeof...(Us),
+                  bool> = true>
+    VECMEM_HOST_AND_DEVICE constexpr tuple &operator=(
+        const tuple<U, Us...> &parent) {
+        m_head = parent.m_head;
+        m_tail = parent.m_tail;
+        return *this;
+    }
 
     /// The first/head element of the tuple
     T m_head;

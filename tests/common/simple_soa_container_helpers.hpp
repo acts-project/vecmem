@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -26,9 +26,8 @@ inline void fill(unsigned int i, simple_soa_container::device& obj) {
     }
     // In the rest of the threads modify the vector variables.
     if (i < obj.capacity()) {
-        unsigned int ii = obj.push_back_default();
-        obj.measurement()[ii] = 1.0f * static_cast<float>(ii);
-        obj.at(ii).index() = static_cast<int>(ii);
+        obj.push_back(
+            {55, 1.0f * static_cast<float>(i), 3.141592f, static_cast<int>(i)});
     }
 }
 

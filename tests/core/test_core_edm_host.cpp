@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -28,6 +28,7 @@ protected:
     template <typename BASE>
     struct interface : public BASE {
         using BASE::BASE;
+        using BASE::operator=;
         auto& scalar() { return BASE::template get<0>(); }
         const auto& scalar() const { return BASE::template get<0>(); }
         auto& vector() { return BASE::template get<1>(); }
@@ -44,14 +45,12 @@ protected:
         // Create a host container, and fill it.
         host_type host{m_resource};
         static constexpr std::size_t SIZE = 5;
-        host.resize(SIZE);
-        host.get<0>() = 1;
         for (std::size_t i = 0; i < SIZE; ++i) {
-            host.get<1>()[i] = static_cast<float>(2 + i);
-            host.get<2>()[i].resize(i + 1);
+            vecmem::vector<double> v{&m_resource};
             for (std::size_t j = 0; j < i + 1; ++j) {
-                host.get<2>()[i][j] = static_cast<double>(3 + i + j);
+                v.push_back(3. + static_cast<double>(i + j));
             }
+            host.push_back(host_type::object_type{1, 2.f + 1, v});
         }
         // Give it to the caller.
         return host;
@@ -210,6 +209,93 @@ TEST_F(core_edm_host_test, const_proxy) {
                              host.jagged_vector().at(i).at(j));
             EXPECT_DOUBLE_EQ(host[i].jagged_vector()[j],
                              host.jagged_vector()[i][j]);
+        }
+    }
+}
+
+namespace {
+using simple_schema = vecmem::edm::schema<vecmem::edm::type::scalar<int>,
+                                          vecmem::edm::type::vector<float>>;
+template <typename BASE>
+struct simple_interface : public BASE {
+    using BASE::BASE;
+    using BASE::operator=;
+    auto& scalar() { return BASE::template get<0>(); }
+    const auto& scalar() const { return BASE::template get<0>(); }
+    auto& vector() { return BASE::template get<1>(); }
+    const auto& vector() const { return BASE::template get<1>(); }
+};
+using simple_host_type =
+    simple_interface<vecmem::edm::host<simple_schema, simple_interface>>;
+}  // namespace
+
+TEST_F(core_edm_host_test, push_back_simple) {
+
+    // Set up a simple type, without any jagged vectors.
+    simple_host_type host{m_resource};
+
+    // Add a couple of elements to it. Since simple_interface has an explicit
+    // constructor, the formalism here is fairly simple.
+    host.push_back({1, 2.f});
+    host.push_back({2, 3.f});
+
+    // Check that the contents are as expected.
+    ASSERT_EQ(host.size(), 2);
+    EXPECT_EQ(host.at(0).scalar(), 2);
+    EXPECT_EQ(host.at(1).scalar(), 2);
+    EXPECT_FLOAT_EQ(host.at(0).vector(), 2.f);
+    EXPECT_FLOAT_EQ(host.at(1).vector(), 3.f);
+}
+
+TEST_F(core_edm_host_test, push_back_jagged) {
+
+    // Create an empty host container.
+    host_type host{m_resource};
+
+    // Add a couple of elements to it. Since interface has no constructor of
+    // its own, because with jagged vectors that's not so easy to do, one needs
+    // to use double braces in the following expression.
+    host.push_back({1, 2.f, vecmem::vector<double>{3., 4., 5.}});
+    host.push_back({2, 3.f, vecmem::vector<double>{4., 5., 6.}});
+
+    // Check that the contents are as expected.
+    ASSERT_EQ(host.size(), 2);
+    EXPECT_EQ(host.at(0).scalar(), 2);
+    EXPECT_EQ(host.at(1).scalar(), 2);
+    EXPECT_FLOAT_EQ(host.at(0).vector(), 2.f);
+    EXPECT_FLOAT_EQ(host.at(1).vector(), 3.f);
+    ASSERT_EQ(host.at(0).jagged_vector().size(), 3);
+    ASSERT_EQ(host.at(1).jagged_vector().size(), 3);
+    for (std::size_t i = 0; i < 3; ++i) {
+        EXPECT_DOUBLE_EQ(host.at(0).jagged_vector().at(i),
+                         3. + static_cast<double>(i));
+        EXPECT_DOUBLE_EQ(host.at(1).jagged_vector().at(i),
+                         4. + static_cast<double>(i));
+    }
+
+    // Construct a filled host container.
+    host_type host2 = create();
+    host_type host2_ref = host2;
+
+    // Add elements to it from the previous container.
+    for (std::size_t i = 0; i < host.size(); ++i) {
+        host2.push_back(host.at(i));
+    }
+
+    // Check that the contents are as expected.
+    ASSERT_EQ(host2.size(), 7);
+    for (std::size_t i = 0; i < host2.size(); ++i) {
+        const auto test_proxy = host2.at(i);
+        const auto ref_proxy = (i < host2_ref.size())
+                                   ? host2_ref.at(i)
+                                   : host.at(i - host2_ref.size());
+        EXPECT_EQ(test_proxy.scalar(), host.at(0).scalar());
+        EXPECT_FLOAT_EQ(test_proxy.vector(), ref_proxy.vector());
+        ASSERT_EQ(test_proxy.jagged_vector().size(),
+                  ref_proxy.jagged_vector().size());
+        for (std::size_t j = 0; j < test_proxy.jagged_vector().size(); ++j) {
+            EXPECT_DOUBLE_EQ(test_proxy.jagged_vector().at(j),
+                             ref_proxy.jagged_vector().at(j));
         }
     }
 }

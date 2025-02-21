@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -78,6 +78,20 @@ device<schema<VARTYPES...>, INTERFACE>::push_back_default() -> size_type {
 
     // Construct the new elements in all of the vector variables.
     construct_default(index, std::index_sequence_for<VARTYPES...>{});
+
+    // Return the position of the new variable(s).
+    return index;
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto device<schema<VARTYPES...>, INTERFACE>::push_back(
+    const object_type& element) -> size_type {
+
+    // Add a new default element to the container.
+    const size_type index = push_back_default();
+
+    // Set it to the given value.
+    at(index) = element;
 
     // Return the position of the new variable(s).
     return index;

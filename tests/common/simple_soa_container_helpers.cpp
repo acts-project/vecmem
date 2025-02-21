@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -18,12 +18,10 @@ namespace vecmem::testing {
 
 void fill(simple_soa_container::host& obj) {
 
-    obj.resize(10);
-    obj.count() = 55;
-    obj.average() = 3.141592f;
-    for (std::size_t i = 0; i < obj.size(); ++i) {
-        obj.measurement()[i] = 1.0f * static_cast<float>(i);
-        obj.index()[i] = static_cast<int>(i);
+    obj.reserve(10);
+    for (std::size_t i = 0; i < 10; ++i) {
+        obj.push_back(
+            {55, 1.0f * static_cast<float>(i), 3.141592f, static_cast<int>(i)});
     }
 }
 
@@ -41,11 +39,21 @@ void compare(const simple_soa_container::const_view& view1,
     EXPECT_EQ(device1.count(), device2.count());
     EXPECT_FLOAT_EQ(device1.average(), device2.average());
 
-    // Compare the vector variables.
+    // Compare the vector variables. Both vectors need to have the same
+    // variables but not necessarily in the same order.
     auto compare_vector = [](const auto& lhs, const auto& rhs) {
         ASSERT_EQ(lhs.size(), rhs.size());
+        std::vector<bool> matched(rhs.size(), false);
         for (unsigned int i = 0; i < lhs.size(); ++i) {
-            EXPECT_EQ(lhs[i], rhs[i]);
+            for (unsigned int j = 0; j < rhs.size(); ++j) {
+                if (lhs[i] == rhs[j] && !matched[j]) {
+                    matched[j] = true;
+                    break;
+                }
+                if (j == rhs.size() - 1) {
+                    FAIL() << "The vectors are not equal";
+                }
+            }
         }
     };
     compare_vector(device1.measurement(), device2.measurement());

@@ -66,6 +66,22 @@ VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::reserve(
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::push_back(
+    const object_type& element) {
+
+    // Make sure that there are some (jagged) vector types in the container.
+    static_assert(
+        std::disjunction_v<type::details::is_vector<VARTYPES>...>,
+        "This function requires at least one (jagged) vector variable.");
+
+    // Add a new element to the container.
+    const size_type index = size();
+    resize(index + 1);
+    // Set the new element.
+    at(index) = element;
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
 VECMEM_HOST typename details::host_type_at<INDEX, VARTYPES...>::return_type
 host<schema<VARTYPES...>, INTERFACE>::get() {

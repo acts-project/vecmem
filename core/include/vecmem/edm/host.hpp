@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -52,12 +52,18 @@ public:
     using interface_type = INTERFACE<T>;
     /// The type of the (non-const) proxy objects for the container elements
     using proxy_type =
-        interface_type<proxy<schema_type, details::proxy_type::host,
-                             details::proxy_access::non_constant>>;
+        interface_type<proxy<schema_type, details::proxy_domain::host,
+                             details::proxy_access::non_constant,
+                             details::proxy_type::reference>>;
     /// The type of the (const) proxy objects for the container elements
-    using const_proxy_type =
-        interface_type<proxy<schema_type, details::proxy_type::host,
-                             details::proxy_access::constant>>;
+    using const_proxy_type = interface_type<
+        proxy<schema_type, details::proxy_domain::host,
+              details::proxy_access::constant, details::proxy_type::reference>>;
+    /// Type type of standalone proxy objects for the container
+    using object_type =
+        interface_type<proxy<schema_type, details::proxy_domain::host,
+                             details::proxy_access::non_constant,
+                             details::proxy_type::standalone>>;
 
     /// @name Constructors and assignment operators
     /// @{
@@ -80,6 +86,8 @@ public:
     /// Reserve memory for the container
     VECMEM_HOST
     void reserve(size_type size);
+    /// Add a new element to the container
+    VECMEM_HOST void push_back(const object_type& element);
 
     /// Get the vector of a specific variable (non-const)
     template <std::size_t INDEX>
