@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -25,8 +25,8 @@ TEST(core_conditional_memory_resource_test, allocate1) {
 
     void* p = nullptr;
 
+    EXPECT_THROW(p = res.allocate(0), std::bad_alloc);
     EXPECT_THROW(p = res.allocate(10), std::bad_alloc);
-    EXPECT_NO_THROW(p = res.allocate(0));
     EXPECT_EQ(allocs, 0);
     EXPECT_NO_THROW(p = res.allocate(5321));
     EXPECT_EQ(allocs, 1);
@@ -58,8 +58,8 @@ TEST(core_conditional_memory_resource_test, allocate2) {
 
     void* p = nullptr;
 
+    EXPECT_THROW(p = res.allocate(0), std::bad_alloc);
     EXPECT_THROW(p = res.allocate(10), std::bad_alloc);
-    EXPECT_NO_THROW(p = res.allocate(0));
     EXPECT_THROW(p = res.allocate(5321), std::bad_alloc);
     EXPECT_THROW(p = res.allocate(55), std::bad_alloc);
     EXPECT_THROW(p = res.allocate(19), std::bad_alloc);
