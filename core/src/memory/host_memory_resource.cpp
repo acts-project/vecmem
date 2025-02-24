@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
+#include <stdexcept>
 
 namespace vecmem {
 
@@ -27,7 +28,7 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
                                         std::size_t alignment) {
 
     if (bytes == 0) {
-        return nullptr;
+        throw std::bad_alloc();
     }
 
 #ifdef VECMEM_HAVE_STD_ALIGNED_ALLOC
@@ -77,9 +78,11 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
     return ptr;
 }
 
-void host_memory_resource::do_deallocate(void *ptr, std::size_t, std::size_t) {
+void host_memory_resource::do_deallocate(void *ptr, std::size_t bytes,
+                                         std::size_t) {
 
-    if (ptr == nullptr) {
+    assert(ptr != nullptr);
+    if (bytes == 0u) {
         return;
     }
 
