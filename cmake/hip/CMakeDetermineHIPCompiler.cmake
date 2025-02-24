@@ -83,14 +83,14 @@ set( CMAKE_HIP_COMPILER_ENV_VAR "HIPCXX" )
 set( CMAKE_HIP_HOST_LINKER "${CMAKE_CXX_COMPILER}" )
 
 # Decide whether to generate AMD or NVidia code using HIP.
-set( CMAKE_HIP_PLATFORM_DEFAULT "hcc" )
+set( CMAKE_HIP_PLATFORM_DEFAULT "amd" )
 if( NOT "$ENV{HIP_PLATFORM}" STREQUAL "" )
    set( CMAKE_HIP_PLATFORM_DEFAULT "$ENV{HIP_PLATFORM}" )
 endif()
 set( CMAKE_HIP_PLATFORM "${CMAKE_HIP_PLATFORM_DEFAULT}" CACHE STRING
    "Platform to build all HIP code for in the project" )
 set_property( CACHE CMAKE_HIP_PLATFORM
-   PROPERTY STRINGS "hcc" "nvcc" "amd" "nvidia" )
+   PROPERTY STRINGS "amd" "nvidia" )
 
 # Set up C++14 by default for HIP.
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "C++ standard to use with HIP" )
