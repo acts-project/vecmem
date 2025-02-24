@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -14,6 +14,10 @@
 // HIP include(s).
 #include <hip/hip_runtime_api.h>
 
+// System include(s).
+#include <cassert>
+#include <stdexcept>
+
 namespace vecmem::hip {
 
 host_memory_resource::host_memory_resource() = default;
@@ -23,7 +27,7 @@ host_memory_resource::~host_memory_resource() = default;
 void* host_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 
     if (nbytes == 0) {
-        return nullptr;
+        throw std::bad_alloc();
     }
 
     // Allocate the memory.
@@ -33,9 +37,11 @@ void* host_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
     return result;
 }
 
-void host_memory_resource::do_deallocate(void* ptr, std::size_t, std::size_t) {
+void host_memory_resource::do_deallocate(void* ptr, std::size_t bytes,
+                                         std::size_t) {
 
-    if (ptr == nullptr) {
+    assert(ptr != nullptr);
+    if (bytes == 0u) {
         return;
     }
 
