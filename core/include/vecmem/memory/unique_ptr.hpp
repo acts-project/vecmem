@@ -17,6 +17,20 @@
 #include "vecmem/vecmem_core_export.hpp"
 
 namespace vecmem {
+namespace details {
+
+/// Helper function for generating a nonexistent, but still "aligned" pointer.
+///
+/// @tparam T The type of the pointer
+/// @return The pointer
+///
+template <typename T>
+T get_nonexistent_pointer() {
+    return reinterpret_cast<T>(0xf000U);
+}
+
+}  // namespace details
+
 /**
  * @brief A unique pointer type for non-trivial objects.
  *
@@ -118,7 +132,7 @@ make_unique_obj(memory_resource& m, std::size_t n) {
 
     // Handle the case with zero elements.
     if (n == 0) {
-        return unique_obj_ptr<T>(reinterpret_cast<pointer_t>(0xf0000000));
+        return unique_obj_ptr<T>(details::get_nonexistent_pointer<pointer_t>());
     }
 
     /*
@@ -249,7 +263,8 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
 
     // Handle the case with zero elements.
     if (n == 0) {
-        return unique_alloc_ptr<T>(reinterpret_cast<pointer_t>(0xf0000000));
+        return unique_alloc_ptr<T>(
+            details::get_nonexistent_pointer<pointer_t>());
     }
 
     /*
@@ -403,7 +418,8 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n,
 
     // Handle the case with zero elements.
     if (n == 0) {
-        return unique_alloc_ptr<T>(reinterpret_cast<pointer_t>(0xf0000000));
+        return unique_alloc_ptr<T>(
+            details::get_nonexistent_pointer<pointer_t>());
     }
 
     /*
