@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -13,6 +13,9 @@
 // SYCL include(s).
 #include <sycl/sycl.hpp>
 
+// System include(s).
+#include <cassert>
+
 namespace vecmem::sycl::details {
 
 memory_resource_base::memory_resource_base(const queue_wrapper& queue)
@@ -20,9 +23,11 @@ memory_resource_base::memory_resource_base(const queue_wrapper& queue)
 
 memory_resource_base::~memory_resource_base() = default;
 
-void memory_resource_base::do_deallocate(void* ptr, std::size_t, std::size_t) {
+void memory_resource_base::do_deallocate(void* ptr, std::size_t size,
+                                         std::size_t) {
 
-    if (ptr == nullptr) {
+    assert(ptr != nullptr);
+    if (size == 0u) {
         return;
     }
 
