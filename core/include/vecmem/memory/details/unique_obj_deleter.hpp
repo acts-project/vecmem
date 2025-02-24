@@ -122,12 +122,12 @@ public:
      * makes it easier to cross-check the logic.
      */
     void operator()(pointer_t p) const {
-        assert(m_mr != nullptr);
+        assert(m_mr != nullptr || m_size == 0u);
 
         /*
-         * If this ever happens, something has gone VERY wrong...
+         * Non-null pointers with a zero size can happen.
          */
-        if (m_mr == nullptr) {
+        if (m_size == 0u) {
             return;
         }
 
