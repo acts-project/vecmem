@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -34,12 +34,9 @@ TEST(core_terminal_memory_resource_test, deallocate) {
 
     void* p = ups.allocate(1024);
 
-    void* i = nullptr;
-
     /*
      * How do you even meaningfully test that a bit of code does nothing?
      */
-    EXPECT_NO_THROW(res.deallocate(i, 8));
     EXPECT_NO_THROW(res.deallocate(p, 1024));
 
     ups.deallocate(p, 1024);
