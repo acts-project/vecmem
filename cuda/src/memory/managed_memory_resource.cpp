@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,6 +15,10 @@
 // CUDA include(s).
 #include <cuda_runtime_api.h>
 
+// System include(s).
+#include <cassert>
+#include <stdexcept>
+
 namespace vecmem::cuda {
 
 managed_memory_resource::managed_memory_resource() = default;
@@ -24,7 +28,7 @@ managed_memory_resource::~managed_memory_resource() = default;
 void *managed_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 
     if (bytes == 0) {
-        return nullptr;
+        throw std::bad_alloc();
     }
 
     // Allocate the memory.
@@ -34,9 +38,11 @@ void *managed_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
     return res;
 }
 
-void managed_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
+void managed_memory_resource::do_deallocate(void *p, std::size_t bytes,
+                                            std::size_t) {
 
-    if (p == nullptr) {
+    assert(p != nullptr);
+    if (bytes == 0u) {
         return;
     }
 
