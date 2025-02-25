@@ -16,11 +16,12 @@ __compiler_gnu( HIP )
 set( CMAKE_HIP_DEPENDS_USE_COMPILER TRUE )
 set( CMAKE_HIP_DEPFILE_FORMAT gcc )
 
-# Decide how to do the build for the AMD and NVidia backends.
+# Decide how to do the build for the AMD (hcc) and NVidia (nvcc) backends.
 set( CMAKE_INCLUDE_FLAG_HIP "-I" )
 set( CMAKE_INCLUDE_SYSTEM_FLAG_HIP "-isystem " )
 set( CMAKE_HIP_STANDARD_LIBRARIES "${HIPToolkit_RUNTIME_LIBRARY}" )
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
 
    if( "${CMAKE_HIP_COMPILER_VERSION}" VERSION_LESS "3.7" )
       set( CMAKE_HIP_COMPILE_SOURCE_TYPE_FLAG "-x c++" )
@@ -29,7 +30,8 @@ if( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" )
    endif()
    set( CMAKE_HIP_STANDARD_INCLUDE_DIRECTORIES ${HIPToolkit_INCLUDE_DIRS} )
 
-elseif( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" )
+elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+        ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
 
    include( Compiler/NVIDIA-CUDA )
 

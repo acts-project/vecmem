@@ -90,7 +90,7 @@ endif()
 set( CMAKE_HIP_PLATFORM "${CMAKE_HIP_PLATFORM_DEFAULT}" CACHE STRING
    "Platform to build all HIP code for in the project" )
 set_property( CACHE CMAKE_HIP_PLATFORM
-   PROPERTY STRINGS "amd" "nvidia" )
+   PROPERTY STRINGS "hcc" "nvcc" "amd" "nvidia" )
 
 # Set up C++14 by default for HIP.
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "C++ standard to use with HIP" )

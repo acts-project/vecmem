@@ -11,7 +11,8 @@ include( vecmem-functions )
 set( CMAKE_HIP_STANDARD 14 CACHE STRING "The (HIP) C++ standard to use" )
 
 # Basic flags for all build modes.
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
    vecmem_add_flag( CMAKE_HIP_FLAGS "-Wall" )
    vecmem_add_flag( CMAKE_HIP_FLAGS "-Wextra" )
    vecmem_add_flag( CMAKE_HIP_FLAGS "-Wshadow" )
@@ -20,13 +21,15 @@ if( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" )
 endif()
 
 # Generate debug symbols for the device code as well in a debug build.
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    vecmem_add_flag( CMAKE_HIP_FLAGS_DEBUG "-G" )
 endif()
 
 # Fail on warnings, if asked for that behaviour.
 if( VECMEM_FAIL_ON_WARNINGS )
-   if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
+   if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+       ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
       vecmem_add_flag( CMAKE_HIP_FLAGS "-Werror" )
    elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
            ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )

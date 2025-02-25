@@ -12,7 +12,7 @@ endif()
 set( CMAKE_HIP_PLATFORM "${CMAKE_HIP_PLATFORM_DEFAULT}" CACHE STRING
    "Platform to build the HIP code for" )
 set_property( CACHE CMAKE_HIP_PLATFORM
-   PROPERTY STRINGS "amd" "nvidia" )
+   PROPERTY STRINGS "hcc" "nvcc" "amd" "nvidia" )
 
 # Set a helper variable.
 set( _quietFlag )
@@ -67,7 +67,8 @@ endif()
 
 # Look for the HIP runtime library.
 set( HIPToolkit_LIBRARIES )
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
    find_library( HIPToolkit_amdhip64_LIBRARY
       NAMES "amdhip64"
       PATHS "${HIP_ROOT_DIR}"
@@ -81,7 +82,8 @@ if( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" )
    set( HIPToolkit_RUNTIME_LIBRARY "${HIPToolkit_amdhip64_LIBRARY}" )
    list( APPEND HIPToolkit_LIBRARIES "${HIPToolkit_amdhip64_LIBRARY}" )
    list( APPEND _requiredVars HIPToolkit_RUNTIME_LIBRARY )
-elseif( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" )
+elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+        ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
    set( HIPToolkit_RUNTIME_LIBRARY "${CUDA_CUDART}" )
    list( APPEND HIPToolkit_LIBRARIES CUDA::cudart CUDA::cuda_driver )
 else()
@@ -90,10 +92,14 @@ else()
 endif()
 
 # Set up the compiler definitions needed to use the HIP headers.
-if( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" )
-   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_AMD__" )
-elseif( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" )
-   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_NVIDIA__" )
+if( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "hcc" ) OR
+    ( "${CMAKE_HIP_PLATFORM}" STREQUAL "amd" ) )
+   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_HCC__"
+                               "__HIP_PLATFORM_AMD__" )
+elseif( ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvcc" ) OR
+        ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
+   set( HIPToolkit_DEFINITIONS "__HIP_PLATFORM_NVCC__"
+                               "__HIP_PLATFORM_NVIDIA__" )
 else()
    message( SEND_ERROR "Invalid (CMAKE_)HIP_PLATFORM setting received" )
 endif()
