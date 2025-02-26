@@ -5,7 +5,7 @@
 # Mozilla Public License Version 2.0
 
 # Decide whether AMD or NVidia code is generated using HIP.
-set( CMAKE_HIP_PLATFORM_DEFAULT "hcc" )
+set( CMAKE_HIP_PLATFORM_DEFAULT "amd" )
 if( NOT "$ENV{HIP_PLATFORM}" STREQUAL "" )
    set( CMAKE_HIP_PLATFORM_DEFAULT "$ENV{HIP_PLATFORM}" )
 endif()

@@ -83,7 +83,7 @@ set( CMAKE_HIP_COMPILER_ENV_VAR "HIPCXX" )
 set( CMAKE_HIP_HOST_LINKER "${CMAKE_CXX_COMPILER}" )
 
 # Decide whether to generate AMD or NVidia code using HIP.
-set( CMAKE_HIP_PLATFORM_DEFAULT "hcc" )
+set( CMAKE_HIP_PLATFORM_DEFAULT "amd" )
 if( NOT "$ENV{HIP_PLATFORM}" STREQUAL "" )
    set( CMAKE_HIP_PLATFORM_DEFAULT "$ENV{HIP_PLATFORM}" )
 endif()
