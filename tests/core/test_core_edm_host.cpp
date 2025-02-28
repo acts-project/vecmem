@@ -213,6 +213,42 @@ TEST_F(core_edm_host_test, const_proxy) {
     }
 }
 
+TEST_F(core_edm_host_test, proxy_assign) {
+
+    // Helper lambda for comparing two containers.
+    auto compare = [](const host_type& h1, const host_type& h2) {
+        EXPECT_EQ(h1.size(), h2.size());
+        for (std::size_t i = 0; i < h1.size(); ++i) {
+            EXPECT_EQ(h1.at(i).scalar(), h2.at(i).scalar());
+            EXPECT_FLOAT_EQ(h1.at(i).vector(), h2.at(i).vector());
+            ASSERT_EQ(h1.at(i).jagged_vector().size(),
+                      h2.at(i).jagged_vector().size());
+            for (std::size_t j = 0; j < h1.at(i).jagged_vector().size(); ++j) {
+                EXPECT_DOUBLE_EQ(h1.at(i).jagged_vector().at(j),
+                                 h2.at(i).jagged_vector().at(j));
+            }
+        }
+    };
+
+    // Construct the host containers.
+    host_type orig = create();
+
+    // Make a copy using push_back-s.
+    host_type copy1{m_resource};
+    for (std::size_t i = 0; i < orig.size(); ++i) {
+        copy1.push_back(orig.at(i));
+    }
+    compare(orig, copy1);
+
+    // Make a copy using assignment.
+    host_type copy2{m_resource};
+    copy2.resize(orig.size());
+    for (std::size_t i = 0; i < orig.size(); ++i) {
+        copy2.at(i) = orig.at(i);
+    }
+    compare(orig, copy2);
+}
+
 namespace {
 using simple_schema = vecmem::edm::schema<vecmem::edm::type::scalar<int>,
                                           vecmem::edm::type::vector<float>>;

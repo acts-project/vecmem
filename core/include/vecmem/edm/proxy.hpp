@@ -69,6 +69,12 @@ public:
     VECMEM_HOST_AND_DEVICE proxy(const PARENT& parent,
                                  typename PARENT::size_type index);
 
+    /// Default copy constructor
+    proxy(const proxy&) = default;
+
+    /// Default move constructor
+    proxy(proxy&&) = default;
+
     /// Copy constructor
     ///
     /// @tparam OPDOMAIN The domain of the other proxy
@@ -77,10 +83,10 @@ public:
     ///
     /// @param other The proxy to copy
     ///
-    template <details::proxy_domain OPDOMAIN, details::proxy_access OPACCESS,
-              details::proxy_type OPTYPE>
+    template <typename... OVARTYPES, details::proxy_domain OPDOMAIN,
+              details::proxy_access OPACCESS, details::proxy_type OPTYPE>
     VECMEM_HOST_AND_DEVICE proxy(
-        const proxy<schema<VARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other);
+        const proxy<schema<OVARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other);
 
     /// Construct a proxy from a list of variables
     ///
@@ -93,21 +99,31 @@ public:
         typename details::proxy_var_type<VARTYPES, proxy_domain, access_type,
                                          proxy_type>::type... data);
 
-    /// Assignment operator
-    ///
-    /// @tparam OPDOMAIN The domain of the other proxy
-    /// @tparam OPACCESS The access mode of the other proxy
-    /// @tparam OPTYPE   The type of the other proxy
+    /// Copy assignment operator from an identical type
     ///
     /// @param other The proxy to copy
     ///
     /// @return A reference to the proxy object
     ///
-    template <details::proxy_domain OPDOMAIN, details::proxy_access OPACCESS,
-              details::proxy_type OPTYPE>
+    VECMEM_HOST_AND_DEVICE
+    proxy& operator=(const proxy& other);
+
+    /// Copy assignment operator from a different type
+    ///
+    /// @tparam OVARTYPES The variable types of the other proxy
+    /// @tparam OPDOMAIN  The domain of the other proxy
+    /// @tparam OPACCESS  The access mode of the other proxy
+    /// @tparam OPTYPE    The type of the other proxy
+    ///
+    /// @param other The proxy to copy
+    ///
+    /// @return A reference to the proxy object
+    ///
+    template <typename... OVARTYPES, details::proxy_domain OPDOMAIN,
+              details::proxy_access OPACCESS, details::proxy_type OPTYPE>
     VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>&
     operator=(
-        const proxy<schema<VARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other);
+        const proxy<schema<OVARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other);
 
     /// @}
 
