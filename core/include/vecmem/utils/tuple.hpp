@@ -51,13 +51,21 @@ struct tuple<T, Ts...> {
 
     /// Default constructor
     constexpr tuple() = default;
+    /// Default copy constructor
+    constexpr tuple(const tuple &) = default;
+    /// Default move constructor
+    constexpr tuple(tuple &&) noexcept = default;
 
     /// Copy constructor
     ///
     /// @param parent The parent to copy
     ///
     template <typename U, typename... Us,
-              std::enable_if_t<sizeof...(Ts) == sizeof...(Us), bool> = true>
+              std::enable_if_t<
+                  vecmem::details::conjunction<
+                      std::is_constructible<T, std::decay_t<U>>,
+                      std::is_constructible<Ts, std::decay_t<Us>>...>::value,
+                  bool> = true>
     VECMEM_HOST_AND_DEVICE constexpr tuple(const tuple<U, Us...> &parent)
         : m_head(parent.m_head), m_tail(parent.m_tail) {}
 
@@ -93,15 +101,30 @@ struct tuple<T, Ts...> {
     VECMEM_HOST_AND_DEVICE constexpr tuple(U &&head, tuple<Us...> &&tail)
         : m_head(std::forward<U>(head)), m_tail(std::move(tail)) {}
 
+    /// Assignment operator
+    ///
+    /// Need to implement this by hand, as the default implementation does not
+    /// do the thing for reference members that we would like it to do. (I.e.
+    /// to copy the referenced elements.)
+    ///
+    /// @param parent The parent to copy
+    ///
+    VECMEM_HOST_AND_DEVICE constexpr tuple &operator=(const tuple &parent) {
+        m_head = parent.m_head;
+        m_tail = parent.m_tail;
+        return *this;
+    }
+
     /// Assignment operator from a (slightly) different tuple type
     ///
     /// @param parent The parent to copy
     ///
     template <typename U, typename... Us,
-              std::enable_if_t<
-                  (!std::is_same<tuple<T, Ts...>, tuple<U, Us...>>::value) &&
-                      sizeof...(Ts) == sizeof...(Us),
-                  bool> = true>
+              std::enable_if_t<(sizeof...(Ts) == sizeof...(Us)) &&
+                                   vecmem::details::conjunction<
+                                       std::is_assignable<T, U &&>,
+                                       std::is_assignable<Ts, Us &&>...>::value,
+                               bool> = true>
     VECMEM_HOST_AND_DEVICE constexpr tuple &operator=(
         const tuple<U, Us...> &parent) {
         m_head = parent.m_head;
