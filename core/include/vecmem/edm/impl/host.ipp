@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -183,7 +183,9 @@ VECMEM_HOST memory_resource& host<schema<VARTYPES...>, INTERFACE>::resource()
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST void get_data_impl(edm::host<edm::schema<VARTYPES...>, INTERFACE>&,
                                edm::data<edm::schema<VARTYPES...>>&,
-                               memory_resource&, std::index_sequence<>) {}
+                               memory_resource&, std::index_sequence<>) {
+    // For SonarCloud: The terminal node doesn't need to do anything.
+}
 
 /// Helper function recursive node
 template <typename... VARTYPES, template <typename> class INTERFACE,
@@ -199,10 +201,12 @@ VECMEM_HOST void get_data_impl(
         // Make the @c vecmem::edm::data object hold on to the
         // @c vecmem::data::jagged_vector_data object. Notice that this is a
         // move assignment here.
-        std::get<I>(data.variables()) = get_data(host.template get<I>(), &mr);
+        std::get<I>(data.variables()) =
+            ::vecmem::get_data(host.template get<I>(), &mr);
         // Set up the @c vecmem::edm::view object to point at the
         // @c vecmem::data::jagged_vector_data object.
-        data.template get<I>() = get_data(std::get<I>(data.variables()));
+        data.template get<I>() =
+            ::vecmem::get_data(std::get<I>(data.variables()));
     } else if constexpr (edm::type::details::is_scalar<
                              typename std::tuple_element<
                                  I, std::tuple<VARTYPES...>>::type>::value) {
@@ -212,7 +216,7 @@ VECMEM_HOST void get_data_impl(
     } else {
         // For 1D vectors it's enough to make @c vecmem::edm::view have a
         // correct @c vecmem::data::vector_view object.
-        data.template get<I>() = get_data(host.template get<I>());
+        data.template get<I>() = ::vecmem::get_data(host.template get<I>());
     }
     // Continue the recursion.
     get_data_impl(host, data, mr, std::index_sequence<Is...>{});
@@ -249,7 +253,9 @@ template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST void get_data_impl(
     const edm::host<edm::schema<VARTYPES...>, INTERFACE>&,
     edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>&,
-    memory_resource&, std::index_sequence<>) {}
+    memory_resource&, std::index_sequence<>) {
+    // For SonarCloud: The terminal node doesn't need to do anything.
+}
 
 /// Helper function recursive node
 template <typename... VARTYPES, template <typename> class INTERFACE,
@@ -265,10 +271,12 @@ VECMEM_HOST void get_data_impl(
         // Make the @c vecmem::edm::data object hold on to the
         // @c vecmem::data::jagged_vector_data object. Notice that this is a
         // move assignment here.
-        std::get<I>(data.variables()) = get_data(host.template get<I>(), &mr);
+        std::get<I>(data.variables()) =
+            ::vecmem::get_data(host.template get<I>(), &mr);
         // Set up the @c vecmem::edm::view object to point at the
         // @c vecmem::data::jagged_vector_data object.
-        data.template get<I>() = get_data(std::get<I>(data.variables()));
+        data.template get<I>() =
+            ::vecmem::get_data(std::get<I>(data.variables()));
     } else if constexpr (edm::type::details::is_scalar<
                              typename std::tuple_element<
                                  I, std::tuple<VARTYPES...>>::type>::value) {
@@ -278,7 +286,7 @@ VECMEM_HOST void get_data_impl(
     } else {
         // For 1D vectors it's enough to make @c vecmem::edm::view have a
         // correct @c vecmem::data::vector_view object.
-        data.template get<I>() = get_data(host.template get<I>());
+        data.template get<I>() = ::vecmem::get_data(host.template get<I>());
     }
     // Continue the recursion.
     get_data_impl(host, data, mr, std::index_sequence<Is...>{});
