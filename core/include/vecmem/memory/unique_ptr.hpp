@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -17,6 +17,20 @@
 #include "vecmem/vecmem_core_export.hpp"
 
 namespace vecmem {
+namespace details {
+
+/// Helper function for generating a nonexistent, but still "aligned" pointer.
+///
+/// @tparam T The type of the pointer
+/// @return The pointer
+///
+template <typename T>
+T get_nonexistent_pointer() {
+    return reinterpret_cast<T>(0xf000U);
+}
+
+}  // namespace details
+
 /**
  * @brief A unique pointer type for non-trivial objects.
  *
@@ -115,6 +129,11 @@ typename std::enable_if_t<std::is_array_v<T> && std::extent_v<T> == 0,
                           unique_obj_ptr<T>>
 make_unique_obj(memory_resource& m, std::size_t n) {
     using pointer_t = typename unique_obj_ptr<T>::deleter_type::pointer_t;
+
+    // Handle the case with zero elements.
+    if (n == 0) {
+        return unique_obj_ptr<T>(details::get_nonexistent_pointer<pointer_t>());
+    }
 
     /*
      * Calculate the size of the allocation and use the memory resource to
@@ -241,6 +260,12 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
 
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
+
+    // Handle the case with zero elements.
+    if (n == 0) {
+        return unique_alloc_ptr<T>(
+            details::get_nonexistent_pointer<pointer_t>());
+    }
 
     /*
      * Calculate the size of the allocation and use the memory resource to
@@ -390,6 +415,12 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n,
 
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
+
+    // Handle the case with zero elements.
+    if (n == 0) {
+        return unique_alloc_ptr<T>(
+            details::get_nonexistent_pointer<pointer_t>());
+    }
 
     /*
      * Calculate the size of the allocation and use the memory resource to

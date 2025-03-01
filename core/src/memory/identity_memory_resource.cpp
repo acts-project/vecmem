@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -19,10 +19,6 @@ identity_memory_resource::~identity_memory_resource() = default;
 void *identity_memory_resource::do_allocate(std::size_t size,
                                             std::size_t align) {
 
-    if (size == 0) {
-        return nullptr;
-    }
-
     /*
      * By definition, this just forwards the allocation upstream.
      */
@@ -31,10 +27,6 @@ void *identity_memory_resource::do_allocate(std::size_t size,
 
 void identity_memory_resource::do_deallocate(void *ptr, std::size_t size,
                                              std::size_t align) {
-
-    if (ptr == nullptr) {
-        return;
-    }
 
     /*
      * The deallocation, like allocation, is a forwarding method.

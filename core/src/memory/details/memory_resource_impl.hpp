@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -9,6 +9,10 @@
 
 // Local include(s).
 #include "vecmem/utils/debug.hpp"
+
+// System include(s).
+#include <cassert>
+#include <stdexcept>
 
 /// Helper macro for implementing all standard constructors, copy/move
 /// operators and functions for a memory resource that uses PIMPL.
@@ -22,7 +26,7 @@
     CLASSNAME& CLASSNAME::operator=(CLASSNAME&&) = default;                 \
     void* CLASSNAME::do_allocate(std::size_t size, std::size_t alignment) { \
         if (size == 0) {                                                    \
-            return nullptr;                                                 \
+            throw std::bad_alloc();                                         \
         }                                                                   \
         void* ptr = m_impl->allocate(size, alignment);                      \
         VECMEM_DEBUG_MSG(2, "Allocated %lu bytes at %p", size, ptr);        \
@@ -30,7 +34,8 @@
     }                                                                       \
     void CLASSNAME::do_deallocate(void* ptr, std::size_t size,              \
                                   std::size_t alignment) {                  \
-        if (ptr == nullptr) {                                               \
+        assert(ptr != nullptr);                                             \
+        if (size == 0u) {                                                   \
             return;                                                         \
         }                                                                   \
         VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", ptr);             \
