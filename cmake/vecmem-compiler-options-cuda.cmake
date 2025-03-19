@@ -4,9 +4,10 @@
 #
 # Mozilla Public License Version 2.0
 
-# CUDAToolkit requires CMake 3.17.
-cmake_minimum_required( VERSION 3.17 )
+cmake_minimum_required(VERSION 3.21)
 
+# Only set these compiler flags if we are the top level project.
+if(PROJECT_IS_TOP_LEVEL)
 # Include the helper function(s).
 include( vecmem-functions )
 
@@ -38,4 +39,5 @@ if( VECMEM_FAIL_ON_WARNINGS )
    elseif( "${CMAKE_CUDA_COMPILER_ID}" MATCHES "Clang" )
       vecmem_add_flag( CMAKE_CUDA_FLAGS "-Werror" )
    endif()
+endif()
 endif()

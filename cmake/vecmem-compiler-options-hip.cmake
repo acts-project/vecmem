@@ -4,6 +4,10 @@
 #
 # Mozilla Public License Version 2.0
 
+cmake_minimum_required(VERSION 3.21)
+
+# Only set these compiler flags if we are the top level project.
+if(PROJECT_IS_TOP_LEVEL)
 # Include the helper function(s).
 include( vecmem-functions )
 
@@ -35,4 +39,5 @@ if( VECMEM_FAIL_ON_WARNINGS )
            ( "${CMAKE_HIP_PLATFORM}" STREQUAL "nvidia" ) )
       vecmem_add_flag( CMAKE_HIP_FLAGS "-Werror all-warnings" )
    endif()
+endif()
 endif()
