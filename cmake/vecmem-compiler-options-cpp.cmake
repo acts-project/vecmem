@@ -4,6 +4,10 @@
 #
 # Mozilla Public License Version 2.0
 
+cmake_minimum_required(VERSION 3.21)
+
+# Only set these compiler flags if we are the top level project.
+if(PROJECT_IS_TOP_LEVEL)
 # Include the helper function(s).
 include( vecmem-functions )
 
@@ -50,4 +54,5 @@ if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" )
 elseif( ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" ) OR
         ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" ) )
    vecmem_add_flag( CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined" )
+endif()
 endif()
