@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -29,8 +29,10 @@ VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
 }
 
 template <typename TYPE>
+template <typename OTHERTYPE,
+          std::enable_if_t<std::is_convertible<OTHERTYPE, TYPE>::value, bool>>
 VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
-    const device_vector& parent)
+    const device_vector<OTHERTYPE>& parent)
     : m_capacity(parent.m_capacity),
       m_size(parent.m_size),
       m_ptr(parent.m_ptr) {
@@ -52,9 +54,26 @@ VECMEM_HOST_AND_DEVICE device_vector<TYPE>& device_vector<TYPE>::operator=(
     }
 
     // Copy the other object's payload.
-    m_capacity = rhs.m_capacity;
-    m_size = rhs.m_size;
-    m_ptr = rhs.m_ptr;
+    resize(rhs.size());
+    for (size_type i = 0; i < size(); ++i) {
+        this->at(i) = rhs.at(i);
+    }
+
+    // Return a reference to this object.
+    return *this;
+}
+
+template <typename TYPE>
+template <typename OTHERTYPE,
+          std::enable_if_t<std::is_convertible<OTHERTYPE, TYPE>::value, bool>>
+VECMEM_HOST_AND_DEVICE device_vector<TYPE>& device_vector<TYPE>::operator=(
+    const device_vector<OTHERTYPE>& rhs) {
+
+    // Copy the other object's payload.
+    resize(rhs.size());
+    for (size_type i = 0; i < size(); ++i) {
+        this->at(i) = rhs.at(i);
+    }
 
     // Return a reference to this object.
     return *this;
