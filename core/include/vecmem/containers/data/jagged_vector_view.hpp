@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -44,18 +44,16 @@ template <typename T>
 class jagged_vector_view {
 
     /// We cannot use boolean types.
-    static_assert(!std::is_same<typename std::remove_cv<T>::type, bool>::value,
+    static_assert(!std::is_same<std::remove_cv_t<T>, bool>::value,
                   "bool is not supported in VecMem containers");
 
 public:
     /// Size type used in the class
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
     /// Value type of the jagged array
-    typedef vector_view<T> value_type;
+    using value_type = vector_view<T>;
     /// Pointer type to the jagged array
-    typedef value_type* pointer;
-    /// Constant pointer type to the jagged array
-    typedef const value_type* const_pointer;
+    using pointer = std::add_pointer_t<value_type>;
 
     /**
      * Default constructor
@@ -115,14 +113,11 @@ public:
     VECMEM_HOST_AND_DEVICE
     size_type capacity() const;
 
-    /// Get a pointer to the vector elements (non-const)
+    /// Get a pointer to the vector elements
     VECMEM_HOST_AND_DEVICE
-    pointer ptr();
-    /// Get a pointer to the vector elements (const)
-    VECMEM_HOST_AND_DEVICE
-    const_pointer ptr() const;
+    pointer ptr() const;
 
-    /// Access the host accessible non-const array describing the inner vectors
+    /// Access the host accessible array describing the inner vectors
     ///
     /// This may or may not return the same pointer as @c ptr(). If the
     /// underlying data is stored in host-accessible memory, then the two will
@@ -135,16 +130,9 @@ public:
     ///         vectors
     ///
     VECMEM_HOST_AND_DEVICE
-    pointer host_ptr();
-    /// Access the host accessible const array describing the inner vectors
-    ///
-    /// @return A host-accessible pointer to the array describing the inner
-    ///         vectors
-    ///
-    VECMEM_HOST_AND_DEVICE
-    const_pointer host_ptr() const;
+    pointer host_ptr() const;
 
-protected:
+private:
     /**
      * The number of rows in this jagged vector.
      */

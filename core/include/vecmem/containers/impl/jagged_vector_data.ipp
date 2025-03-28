@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -47,9 +47,9 @@ template <typename T>
 jagged_vector_data<T>::jagged_vector_data(size_type size, memory_resource& mem)
     : base_type(size, nullptr),
       m_memory(::allocate_jagged_memory<T>(size, mem)) {
-    // Point the base class at the newly allocated memory.
-    base_type::m_ptr = m_memory.get();
-    base_type::m_host_ptr = m_memory.get();
+
+    // Set up the base object.
+    base_type::operator=(base_type{size, m_memory.get(), m_memory.get()});
 
     /*
      * Construct vecmem::data::vector_view objects in the allocated area.
@@ -61,7 +61,7 @@ jagged_vector_data<T>::jagged_vector_data(size_type size, memory_resource& mem)
          * We use the memory allocated earlier and construct device vector
          * objects there.
          */
-        new (base_type::m_ptr + i) vector_view<T>();
+        new (base_type::host_ptr() + i) vector_view<T>();
     }
 }
 

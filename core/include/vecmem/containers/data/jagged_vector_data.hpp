@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -33,9 +33,9 @@ public:
     /// Type of the base class
     using base_type = jagged_vector_view<T>;
     /// Use the base class's @c size_type
-    typedef typename base_type::size_type size_type;
+    using size_type = typename base_type::size_type;
     /// Use the base class's @c value_type
-    typedef typename base_type::value_type value_type;
+    using value_type = typename base_type::value_type;
 
     /// Default constructor
     jagged_vector_data();
@@ -50,10 +50,10 @@ public:
      */
     jagged_vector_data(size_type size, memory_resource& mem);
     /// Move constructor
-    jagged_vector_data(jagged_vector_data&&) = default;
+    jagged_vector_data(jagged_vector_data&&) noexcept = default;
 
     /// Move assignment
-    jagged_vector_data& operator=(jagged_vector_data&&) = default;
+    jagged_vector_data& operator=(jagged_vector_data&&) noexcept = default;
 
 private:
     /// Data object owning the allocated memory

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -51,25 +51,26 @@ public:
     /// @{
 
     /// Type of the "outer" array elements
-    typedef device_vector<T> value_type;
+    using value_type = device_vector<T>;
     /// Size type for the array
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
     /// Pointer difference type
-    typedef std::ptrdiff_t difference_type;
+    using difference_type = std::ptrdiff_t;
 
     /// Value reference type
-    typedef device_vector<T> reference;
+    using reference = device_vector<T>;
     /// Constant value reference type
-    typedef device_vector<const T> const_reference;
+    using const_reference = device_vector<std::add_const_t<T> >;
 
     /// Forward iterator type
-    typedef details::jagged_device_vector_iterator<T> iterator;
+    using iterator = details::jagged_device_vector_iterator<T>;
     /// Constant forward iterator type
-    typedef details::jagged_device_vector_iterator<const T> const_iterator;
+    using const_iterator =
+        details::jagged_device_vector_iterator<std::add_const_t<T> >;
     /// Reverse iterator type
-    typedef details::reverse_iterator<iterator> reverse_iterator;
+    using reverse_iterator = details::reverse_iterator<iterator>;
     /// Constant reverse iterator type
-    typedef details::reverse_iterator<const_iterator> const_reverse_iterator;
+    using const_reverse_iterator = details::reverse_iterator<const_iterator>;
 
     /// @}
 
