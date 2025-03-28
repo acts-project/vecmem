@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2025 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -13,16 +13,23 @@ on: [ push, pull_request ]
 # All the different "check" jobs.
 jobs:
 
-  # Check the formatting of the code using clang-format.
+  # Check the formatting of the code using pre-commit.
   format:
     runs-on: ubuntu-latest
-    container: ghcr.io/acts-project/format10:v11
+    env:
+      PRE_COMMIT_HOME: '/tmp/pre-commit'
     steps:
-      - uses: actions/checkout@v4
-      - name: Check
-        run: .github/check_format.sh .
-      - uses: actions/upload-artifact@v4
-        if: failure()
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          name: changed
-          path: changed
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PRE_COMMIT_HOME }}
+          key: ${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure
