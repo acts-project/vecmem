@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2024 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -34,10 +34,16 @@ vector_buffer<TYPE>::vector_buffer(size_type capacity,
         return;
     }
 
-    std::tie(m_memory, base_type::m_size, base_type::m_ptr) =
+    // Allocate the memory of the buffer.
+    size_pointer size = nullptr;
+    pointer ptr = nullptr;
+    std::tie(m_memory, size, ptr) =
         details::aligned_multiple_placement<std::remove_pointer_t<size_pointer>,
                                             std::remove_pointer_t<pointer>>(
             resource, type == buffer_type::fixed_size ? 0 : 1, capacity);
+
+    // Set up the base object.
+    base_type::operator=(base_type{capacity, size, ptr});
 }
 
 }  // namespace data

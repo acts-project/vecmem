@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -80,43 +80,26 @@ VECMEM_HOST_AND_DEVICE bool jagged_vector_view<T>::operator!=(
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename jagged_vector_view<T>::size_type
-jagged_vector_view<T>::size() const {
+VECMEM_HOST_AND_DEVICE auto jagged_vector_view<T>::size() const -> size_type {
 
     return m_size;
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename jagged_vector_view<T>::size_type
-jagged_vector_view<T>::capacity() const {
+VECMEM_HOST_AND_DEVICE auto jagged_vector_view<T>::capacity() const
+    -> size_type {
 
     return m_size;
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename jagged_vector_view<T>::pointer
-jagged_vector_view<T>::ptr() {
+VECMEM_HOST_AND_DEVICE auto jagged_vector_view<T>::ptr() const -> pointer {
 
     return m_ptr;
 }
 
 template <typename T>
-VECMEM_HOST_AND_DEVICE typename jagged_vector_view<T>::const_pointer
-jagged_vector_view<T>::ptr() const {
-
-    return m_ptr;
-}
-
-template <typename T>
-VECMEM_HOST_AND_DEVICE typename jagged_vector_view<T>::pointer
-jagged_vector_view<T>::host_ptr() {
-
-    return m_host_ptr;
-}
-
-template <typename T>
-VECMEM_HOST_AND_DEVICE typename jagged_vector_view<T>::const_pointer
-jagged_vector_view<T>::host_ptr() const {
+VECMEM_HOST_AND_DEVICE auto jagged_vector_view<T>::host_ptr() const -> pointer {
 
     return m_host_ptr;
 }

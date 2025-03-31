@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -30,13 +30,13 @@ class vector_buffer : public vector_view<TYPE> {
 
 public:
     /// The base type used by this class
-    typedef vector_view<TYPE> base_type;
+    using base_type = vector_view<TYPE>;
     /// Size type definition coming from the base class
-    typedef typename base_type::size_type size_type;
+    using size_type = typename base_type::size_type;
     /// Size pointer type definition coming from the base class
-    typedef typename base_type::size_pointer size_pointer;
+    using size_pointer = typename base_type::size_pointer;
     /// Pointer type definition coming from the base class
-    typedef typename base_type::pointer pointer;
+    using pointer = typename base_type::pointer;
 
     /// @name Checks on the type of the array element
     /// @{
@@ -54,10 +54,10 @@ public:
     vector_buffer(size_type capacity, memory_resource& resource,
                   buffer_type type = buffer_type::fixed_size);
     /// Move constructor
-    vector_buffer(vector_buffer&&) = default;
+    vector_buffer(vector_buffer&&) noexcept = default;
 
     /// Move assignment
-    vector_buffer& operator=(vector_buffer&&) = default;
+    vector_buffer& operator=(vector_buffer&&) noexcept = default;
 
 private:
     /// Data object owning the allocated memory

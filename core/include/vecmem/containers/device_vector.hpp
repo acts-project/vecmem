@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -44,35 +44,36 @@ public:
     /// @{
 
     /// Type of the array elements
-    typedef TYPE value_type;
+    using value_type = TYPE;
     /// Size type for the array
-    typedef unsigned int size_type;
+    using size_type = unsigned int;
     /// Pointer difference type
-    typedef std::ptrdiff_t difference_type;
+    using difference_type = std::ptrdiff_t;
 
     /// Pointer type to the size of the array
-    typedef
+    using size_pointer =
         typename std::conditional<std::is_const<TYPE>::value, const size_type*,
-                                  size_type*>::type size_pointer;
+                                  size_type*>::type;
 
     /// Value reference type
-    typedef value_type& reference;
+    using reference = std::add_lvalue_reference_t<value_type>;
     /// Constant value reference type
-    typedef const value_type& const_reference;
+    using const_reference =
+        std::add_lvalue_reference_t<std::add_const_t<value_type>>;
     /// Value pointer type
-    typedef value_type* pointer;
+    using pointer = std::add_pointer_t<value_type>;
     /// Constant value pointer type
-    typedef const value_type* const_pointer;
+    using const_pointer = std::add_pointer_t<std::add_const_t<value_type>>;
 
     /// Forward iterator type
-    typedef pointer iterator;
+    using iterator = pointer;
     /// Constant forward iterator type
-    typedef const_pointer const_iterator;
+    using const_iterator = const_pointer;
     /// Reverse iterator type
-    typedef vecmem::details::reverse_iterator<iterator> reverse_iterator;
+    using reverse_iterator = vecmem::details::reverse_iterator<iterator>;
     /// Constant reverse iterator type
-    typedef vecmem::details::reverse_iterator<const_iterator>
-        const_reverse_iterator;
+    using const_reverse_iterator =
+        vecmem::details::reverse_iterator<const_iterator>;
 
     /// @}
 

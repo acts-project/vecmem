@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -44,18 +44,14 @@ class vector_view {
 
 public:
     /// Size type used in the class
-    typedef unsigned int size_type;
+    using size_type = unsigned int;
     /// Pointer type to the size of the array
-    typedef
-        typename std::conditional<std::is_const<TYPE>::value, const size_type*,
-                                  size_type*>::type size_pointer;
-    /// Constant pointer type to the size of the array
-    typedef const typename std::remove_const<size_pointer>::type
-        const_size_pointer;
+    using size_pointer =
+        std::conditional_t<std::is_const<TYPE>::value,
+                           std::add_pointer_t<std::add_const_t<size_type>>,
+                           std::add_pointer_t<size_type>>;
     /// Pointer type to the array
-    typedef TYPE* pointer;
-    /// Constant pointer to the array
-    typedef const typename std::remove_const<pointer>::type const_pointer;
+    using pointer = std::add_pointer_t<TYPE>;
 
     /// Default constructor
     vector_view() = default;
@@ -91,20 +87,18 @@ public:
 
     /// Equality check. Two objects are only equal if they point at the same
     /// memory.
-    template <
-        typename OTHERTYPE,
-        std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
-                                      std::remove_cv_t<OTHERTYPE> >::value,
-                         bool> = true>
+    template <typename OTHERTYPE,
+              std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
+                                            std::remove_cv_t<OTHERTYPE>>::value,
+                               bool> = true>
     VECMEM_HOST_AND_DEVICE bool operator==(
         const vector_view<OTHERTYPE>& rhs) const;
 
     /// Inequality check. Simply based on @c operator==.
-    template <
-        typename OTHERTYPE,
-        std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
-                                      std::remove_cv_t<OTHERTYPE> >::value,
-                         bool> = true>
+    template <typename OTHERTYPE,
+              std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
+                                            std::remove_cv_t<OTHERTYPE>>::value,
+                               bool> = true>
     VECMEM_HOST_AND_DEVICE bool operator!=(
         const vector_view<OTHERTYPE>& rhs) const;
 
@@ -115,21 +109,15 @@ public:
     VECMEM_HOST_AND_DEVICE
     size_type capacity() const;
 
-    /// Get a pointer to the size of the vector (non-const)
+    /// Get a pointer to the size of the vector
     VECMEM_HOST_AND_DEVICE
-    size_pointer size_ptr();
-    /// Get a pointer to the size of the vector (const)
-    VECMEM_HOST_AND_DEVICE
-    const_size_pointer size_ptr() const;
+    size_pointer size_ptr() const;
 
-    /// Get a pointer to the vector elements (non-const)
+    /// Get a pointer to the vector elements
     VECMEM_HOST_AND_DEVICE
-    pointer ptr();
-    /// Get a pointer to the vector elements (const)
-    VECMEM_HOST_AND_DEVICE
-    const_pointer ptr() const;
+    pointer ptr() const;
 
-protected:
+private:
     /// Maximum capacity of the array
     size_type m_capacity;
     /// Pointer to the size of the array in memory

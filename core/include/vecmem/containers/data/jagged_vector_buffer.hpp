@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -31,13 +31,13 @@ class jagged_vector_buffer : public jagged_vector_view<TYPE> {
 
 public:
     /// The base type used by this class
-    typedef jagged_vector_view<TYPE> base_type;
+    using base_type = jagged_vector_view<TYPE>;
     /// Use the base class's @c size_type
-    typedef typename base_type::size_type size_type;
+    using size_type = typename base_type::size_type;
     /// Use the base class's @c value_type
-    typedef typename base_type::value_type value_type;
+    using value_type = typename base_type::value_type;
     /// Pointer type to the jagged array
-    typedef typename base_type::pointer pointer;
+    using pointer = typename base_type::pointer;
 
     /// @name Checks on the type of the array element
     /// @{
@@ -95,10 +95,10 @@ public:
                          buffer_type type = buffer_type::fixed_size);
 
     /// Move constructor
-    jagged_vector_buffer(jagged_vector_buffer&&) = default;
+    jagged_vector_buffer(jagged_vector_buffer&&) noexcept = default;
 
     /// Move assignment
-    jagged_vector_buffer& operator=(jagged_vector_buffer&&) = default;
+    jagged_vector_buffer& operator=(jagged_vector_buffer&&) noexcept = default;
 
 private:
     /// Data object for the @c vecmem::data::vector_view array

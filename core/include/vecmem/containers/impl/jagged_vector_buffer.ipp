@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -107,11 +107,12 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
                 resource, capacities.size(), total_elements);
     }
 
-    // Point the base class at the newly allocated memory.
-    base_type::m_ptr =
+    // Set up the base object.
+    base_type::operator=(base_type{
+        capacities.size(),
         ((host_access_resource != nullptr) ? m_outer_memory.get()
-                                           : m_outer_host_memory.get());
-    base_type::m_host_ptr = m_outer_host_memory.get();
+                                           : m_outer_host_memory.get()),
+        m_outer_host_memory.get()});
 
     // Set up the vecmem::vector_view objects in the host accessible memory.
     std::ptrdiff_t ptrdiff = 0;

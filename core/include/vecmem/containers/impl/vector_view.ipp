@@ -1,13 +1,10 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 #pragma once
-
-// System include(s).
-#include <cassert>
 
 namespace vecmem {
 namespace data {
@@ -84,26 +81,14 @@ VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::capacity() const -> size_type {
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::size_ptr() -> size_pointer {
-
-    return m_size;
-}
-
-template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::size_ptr() const
-    -> const_size_pointer {
+    -> size_pointer {
 
     return m_size;
 }
 
 template <typename TYPE>
-VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::ptr() -> pointer {
-
-    return m_ptr;
-}
-
-template <typename TYPE>
-VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::ptr() const -> const_pointer {
+VECMEM_HOST_AND_DEVICE auto vector_view<TYPE>::ptr() const -> pointer {
 
     return m_ptr;
 }
