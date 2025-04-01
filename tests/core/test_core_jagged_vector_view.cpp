@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -217,7 +217,7 @@ TEST_F(core_jagged_vector_view_test, sizeless) {
 
     // Create a resizable buffer for a jagged vector.
     vecmem::data::jagged_vector_buffer<int> output_data(
-        std::vector<std::size_t>(3, 0), m_mem, nullptr,
+        vecmem::vector<std::size_t>(3, 0, &m_mem), m_mem, nullptr,
         vecmem::data::buffer_type::resizable);
     copy.setup(output_data)->wait();
 
