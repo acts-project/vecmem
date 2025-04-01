@@ -86,10 +86,11 @@ public:
     /// @param type The type (resizable or not) of the buffer
     ///
     template <typename SIZE_TYPE = std::size_t,
+              typename SIZE_ALLOC = std::allocator<SIZE_TYPE>,
               std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
                                    std::is_unsigned<SIZE_TYPE>::value,
                                bool> = true>
-    jagged_vector_buffer(const std::vector<SIZE_TYPE>& capacities,
+    jagged_vector_buffer(const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
                          memory_resource& resource,
                          memory_resource* host_access_resource = nullptr,
                          buffer_type type = buffer_type::fixed_size);
