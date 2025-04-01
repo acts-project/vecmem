@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -13,6 +13,7 @@
 
 // System include(s).
 #include <cstddef>
+#include <functional>
 
 namespace vecmem {
 
@@ -31,11 +32,11 @@ public:
      *
      * @param[in] upstream The upstream memory resource to use.
      */
-    VECMEM_CORE_EXPORT
-    identity_memory_resource(memory_resource& upstream);
+    VECMEM_CORE_EXPORT explicit identity_memory_resource(
+        memory_resource& upstream);
     /// Destructor
     VECMEM_CORE_EXPORT
-    ~identity_memory_resource();
+    ~identity_memory_resource() override;
 
 private:
     /// @name Function(s) implementing @c vecmem::memory_resource
@@ -43,20 +44,18 @@ private:
 
     /// Allocate memory with the upstream resource
     VECMEM_CORE_EXPORT
-    virtual void* do_allocate(std::size_t, std::size_t) override final;
+    void* do_allocate(std::size_t, std::size_t) override;
     /// De-allocate a previously allocated memory block
     VECMEM_CORE_EXPORT
-    virtual void do_deallocate(void* p, std::size_t,
-                               std::size_t) override final;
+    void do_deallocate(void* p, std::size_t, std::size_t) override;
     /// Compare the equality of @c *this memory resource with another
     VECMEM_CORE_EXPORT
-    virtual bool do_is_equal(
-        const memory_resource&) const noexcept override final;
+    bool do_is_equal(const memory_resource&) const noexcept override;
 
     /// @}
 
     /// The upstream memory resource to use
-    memory_resource& m_upstream;
+    std::reference_wrapper<memory_resource> m_upstream;
 
 };  // class identity_memory_resource
 

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -27,7 +27,7 @@ inline constexpr std::size_t align_up(std::size_t v,
     return (v + (align_bytes - 1)) & ~(align_bytes - 1);
 }
 
-static constexpr std::size_t minimum_superblock_size = 1u << 18u;
+constexpr std::size_t minimum_superblock_size = 1u << 18u;
 
 }  // namespace
 
@@ -156,9 +156,9 @@ arena_memory_resource_impl::block arena_memory_resource_impl::first_fit(
 
         if (b.size() > size) {
             // split the block and put the remainder back.
-            auto const split = b.split(size);
-            free_blocks.insert(i, split.second);
-            return split.first;
+            auto const [split_first, split_second] = b.split(size);
+            free_blocks.insert(i, split_second);
+            return split_first;
         } else {
             // b.size == size then return b
             return b;
@@ -235,11 +235,10 @@ arena_memory_resource_impl::block arena_memory_resource_impl::expand_arena(
     else {
         size = size_superblocks_;
     }
-    std::pair<std::set<block>::iterator, bool> ret =
-        free_blocks_.insert({mm_.allocate(size), size});
+    auto [ret, _] = free_blocks_.insert({mm_.allocate(size), size});
 
     current_size_ += size;
-    return *(ret.first);
+    return *ret;
 }
 
 arena_memory_resource_impl::block arena_memory_resource_impl::free_block(

@@ -21,13 +21,14 @@
 ///                      and various functions for.
 ///
 #define VECMEM_MEMORY_RESOURCE_PIMPL_IMPL(CLASSNAME)                        \
-    CLASSNAME::CLASSNAME(CLASSNAME&&) = default;                            \
+    CLASSNAME::CLASSNAME(CLASSNAME&&) noexcept = default;                   \
     CLASSNAME::~CLASSNAME() = default;                                      \
-    CLASSNAME& CLASSNAME::operator=(CLASSNAME&&) = default;                 \
+    CLASSNAME& CLASSNAME::operator=(CLASSNAME&&) noexcept = default;        \
     void* CLASSNAME::do_allocate(std::size_t size, std::size_t alignment) { \
         if (size == 0) {                                                    \
             throw std::bad_alloc();                                         \
         }                                                                   \
+        assert(m_impl);                                                     \
         void* ptr = m_impl->allocate(size, alignment);                      \
         VECMEM_DEBUG_MSG(2, "Allocated %lu bytes at %p", size, ptr);        \
         return ptr;                                                         \
@@ -39,5 +40,6 @@
             return;                                                         \
         }                                                                   \
         VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", ptr);             \
+        assert(m_impl);                                                     \
         m_impl->deallocate(ptr, size, alignment);                           \
     }

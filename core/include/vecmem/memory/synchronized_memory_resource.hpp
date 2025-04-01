@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -27,22 +27,16 @@ class synchronized_memory_resource final : public memory_resource {
 
 public:
     /// Constructor around an upstream memory resource
-    VECMEM_CORE_EXPORT
-    synchronized_memory_resource(memory_resource& upstream);
-    /// Move constructor
-    VECMEM_CORE_EXPORT
-    synchronized_memory_resource(synchronized_memory_resource&& parent);
+    VECMEM_CORE_EXPORT explicit synchronized_memory_resource(
+        memory_resource& upstream);
     /// Copy constructor
     VECMEM_CORE_EXPORT
     synchronized_memory_resource(const synchronized_memory_resource& parent);
 
     /// Destructor
     VECMEM_CORE_EXPORT
-    virtual ~synchronized_memory_resource();
+    ~synchronized_memory_resource() override;
 
-    /// Move assignment operator
-    VECMEM_CORE_EXPORT
-    synchronized_memory_resource& operator=(synchronized_memory_resource&& rhs);
     /// Copy assignment operator
     VECMEM_CORE_EXPORT
     synchronized_memory_resource& operator=(
@@ -54,15 +48,13 @@ private:
 
     /// Allocate memory with one of the underlying resources
     VECMEM_CORE_EXPORT
-    virtual void* do_allocate(std::size_t, std::size_t) override final;
+    void* do_allocate(std::size_t, std::size_t) override;
     /// De-allocate a previously allocated memory block
     VECMEM_CORE_EXPORT
-    virtual void do_deallocate(void* p, std::size_t,
-                               std::size_t) override final;
+    void do_deallocate(void* p, std::size_t, std::size_t) override;
     /// Compare the equality of @c *this memory resource with another
     VECMEM_CORE_EXPORT
-    virtual bool do_is_equal(
-        const memory_resource& other) const noexcept override final;
+    bool do_is_equal(const memory_resource& other) const noexcept override;
 
     /// @}
 

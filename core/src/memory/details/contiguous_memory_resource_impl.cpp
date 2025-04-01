@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -22,12 +22,12 @@ contiguous_memory_resource_impl::contiguous_memory_resource_impl(
     memory_resource &upstream, std::size_t size)
     : m_upstream(upstream),
       m_size(size),
-      m_begin(m_upstream.allocate(m_size)),
+      m_begin(static_cast<char *>(m_upstream.allocate(m_size))),
       m_next(m_begin) {
 
     VECMEM_DEBUG_MSG(
         2, "Allocated %lu bytes at %p from the upstream memory resource",
-        m_size, m_begin);
+        m_size, static_cast<void *>(m_begin));
 }
 
 contiguous_memory_resource_impl::~contiguous_memory_resource_impl() {
@@ -37,7 +37,7 @@ contiguous_memory_resource_impl::~contiguous_memory_resource_impl() {
     m_upstream.deallocate(m_begin, m_size);
     VECMEM_DEBUG_MSG(
         2, "De-allocated %lu bytes at %p using the upstream memory resource",
-        m_size, m_begin);
+        m_size, static_cast<void *>(m_begin));
 }
 
 void *contiguous_memory_resource_impl::allocate(std::size_t size,
@@ -52,24 +52,22 @@ void *contiguous_memory_resource_impl::allocate(std::size_t size,
      * library-related reasons.
      */
     assert(m_next >= m_begin);
-    std::size_t rem =
-        m_size - static_cast<std::size_t>(static_cast<char *>(m_next) -
-                                          static_cast<char *>(m_begin));
+    std::size_t rem = m_size - static_cast<std::size_t>(m_next - m_begin);
 
     /*
      * Employ std::align to find the next properly aligned address.
      */
-    if (std::align(alignment, size, m_next, rem)) {
+    void *result = m_next;
+    if (std::align(alignment, size, result, rem)) {
         /*
          * Store the return pointer, update the stored next pointer, then
          * return.
          */
-        void *res = m_next;
-        m_next = static_cast<char *>(m_next) + size;
+        m_next = static_cast<char *>(result) + size;
 
-        VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", size, res);
+        VECMEM_DEBUG_MSG(4, "Allocated %lu bytes at %p", size, result);
 
-        return res;
+        return result;
     } else {
         /*
          * If std::align returns a false-like value, the allocation has failed
