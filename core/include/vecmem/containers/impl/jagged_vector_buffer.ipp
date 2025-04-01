@@ -69,13 +69,14 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
                            type) {}
 
 template <typename TYPE>
-template <typename SIZE_TYPE,
+template <typename SIZE_TYPE, typename SIZE_ALLOC,
           std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
                                std::is_unsigned<SIZE_TYPE>::value,
                            bool> >
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
-    const std::vector<SIZE_TYPE>& capacities, memory_resource& resource,
-    memory_resource* host_access_resource, buffer_type type)
+    const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
+    memory_resource& resource, memory_resource* host_access_resource,
+    buffer_type type)
     : base_type(capacities.size(), nullptr),
       m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
           (host_access_resource == nullptr ? 0 : capacities.size()), resource)),
