@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -44,7 +44,10 @@ protected:
 
     /// Dummy container interface for the test
     template <typename BASE>
-    struct interface {};
+    struct interface : public BASE {
+        using BASE::BASE;
+        using BASE::operator=;
+    };
 
     /// Memory resource for the test(s)
     vecmem::host_memory_resource m_resource;
@@ -415,6 +418,55 @@ TEST_F(core_edm_buffer_test, device) {
         EXPECT_EQ(device4.get<3>()[i].size(), CAPACITIES[i] / 2u);
         for (unsigned int j = 0; j < device4.get<3>()[i].size(); ++j) {
             EXPECT_EQ(device4.get<3>()[i][j], 9 + static_cast<int>(j));
+        }
+    }
+}
+
+TEST_F(core_edm_buffer_test, proxy) {
+
+    // Construct two buffers.
+    vecmem::edm::buffer<jagged_schema> source_buffer{
+        CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(source_buffer)->wait();
+    vecmem::edm::buffer<jagged_schema> target_buffer{
+        CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
+    m_copy.setup(target_buffer)->wait();
+
+    // Set up device containers for them.
+    vecmem::edm::device<jagged_schema, interface> source{source_buffer};
+    const vecmem::edm::device<jagged_const_schema, interface> const_source{
+        vecmem::get_data(source_buffer)};
+    vecmem::edm::device<jagged_schema, interface> target{target_buffer};
+
+    // Set some values on the source buffer.
+    source.get<2>() = 2;
+    for (unsigned int i = 0; i < CAPACITY; ++i) {
+        source.get<0>()[i] = 1.f;
+        for (unsigned int j = 0; j < CAPACITIES[i]; ++j) {
+            source.get<1>()[i][j] = 3. + static_cast<double>(j);
+            source.get<3>()[i][j] = 4 + static_cast<int>(j);
+        }
+    }
+
+    // Copy elements from the source to the target.
+    for (unsigned int i = 0; i < CAPACITY; ++i) {
+        if (i % 2) {
+            target.at(i) = source.at(i);
+        } else {
+            target.at(i) = const_source.at(i);
+        }
+    }
+
+    // Inspect the target buffer.
+    EXPECT_EQ(target.get<2>(), 2);
+    for (unsigned int i = 0; i < CAPACITY; ++i) {
+        EXPECT_FLOAT_EQ(target.get<0>()[i], 1.f);
+        ASSERT_EQ(target.get<1>()[i].size(), CAPACITIES[i]);
+        ASSERT_EQ(target.get<3>()[i].size(), CAPACITIES[i]);
+        for (unsigned int j = 0; j < CAPACITIES[i]; ++j) {
+            EXPECT_DOUBLE_EQ(target.get<1>()[i][j],
+                             3. + static_cast<double>(j));
+            EXPECT_EQ(target.get<3>()[i][j], 4 + static_cast<int>(j));
         }
     }
 }

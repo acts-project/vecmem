@@ -70,7 +70,7 @@ public:
 
     /// Constructor with a mandatory memory resource
     VECMEM_HOST
-    host(memory_resource& resource);
+    explicit host(memory_resource& resource);
 
     /// @}
 

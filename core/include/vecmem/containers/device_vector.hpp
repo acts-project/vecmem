@@ -81,12 +81,23 @@ public:
     VECMEM_HOST_AND_DEVICE
     explicit device_vector(const data::vector_view<value_type>& data);
     /// Copy constructor
-    VECMEM_HOST_AND_DEVICE
-    device_vector(const device_vector& parent);
+    device_vector(const device_vector& parent) = default;
+    /// Copy constructor
+    template <typename OTHERTYPE,
+              std::enable_if_t<std::is_convertible<OTHERTYPE, TYPE>::value,
+                               bool> = true>
+    VECMEM_HOST_AND_DEVICE device_vector(
+        const device_vector<OTHERTYPE>& parent);
 
-    /// Copy assignment operator
-    VECMEM_HOST_AND_DEVICE
-    device_vector& operator=(const device_vector& rhs);
+    /// Copy assignment operator from an identical type
+    VECMEM_HOST_AND_DEVICE device_vector& operator=(const device_vector& rhs);
+
+    /// Copy assignment operator from a different type
+    template <typename OTHERTYPE,
+              std::enable_if_t<std::is_convertible<OTHERTYPE, TYPE>::value,
+                               bool> = true>
+    VECMEM_HOST_AND_DEVICE device_vector& operator=(
+        const device_vector<OTHERTYPE>& rhs);
 
     /// @name Vector element access functions
     /// @{

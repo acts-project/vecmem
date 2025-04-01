@@ -37,11 +37,11 @@ VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PDOMAIN, PACCESS,
 
 template <typename... VARTYPES, details::proxy_domain PDOMAIN,
           details::proxy_access PACCESS, details::proxy_type PTYPE>
-template <details::proxy_domain OPDOMAIN, details::proxy_access OPACCESS,
-          details::proxy_type OPTYPE>
+template <typename... OVARTYPES, details::proxy_domain OPDOMAIN,
+          details::proxy_access OPACCESS, details::proxy_type OPTYPE>
 VECMEM_HOST_AND_DEVICE
 proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>::proxy(
-    const proxy<schema<VARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other)
+    const proxy<schema<OVARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other)
     : m_data(other.variables()) {}
 
 template <typename... VARTYPES, details::proxy_domain PDOMAIN,
@@ -54,15 +54,25 @@ proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>::proxy(
 
 template <typename... VARTYPES, details::proxy_domain PDOMAIN,
           details::proxy_access PACCESS, details::proxy_type PTYPE>
-template <details::proxy_domain OPDOMAIN, details::proxy_access OPACCESS,
-          details::proxy_type OPTYPE>
 VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>&
 proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>::operator=(
-    const proxy<schema<VARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other) {
+    const proxy& other) {
 
-    if (static_cast<const void*>(this) != static_cast<const void*>(&other)) {
+    if (this != &other) {
         m_data = other.variables();
     }
+    return *this;
+}
+
+template <typename... VARTYPES, details::proxy_domain PDOMAIN,
+          details::proxy_access PACCESS, details::proxy_type PTYPE>
+template <typename... OVARTYPES, details::proxy_domain OPDOMAIN,
+          details::proxy_access OPACCESS, details::proxy_type OPTYPE>
+VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>&
+proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>::operator=(
+    const proxy<schema<OVARTYPES...>, OPDOMAIN, OPACCESS, OPTYPE>& other) {
+
+    m_data = other.variables();
     return *this;
 }
 
