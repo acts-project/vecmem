@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -49,10 +49,10 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(size_type capacity,
 }
 
 template <typename... VARTYPES>
-template <typename SIZE_TYPE,
-          std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
-                               std::is_unsigned<SIZE_TYPE>::value,
-                           bool>>
+template <
+    typename SIZE_TYPE,
+    std::enable_if_t<
+        std::is_integral_v<SIZE_TYPE> && std::is_unsigned_v<SIZE_TYPE>, bool>>
 VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(
     const std::vector<SIZE_TYPE>& capacities, memory_resource& main_mr,
     memory_resource* host_mr, vecmem::data::buffer_type type)

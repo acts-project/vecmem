@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -56,7 +56,7 @@ struct binary_page_memory_resource_impl {
     static constexpr std::size_t min_page_size = 8;
 
     /// Constructor, on top of another memory resource
-    binary_page_memory_resource_impl(memory_resource &upstream);
+    explicit binary_page_memory_resource_impl(memory_resource &upstream);
 
     /**
      * @brief The different possible states a page can be in.
@@ -149,6 +149,11 @@ struct binary_page_memory_resource_impl {
          * @brief Default implementation of move assignment.
          */
         page_ref &operator=(page_ref &&) = default;
+
+        /**
+         * @brief Default implementation of copy assignment.
+         */
+        page_ref &operator=(const page_ref &) = default;
 
         /**
          * @brief Equality operator of pages.

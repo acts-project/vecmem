@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -60,7 +60,7 @@ public:
     /// Default constructor
     data() = default;
     /// Move constructor
-    data(data&&) = default;
+    data(data&&) noexcept = default;
 
     /// Move assignment operator
     data& operator=(data&&) = default;

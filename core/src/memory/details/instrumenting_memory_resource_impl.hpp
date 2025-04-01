@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -28,7 +28,7 @@ public:
      *
      * @param[in] upstream The upstream memory resource to use.
      */
-    instrumenting_memory_resource_impl(memory_resource& upstream);
+    explicit instrumenting_memory_resource_impl(memory_resource& upstream);
 
     /**
      * @brief Return a list of memory allocation and deallocation events in

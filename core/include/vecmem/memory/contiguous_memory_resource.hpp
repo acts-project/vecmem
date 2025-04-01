@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -52,7 +52,7 @@ public:
     contiguous_memory_resource(memory_resource& upstream, std::size_t size);
     /// Move constructor
     VECMEM_CORE_EXPORT
-    contiguous_memory_resource(contiguous_memory_resource&& parent);
+    contiguous_memory_resource(contiguous_memory_resource&& parent) noexcept;
     /// Disallow copying the memory resource
     contiguous_memory_resource(const contiguous_memory_resource&) = delete;
     /**
@@ -61,11 +61,12 @@ public:
      * This method deallocates the arena memory on the upstream allocator.
      */
     VECMEM_CORE_EXPORT
-    ~contiguous_memory_resource();
+    ~contiguous_memory_resource() override;
 
     /// Move assignment operator
     VECMEM_CORE_EXPORT
-    contiguous_memory_resource& operator=(contiguous_memory_resource&& rhs);
+    contiguous_memory_resource& operator=(
+        contiguous_memory_resource&& rhs) noexcept;
     /// Disallow copying the memory resource
     contiguous_memory_resource& operator=(const contiguous_memory_resource&) =
         delete;
@@ -76,11 +77,10 @@ private:
 
     /// Allocate memory with one of the underlying resources
     VECMEM_CORE_EXPORT
-    virtual void* do_allocate(std::size_t, std::size_t) override final;
+    void* do_allocate(std::size_t, std::size_t) override;
     /// De-allocate a previously allocated memory block
     VECMEM_CORE_EXPORT
-    virtual void do_deallocate(void* p, std::size_t,
-                               std::size_t) override final;
+    void do_deallocate(void* p, std::size_t, std::size_t) override;
 
     /// @}
 

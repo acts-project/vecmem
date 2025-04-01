@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -22,7 +22,7 @@ class choice_memory_resource_impl {
 
 public:
     /// Constructor
-    choice_memory_resource_impl(
+    explicit choice_memory_resource_impl(
         std::function<memory_resource&(std::size_t, std::size_t)> decision);
 
     /// Allocate memory with a chosen memory resource

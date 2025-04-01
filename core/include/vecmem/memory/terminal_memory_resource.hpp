@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -41,11 +41,11 @@ public:
      *
      * @param[in] upstream The upstream memory resource to use.
      */
-    VECMEM_CORE_EXPORT
-    terminal_memory_resource(memory_resource& upstream);
+    VECMEM_CORE_EXPORT explicit terminal_memory_resource(
+        memory_resource& upstream);
     /// Destructor
     VECMEM_CORE_EXPORT
-    ~terminal_memory_resource();
+    ~terminal_memory_resource() override;
 
 private:
     /// @name Function(s) implementing @c vecmem::memory_resource
@@ -53,15 +53,13 @@ private:
 
     /// Throw @c std::bad_alloc.
     VECMEM_CORE_EXPORT
-    virtual void* do_allocate(std::size_t, std::size_t) override final;
+    void* do_allocate(std::size_t, std::size_t) override;
     /// Do nothing.
     VECMEM_CORE_EXPORT
-    virtual void do_deallocate(void* p, std::size_t,
-                               std::size_t) override final;
+    void do_deallocate(void* p, std::size_t, std::size_t) override;
     /// Check whether the other resource is also a terminal resource.
     VECMEM_CORE_EXPORT
-    virtual bool do_is_equal(
-        const memory_resource& other) const noexcept override final;
+    bool do_is_equal(const memory_resource& other) const noexcept override;
 
     /// @}
 

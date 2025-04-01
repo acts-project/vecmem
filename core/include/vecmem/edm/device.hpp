@@ -71,7 +71,7 @@ public:
 
     /// Constructor from an approptiate view
     VECMEM_HOST_AND_DEVICE
-    device(const view<schema_type>& view);
+    explicit device(const view<schema_type>& view);
 
     /// @}
 

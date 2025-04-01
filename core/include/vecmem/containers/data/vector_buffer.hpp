@@ -42,7 +42,7 @@ public:
     /// @{
 
     /// Make sure that the template type does not have a custom destructor
-    static_assert(std::is_trivially_destructible<TYPE>::value,
+    static_assert(std::is_trivially_destructible_v<TYPE>,
                   "vecmem::data::vector_buffer can not handle types with "
                   "custom destructors");
 
