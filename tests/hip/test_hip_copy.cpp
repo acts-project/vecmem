@@ -63,9 +63,7 @@ static ::testing::Environment* const async_hip_copy_env =
 
 /// The configurations to run the tests with. Skip tests with asynchronous
 /// copies on "managed host memory" on Windows. (Using managed memory as
-/// "device memory" does seem to be fine.) There seems to be some issue with
-/// HIP, which results in SEH exceptions when scheduling an asynchronous
-/// copy in such a setup, while a previous asynchronous copy is still running.
+/// "device memory" does seem to be fine.)
 static const auto hip_copy_configs = testing::Values(
     std::tie(hip_device_copy_ptr, hip_host_copy_ptr, hip_device_resource_ptr,
              hip_host_resource_ptr),

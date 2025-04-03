@@ -10,6 +10,7 @@
 #include "vecmem/utils/hip/async_copy.hpp"
 
 #include "../hip_error_handling.hpp"
+#include "../get_stream.hpp"
 #include "vecmem/utils/debug.hpp"
 
 // HIP include(s).
