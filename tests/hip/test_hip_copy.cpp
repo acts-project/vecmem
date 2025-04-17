@@ -27,8 +27,7 @@
 static vecmem::hip::host_memory_resource hip_host_resource;
 static vecmem::memory_resource* hip_host_resource_ptr = &hip_host_resource;
 static vecmem::hip::device_memory_resource hip_device_resource;
-static vecmem::memory_resource* hip_device_resource_ptr =
-    &hip_device_resource;
+static vecmem::memory_resource* hip_device_resource_ptr = &hip_device_resource;
 static vecmem::hip::managed_memory_resource hip_managed_resource;
 static vecmem::memory_resource* hip_managed_resource_ptr =
     &hip_managed_resource;
@@ -67,19 +66,18 @@ static const auto hip_copy_configs = testing::Values(
              hip_host_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_device_resource_ptr, hip_host_resource_ptr),
-    std::tie(hip_device_copy_ptr, hip_host_copy_ptr,
-             hip_managed_resource_ptr, hip_host_resource_ptr),
+    std::tie(hip_device_copy_ptr, hip_host_copy_ptr, hip_managed_resource_ptr,
+             hip_host_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_managed_resource_ptr, hip_host_resource_ptr),
-    std::tie(hip_device_copy_ptr, hip_host_copy_ptr,
-             hip_managed_resource_ptr, hip_managed_resource_ptr),
+    std::tie(hip_device_copy_ptr, hip_host_copy_ptr, hip_managed_resource_ptr,
+             hip_managed_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_managed_resource_ptr, hip_managed_resource_ptr),
     std::tie(hip_device_copy_ptr, hip_host_copy_ptr, hip_device_resource_ptr,
              hip_managed_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
-             hip_device_resource_ptr, hip_managed_resource_ptr)
-);
+             hip_device_resource_ptr, hip_managed_resource_ptr));
 // Instantiate the test suite(s).
 INSTANTIATE_TEST_SUITE_P(hip_copy_tests, copy_tests, hip_copy_configs);
 INSTANTIATE_TEST_SUITE_P(hip_soa_copy_tests_simple, soa_copy_tests_simple,
