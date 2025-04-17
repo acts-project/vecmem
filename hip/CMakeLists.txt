@@ -22,6 +22,8 @@ vecmem_add_library( vecmem_hip hip
    # Utilities.
    "include/vecmem/utils/hip/copy.hpp"
    "src/utils/hip/copy.cpp"
+   "include/vecmem/utils/hip/async_copy.hpp"
+   "src/utils/hip/async_copy.cpp"
    "include/vecmem/utils/hip/stream_wrapper.hpp"
    "src/utils/stream_wrapper.cpp"
    "src/utils/get_device_name.hpp"
