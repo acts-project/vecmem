@@ -82,7 +82,6 @@ static const auto hip_copy_configs = testing::Values(
              hip_managed_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_device_resource_ptr, hip_managed_resource_ptr)
-#endif
 );
 
 // Instantiate the test suite(s).
