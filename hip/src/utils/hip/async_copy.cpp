@@ -9,8 +9,8 @@
 // VecMem include(s).
 #include "vecmem/utils/hip/async_copy.hpp"
 
-#include "../hip_error_handling.hpp"
 #include "../get_stream.hpp"
+#include "../hip_error_handling.hpp"
 #include "vecmem/utils/debug.hpp"
 
 // HIP include(s).
@@ -27,9 +27,7 @@ namespace {
 struct hip_event : public vecmem::abstract_event {
 
     /// Constructor with the created event.
-    hip_event(hipEvent_t event) : m_event(event) {
-        assert(m_event != nullptr);
-    }
+    hip_event(hipEvent_t event) : m_event(event) { assert(m_event != nullptr); }
     /// Destructor
     ~hip_event() {
         // Check if the user forgot to wait on this asynchronous event.
@@ -104,8 +102,8 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
 
     // Perform the copy.
     VECMEM_HIP_ERROR_CHECK(hipMemcpyAsync(to_ptr, from_ptr, size,
-                                            copy_type_translator[cptype],
-                                            details::get_stream(m_stream)));
+                                          copy_type_translator[cptype],
+                                          details::get_stream(m_stream)));
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(1,

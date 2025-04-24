@@ -12,7 +12,9 @@
 // VecMem include(s).
 #include "vecmem/memory/hip/device_memory_resource.hpp"
 #include "vecmem/memory/hip/host_memory_resource.hpp"
+#include "vecmem/memory/hip/managed_memory_resource.hpp"
 #include "vecmem/utils/copy.hpp"
+#include "vecmem/utils/hip/async_copy.hpp"
 #include "vecmem/utils/hip/copy.hpp"
 
 // GoogleTest include(s).
@@ -26,8 +28,7 @@
 static vecmem::hip::host_memory_resource hip_host_resource;
 static vecmem::memory_resource* hip_host_resource_ptr = &hip_host_resource;
 static vecmem::hip::device_memory_resource hip_device_resource;
-static vecmem::memory_resource* hip_device_resource_ptr =
-    &hip_device_resource;
+static vecmem::memory_resource* hip_device_resource_ptr = &hip_device_resource;
 static vecmem::hip::managed_memory_resource hip_managed_resource;
 static vecmem::memory_resource* hip_managed_resource_ptr =
     &hip_managed_resource;
@@ -69,20 +70,16 @@ static const auto hip_copy_configs = testing::Values(
              hip_host_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_device_resource_ptr, hip_host_resource_ptr),
-    std::tie(hip_device_copy_ptr, hip_host_copy_ptr,
-             hip_managed_resource_ptr, hip_host_resource_ptr),
+    std::tie(hip_device_copy_ptr, hip_host_copy_ptr, hip_managed_resource_ptr,
+             hip_host_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_managed_resource_ptr, hip_host_resource_ptr),
-    std::tie(hip_device_copy_ptr, hip_host_copy_ptr,
-             hip_managed_resource_ptr, hip_managed_resource_ptr),
-#ifndef _WIN32
+    std::tie(hip_device_copy_ptr, hip_host_copy_ptr, hip_managed_resource_ptr,
+             hip_managed_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_managed_resource_ptr, hip_managed_resource_ptr),
-#endif
     std::tie(hip_device_copy_ptr, hip_host_copy_ptr, hip_device_resource_ptr,
-             hip_managed_resource_ptr)
-#ifndef _WIN32
-        ,
+             hip_managed_resource_ptr),
     std::tie(hip_async_device_copy_ptr, hip_host_copy_ptr,
              hip_device_resource_ptr, hip_managed_resource_ptr)
 #endif
