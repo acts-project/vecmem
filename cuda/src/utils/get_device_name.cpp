@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022 CERN for the benefit of the ACTS project
+ * (c) 2022-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -15,9 +15,7 @@
 // System include(s).
 #include <sstream>
 
-namespace vecmem {
-namespace cuda {
-namespace details {
+namespace vecmem::cuda::details {
 
 std::string get_device_name(int device) {
 
@@ -34,6 +32,4 @@ std::string get_device_name(int device) {
     return result.str();
 }
 
-}  // namespace details
-}  // namespace cuda
-}  // namespace vecmem
+}  // namespace vecmem::cuda::details

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -13,12 +13,18 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace vecmem {
-namespace cuda {
+namespace vecmem::cuda {
+
+/// Specific exception for CUDA errors thrown by this library
+struct runtime_error : public std::runtime_error {
+    /// Inherit the base class's constructor(s)
+    using std::runtime_error::runtime_error;
+};
+
 namespace details {
 
-void throw_error(cudaError_t errorCode, const char* expression,
-                 const char* file, int line) {
+[[noreturn]] void throw_error(cudaError_t errorCode, const char* expression,
+                              const char* file, int line) {
 
     // Create a nice error message.
     std::ostringstream errorMsg;
@@ -26,9 +32,8 @@ void throw_error(cudaError_t errorCode, const char* expression,
              << " (" << cudaGetErrorString(errorCode) << ")";
 
     // Now throw a runtime error with this message.
-    throw std::runtime_error(errorMsg.str());
+    throw runtime_error(errorMsg.str());
 }
 
 }  // namespace details
-}  // namespace cuda
-}  // namespace vecmem
+}  // namespace vecmem::cuda

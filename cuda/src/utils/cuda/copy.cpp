@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -16,6 +16,7 @@
 #include <cuda_runtime_api.h>
 
 // System include(s).
+#include <array>
 #include <cassert>
 #include <string>
 
@@ -23,12 +24,13 @@ namespace vecmem::cuda {
 
 /// Helper array for translating between the vecmem and CUDA copy type
 /// definitions
-static constexpr cudaMemcpyKind copy_type_translator[copy::type::count] = {
-    cudaMemcpyHostToDevice, cudaMemcpyDeviceToHost, cudaMemcpyHostToHost,
-    cudaMemcpyDeviceToDevice, cudaMemcpyDefault};
+static constexpr std::array<cudaMemcpyKind, copy::type::count>
+    copy_type_translator = {cudaMemcpyHostToDevice, cudaMemcpyDeviceToHost,
+                            cudaMemcpyHostToHost, cudaMemcpyDeviceToDevice,
+                            cudaMemcpyDefault};
 
 /// Helper array for providing a printable name for the copy type definitions
-static const std::string copy_type_printer[copy::type::count] = {
+static const std::array<std::string, copy::type::count> copy_type_printer = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};
 
