@@ -215,26 +215,32 @@ public:
     /// @param type       The type of the buffer (fixed or variable size)
     ///
     template <typename SIZE_TYPE = std::size_t,
+              typename SIZE_ALLOC = std::allocator<SIZE_TYPE>,
               std::enable_if_t<std::is_integral_v<SIZE_TYPE> &&
                                    std::is_unsigned_v<SIZE_TYPE>,
                                bool> = true>
     VECMEM_HOST buffer(
-        const std::vector<SIZE_TYPE>& capacities, memory_resource& mr,
-        memory_resource* host_mr = nullptr,
+        const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
+        memory_resource& mr, memory_resource* host_mr = nullptr,
         vecmem::data::buffer_type type = vecmem::data::buffer_type::fixed_size);
 
 private:
     /// Set up a fixed sized buffer
-    template <typename SIZE_TYPE = std::size_t, std::size_t... INDICES>
-    VECMEM_HOST void setup_fixed(const std::vector<SIZE_TYPE>& capacities,
-                                 memory_resource& mr, memory_resource* host_mr,
-                                 std::index_sequence<INDICES...>);
+    template <typename SIZE_TYPE = std::size_t,
+              typename SIZE_ALLOC = std::allocator<SIZE_TYPE>,
+              std::size_t... INDICES>
+    VECMEM_HOST void setup_fixed(
+        const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
+        memory_resource& mr, memory_resource* host_mr,
+        std::index_sequence<INDICES...>);
     /// Set up a resizable buffer
-    template <typename SIZE_TYPE = std::size_t, std::size_t... INDICES>
-    VECMEM_HOST void setup_resizable(const std::vector<SIZE_TYPE>& capacities,
-                                     memory_resource& mr,
-                                     memory_resource* host_mr,
-                                     std::index_sequence<INDICES...>);
+    template <typename SIZE_TYPE = std::size_t,
+              typename SIZE_ALLOC = std::allocator<SIZE_TYPE>,
+              std::size_t... INDICES>
+    VECMEM_HOST void setup_resizable(
+        const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
+        memory_resource& mr, memory_resource* host_mr,
+        std::index_sequence<INDICES...>);
 
     /// The full allocated block of (device) memory
     memory_type m_memory;
