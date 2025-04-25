@@ -22,7 +22,7 @@ void *identity_memory_resource::do_allocate(std::size_t size,
     /*
      * By definition, this just forwards the allocation upstream.
      */
-    return m_upstream.allocate(size, align);
+    return m_upstream.get().allocate(size, align);
 }
 
 void identity_memory_resource::do_deallocate(void *ptr, std::size_t size,
@@ -31,7 +31,7 @@ void identity_memory_resource::do_deallocate(void *ptr, std::size_t size,
     /*
      * The deallocation, like allocation, is a forwarding method.
      */
-    m_upstream.deallocate(ptr, size, align);
+    m_upstream.get().deallocate(ptr, size, align);
 }
 
 bool identity_memory_resource::do_is_equal(
@@ -43,7 +43,7 @@ bool identity_memory_resource::do_is_equal(
     const identity_memory_resource *o =
         dynamic_cast<const identity_memory_resource *>(&other);
 
-    return o != nullptr && m_upstream.is_equal(o->m_upstream);
+    return o != nullptr && m_upstream.get().is_equal(o->m_upstream);
 }
 
 }  // namespace vecmem

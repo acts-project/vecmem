@@ -37,9 +37,9 @@ private:
     /// Size of memory to allocate upstream
     const std::size_t m_size;
     /// Pointer to the memory blob allocated from upstream
-    void* const m_begin;
+    char* const m_begin;
     /// Pointer to the next free memory block to give out
-    void* m_next;
+    char* m_next;
 
 };  // class contiguous_memory_resource_impl
 

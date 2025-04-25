@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -163,12 +163,12 @@ class buffer<schema<VARTYPES...>> : public view<schema<VARTYPES...>> {
     // to copy the contents of all variables with simple memory copies, and
     // it has to be possible to trivially destruct all objects.
     static_assert(
-        std::conjunction<
-            std::is_trivially_destructible<typename VARTYPES::type>...>::value,
+        std::conjunction_v<
+            std::is_trivially_destructible<typename VARTYPES::type>...>,
         "Unsupported variable type");
-    static_assert(std::conjunction<std::is_trivially_assignable<
+    static_assert(std::conjunction_v<std::is_trivially_assignable<
                       std::add_lvalue_reference_t<typename VARTYPES::type>,
-                      typename VARTYPES::type>...>::value,
+                      typename VARTYPES::type>...>,
                   "Unsupported variable type");
 
 public:
@@ -184,7 +184,7 @@ public:
     /// Default constructor
     buffer() = default;
     /// Move constructor
-    buffer(buffer&&) = default;
+    buffer(buffer&&) noexcept = default;
 
     /// Move assignment operator
     buffer& operator=(buffer&&) = default;
@@ -215,8 +215,8 @@ public:
     /// @param type       The type of the buffer (fixed or variable size)
     ///
     template <typename SIZE_TYPE = std::size_t,
-              std::enable_if_t<std::is_integral<SIZE_TYPE>::value &&
-                                   std::is_unsigned<SIZE_TYPE>::value,
+              std::enable_if_t<std::is_integral_v<SIZE_TYPE> &&
+                                   std::is_unsigned_v<SIZE_TYPE>,
                                bool> = true>
     VECMEM_HOST buffer(
         const std::vector<SIZE_TYPE>& capacities, memory_resource& mr,

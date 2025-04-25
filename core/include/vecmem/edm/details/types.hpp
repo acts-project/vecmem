@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -17,10 +17,10 @@ namespace edm {
 namespace details {
 
 /// Type-less, non-const view of a memory block
-using memory_view = data::vector_view<char>;
+using memory_view = vecmem::data::vector_view<char>;
 
 /// Type-less, const view of a memory block
-using const_memory_view = data::vector_view<const char>;
+using const_memory_view = vecmem::data::vector_view<const char>;
 
 /// Size type used in the SoA classes
 using size_type = memory_view::size_type;

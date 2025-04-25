@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -26,7 +26,7 @@ public:
      *
      * @param[in] upstream The upstream memory resource to use.
      */
-    debug_memory_resource_impl(memory_resource& upstream);
+    explicit debug_memory_resource_impl(memory_resource& upstream);
 
     /// Allocate memory with a chosen memory resource
     void* allocate(std::size_t, std::size_t);

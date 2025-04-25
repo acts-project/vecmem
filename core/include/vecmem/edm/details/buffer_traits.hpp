@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -221,13 +221,11 @@ find_layout_view(
     using result_type = typename view<schema<TYPES...> >::memory_view_type;
 
     // Find the first non-zero pointer.
-    typename result_type::pointer ptr =
-        reinterpret_cast<typename result_type::pointer>(
-            find_first_pointer(layouts, std::index_sequence_for<TYPES...>()));
+    auto ptr = static_cast<typename result_type::pointer>(
+        find_first_pointer(layouts, std::index_sequence_for<TYPES...>()));
     // Find the last non-zero pointer.
-    typename result_type::pointer end_ptr =
-        reinterpret_cast<typename result_type::pointer>(find_last_pointer(
-            layouts, sizes, std::index_sequence_for<TYPES...>()));
+    auto end_ptr = static_cast<typename result_type::pointer>(
+        find_last_pointer(layouts, sizes, std::index_sequence_for<TYPES...>()));
 
     // Construct the result.
     return {static_cast<typename result_type::size_type>(end_ptr - ptr), ptr};
@@ -244,13 +242,11 @@ find_payload_view(
     using result_type = typename view<schema<TYPES...> >::memory_view_type;
 
     // Find the first non-zero pointer.
-    typename result_type::pointer ptr =
-        reinterpret_cast<typename result_type::pointer>(
-            find_first_pointer(payloads, std::index_sequence_for<TYPES...>()));
+    auto ptr = static_cast<typename result_type::pointer>(
+        find_first_pointer(payloads, std::index_sequence_for<TYPES...>()));
     // Find the last non-zero pointer.
-    typename result_type::pointer end_ptr =
-        reinterpret_cast<typename result_type::pointer>(find_last_pointer(
-            payloads, sizes, std::index_sequence_for<TYPES...>()));
+    auto end_ptr = static_cast<typename result_type::pointer>(find_last_pointer(
+        payloads, sizes, std::index_sequence_for<TYPES...>()));
 
     // Construct the result.
     return {static_cast<typename result_type::size_type>(end_ptr - ptr), ptr};

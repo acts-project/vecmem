@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -23,7 +23,7 @@ class coalescing_memory_resource_impl {
 
 public:
     /// Constructor
-    coalescing_memory_resource_impl(
+    explicit coalescing_memory_resource_impl(
         std::vector<std::reference_wrapper<memory_resource>>&& upstreams);
 
     /// Allocate memory with a chosen memory resource
