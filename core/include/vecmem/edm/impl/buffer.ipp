@@ -50,12 +50,13 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(size_type capacity,
 
 template <typename... VARTYPES>
 template <
-    typename SIZE_TYPE,
+    typename SIZE_TYPE, typename SIZE_ALLOC,
     std::enable_if_t<
         std::is_integral_v<SIZE_TYPE> && std::is_unsigned_v<SIZE_TYPE>, bool>>
 VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(
-    const std::vector<SIZE_TYPE>& capacities, memory_resource& main_mr,
-    memory_resource* host_mr, vecmem::data::buffer_type type)
+    const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
+    memory_resource& main_mr, memory_resource* host_mr,
+    vecmem::data::buffer_type type)
     : view_type(static_cast<size_type>(capacities.size())) {
 
     // Make sure that this constructor is only used for a container that has
@@ -80,9 +81,9 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(
 }
 
 template <typename... VARTYPES>
-template <typename SIZE_TYPE, std::size_t... INDICES>
+template <typename SIZE_TYPE, typename SIZE_ALLOC, std::size_t... INDICES>
 VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
-    const std::vector<SIZE_TYPE>& capacities, memory_resource& mr,
+    const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities, memory_resource& mr,
     memory_resource* host_mr, std::index_sequence<INDICES...>) {
 
     // Sanity check.
@@ -132,15 +133,16 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
     }
 
     // Initialize the views from all the raw pointers.
-    view_type::m_views = details::make_buffer_views<SIZE_TYPE, VARTYPES...>(
-        capacities, layout_ptrs, host_layout_ptrs, payload_ptrs,
-        std::index_sequence_for<VARTYPES...>{});
+    view_type::m_views =
+        details::make_buffer_views<SIZE_TYPE, SIZE_ALLOC, VARTYPES...>(
+            capacities, layout_ptrs, host_layout_ptrs, payload_ptrs,
+            std::index_sequence_for<VARTYPES...>{});
 }
 
 template <typename... VARTYPES>
-template <typename SIZE_TYPE, std::size_t... INDICES>
+template <typename SIZE_TYPE, typename SIZE_ALLOC, std::size_t... INDICES>
 VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_resizable(
-    const std::vector<SIZE_TYPE>& capacities, memory_resource& mr,
+    const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities, memory_resource& mr,
     memory_resource* host_mr, std::index_sequence<INDICES...>) {
 
     // Sanity check(s).
@@ -237,9 +239,10 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_resizable(
     }
 
     // Initialize the views from all the raw pointers.
-    view_type::m_views = details::make_buffer_views<SIZE_TYPE, VARTYPES...>(
-        capacities, sizes_ptrs, layout_ptrs, host_layout_ptrs, payload_ptrs,
-        std::index_sequence_for<VARTYPES...>{});
+    view_type::m_views =
+        details::make_buffer_views<SIZE_TYPE, SIZE_ALLOC, VARTYPES...>(
+            capacities, sizes_ptrs, layout_ptrs, host_layout_ptrs, payload_ptrs,
+            std::index_sequence_for<VARTYPES...>{});
 }
 
 }  // namespace edm
