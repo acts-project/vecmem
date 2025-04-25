@@ -28,9 +28,15 @@ namespace details {
 /// Struct responsible for managing the lifetime of a CUDA stream
 struct stream_owner {
 
-    /// Constructor
+    /// Default constructor
     stream_owner() : m_stream(nullptr) {
         VECMEM_CUDA_ERROR_CHECK(cudaStreamCreate(&m_stream));
+    }
+    /// Copy constructor
+    stream_owner(const stream_owner&) = delete;
+    /// Move constructor
+    stream_owner(stream_owner&& parent) noexcept : m_stream(parent.m_stream) {
+        parent.m_stream = nullptr;
     }
     /// Destructor
     ~stream_owner() {
@@ -45,6 +51,17 @@ struct stream_owner {
         // application, would be too platform specific and fragile of an
         // operation.
         cudaStreamDestroy(m_stream);
+    }
+
+    /// Copy assignment
+    stream_owner& operator=(const stream_owner&) = delete;
+    /// Move assignment
+    stream_owner& operator=(stream_owner&& parent) noexcept {
+        if (this != &parent) {
+            m_stream = parent.m_stream;
+            parent.m_stream = nullptr;
+        }
+        return *this;
     }
 
     /// The managed stream
@@ -92,7 +109,7 @@ stream_wrapper::stream_wrapper(const stream_wrapper& parent)
     *m_impl = *(parent.m_impl);
 }
 
-stream_wrapper::stream_wrapper(stream_wrapper&& parent) = default;
+stream_wrapper::stream_wrapper(stream_wrapper&& parent) noexcept = default;
 
 stream_wrapper::~stream_wrapper() = default;
 
@@ -104,7 +121,8 @@ stream_wrapper& stream_wrapper::operator=(const stream_wrapper& rhs) {
     return *this;
 }
 
-stream_wrapper& stream_wrapper::operator=(stream_wrapper&& rhs) = default;
+stream_wrapper& stream_wrapper::operator=(stream_wrapper&& rhs) noexcept =
+    default;
 
 void* stream_wrapper::stream() const {
 

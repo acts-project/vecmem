@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -17,6 +17,7 @@
 #include <cuda_runtime_api.h>
 
 // System include(s).
+#include <array>
 #include <cassert>
 #include <exception>
 #include <string>
@@ -27,16 +28,22 @@ namespace {
 struct cuda_event : public vecmem::abstract_event {
 
     /// Constructor with the created event.
-    cuda_event(cudaEvent_t event) : m_event(event) {
+    explicit cuda_event(cudaEvent_t event) : m_event(event) {
         assert(m_event != nullptr);
     }
+    /// Copy constructor
+    cuda_event(const cuda_event&) = delete;
+    /// Move constructor
+    cuda_event(cuda_event&& parent) noexcept : m_event(parent.m_event) {
+        parent.m_event = nullptr;
+    }
     /// Destructor
-    ~cuda_event() {
+    ~cuda_event() override {
         // Check if the user forgot to wait on this asynchronous event.
         if (m_event != nullptr) {
             // If so, wait implicitly now.
             VECMEM_DEBUG_MSG(1, "Asynchronous CUDA event was not waited on!");
-            wait();
+            cuda_event::wait();
 #ifdef VECMEM_FAIL_ON_ASYNC_ERRORS
             // If the user wants to fail on asynchronous errors, do so now.
             std::terminate();
@@ -44,17 +51,28 @@ struct cuda_event : public vecmem::abstract_event {
         }
     }
 
+    /// Copy assignment
+    cuda_event& operator=(const cuda_event&) = delete;
+    /// Move assignment
+    cuda_event& operator=(cuda_event&& rhs) noexcept {
+        if (this != &rhs) {
+            m_event = rhs.m_event;
+            rhs.m_event = nullptr;
+        }
+        return *this;
+    }
+
     /// Synchronize on the underlying CUDA event
-    virtual void wait() override {
+    void wait() override {
         if (m_event == nullptr) {
             return;
         }
         VECMEM_CUDA_ERROR_CHECK(cudaEventSynchronize(m_event));
-        ignore();
+        cuda_event::ignore();
     }
 
     /// Ignore the underlying CUDA event
-    virtual void ignore() override {
+    void ignore() override {
         if (m_event == nullptr) {
             return;
         }
@@ -73,19 +91,20 @@ namespace vecmem::cuda {
 
 /// Helper array for translating between the vecmem and CUDA copy type
 /// definitions
-static constexpr cudaMemcpyKind copy_type_translator[copy::type::count] = {
-    cudaMemcpyHostToDevice, cudaMemcpyDeviceToHost, cudaMemcpyHostToHost,
-    cudaMemcpyDeviceToDevice, cudaMemcpyDefault};
+static constexpr std::array<cudaMemcpyKind, copy::type::count>
+    copy_type_translator = {cudaMemcpyHostToDevice, cudaMemcpyDeviceToHost,
+                            cudaMemcpyHostToHost, cudaMemcpyDeviceToDevice,
+                            cudaMemcpyDefault};
 
 /// Helper array for providing a printable name for the copy type
 /// definitions
-static const std::string copy_type_printer[copy::type::count] = {
+static const std::array<std::string, copy::type::count> copy_type_printer = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};
 
 async_copy::async_copy(const stream_wrapper& stream) : m_stream(stream) {}
 
-async_copy::~async_copy() {}
+async_copy::~async_copy() noexcept = default;
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                          type::copy_type cptype) const {

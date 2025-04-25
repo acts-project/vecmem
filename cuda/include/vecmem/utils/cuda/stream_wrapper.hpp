@@ -29,7 +29,7 @@ public:
 
     /// Construct a new stream (for the specified device)
     VECMEM_CUDA_EXPORT
-    stream_wrapper(int device = INVALID_DEVICE);
+    explicit stream_wrapper(int device = INVALID_DEVICE);
     /// Wrap an existing @c cudaStream_t object
     ///
     /// Without taking ownership of it!
@@ -42,7 +42,7 @@ public:
     stream_wrapper(const stream_wrapper& parent);
     /// Move constructor
     VECMEM_CUDA_EXPORT
-    stream_wrapper(stream_wrapper&& parent);
+    stream_wrapper(stream_wrapper&& parent) noexcept;
 
     /// Destructor
     VECMEM_CUDA_EXPORT
@@ -53,7 +53,7 @@ public:
     stream_wrapper& operator=(const stream_wrapper& rhs);
     /// Move assignment
     VECMEM_CUDA_EXPORT
-    stream_wrapper& operator=(stream_wrapper&& rhs);
+    stream_wrapper& operator=(stream_wrapper&& rhs) noexcept;
 
     /// Access a typeless pointer to the managed @c cudaStream_t object
     VECMEM_CUDA_EXPORT

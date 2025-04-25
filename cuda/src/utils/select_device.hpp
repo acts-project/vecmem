@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -31,7 +31,7 @@ public:
      *
      * @param[in] device The CUDA device number to switch to.
      */
-    select_device(int device);
+    explicit select_device(int device);
 
     /**
      * @brief Deconstructs the object, returning to the device that was
