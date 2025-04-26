@@ -1,0 +1,32 @@
+/* VecMem project, part of the ACTS project (R&D line)
+ *
+ * (c) 2025 CERN for the benefit of the ACTS project
+ *
+ * Mozilla Public License Version 2.0
+ */
+
+// Local include(s).
+#include "vecmem/utils/sycl/details/queue_holder.hpp"
+
+// System include(s).
+#include <cassert>
+
+namespace vecmem::sycl::details {
+
+struct queue_holder::impl {
+    /// SYCL queue to perform memory operations with
+    queue_wrapper m_queue;
+};
+
+queue_holder::queue_holder(const queue_wrapper& queue)
+    : m_impl{new impl{queue}} {}
+
+queue_holder::~queue_holder() = default;
+
+queue_wrapper& queue_holder::queue() const {
+
+    assert(m_impl);
+    return m_impl->m_queue;
+}
+
+}  // namespace vecmem::sycl::details

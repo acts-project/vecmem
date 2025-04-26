@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -25,14 +25,15 @@ namespace {
 struct sycl_event : public vecmem::abstract_event {
 
     /// Constructor with a SYCL event
-    sycl_event(const std::vector<::sycl::event>& events) : m_events(events) {}
+    explicit sycl_event(const std::vector<::sycl::event>& events)
+        : m_events(events) {}
     /// Destructor
     ~sycl_event() {
         // Check if the user forgot to wait on this asynchronous event.
         if (!m_events.empty()) {
             // If so, wait implicitly now.
             VECMEM_DEBUG_MSG(1, "Asynchronous SYCL event was not waited on!");
-            wait();
+            sycl_event::wait();
 #ifdef VECMEM_FAIL_ON_ASYNC_ERRORS
             // If the user wants to fail on asynchronous errors, do so now.
             std::terminate();
@@ -41,13 +42,13 @@ struct sycl_event : public vecmem::abstract_event {
     }
 
     /// Synchronize on the underlying SYCL event
-    virtual void wait() override {
+    void wait() override {
         ::sycl::event::wait_and_throw(m_events);
-        ignore();
+        sycl_event::ignore();
     }
 
     /// Ignore the underlying SYCL event
-    virtual void ignore() override { m_events.clear(); }
+    void ignore() override { m_events.clear(); }
 
     /// The managed SYCL event
     std::vector<::sycl::event> m_events;
@@ -57,19 +58,16 @@ struct sycl_event : public vecmem::abstract_event {
 }  // namespace
 
 namespace vecmem::sycl {
-namespace details {
 
-struct async_copy_data {
-    queue_wrapper m_queue;
+struct async_copy::impl {
+    /// SYCL (copy) events currently in flight
     std::vector<::sycl::event> m_events;
 };
 
-}  // namespace details
-
 async_copy::async_copy(const queue_wrapper& queue)
-    : m_data(new details::async_copy_data{queue, {}}) {}
+    : details::queue_holder(queue), m_impl{std::make_unique<impl>()} {}
 
-async_copy::~async_copy() {}
+async_copy::~async_copy() = default;
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                          type::copy_type) const {
@@ -83,10 +81,11 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
     // Some sanity checks.
     assert(from_ptr != nullptr);
     assert(to_ptr != nullptr);
+    assert(m_impl);
 
     // Perform the copy.
-    m_data->m_events.push_back(
-        details::get_queue(m_data->m_queue).memcpy(to_ptr, from_ptr, size));
+    m_impl->m_events.push_back(
+        details::get_queue(queue()).memcpy(to_ptr, from_ptr, size));
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(1, "Performed memory copy of %lu bytes from %p to %p",
@@ -103,11 +102,12 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Some sanity checks.
     assert(ptr != nullptr);
+    assert(m_impl);
 
     // Perform the operation.
 #if defined(VECMEM_HAVE_SYCL_MEMSET)
-    m_data->m_events.push_back(
-        details::get_queue(m_data->m_queue).memset(ptr, value, size));
+    m_impl->m_events.push_back(
+        details::get_queue(queue()).memset(ptr, value, size));
 #else
     // We can not perform this operation asynchronously, since the data used
     // in the copy only exists as long as this function is executing. So we
@@ -115,7 +115,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
     std::vector<int> dummy(size / sizeof(int) + 1);
     std::fill_n(reinterpret_cast<unsigned char*>(dummy.data()), size,
                 static_cast<unsigned char>(value));
-    details::get_queue(m_data->m_queue)
+    details::get_queue(queue())
         .memcpy(ptr, dummy.data(), size)
         .wait_and_throw();
 #endif  // VECMEM_HAVE_SYCL_MEMSET
@@ -128,9 +128,9 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 copy::event_type async_copy::create_event() const {
 
     // Construct an event object out of all of the events collected.
-    auto result = std::make_unique<::sycl_event>(m_data->m_events);
+    auto result = std::make_unique<::sycl_event>(m_impl->m_events);
     // Forget about the events in this object.
-    m_data->m_events.clear();
+    m_impl->m_events.clear();
     // Return the event object.
     return result;
 }

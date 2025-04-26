@@ -54,7 +54,7 @@ queue_wrapper::queue_wrapper(const queue_wrapper& parent)
     *m_impl = *(parent.m_impl);
 }
 
-queue_wrapper::queue_wrapper(queue_wrapper&& parent) = default;
+queue_wrapper::queue_wrapper(queue_wrapper&& parent) noexcept = default;
 
 queue_wrapper::~queue_wrapper() = default;
 
@@ -69,7 +69,7 @@ queue_wrapper& queue_wrapper::operator=(const queue_wrapper& rhs) {
     return *this;
 }
 
-queue_wrapper& queue_wrapper::operator=(queue_wrapper&& rhs) = default;
+queue_wrapper& queue_wrapper::operator=(queue_wrapper&& rhs) noexcept = default;
 
 void* queue_wrapper::queue() {
 

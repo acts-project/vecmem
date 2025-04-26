@@ -38,7 +38,7 @@ public:
     queue_wrapper(const queue_wrapper& parent);
     /// Move constructor
     VECMEM_SYCL_EXPORT
-    queue_wrapper(queue_wrapper&& parent);
+    queue_wrapper(queue_wrapper&& parent) noexcept;
 
     /// Destructor
     VECMEM_SYCL_EXPORT
@@ -49,7 +49,7 @@ public:
     queue_wrapper& operator=(const queue_wrapper& rhs);
     /// Move assignment
     VECMEM_SYCL_EXPORT
-    queue_wrapper& operator=(queue_wrapper&& rhs);
+    queue_wrapper& operator=(queue_wrapper&& rhs) noexcept;
 
     /// Access a typeless pointer to the managed @c ::sycl::queue object
     VECMEM_SYCL_EXPORT

@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2025 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -25,6 +25,8 @@ vecmem_add_library( vecmem_sycl sycl
    "include/vecmem/memory/sycl/shared_memory_resource.hpp"
    "src/memory/shared_memory_resource.sycl"
    # Utilities.
+   "include/vecmem/utils/sycl/details/queue_holder.hpp"
+   "src/utils/sycl/queue_holder.sycl"
    "include/vecmem/utils/sycl/copy.hpp"
    "src/utils/sycl/copy.sycl"
    "include/vecmem/utils/sycl/async_copy.hpp"

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -9,28 +9,18 @@
 // SYCL include(s).
 #include <sycl/sycl.hpp>
 
-// VecMem include(s).
+// Local include(s).
 #include "get_queue.hpp"
-#include "vecmem/utils/debug.hpp"
 #include "vecmem/utils/sycl/copy.hpp"
+
+// Project include(s).
+#include "vecmem/utils/debug.hpp"
 
 // System include(s).
 #include <algorithm>
 #include <vector>
 
 namespace vecmem::sycl {
-namespace details {
-
-struct copy_data {
-    queue_wrapper m_queue;
-};
-
-}  // namespace details
-
-copy::copy(const queue_wrapper& queue)
-    : m_data(new details::copy_data{queue}) {}
-
-copy::~copy() {}
 
 void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                    type::copy_type) const {
@@ -46,9 +36,7 @@ void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
     assert(to_ptr != nullptr);
 
     // Perform the copy.
-    details::get_queue(m_data->m_queue)
-        .memcpy(to_ptr, from_ptr, size)
-        .wait_and_throw();
+    details::get_queue(queue()).memcpy(to_ptr, from_ptr, size).wait_and_throw();
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(1, "Performed memory copy of %lu bytes from %p to %p",
@@ -68,14 +56,12 @@ void copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Perform the operation.
 #if defined(VECMEM_HAVE_SYCL_MEMSET)
-    details::get_queue(m_data->m_queue)
-        .memset(ptr, value, size)
-        .wait_and_throw();
+    details::get_queue(queue()).memset(ptr, value, size).wait_and_throw();
 #else
     std::vector<int> dummy(size / sizeof(int) + 1);
     std::fill_n(reinterpret_cast<unsigned char*>(dummy.data()), size,
                 static_cast<unsigned char>(value));
-    details::get_queue(m_data->m_queue)
+    details::get_queue(queue())
         .memcpy(ptr, dummy.data(), size)
         .wait_and_throw();
 #endif  // VECMEM_HAVE_SYCL_MEMSET

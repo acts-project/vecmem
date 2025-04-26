@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -18,12 +18,8 @@ namespace vecmem::sycl {
 class host_memory_resource final : public details::memory_resource_base {
 
 public:
-    /// Constructor on top of a user-provided queue
-    VECMEM_SYCL_EXPORT
-    host_memory_resource(const queue_wrapper& queue = {});
-    /// Destructor
-    VECMEM_SYCL_EXPORT
-    ~host_memory_resource();
+    /// Inherit the base class's constructor(s)
+    using details::memory_resource_base::memory_resource_base;
 
 private:
     /// @name Function(s) implementing @c vecmem::memory_resource
@@ -31,8 +27,7 @@ private:
 
     /// Function performing the memory allocation
     VECMEM_SYCL_EXPORT
-    virtual void* do_allocate(std::size_t nbytes,
-                              std::size_t alignment) override final;
+    void* do_allocate(std::size_t nbytes, std::size_t alignment) override;
 
     /// @}
 
