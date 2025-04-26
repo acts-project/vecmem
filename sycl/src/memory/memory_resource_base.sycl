@@ -18,11 +18,6 @@
 
 namespace vecmem::sycl::details {
 
-memory_resource_base::memory_resource_base(const queue_wrapper& queue)
-    : m_queue(queue) {}
-
-memory_resource_base::~memory_resource_base() = default;
-
 void memory_resource_base::do_deallocate(void* ptr, std::size_t size,
                                          std::size_t) {
 
@@ -33,18 +28,17 @@ void memory_resource_base::do_deallocate(void* ptr, std::size_t size,
 
     // Free the memory.
     VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", ptr);
-    ::sycl::free(ptr, get_queue(m_queue));
+    ::sycl::free(ptr, get_queue(queue()));
 }
 
 bool memory_resource_base::do_is_equal(
     const memory_resource& other) const noexcept {
 
     // Try to cast the other object to this exact type.
-    const memory_resource_base* p =
-        dynamic_cast<const memory_resource_base*>(&other);
+    auto p = dynamic_cast<const memory_resource_base*>(&other);
 
     // The two are equal if they have equal queues.
-    return ((p != nullptr) && (get_queue(p->m_queue) == get_queue(m_queue)));
+    return ((p != nullptr) && (get_queue(p->queue()) == get_queue(queue())));
 }
 
 }  // namespace vecmem::sycl::details
