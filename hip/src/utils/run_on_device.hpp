@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -20,11 +20,11 @@ class run_on_device {
 
 public:
     /// Constructor, with the device that code should run on
-    run_on_device(int device) : m_device(device) {}
+    explicit run_on_device(int device) : m_device(device) {}
 
     /// Operator executing "something" on the specified device.
     template <typename EXECUTABLE>
-    void operator()(EXECUTABLE exe) {
+    void operator()(EXECUTABLE exe) const {
 
         // Switch to the device in a RAII mode.
         select_device helper(m_device);

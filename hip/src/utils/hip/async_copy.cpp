@@ -17,6 +17,7 @@
 #include <hip/hip_runtime_api.h>
 
 // System include(s).
+#include <array>
 #include <cassert>
 #include <exception>
 #include <string>
@@ -27,14 +28,22 @@ namespace {
 struct hip_event : public vecmem::abstract_event {
 
     /// Constructor with the created event.
-    hip_event(hipEvent_t event) : m_event(event) { assert(m_event != nullptr); }
+    explicit hip_event(hipEvent_t event) : m_event(event) {
+        assert(m_event != nullptr);
+    }
+    /// Copy constructor
+    hip_event(const hip_event&) = delete;
+    /// Move constructor
+    hip_event(hip_event&& parent) noexcept : m_event(parent.m_event) {
+        parent.m_event = nullptr;
+    }
     /// Destructor
-    ~hip_event() {
+    ~hip_event() override {
         // Check if the user forgot to wait on this asynchronous event.
         if (m_event != nullptr) {
             // If so, wait implicitly now.
             VECMEM_DEBUG_MSG(1, "Asynchronous HIP event was not waited on!");
-            wait();
+            hip_event::wait();
 #ifdef VECMEM_FAIL_ON_ASYNC_ERRORS
             // If the user wants to fail on asynchronous errors, do so now.
             std::terminate();
@@ -42,17 +51,28 @@ struct hip_event : public vecmem::abstract_event {
         }
     }
 
+    /// Copy assignment
+    hip_event& operator=(const hip_event&) = delete;
+    /// Move assignment
+    hip_event& operator=(hip_event&& rhs) noexcept {
+        if (this != &rhs) {
+            m_event = rhs.m_event;
+            rhs.m_event = nullptr;
+        }
+        return *this;
+    }
+
     /// Synchronize on the underlying HIP event
-    virtual void wait() override {
+    void wait() override {
         if (m_event == nullptr) {
             return;
         }
         VECMEM_HIP_ERROR_CHECK(hipEventSynchronize(m_event));
-        ignore();
+        hip_event::ignore();
     }
 
     /// Ignore the underlying HIP event
-    virtual void ignore() override {
+    void ignore() override {
         if (m_event == nullptr) {
             return;
         }
@@ -71,19 +91,20 @@ namespace vecmem::hip {
 
 /// Helper array for translating between the vecmem and HIP copy type
 /// definitions
-static constexpr hipMemcpyKind copy_type_translator[copy::type::count] = {
-    hipMemcpyHostToDevice, hipMemcpyDeviceToHost, hipMemcpyHostToHost,
-    hipMemcpyDeviceToDevice, hipMemcpyDefault};
+static constexpr std::array<hipMemcpyKind, copy::type::count>
+    copy_type_translator = {hipMemcpyHostToDevice, hipMemcpyDeviceToHost,
+                            hipMemcpyHostToHost, hipMemcpyDeviceToDevice,
+                            hipMemcpyDefault};
 
 /// Helper array for providing a printable name for the copy type
 /// definitions
-static const std::string copy_type_printer[copy::type::count] = {
+static const std::array<std::string, copy::type::count> copy_type_printer = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};
 
 async_copy::async_copy(const stream_wrapper& stream) : m_stream(stream) {}
 
-async_copy::~async_copy() {}
+async_copy::~async_copy() noexcept = default;
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                          type::copy_type cptype) const {

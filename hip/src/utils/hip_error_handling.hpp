@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -31,8 +31,8 @@ namespace hip {
 namespace details {
 
 /// Function used to print and throw a user-readable error if something breaks
-void throw_error(hipError_t errorCode, const char* expression, const char* file,
-                 int line);
+[[noreturn]] void throw_error(hipError_t errorCode, const char* expression,
+                              const char* file, int line);
 
 }  // namespace details
 }  // namespace hip

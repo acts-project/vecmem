@@ -32,20 +32,19 @@ public:
     async_copy(const stream_wrapper& stream);
     /// Destructor
     VECMEM_HIP_EXPORT
-    ~async_copy();
+    ~async_copy() noexcept;
 
 protected:
     /// Perform an asynchronous memory copy using HIP
     VECMEM_HIP_EXPORT
-    virtual void do_copy(std::size_t size, const void* from, void* to,
-                         type::copy_type cptype) const override final;
+    void do_copy(std::size_t size, const void* from, void* to,
+                 type::copy_type cptype) const final;
     /// Fill a memory area using HIP asynchronously
     VECMEM_HIP_EXPORT
-    virtual void do_memset(std::size_t size, void* ptr,
-                           int value) const override final;
+    void do_memset(std::size_t size, void* ptr, int value) const final;
     /// Create an event for synchronization
     VECMEM_HIP_EXPORT
-    virtual event_type create_event() const override final;
+    event_type create_event() const final;
 
 private:
     /// The stream that the copies are performed on

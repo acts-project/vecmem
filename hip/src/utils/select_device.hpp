@@ -31,7 +31,7 @@ public:
      *
      * @param[in] device The HIP device number to switch to.
      */
-    select_device(int device);
+    explicit select_device(int device);
 
     /**
      * @brief Deconstructs the object, returning to the device that was

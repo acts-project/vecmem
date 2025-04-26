@@ -25,7 +25,7 @@ namespace vecmem::hip {
 device_memory_resource::device_memory_resource(int device)
     : m_device(device == INVALID_DEVICE ? details::get_device() : device) {}
 
-device_memory_resource::~device_memory_resource() = default;
+device_memory_resource::~device_memory_resource() noexcept = default;
 
 void* device_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 
@@ -62,8 +62,7 @@ bool device_memory_resource::do_is_equal(
     const memory_resource& other) const noexcept {
 
     // Try to cast the other object to this exact type.
-    const device_memory_resource* p =
-        dynamic_cast<const device_memory_resource*>(&other);
+    auto p = dynamic_cast<const device_memory_resource*>(&other);
 
     // The two are equal if they operate on the same device.
     return ((p != nullptr) && (p->m_device == m_device));

@@ -41,7 +41,7 @@ public:
     stream_wrapper(const stream_wrapper& parent);
     /// Move constructor
     VECMEM_HIP_EXPORT
-    stream_wrapper(stream_wrapper&& parent);
+    stream_wrapper(stream_wrapper&& parent) noexcept;
 
     /// Destructor
     VECMEM_HIP_EXPORT
@@ -52,7 +52,7 @@ public:
     stream_wrapper& operator=(const stream_wrapper& rhs);
     /// Move assignment
     VECMEM_HIP_EXPORT
-    stream_wrapper& operator=(stream_wrapper&& rhs);
+    stream_wrapper& operator=(stream_wrapper&& rhs) noexcept;
 
     /// Access a typeless pointer to the managed @c hipStream_t object
     VECMEM_HIP_EXPORT

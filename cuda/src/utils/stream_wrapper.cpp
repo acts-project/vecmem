@@ -29,9 +29,7 @@ namespace details {
 struct stream_owner {
 
     /// Default constructor
-    stream_owner() : m_stream(nullptr) {
-        VECMEM_CUDA_ERROR_CHECK(cudaStreamCreate(&m_stream));
-    }
+    stream_owner() { VECMEM_CUDA_ERROR_CHECK(cudaStreamCreate(&m_stream)); }
     /// Copy constructor
     stream_owner(const stream_owner&) = delete;
     /// Move constructor
@@ -65,7 +63,7 @@ struct stream_owner {
     }
 
     /// The managed stream
-    cudaStream_t m_stream;
+    cudaStream_t m_stream{nullptr};
 
 };  // struct stream_owner
 

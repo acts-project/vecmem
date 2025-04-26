@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2024 CERN for the benefit of the ACTS project
+ * (c) 2024-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -28,7 +28,7 @@ public:
     managed_memory_resource();
     /// Destructor
     VECMEM_HIP_EXPORT
-    ~managed_memory_resource();
+    ~managed_memory_resource() noexcept override;
 
 private:
     /// @name Function(s) implementing @c vecmem::memory_resource
@@ -36,15 +36,13 @@ private:
 
     /// Allocate HIP managed memory
     VECMEM_HIP_EXPORT
-    virtual void* do_allocate(std::size_t, std::size_t) override final;
+    void* do_allocate(std::size_t, std::size_t) override;
     /// De-allocate a previously allocated managed memory block
     VECMEM_HIP_EXPORT
-    virtual void do_deallocate(void* p, std::size_t,
-                               std::size_t) override final;
+    void do_deallocate(void* p, std::size_t, std::size_t) override;
     /// Compares @c *this for equality with @c other
     VECMEM_HIP_EXPORT
-    virtual bool do_is_equal(
-        const memory_resource& other) const noexcept override final;
+    bool do_is_equal(const memory_resource& other) const noexcept override;
 
     /// @}
 
