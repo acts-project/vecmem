@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -16,6 +16,7 @@
 #include <hip/hip_runtime_api.h>
 
 // System include(s).
+#include <array>
 #include <cassert>
 #include <string>
 
@@ -23,12 +24,13 @@ namespace vecmem::hip {
 
 /// Helper array for translating between the vecmem and HIP copy type
 /// definitions
-static constexpr hipMemcpyKind copy_type_translator[copy::type::count] = {
-    hipMemcpyHostToDevice, hipMemcpyDeviceToHost, hipMemcpyHostToHost,
-    hipMemcpyDeviceToDevice, hipMemcpyDefault};
+static constexpr std::array<hipMemcpyKind, copy::type::count>
+    copy_type_translator = {hipMemcpyHostToDevice, hipMemcpyDeviceToHost,
+                            hipMemcpyHostToHost, hipMemcpyDeviceToDevice,
+                            hipMemcpyDefault};
 
 /// Helper array for providing a printable name for the copy type definitions
-static const std::string copy_type_printer[copy::type::count] = {
+static const std::array<std::string, copy::type::count> copy_type_printer = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};
 

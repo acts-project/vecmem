@@ -23,7 +23,7 @@ namespace vecmem::hip {
 
 managed_memory_resource::managed_memory_resource() = default;
 
-managed_memory_resource::~managed_memory_resource() = default;
+managed_memory_resource::~managed_memory_resource() noexcept = default;
 
 void *managed_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -49,39 +49,44 @@
         VECMEM_PRINTF(__msg, __VA_ARGS__);              \
     } while (false)
 
+/// No-op implementation of the print macro (mainly for SonarCloud's benefit)
+#define __VECMEM_PRINT_MSG_EMPTY \
+    do {                         \
+    } while (false)
+
 /// Print macro for "level 1" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 1
 #define __VECMEM_PRINT_1(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
-#define __VECMEM_PRINT_1(MSG, ...)
+#define __VECMEM_PRINT_1(MSG, ...) __VECMEM_PRINT_MSG_EMPTY
 #endif
 
 /// Print macro for "level 2" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 2
 #define __VECMEM_PRINT_2(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
-#define __VECMEM_PRINT_2(MSG, ...)
+#define __VECMEM_PRINT_2(MSG, ...) __VECMEM_PRINT_MSG_EMPTY
 #endif
 
 /// Print macro for "level 3" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 3
 #define __VECMEM_PRINT_3(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
-#define __VECMEM_PRINT_3(MSG, ...)
+#define __VECMEM_PRINT_3(MSG, ...) __VECMEM_PRINT_MSG_EMPTY
 #endif
 
 /// Print macro for "level 4" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 4
 #define __VECMEM_PRINT_4(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
-#define __VECMEM_PRINT_4(MSG, ...)
+#define __VECMEM_PRINT_4(MSG, ...) __VECMEM_PRINT_MSG_EMPTY
 #endif
 
 /// Print macro for "level 5" debug messages
 #if VECMEM_DEBUG_MSG_LVL >= 5
 #define __VECMEM_PRINT_5(MSG, ...) __VECMEM_PRINT_MSG(MSG, __VA_ARGS__)
 #else
-#define __VECMEM_PRINT_5(MSG, ...)
+#define __VECMEM_PRINT_5(MSG, ...) __VECMEM_PRINT_MSG_EMPTY
 #endif
 
 // Implement the main macro(s) a little differently for MSVC and all other

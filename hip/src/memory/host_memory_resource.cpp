@@ -22,7 +22,7 @@ namespace vecmem::hip {
 
 host_memory_resource::host_memory_resource() = default;
 
-host_memory_resource::~host_memory_resource() = default;
+host_memory_resource::~host_memory_resource() noexcept = default;
 
 void* host_memory_resource::do_allocate(std::size_t nbytes, std::size_t) {
 

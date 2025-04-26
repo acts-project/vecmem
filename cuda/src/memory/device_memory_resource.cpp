@@ -68,8 +68,8 @@ void device_memory_resource::do_deallocate(void *p, std::size_t bytes,
 
 bool device_memory_resource::do_is_equal(
     const memory_resource &other) const noexcept {
-    const device_memory_resource *c;
-    c = dynamic_cast<const device_memory_resource *>(&other);
+
+    auto c = dynamic_cast<const device_memory_resource *>(&other);
 
     /*
      * The equality check here is ever so slightly more difficult. Not only

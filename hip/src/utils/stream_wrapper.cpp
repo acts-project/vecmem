@@ -30,8 +30,12 @@ namespace details {
 struct stream_owner {
 
     /// Constructor
-    stream_owner() : m_stream(nullptr) {
-        VECMEM_HIP_ERROR_CHECK(hipStreamCreate(&m_stream));
+    stream_owner() { VECMEM_HIP_ERROR_CHECK(hipStreamCreate(&m_stream)); }
+    /// Copy constructor
+    stream_owner(const stream_owner&) = delete;
+    /// Move constructor
+    stream_owner(stream_owner&& parent) noexcept : m_stream(parent.m_stream) {
+        parent.m_stream = nullptr;
     }
     /// Destructor
     ~stream_owner() {
@@ -48,8 +52,19 @@ struct stream_owner {
         (void)hipStreamDestroy(m_stream);
     }
 
+    /// Copy assignment
+    stream_owner& operator=(const stream_owner&) = delete;
+    /// Move assignment
+    stream_owner& operator=(stream_owner&& parent) noexcept {
+        if (this != &parent) {
+            m_stream = parent.m_stream;
+            parent.m_stream = nullptr;
+        }
+        return *this;
+    }
+
     /// The managed stream
-    hipStream_t m_stream;
+    hipStream_t m_stream{nullptr};
 
 };  // struct stream_owner
 
@@ -90,7 +105,7 @@ stream_wrapper::stream_wrapper(const stream_wrapper& parent)
     *m_impl = *(parent.m_impl);
 }
 
-stream_wrapper::stream_wrapper(stream_wrapper&& parent) = default;
+stream_wrapper::stream_wrapper(stream_wrapper&& parent) noexcept = default;
 
 stream_wrapper::~stream_wrapper() = default;
 
@@ -102,7 +117,8 @@ stream_wrapper& stream_wrapper::operator=(const stream_wrapper& rhs) {
     return *this;
 }
 
-stream_wrapper& stream_wrapper::operator=(stream_wrapper&& rhs) = default;
+stream_wrapper& stream_wrapper::operator=(stream_wrapper&& rhs) noexcept =
+    default;
 
 void* stream_wrapper::stream() const {
 
