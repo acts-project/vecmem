@@ -463,6 +463,38 @@ private:
 
 /// @}
 
+/// @name Code for copying the proxy tuples
+/// @{
+
+/// Copy a tuple that has just a single element
+///
+/// @tparam T The type of that single element
+///
+/// @param dst Destination tuple to copy into
+/// @param src Source tuple to copy from
+///
+template <typename T>
+void proxy_tuple_copy(tuple<T>& dst, const tuple<T>& src) {
+    dst.m_head = src.m_head;
+}
+
+/// Copy a tuple that has more than one element
+///
+/// @tparam T The type of the first element
+/// @tparam Ts The types of the rest of the elements
+///
+/// @param dst Destination tuple to copy into
+/// @param src Source tuple to copy from
+///
+template <typename T, typename... Ts,
+          std::enable_if_t<(sizeof...(Ts) > 0), bool> = true>
+void proxy_tuple_copy(tuple<T, Ts...>& dst, const tuple<T, Ts...>& src) {
+    dst.m_head = src.m_head;
+    proxy_tuple_copy(dst.m_tail, src.m_tail);
+}
+
+/// @}
+
 }  // namespace details
 }  // namespace edm
 }  // namespace vecmem
