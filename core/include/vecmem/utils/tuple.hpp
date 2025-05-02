@@ -60,13 +60,14 @@ struct tuple<T, Ts...> {
     ///
     /// @param parent The parent to copy
     ///
-    template <typename U, typename... Us,
-              std::enable_if_t<
-                  vecmem::details::conjunction<
-                      std::is_constructible<T, std::decay_t<U>>,
-                      std::is_constructible<Ts, std::decay_t<Us>>...>::value,
-                  bool> = true>
-    VECMEM_HOST_AND_DEVICE constexpr tuple(const tuple<U, Us...> &parent)
+    template <
+        typename U, typename... Us,
+        std::enable_if_t<vecmem::details::conjunction_v<
+                             std::is_constructible<T, std::decay_t<U>>,
+                             std::is_constructible<Ts, std::decay_t<Us>>...>,
+                         bool> = true>
+    VECMEM_HOST_AND_DEVICE constexpr explicit tuple(
+        const tuple<U, Us...> &parent)
         : m_head(parent.m_head), m_tail(parent.m_tail) {}
 
     /// Main constructor, from a list of tuple elements
@@ -77,10 +78,10 @@ struct tuple<T, Ts...> {
     template <
         typename U, typename... Us,
         std::enable_if_t<
-            vecmem::details::conjunction<
+            vecmem::details::conjunction_v<
                 vecmem::details::negation<std::is_same<tuple<T, Ts...>, U>>,
                 std::is_constructible<T, U &&>,
-                std::is_constructible<Ts, Us &&>...>::value,
+                std::is_constructible<Ts, Us &&>...>,
             bool> = true>
     VECMEM_HOST_AND_DEVICE constexpr tuple(U &&head, Us &&... tail)
         : m_head(std::forward<U>(head)), m_tail(std::forward<Us>(tail)...) {}
@@ -94,37 +95,29 @@ struct tuple<T, Ts...> {
     /// @param tail The rest of the elements to be stored in the tuple
     ///
     template <typename U, typename... Us,
-              std::enable_if_t<vecmem::details::conjunction<
+              std::enable_if_t<vecmem::details::conjunction_v<
                                    std::is_constructible<T, U &&>,
-                                   std::is_constructible<Ts, Us &&>...>::value,
+                                   std::is_constructible<Ts, Us &&>...>,
                                bool> = true>
     VECMEM_HOST_AND_DEVICE constexpr tuple(U &&head, tuple<Us...> &&tail)
         : m_head(std::forward<U>(head)), m_tail(std::move(tail)) {}
 
-    /// Assignment operator
-    ///
-    /// Need to implement this by hand, as the default implementation does not
-    /// do the thing for reference members that we would like it to do. (I.e.
-    /// to copy the referenced elements.)
-    ///
-    /// @param parent The parent to copy
-    ///
-    VECMEM_HOST_AND_DEVICE constexpr tuple &operator=(const tuple &parent) {
-        m_head = parent.m_head;
-        m_tail = parent.m_tail;
-        return *this;
-    }
+    /// Default copy assignment operator
+    constexpr tuple &operator=(const tuple &) = default;
+    /// Default move assignment operator
+    constexpr tuple &operator=(tuple &&) noexcept = default;
 
     /// Assignment operator from a (slightly) different tuple type
     ///
     /// @param parent The parent to copy
     ///
     template <typename U, typename... Us,
-              std::enable_if_t<(sizeof...(Ts) == sizeof...(Us)) &&
-                                   vecmem::details::conjunction<
-                                       std::is_assignable<T, U &&>,
-                                       std::is_assignable<Ts, Us &&>...>::value,
-                               bool> = true>
+              std::enable_if_t<
+                  vecmem::details::conjunction<
+                      std::is_assignable<std::add_lvalue_reference_t<T>, U>,
+                      std::is_assignable<std::add_lvalue_reference_t<Ts>,
+                                         Us>...>::value,
+                  bool> = true>
     VECMEM_HOST_AND_DEVICE constexpr tuple &operator=(
         const tuple<U, Us...> &parent) {
         m_head = parent.m_head;
@@ -150,7 +143,7 @@ struct tuple<T, Ts...> {
 /// @return The I-th element of the tuple
 ///
 template <std::size_t I, typename... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr const auto &get(
+VECMEM_HOST_AND_DEVICE constexpr const auto &get(
     const tuple<Ts...> &t) noexcept;
 
 /// Get a non-constant element out of a tuple
@@ -161,7 +154,7 @@ VECMEM_HOST_AND_DEVICE inline constexpr const auto &get(
 /// @return The I-th element of the tuple
 ///
 template <std::size_t I, typename... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr auto &get(tuple<Ts...> &t) noexcept;
+VECMEM_HOST_AND_DEVICE constexpr auto &get(tuple<Ts...> &t) noexcept;
 
 /// Tie references to existing objects, into a tuple
 ///
@@ -170,7 +163,7 @@ VECMEM_HOST_AND_DEVICE inline constexpr auto &get(tuple<Ts...> &t) noexcept;
 /// @return A tuple of references to some existing objects
 ///
 template <typename... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr tuple<Ts &...> tie(Ts &... args);
+VECMEM_HOST_AND_DEVICE constexpr tuple<Ts &...> tie(Ts &... args);
 
 /// Make a tuple with automatic type deduction
 ///
@@ -179,8 +172,8 @@ VECMEM_HOST_AND_DEVICE inline constexpr tuple<Ts &...> tie(Ts &... args);
 /// @return A tuple constructed from the received values
 ///
 template <class... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr tuple<typename std::decay<Ts>::type...>
-make_tuple(Ts &&... args);
+VECMEM_HOST_AND_DEVICE constexpr tuple<std::decay_t<Ts>...> make_tuple(
+    Ts &&... args);
 
 /// Default/empty implementation for @c vecmem::tuple_element
 ///
