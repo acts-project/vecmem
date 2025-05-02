@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 
 // System include(s).
+#include <type_traits>
 #include <vector>
 
 TEST(core_edm_view_test, construct_assign) {
@@ -31,6 +32,17 @@ TEST(core_edm_view_test, construct_assign) {
                             vecmem::edm::type::jagged_vector<const double>>>
         view3{};
     view3 = view1;
+
+    constexpr bool helper1 =
+        std::is_trivially_copyable_v<vecmem::edm::view<vecmem::edm::schema<
+            vecmem::edm::type::scalar<int>, vecmem::edm::type::vector<float>,
+            vecmem::edm::type::jagged_vector<double>>>>;
+    EXPECT_TRUE(helper1);
+    constexpr bool helper2 = std::is_trivially_copyable_v<vecmem::edm::view<
+        vecmem::edm::schema<vecmem::edm::type::scalar<const int>,
+                            vecmem::edm::type::vector<const float>,
+                            vecmem::edm::type::jagged_vector<const double>>>>;
+    EXPECT_TRUE(helper2);
 }
 
 TEST(core_edm_view_test, members) {

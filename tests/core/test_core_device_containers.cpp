@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -27,9 +27,8 @@
 #include <type_traits>
 
 /// Test case for the custom device container types
-class core_device_container_test : public testing::Test {
+struct core_device_container_test : public testing::Test {
 
-protected:
     /// Memory resource for the test(s)
     vecmem::host_memory_resource m_resource;
     /// Helper object for the memory copies.
@@ -38,13 +37,15 @@ protected:
 };  // class core_device_container_test
 
 /// Test that the "simple" data types are trivially constructible.
-TEST_F(core_device_container_test, trivial_construct) {
+TEST_F(core_device_container_test, construct_copy_assign) {
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
                 vecmem::data::jagged_vector_view<const int> >());
     EXPECT_TRUE(std::is_trivially_constructible<
                 vecmem::data::jagged_vector_view<const int> >());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
+                vecmem::data::jagged_vector_view<const int> >());
+    EXPECT_TRUE(std::is_trivially_copyable<
                 vecmem::data::jagged_vector_view<const int> >());
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
@@ -53,6 +54,18 @@ TEST_F(core_device_container_test, trivial_construct) {
                 vecmem::data::jagged_vector_view<int> >());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
                 vecmem::data::jagged_vector_view<int> >());
+    EXPECT_TRUE(
+        std::is_trivially_copyable<vecmem::data::jagged_vector_view<int> >());
+
+    bool helper = std::is_assignable<vecmem::data::jagged_vector_view<int>,
+                                     vecmem::data::jagged_vector_view<int> >();
+    EXPECT_TRUE(helper);
+    helper = std::is_assignable<vecmem::data::jagged_vector_view<const int>,
+                                vecmem::data::jagged_vector_view<const int> >();
+    EXPECT_TRUE(helper);
+    helper = std::is_assignable<vecmem::data::jagged_vector_view<const int>,
+                                vecmem::data::jagged_vector_view<int> >();
+    EXPECT_TRUE(helper);
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
                 vecmem::data::vector_view<const int> >());
@@ -60,6 +73,8 @@ TEST_F(core_device_container_test, trivial_construct) {
                 vecmem::data::vector_view<const int> >());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
                 vecmem::data::vector_view<const int> >());
+    EXPECT_TRUE(
+        std::is_trivially_copyable<vecmem::data::vector_view<const int> >());
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
                 vecmem::data::vector_view<int> >());
@@ -67,6 +82,17 @@ TEST_F(core_device_container_test, trivial_construct) {
         std::is_trivially_constructible<vecmem::data::vector_view<int> >());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
                 vecmem::data::vector_view<int> >());
+    EXPECT_TRUE(std::is_trivially_copyable<vecmem::data::vector_view<int> >());
+
+    helper = std::is_assignable<vecmem::data::vector_view<int>,
+                                vecmem::data::vector_view<int> >();
+    EXPECT_TRUE(helper);
+    helper = std::is_assignable<vecmem::data::vector_view<const int>,
+                                vecmem::data::vector_view<const int> >();
+    EXPECT_TRUE(helper);
+    helper = std::is_assignable<vecmem::data::vector_view<const int>,
+                                vecmem::data::vector_view<int> >();
+    EXPECT_TRUE(helper);
 
     EXPECT_TRUE(
         std::is_default_constructible<vecmem::data::vector_buffer<int> >());
@@ -142,9 +168,9 @@ TEST_F(core_device_container_test, resizable_vector_buffer) {
     std::vector<int> host_vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
     // Helper local type definitions.
-    typedef
-        typename vecmem::data::vector_buffer<int>::size_type buffer_size_type;
-    typedef typename vecmem::device_vector<int>::size_type vector_size_type;
+    using buffer_size_type =
+        typename vecmem::data::vector_buffer<int>::size_type;
+    using vector_size_type = typename vecmem::device_vector<int>::size_type;
 
     // Create a resizable buffer from that data.
     static constexpr buffer_size_type BUFFER_SIZE = 100;
@@ -258,11 +284,14 @@ TEST_F(core_device_container_test, resizable_vector_buffer_nontrivial) {
     public:
         nontrivial_class() = delete;
         nontrivial_class(const nontrivial_class&) = delete;
-        nontrivial_class(nontrivial_class&& o) { m_value = o.m_value; };
+        nontrivial_class(nontrivial_class&& o) noexcept : m_value(o.m_value) {
+            o.m_value = 0;
+        }
 
-        nontrivial_class(int v) : m_value(v) {}
+        explicit nontrivial_class(int v) : m_value(v) {}
+        ~nontrivial_class() = default;
 
-        int get() { return m_value; }
+        int get() const { return m_value; }
 
         nontrivial_class& operator=(int v) {
             m_value = v;
@@ -278,10 +307,10 @@ TEST_F(core_device_container_test, resizable_vector_buffer_nontrivial) {
                   "`nontrivial_class` is not an implicit lifetime type.");
 
     // Helper local type definitions.
-    typedef typename vecmem::data::vector_buffer<nontrivial_class>::size_type
-        buffer_size_type;
-    typedef typename vecmem::device_vector<nontrivial_class>::size_type
-        vector_size_type;
+    using buffer_size_type =
+        typename vecmem::data::vector_buffer<nontrivial_class>::size_type;
+    using vector_size_type =
+        typename vecmem::device_vector<nontrivial_class>::size_type;
 
     // Create a resizable buffer from that data.
     static constexpr buffer_size_type BUFFER_SIZE = 100;
@@ -307,7 +336,7 @@ TEST_F(core_device_container_test, resizable_vector_buffer_nontrivial) {
     EXPECT_EQ(device_vector.size(), 10);
 
     for (decltype(device_vector)::size_type i = 0; i < 10; ++i) {
-        device_vector.at(i) = static_cast<int>(i) + static_cast<int>(1);
+        device_vector.at(i) = static_cast<int>(i) + 1;
     }
 
     for (decltype(device_vector)::size_type i = 0; i < 10; ++i) {
@@ -333,7 +362,7 @@ TEST_F(core_device_container_test, resizable_vector_buffer_nontrivial) {
     }
     EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(20));
 
-    for (nontrivial_class& value : device_vector) {
+    for (const nontrivial_class& value : device_vector) {
         EXPECT_EQ(value.get(), 123);
     }
 
@@ -344,7 +373,7 @@ TEST_F(core_device_container_test, resizable_vector_buffer_nontrivial) {
     }
 
     EXPECT_EQ(device_vector.size(), static_cast<vector_size_type>(29));
-    for (nontrivial_class& value : device_vector) {
+    for (const nontrivial_class& value : device_vector) {
         EXPECT_EQ(value.get(), 123);
     }
 
