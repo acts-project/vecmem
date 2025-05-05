@@ -59,7 +59,7 @@ proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>::operator=(
     const proxy& other) {
 
     if (this != &other) {
-        m_data = other.variables();
+        details::proxy_tuple_copy(m_data, other.m_data);
     }
     return *this;
 }

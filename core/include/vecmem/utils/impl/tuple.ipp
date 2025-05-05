@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -55,7 +55,7 @@ struct tuple_get_impl<0> {
 }  // namespace details
 
 template <std::size_t I, typename... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr const auto &get(
+VECMEM_HOST_AND_DEVICE constexpr const auto &get(
     const tuple<Ts...> &t) noexcept {
 
     // Make sure that the requested index is valid.
@@ -67,7 +67,7 @@ VECMEM_HOST_AND_DEVICE inline constexpr const auto &get(
 }
 
 template <std::size_t I, typename... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr auto &get(tuple<Ts...> &t) noexcept {
+VECMEM_HOST_AND_DEVICE constexpr auto &get(tuple<Ts...> &t) noexcept {
 
     // Make sure that the requested index is valid.
     static_assert(I < sizeof...(Ts),
@@ -78,14 +78,14 @@ VECMEM_HOST_AND_DEVICE inline constexpr auto &get(tuple<Ts...> &t) noexcept {
 }
 
 template <typename... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr tuple<Ts &...> tie(Ts &... args) {
+VECMEM_HOST_AND_DEVICE constexpr tuple<Ts &...> tie(Ts &... args) {
 
     return tuple<Ts &...>(args...);
 }
 
 template <class... Ts>
-VECMEM_HOST_AND_DEVICE inline constexpr tuple<typename std::decay<Ts>::type...>
-make_tuple(Ts &&... args) {
+VECMEM_HOST_AND_DEVICE constexpr tuple<std::decay_t<Ts>...> make_tuple(
+    Ts &&... args) {
     return tuple<typename std::decay<Ts>::type...>{std::forward<Ts>(args)...};
 }
 

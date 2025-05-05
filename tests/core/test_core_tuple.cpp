@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -14,13 +14,27 @@
 // System include(s).
 #include <type_traits>
 
-TEST(core_tuple_test, set_get) {
+TEST(core_tuple_test, set_get_copy) {
 
     // Construct trivial tuples in a few different ways.
     vecmem::tuple<int, float, double> t1;
     (void)t1;
     vecmem::tuple<float, int> t2{2.f, 3};
     vecmem::tuple<double, int> t3{t2};  // Type mismatch on purpose!
+
+    bool helper = std::is_trivially_default_constructible<
+        vecmem::tuple<int, float, double>>();
+    EXPECT_TRUE(helper);
+    helper =
+        std::is_trivially_constructible<vecmem::tuple<int, float, double>>();
+    EXPECT_TRUE(helper);
+    helper = std::is_trivially_copy_constructible<
+        vecmem::tuple<int, float, double>>();
+    EXPECT_TRUE(helper);
+    helper = std::is_trivially_copyable<vecmem::tuple<int, float, double>>();
+    EXPECT_TRUE(helper);
+    helper = std::is_trivially_copy_constructible<vecmem::tuple<float, int>>();
+    EXPECT_TRUE(helper);
 
     // Get/set elements in those tuples.
     EXPECT_FLOAT_EQ(vecmem::get<0>(t2), 2.f);
