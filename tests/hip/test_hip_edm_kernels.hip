@@ -1,9 +1,12 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
+
+// HIP include(s).
+#include <hip/hip_runtime.h>
 
 // Local include(s).
 #include "../common/jagged_soa_container_helpers.hpp"
@@ -12,9 +15,6 @@
 
 // Project include(s).
 #include "../../hip/src/utils/hip_error_handling.hpp"
-
-// HIP include(s).
-#include <hip/hip_runtime.h>
 
 __global__ void hipSimpleFillKernel(
     vecmem::testing::simple_soa_container::view view) {

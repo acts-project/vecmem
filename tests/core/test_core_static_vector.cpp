@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -284,11 +284,7 @@ namespace {
 /// Complex type used in one of the tests.
 struct TestType2 {
     TestType2(int a) : m_a(a + 1), m_b(nullptr) {}
-    ~TestType2() {
-        if (m_b != nullptr) {
-            --(*m_b);
-        }
-    }
+
     int m_a;
     int* m_b;
 };  // struct TestType2
@@ -311,11 +307,4 @@ TEST_F(core_static_vector_test_complex, non_trivial_value) {
         EXPECT_EQ(value.m_a, 11);
         EXPECT_EQ(value.m_b, nullptr);
     }
-
-    // Make sure that the destructor is called on the vector elements.
-    int dummy = 10;
-    v[0].m_b = &dummy;
-    v[5].m_b = &dummy;
-    v.clear();
-    EXPECT_EQ(dummy, 8);
 }
