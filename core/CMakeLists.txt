@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2025 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -160,6 +160,8 @@ vecmem_add_library( vecmem_core core
    "src/utils/copy.cpp"
    "include/vecmem/utils/debug.hpp"
    "src/utils/memory_monitor.cpp"
+   "include/vecmem/utils/memmove.hpp"
+   "include/vecmem/utils/impl/memmove.ipp"
    "include/vecmem/utils/memory_monitor.hpp"
    "include/vecmem/utils/tuple.hpp"
    "include/vecmem/utils/impl/tuple.ipp"
