@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -38,6 +38,9 @@ void fill(jagged_soa_container::host& obj) {
         for (std::size_t j = 0; j < obj.indices()[i].size(); ++j) {
             obj[i].indices()[j] = static_cast<int>(i + j);
         }
+        for (std::size_t j = 0; j < i % 3; ++j) {
+            obj[i].static_indices().push_back(static_cast<int>(i + j));
+        }
     }
 }
 
@@ -74,6 +77,7 @@ void compare(const jagged_soa_container::const_view& view1,
     };
     compare_jagged(device1.measurements(), device2.measurements());
     compare_jagged(device1.indices(), device2.indices());
+    compare_jagged(device1.static_indices(), device2.static_indices());
 }
 
 void make_buffer(jagged_soa_container::buffer& buffer, memory_resource& main_mr,
