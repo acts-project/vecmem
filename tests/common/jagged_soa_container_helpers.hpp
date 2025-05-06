@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -31,6 +31,10 @@ inline void fill(unsigned int i, jagged_soa_container::device& obj) {
         for (unsigned int j = 0; j < obj.indices()[i].capacity(); ++j) {
             obj[i].indices().push_back(static_cast<int>(i + j));
         }
+        obj.at(i).static_indices() = {};
+        for (unsigned int j = 0; j < i % 3; ++j) {
+            obj.static_indices().at(i).push_back(static_cast<int>(i + j));
+        }
     }
 }
 
@@ -52,6 +56,9 @@ inline void modify(unsigned int i, jagged_soa_container::device& obj) {
         }
         for (unsigned int j = 0; j < obj.indices()[i].size(); ++j) {
             obj.indices()[i][j] += 10;
+        }
+        for (unsigned int j = 0; j < obj[i].static_indices().size(); ++j) {
+            obj[i].static_indices().at(j) -= 3;
         }
     }
 }

@@ -1,15 +1,16 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 #pragma once
 
+// Local include(s).
+#include "vecmem/utils/memmove.hpp"
+
 // System include(s).
 #include <cassert>
-#include <cstring>
-#include <utility>
 
 namespace vecmem {
 
@@ -23,23 +24,6 @@ VECMEM_HOST_AND_DEVICE static_vector<TYPE, MAX_SIZE>::static_vector(
     : m_size(size), m_elements() {
 
     assign(size, value);
-}
-
-template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE static_vector<TYPE, MAX_SIZE>::static_vector(
-    const static_vector& parent)
-    : m_size(parent.m_size), m_elements() {
-
-    // Make copies of all of the elements.
-    for (size_type i = 0; i < m_size; ++i) {
-        construct(i, parent[i]);
-    }
-}
-
-template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE static_vector<TYPE, MAX_SIZE>::~static_vector() {
-
-    clear();
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
@@ -166,9 +150,9 @@ VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::insert(
     auto id = element_id(pos);
 
     // Move the payload of the existing elements after "pos".
-    memmove(static_cast<void*>(id.m_ptr + 1),
-            static_cast<const void*>(id.m_ptr),
-            (m_size - id.m_index) * value_size);
+    details::memmove(static_cast<void*>(id.m_ptr + 1),
+                     static_cast<const void*>(id.m_ptr),
+                     (m_size - id.m_index) * value_size);
 
     // Instantiate the new value.
     construct(id.m_index, value);
@@ -191,9 +175,9 @@ VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::insert(
     auto id = element_id(pos);
 
     // Move the payload of the existing elements after "pos".
-    memmove(static_cast<void*>(id.m_ptr + count),
-            static_cast<const void*>(id.m_ptr),
-            (m_size - id.m_index) * value_size);
+    details::memmove(static_cast<void*>(id.m_ptr + count),
+                     static_cast<const void*>(id.m_ptr),
+                     (m_size - id.m_index) * value_size);
 
     // Instantiate all the new values.
     for (size_type i = 0; i < count; ++i) {
@@ -219,9 +203,9 @@ VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::emplace(
     auto id = element_id(pos);
 
     // Move the payload of the existing elements after "pos".
-    memmove(static_cast<void*>(id.m_ptr + 1),
-            static_cast<const void*>(id.m_ptr),
-            (m_size - id.m_index) * value_size);
+    details::memmove(static_cast<void*>(id.m_ptr + 1),
+                     static_cast<const void*>(id.m_ptr),
+                     (m_size - id.m_index) * value_size);
 
     // Instantiate the new value.
     new (id.m_ptr) value_type(std::forward<Args>(args)...);
@@ -255,13 +239,10 @@ VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::erase(
     // Find the index of this iterator inside of the vector.
     auto id = element_id(pos);
 
-    // Destroy the object.
-    destruct(id.m_index);
-
     // Move up the payload of the elements from after the removed one.
-    memmove(static_cast<void*>(id.m_ptr),
-            static_cast<const void*>(id.m_ptr + 1),
-            (m_size - id.m_index - 1) * value_size);
+    details::memmove(static_cast<void*>(id.m_ptr),
+                     static_cast<const void*>(id.m_ptr + 1),
+                     (m_size - id.m_index - 1) * value_size);
 
     // Decrement the size.
     --m_size;
@@ -279,15 +260,10 @@ VECMEM_HOST_AND_DEVICE auto static_vector<TYPE, MAX_SIZE>::erase(
     auto last_id = element_id(last);
     assert(first_id.m_index <= last_id.m_index);
 
-    // Destroy the objects.
-    for (size_type i = first_id.m_index; i < last_id.m_index; ++i) {
-        destruct(i);
-    }
-
     // Move up the payload of the elements from after the removed range.
-    memmove(static_cast<void*>(first_id.m_ptr),
-            static_cast<const void*>(last_id.m_ptr),
-            (m_size - last_id.m_index) * value_size);
+    details::memmove(static_cast<void*>(first_id.m_ptr),
+                     static_cast<const void*>(last_id.m_ptr),
+                     (m_size - last_id.m_index) * value_size);
 
     // Decrease the size.
     m_size -= (last_id.m_index - first_id.m_index);
@@ -305,9 +281,6 @@ VECMEM_HOST_AND_DEVICE void static_vector<TYPE, MAX_SIZE>::pop_back() {
 template <typename TYPE, std::size_t MAX_SIZE>
 VECMEM_HOST_AND_DEVICE void static_vector<TYPE, MAX_SIZE>::clear() {
 
-    for (size_type i = 0; i < m_size; ++i) {
-        destruct(i);
-    }
     m_size = 0;
 }
 
@@ -469,18 +442,6 @@ VECMEM_HOST_AND_DEVICE void static_vector<TYPE, MAX_SIZE>::construct(
     // Use the constructor of the type.
     pointer ptr = reinterpret_cast<pointer>(m_elements) + pos;
     new (ptr) value_type(value);
-}
-
-template <typename TYPE, std::size_t MAX_SIZE>
-VECMEM_HOST_AND_DEVICE void static_vector<TYPE, MAX_SIZE>::destruct(
-    size_type pos) {
-
-    // Make sure that the element has been allocated.
-    assert(pos < m_size);
-
-    // Use the destructor of the type.
-    pointer ptr = reinterpret_cast<pointer>(m_elements) + pos;
-    ptr->~value_type();
 }
 
 template <typename TYPE, std::size_t MAX_SIZE>
