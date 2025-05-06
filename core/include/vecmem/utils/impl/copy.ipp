@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -102,6 +102,11 @@ copy::event_type copy::operator()(
     // Figure out the size of the buffer.
     const typename data::vector_view<std::add_const_t<TYPE>>::size_type size =
         get_size(from_view);
+
+    // If the size is zero, don't do an actual copy.
+    if (size == 0u) {
+        return vecmem::copy::create_event();
+    }
 
     // Make the target vector the correct size.
     to_vec.resize(size);
