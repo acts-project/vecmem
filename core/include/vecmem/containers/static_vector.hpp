@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -30,46 +30,62 @@ template <typename TYPE, std::size_t MAX_SIZE>
 class static_vector {
 
 public:
+    /// @name Requirements on the vector type
+    /// @{
+
+    /// The type of the vector needs to be trivially copyable
+    static_assert(std::is_trivially_copyable<TYPE>::value,
+                  "The type of the static vector needs to be trivially "
+                  "copyable.");
+    /// The type of the vector needs to be trivially destructible
+    static_assert(std::is_trivially_destructible<TYPE>::value,
+                  "The type of the static vector needs to be trivially "
+                  "destructible.");
+
+    /// @}
+
     /// @name Type definitions, mimicking @c std::vector
     /// @{
 
     /// Type of the array elements
-    typedef TYPE value_type;
+    using value_type = TYPE;
     /// Size type for the array
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
     /// Pointer difference type
-    typedef std::ptrdiff_t difference_type;
+    using difference_type = std::ptrdiff_t;
 
     /// The maximal size of the vector
     static constexpr size_type array_max_size = MAX_SIZE;
     /// The size of the vector elements
     static constexpr size_type value_size = sizeof(value_type);
     /// Type of the array holding the payload of the vector elements
-    typedef typename details::static_vector_type<
-        char, array_max_size * value_size>::type array_type;
+    using array_type =
+        typename details::static_vector_type<char,
+                                             array_max_size * value_size>::type;
 
     /// Value reference type
-    typedef value_type& reference;
+    using reference = std::add_lvalue_reference_t<value_type>;
     /// Constant value reference type
-    typedef const value_type& const_reference;
+    using const_reference =
+        std::add_lvalue_reference_t<std::add_const_t<value_type> >;
     /// Value pointer type
-    typedef value_type* pointer;
+    using pointer = std::add_pointer_t<value_type>;
     /// Constant value pointer type
-    typedef const value_type* const_pointer;
+    using const_pointer = std::add_pointer_t<std::add_const_t<value_type> >;
 
     /// Forward iterator type
-    typedef pointer iterator;
+    using iterator = pointer;
     /// Constant forward iterator type
-    typedef const_pointer const_iterator;
+    using const_iterator = const_pointer;
     /// Reverse iterator type
-    typedef vecmem::details::reverse_iterator<iterator> reverse_iterator;
+    using reverse_iterator = vecmem::details::reverse_iterator<iterator>;
     /// Constant reverse iterator type
-    typedef vecmem::details::reverse_iterator<const_iterator>
-        const_reverse_iterator;
+    using const_reverse_iterator =
+        vecmem::details::reverse_iterator<const_iterator>;
 
     /// @}
 
-    /// @name Constructors and destructor, mimicking @c std::vector
+    /// @name Constructors and assignments, mimicking @c std::vector
     /// @{
 
     /// Default constructor
@@ -90,12 +106,17 @@ public:
         assign<InputIt>(other_begin, other_end);
     }
     /// Copy constructor
-    VECMEM_HOST_AND_DEVICE
-    static_vector(const static_vector& parent);
+    static_vector(const static_vector&) = default;
+    /// Move constructor
+    static_vector(static_vector&&) noexcept = default;
 
     /// Destructor
-    VECMEM_HOST_AND_DEVICE
-    ~static_vector();
+    ~static_vector() = default;
+
+    /// Copy assignment operator
+    static_vector& operator=(const static_vector&) = default;
+    /// Move assignment operator
+    static_vector& operator=(static_vector&&) noexcept = default;
 
     /// @}
 
@@ -159,7 +180,8 @@ public:
         // inefficient, but we can't make any assumptions about the type of the
         /// input iterator eceived by this function.
         for (InputIt itr = other_begin; itr != other_end; ++itr) {
-            construct(m_size++, *itr);
+            construct(m_size, *itr);
+            ++m_size;
         }
     }
 
@@ -300,9 +322,6 @@ private:
     /// Construct a new vector element
     VECMEM_HOST_AND_DEVICE
     void construct(size_type pos, const_reference value);
-    /// Destruct a vector element
-    VECMEM_HOST_AND_DEVICE
-    void destruct(size_type pos);
 
     /// Helper type for identifying an element in the array
     struct ElementId {
