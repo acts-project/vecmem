@@ -67,19 +67,26 @@ public:
     std::string device_name() const;
 
     /// Check if it's a CPU queue
+    VECMEM_SYCL_EXPORT
     bool is_cpu() const;
     /// Check if it's a GPU queue
+    VECMEM_SYCL_EXPORT
     bool is_gpu() const;
     /// Check if it's an accelerator (FPGA) queue
+    VECMEM_SYCL_EXPORT
     bool is_accelerator() const;
 
     /// Check if it's an OpenCL queue
+    VECMEM_SYCL_EXPORT
     bool is_opencl() const;
     /// Check if it's a Level-0 queue
+    VECMEM_SYCL_EXPORT
     bool is_level0() const;
     /// Check if it's a CUDA queue
+    VECMEM_SYCL_EXPORT
     bool is_cuda() const;
     /// Check if it's a HIP queue
+    VECMEM_SYCL_EXPORT
     bool is_hip() const;
 
 private:
