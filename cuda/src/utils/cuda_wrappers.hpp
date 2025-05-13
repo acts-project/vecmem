@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,9 +12,7 @@
 // CUDA include(s).
 #include <cuda_runtime_api.h>
 
-namespace vecmem {
-namespace cuda {
-namespace details {
+namespace vecmem::cuda::details {
 
 /**
  * @brief Get current CUDA device number.
@@ -30,6 +28,4 @@ int get_device();
 /// Get concrete @c cudaStream_t object out of our wrapper
 cudaStream_t get_stream(const stream_wrapper& stream);
 
-}  // namespace details
-}  // namespace cuda
-}  // namespace vecmem
+}  // namespace vecmem::cuda::details
