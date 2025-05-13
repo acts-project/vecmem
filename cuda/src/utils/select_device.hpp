@@ -33,11 +33,21 @@ public:
      */
     explicit select_device(int device);
 
+    /// Don't allow copying the class
+    select_device(const select_device&) = delete;
+    /// Don't allow moving the class
+    select_device(select_device&&) = delete;
+
     /**
      * @brief Deconstructs the object, returning to the device that was
      * selected before constructing this object.
      */
     ~select_device();
+
+    /// Don't allow copy assigning the class
+    select_device& operator=(const select_device&) = delete;
+    /// Don't allow move assigning the class
+    select_device& operator=(select_device&&) = delete;
 
     /**
      * @brief Identifier for the device being seleced
