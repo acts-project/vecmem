@@ -177,7 +177,7 @@ template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX, std::size_t... Is>
 VECMEM_HOST_AND_DEVICE void
 device<schema<VARTYPES...>, INTERFACE>::construct_default(
-    size_type index, std::index_sequence<INDEX, Is...>) {
+    size_type index, std::index_sequence<INDEX, Is...>) const {
 
     // Construct the new element in this variable, if it's a vector.
     construct_vector(index, vecmem::get<INDEX>(m_data));
@@ -188,18 +188,22 @@ device<schema<VARTYPES...>, INTERFACE>::construct_default(
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST_AND_DEVICE void
 device<schema<VARTYPES...>, INTERFACE>::construct_default(
-    size_type, std::index_sequence<>) {}
+    size_type, std::index_sequence<>) const {
+    // The terminal node doesn't need to do anything.
+}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 template <typename T>
 VECMEM_HOST_AND_DEVICE void
-device<schema<VARTYPES...>, INTERFACE>::construct_vector(size_type, T&) {}
+device<schema<VARTYPES...>, INTERFACE>::construct_vector(size_type, T&) const {
+    // Nothing is done for non-vector variables.
+}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 template <typename T>
 VECMEM_HOST_AND_DEVICE void
 device<schema<VARTYPES...>, INTERFACE>::construct_vector(
-    size_type index, device_vector<T>& vec) {
+    size_type index, device_vector<T>& vec) const {
 
     vec.construct(index, {});
 }

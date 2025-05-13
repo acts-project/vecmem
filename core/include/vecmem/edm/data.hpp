@@ -63,7 +63,7 @@ public:
     data(data&&) noexcept = default;
 
     /// Move assignment operator
-    data& operator=(data&&) = default;
+    data& operator=(data&&) noexcept = default;
 
     /// Constructor for the data object
     ///
