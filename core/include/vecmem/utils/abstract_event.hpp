@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022-2024 CERN for the benefit of the ACTS project
+ * (c) 2022-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -21,7 +21,7 @@ namespace vecmem {
 struct abstract_event {
 
     /// Virtual destructor to make vtable happy
-    virtual ~abstract_event() {}
+    virtual ~abstract_event() = default;
 
     /// Function that would block the current thread until the event is
     /// complete

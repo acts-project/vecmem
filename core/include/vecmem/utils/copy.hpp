@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -72,7 +72,7 @@ public:
     /// @{
 
     /// Virtual destructor
-    virtual ~copy() {}
+    virtual ~copy() = default;
 
     /// Set up the internal state of a vector buffer correctly on a device
     template <typename TYPE>
