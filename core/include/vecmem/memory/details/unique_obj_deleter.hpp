@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -92,7 +92,7 @@ public:
      *
      * @param i The object deleter to move.
      */
-    unique_obj_deleter(unique_obj_deleter&& i) = default;
+    unique_obj_deleter(unique_obj_deleter&&) noexcept = default;
 
     /**
      * @brief Copy-assign a unique object deleter.
@@ -110,7 +110,7 @@ public:
      *
      * @return A reference to this object.
      */
-    unique_obj_deleter& operator=(unique_obj_deleter&& i) = default;
+    unique_obj_deleter& operator=(unique_obj_deleter&&) noexcept = default;
 
     /**
      * @brief Activate the deletion mechanism of the deleter.

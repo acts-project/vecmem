@@ -61,7 +61,7 @@ void *host_memory_resource::do_allocate(std::size_t bytes,
     // allocated.
     std::size_t align_bytes = alloc_bytes - sizeof(void *);
     // Perform the alignment.
-    void *aligned_ptr = std::align(alignment, bytes, ptr, align_bytes);
+    const void *aligned_ptr = std::align(alignment, bytes, ptr, align_bytes);
     // The alignment was meant to succeed. If it didn't, we messed
     // something up in the code. So let's only check for that in Debug
     // builds.
