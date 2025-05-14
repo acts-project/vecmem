@@ -185,9 +185,14 @@ public:
         edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
         type::copy_type cptype = type::unknown) const;
 
-    /// Get the (outer) size of a resizable SoA container
+    /// Get the (outer) size of a (resizable) SoA container
     template <typename... VARTYPES>
     typename edm::view<edm::schema<VARTYPES...>>::size_type get_size(
+        const edm::view<edm::schema<VARTYPES...>>& data) const;
+
+    /// Get the (inner) size of a (resizable) SoA container
+    template <typename... VARTYPES>
+    std::vector<data::vector_view<int>::size_type> get_sizes(
         const edm::view<edm::schema<VARTYPES...>>& data) const;
 
     /// @}
@@ -255,6 +260,10 @@ private:
         const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
             from,
         edm::view<edm::schema<VARTYPES...>> to, type::copy_type cptype) const;
+    /// Implementation for the variadic @c get_sizes function
+    template <std::size_t INDEX, typename... VARTYPES>
+    std::vector<data::vector_view<int>::size_type> get_sizes_impl(
+        const edm::view<edm::schema<VARTYPES...>>& from) const;
 
 };  // class copy
 

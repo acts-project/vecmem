@@ -489,6 +489,19 @@ typename edm::view<edm::schema<VARTYPES...>>::size_type copy::get_size(
     }
 }
 
+template <typename... VARTYPES>
+std::vector<data::vector_view<int>::size_type> copy::get_sizes(
+    const edm::view<edm::schema<VARTYPES...>>& data) const {
+
+    // Make sure that there's a jagged vector in here.
+    static_assert(
+        edm::details::has_jagged_vector<edm::schema<VARTYPES...>>::value,
+        "Function can only be used on containers with jagged vectors");
+
+    // Get the sizes using the helper function.
+    return get_sizes_impl<0>(data);
+}
+
 template <typename TYPE>
 bool copy::copy_view_impl(
     const data::vector_view<std::add_const_t<TYPE>>& from_view,
@@ -928,6 +941,35 @@ void copy::copy_payload_impl(
     if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {
         copy_payload_impl<INDEX + 1>(from_view, to_view, cptype);
     }
+}
+
+template <std::size_t INDEX, typename... VARTYPES>
+std::vector<data::vector_view<int>::size_type> copy::get_sizes_impl(
+    const edm::view<edm::schema<VARTYPES...>>& view) const {
+
+    // Make sure that there's a jagged vector in here.
+    static_assert(
+        edm::details::has_jagged_vector<edm::schema<VARTYPES...>>::value,
+        "Function can only be used on containers with jagged vectors");
+
+    // Check if the variable at INDEX is a jagged vector.
+    if constexpr (edm::type::details::is_jagged_vector<
+                      typename std::tuple_element<
+                          INDEX, std::tuple<VARTYPES...>>::type>::value) {
+        // If it is, get its (inner) sizes.
+        return get_sizes(view.template get<INDEX>());
+    } else if constexpr (sizeof...(VARTYPES) > (INDEX + 1)) {
+        // If it's not, and this was not the last variable, recurse into the
+        // next variable.
+        return get_sizes_impl<INDEX + 1>(view);
+    }
+
+    // We should never get here as long as the code was written correctly.
+#if defined(__GNUC__)
+    __builtin_unreachable();
+#elif defined(_MSC_VER)
+    __assume(0);
+#endif
 }
 
 }  // namespace vecmem
