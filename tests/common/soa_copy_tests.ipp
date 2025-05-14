@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -55,6 +55,14 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct() {
     // Check the size of the device buffer.
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
 
+    // Exercise the get_sizes(...) function, if there is a jagged vector in the
+    // container.
+    if constexpr (vecmem::edm::details::has_jagged_vector<
+                      typename CONTAINER::schema_type>::value) {
+        EXPECT_EQ(host_copy().get_sizes(input_data),
+                  main_copy().get_sizes(device_buffer));
+    }
+
     // Create the target host container.
     typename CONTAINER::host target{host_mr()};
 
@@ -93,6 +101,17 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_optimal() {
     // Copy the data from the host buffer to the device buffer.
     main_copy()(host_buffer1, device_buffer, vecmem::copy::type::host_to_device)
         ->wait();
+
+    // Check the size of the device buffer.
+    EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
+
+    // Exercise the get_sizes(...) function, if there is a jagged vector in the
+    // container.
+    if constexpr (vecmem::edm::details::has_jagged_vector<
+                      typename CONTAINER::schema_type>::value) {
+        EXPECT_EQ(host_copy().get_sizes(vecmem::get_data(input)),
+                  main_copy().get_sizes(device_buffer));
+    }
 
     // Create a (fixed sized) host buffer, to stage the data back into.
     typename CONTAINER::buffer host_buffer2;
@@ -140,6 +159,14 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host() {
     // Check the size of the device buffer.
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
 
+    // Exercise the get_sizes(...) function, if there is a jagged vector in the
+    // container.
+    if constexpr (vecmem::edm::details::has_jagged_vector<
+                      typename CONTAINER::schema_type>::value) {
+        EXPECT_EQ(host_copy().get_sizes(input_data),
+                  main_copy().get_sizes(device_buffer));
+    }
+
     // Create the target host container.
     typename CONTAINER::host target{host_mr()};
 
@@ -175,6 +202,14 @@ void soa_copy_tests_base<
     // Check the size of the device buffer.
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer1));
 
+    // Exercise the get_sizes(...) function, if there is a jagged vector in the
+    // container.
+    if constexpr (vecmem::edm::details::has_jagged_vector<
+                      typename CONTAINER::schema_type>::value) {
+        EXPECT_EQ(host_copy().get_sizes(vecmem::get_data(input)),
+                  main_copy().get_sizes(device_buffer1));
+    }
+
     // Create the (resizable) device buffer.
     typename CONTAINER::buffer device_buffer2;
     vecmem::testing::make_buffer(device_buffer2, main_mr(), host_mr(),
@@ -187,6 +222,14 @@ void soa_copy_tests_base<
 
     // Check the size of the device buffer.
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer2));
+
+    // Exercise the get_sizes(...) function, if there is a jagged vector in the
+    // container.
+    if constexpr (vecmem::edm::details::has_jagged_vector<
+                      typename CONTAINER::schema_type>::value) {
+        EXPECT_EQ(host_copy().get_sizes(vecmem::get_data(input)),
+                  main_copy().get_sizes(device_buffer2));
+    }
 
     // Create the target host container.
     typename CONTAINER::host target{host_mr()};
