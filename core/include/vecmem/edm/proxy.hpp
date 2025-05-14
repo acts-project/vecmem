@@ -73,7 +73,7 @@ public:
     proxy(const proxy&) = default;
 
     /// Default move constructor
-    proxy(proxy&&) = default;
+    proxy(proxy&&) noexcept = default;
 
     /// Copy constructor
     ///

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -35,7 +35,7 @@ protected:
     ///          otherwise
     ///
     VECMEM_CORE_EXPORT
-    virtual bool do_is_equal(const memory_resource& other) const noexcept;
+    bool do_is_equal(const memory_resource& other) const noexcept override;
 
     /// @}
 

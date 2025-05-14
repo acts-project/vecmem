@@ -12,7 +12,9 @@
 // CUDA include(s).
 #include <cuda_runtime_api.h>
 
-namespace vecmem::cuda::details {
+namespace vecmem {
+namespace cuda {
+namespace details {
 
 /**
  * @brief Get current CUDA device number.
@@ -28,4 +30,6 @@ int get_device();
 /// Get concrete @c cudaStream_t object out of our wrapper
 cudaStream_t get_stream(const stream_wrapper& stream);
 
-}  // namespace vecmem::cuda::details
+}  // namespace details
+}  // namespace cuda
+}  // namespace vecmem

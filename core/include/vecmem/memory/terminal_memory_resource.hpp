@@ -42,7 +42,7 @@ public:
      * @param[in] upstream The upstream memory resource to use.
      */
     VECMEM_CORE_EXPORT explicit terminal_memory_resource(
-        memory_resource& upstream);
+        const memory_resource& upstream);
     /// Destructor
     VECMEM_CORE_EXPORT
     ~terminal_memory_resource() override;
@@ -52,8 +52,7 @@ private:
     /// @{
 
     /// Throw @c std::bad_alloc.
-    VECMEM_CORE_EXPORT
-    void* do_allocate(std::size_t, std::size_t) override;
+    VECMEM_CORE_EXPORT void* do_allocate(std::size_t, std::size_t) override;
     /// Do nothing.
     VECMEM_CORE_EXPORT
     void do_deallocate(void* p, std::size_t, std::size_t) override;

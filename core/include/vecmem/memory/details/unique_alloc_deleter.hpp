@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -73,7 +73,7 @@ public:
      *
      * @param i The allocation deleter to move.
      */
-    unique_alloc_deleter(unique_alloc_deleter&& i) = default;
+    unique_alloc_deleter(unique_alloc_deleter&& i) noexcept = default;
 
     /**
      * @brief Copy-assign a unique allocation deleter.
@@ -91,7 +91,8 @@ public:
      *
      * @return A reference to this object.
      */
-    unique_alloc_deleter& operator=(unique_alloc_deleter&& i) = default;
+    unique_alloc_deleter& operator=(unique_alloc_deleter&& i) noexcept =
+        default;
 
     /**
      * @brief Activate the deletion mechanism of the deleter.

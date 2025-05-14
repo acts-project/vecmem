@@ -154,18 +154,18 @@ private:
     /// Construct a default element for every vector variable
     template <std::size_t INDEX, std::size_t... Is>
     VECMEM_HOST_AND_DEVICE void construct_default(
-        size_type index, std::index_sequence<INDEX, Is...>);
+        size_type index, std::index_sequence<INDEX, Is...>) const;
     /// Construct a default element for every vector variable (terminal node)
     VECMEM_HOST_AND_DEVICE void construct_default(size_type index,
-                                                  std::index_sequence<>);
+                                                  std::index_sequence<>) const;
 
     /// Default, no-op vector element construction helper function
     template <typename T>
-    VECMEM_HOST_AND_DEVICE void construct_vector(size_type, T&);
+    VECMEM_HOST_AND_DEVICE void construct_vector(size_type, T&) const;
     /// Vector element constructor helper function
     template <typename T>
     VECMEM_HOST_AND_DEVICE void construct_vector(size_type index,
-                                                 device_vector<T>& vec);
+                                                 device_vector<T>& vec) const;
 
     /// Maximum capacity of the container
     size_type m_capacity = 0;

@@ -44,7 +44,7 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(size_type capacity,
                             std::index_sequence_for<VARTYPES...>{});
             break;
         default:
-            throw std::runtime_error("Unknown buffer type");
+            throw std::invalid_argument("Unknown buffer type");
     }
 }
 
@@ -76,7 +76,7 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(
                             std::index_sequence_for<VARTYPES...>{});
             break;
         default:
-            throw std::runtime_error("Unknown buffer type");
+            throw std::invalid_argument("Unknown buffer type");
     }
 }
 
@@ -92,7 +92,9 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
 
     // Tuple of pointers to the allocated "layout objects" and "payloads".
     std::tuple<typename details::view_type<VARTYPES>::layout_ptr...>
-        layout_ptrs, host_layout_ptrs;
+        layout_ptrs;
+    std::tuple<typename details::view_type<VARTYPES>::layout_ptr...>
+        host_layout_ptrs;
     std::tuple<typename details::view_type<VARTYPES>::payload_ptr...>
         payload_ptrs;
 
@@ -161,7 +163,9 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_resizable(
 
     // Tuple of pointers to the allocated "layout objects" and "payloads".
     std::tuple<typename details::view_type<VARTYPES>::layout_ptr...>
-        layout_ptrs, host_layout_ptrs;
+        layout_ptrs;
+    std::tuple<typename details::view_type<VARTYPES>::layout_ptr...>
+        host_layout_ptrs;
     std::tuple<typename details::view_type<VARTYPES>::payload_ptr...>
         payload_ptrs;
 

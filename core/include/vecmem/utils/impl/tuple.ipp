@@ -86,7 +86,7 @@ VECMEM_HOST_AND_DEVICE constexpr tuple<Ts &...> tie(Ts &... args) {
 template <class... Ts>
 VECMEM_HOST_AND_DEVICE constexpr tuple<std::decay_t<Ts>...> make_tuple(
     Ts &&... args) {
-    return tuple<typename std::decay<Ts>::type...>{std::forward<Ts>(args)...};
+    return tuple<std::decay_t<Ts>...>{std::forward<Ts>(args)...};
 }
 
 }  // namespace vecmem

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -43,7 +43,7 @@ public:
      *
      * @param[in] mem The memory resource to use for allocations.
      */
-    allocator(memory_resource& mem);
+    explicit allocator(memory_resource& mem);
 
     /**
      * @brief Allocate a given number of bytes.

@@ -315,7 +315,7 @@ copy::event_type copy::set_sizes(
         if (data.host_ptr()[i].size_ptr() == nullptr) {
             perform_copy = false;
         } else if (perform_copy == false) {
-            throw std::runtime_error(
+            throw std::invalid_argument(
                 "Inconsistent target jagged vector view received for resizing");
         }
     }

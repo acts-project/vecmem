@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -16,9 +16,13 @@
 
 namespace {
 /// Empty/no-op implementation for @c vecmem::abstract_event
-struct noop_event : public vecmem::abstract_event {
-    virtual void wait() override {}
-    virtual void ignore() override {}
+struct noop_event final : public vecmem::abstract_event {
+    void wait() override {
+        // No-op
+    }
+    void ignore() override {
+        // No-op
+    }
 };  // struct noop_event
 }  // namespace
 

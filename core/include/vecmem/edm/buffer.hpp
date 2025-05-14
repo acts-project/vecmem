@@ -187,7 +187,7 @@ public:
     buffer(buffer&&) noexcept = default;
 
     /// Move assignment operator
-    buffer& operator=(buffer&&) = default;
+    buffer& operator=(buffer&&) noexcept = default;
 
     /// Constructor for a 1D buffer
     ///
