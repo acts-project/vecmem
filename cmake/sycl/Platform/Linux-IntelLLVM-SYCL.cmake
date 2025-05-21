@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2025 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -15,6 +15,11 @@ if( LinuxIntelLLVM_AVAILABLE AND IntelLLVM_AVAILABLE )
    # configuration.
    __linux_compiler_intel_llvm( SYCL )
    __compiler_intel_llvm( SYCL )
+   # Set some options by hand.
+   set( CMAKE_SYCL_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN
+      "-fvisibility-inlines-hidden" )
+   string( APPEND CMAKE_SYCL_FLAGS_RELEASE_INIT " -DNDEBUG" )
+   string( APPEND CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT " -DNDEBUG" )
 else()
    # We have a somewhat older version of CMake. Use the configuration for the
    # older Intel compilers.
@@ -25,6 +30,11 @@ else()
    if( LinuxIntel_AVAILABLE AND Intel_AVAILABLE )
       __linux_compiler_intel( SYCL )
       __compiler_intel( SYCL )
+      # Set some options by hand.
+      set( CMAKE_SYCL_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN
+         "-fvisibility-inlines-hidden" )
+      string( APPEND CMAKE_SYCL_FLAGS_RELEASE_INIT " -DNDEBUG" )
+      string( APPEND CMAKE_SYCL_FLAGS_RELWITHDEBINFO_INIT " -DNDEBUG" )
    else()
       message( WARNING "No Intel compiler configuration found in CMake! "
          "Setting fragile defaults by hand..." )
