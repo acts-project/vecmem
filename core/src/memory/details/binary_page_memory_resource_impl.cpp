@@ -255,6 +255,23 @@ void binary_page_memory_resource_impl::allocate_upstream(std::size_t size) {
     }
 }
 
+std::pair<std::size_t, std::size_t>
+binary_page_memory_resource_impl::get_memory_usage() {
+    std::size_t occupied_size = 0;
+    std::size_t total_size = 0;
+
+    for (superpage &sp : m_superpages) {
+        auto [sp_occupied_size, sp_total_size] = sp.get_memory_usage();
+
+        occupied_size += sp_occupied_size;
+        total_size += sp_total_size;
+
+        assert(occupied_size <= total_size);
+    }
+
+    return {occupied_size, total_size};
+}
+
 binary_page_memory_resource_impl::superpage::superpage(
     std::size_t size, memory_resource &resource)
     : m_size(size),
@@ -278,6 +295,16 @@ binary_page_memory_resource_impl::superpage::superpage(
 
 std::size_t binary_page_memory_resource_impl::superpage::total_pages() const {
     return m_num_pages;
+}
+
+std::pair<std::size_t, std::size_t>
+binary_page_memory_resource_impl::superpage::get_memory_usage() {
+    std::size_t occupied_size = page_ref(*this, 0).get_occupied_size();
+    std::size_t total_size = static_cast<std::size_t>(1UL) << m_size;
+
+    assert(occupied_size <= total_size);
+
+    return {occupied_size, total_size};
 }
 
 std::size_t binary_page_memory_resource_impl::page_ref::get_size() const {
@@ -413,5 +440,19 @@ void binary_page_memory_resource_impl::page_ref::split() {
     change_state_vacant_to_split();
     left_child().change_state_non_extant_to_vacant();
     right_child().change_state_non_extant_to_vacant();
+}
+
+std::size_t binary_page_memory_resource_impl::page_ref::get_occupied_size() {
+    if (get_state() == page_state::SPLIT) {
+        return left_child().get_occupied_size() +
+               right_child().get_occupied_size();
+    } else if (get_state() == page_state::OCCUPIED) {
+        return static_cast<std::size_t>(1UL) << get_size();
+    } else if (get_state() == page_state::VACANT) {
+        return 0;
+    } else {
+        throw std::runtime_error(
+            "Recursion through page tree encountered non-extant page");
+    }
 }
 }  // namespace vecmem::details
