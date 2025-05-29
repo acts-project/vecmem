@@ -134,15 +134,20 @@ TEST_F(core_device_container_test, jagged_vector_buffer) {
                                                {19, 20},
                                                {},
                                                {21}};
+    const std::vector<unsigned int> capacities{0u, 5u, 2u, 4u, 7u,
+                                               0u, 0u, 2u, 0u, 1u};
     auto host_data = vecmem::get_data(host_vector, &m_resource);
+    EXPECT_EQ(vecmem::data::get_capacities(host_data), capacities);
 
     // Set up an "alternative" memory resource for the test.
     vecmem::contiguous_memory_resource cresource(m_resource, 16384);
 
     // Create a buffer to hold the same data.
     vecmem::data::jagged_vector_buffer<int> device_data1(host_data, m_resource);
+    EXPECT_EQ(vecmem::data::get_capacities(device_data1), capacities);
     vecmem::data::jagged_vector_buffer<int> device_data2(host_data, m_resource,
                                                          &cresource);
+    EXPECT_EQ(vecmem::data::get_capacities(device_data2), capacities);
 
     // Test the internal state of the buffer.
     EXPECT_EQ(device_data1.ptr(), device_data1.host_ptr());
