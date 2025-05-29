@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -41,6 +41,32 @@ struct add_const<type::jagged_vector<TYPE>> {
 
 template <typename T>
 using add_const_t = typename add_const<T>::type;
+
+/// @}
+
+/// @name Traits removing constness and volatility from variable types
+/// @{
+
+template <typename T>
+struct remove_cv;
+
+template <typename TYPE>
+struct remove_cv<type::scalar<TYPE>> {
+    using type = type::scalar<std::remove_cv_t<TYPE>>;
+};  // struct remove_cv
+
+template <typename TYPE>
+struct remove_cv<type::vector<TYPE>> {
+    using type = type::vector<std::remove_cv_t<TYPE>>;
+};  // struct remove_cv
+
+template <typename TYPE>
+struct remove_cv<type::jagged_vector<TYPE>> {
+    using type = type::jagged_vector<std::remove_cv_t<TYPE>>;
+};  // struct remove_cv
+
+template <typename T>
+using remove_cv_t = typename remove_cv<T>::type;
 
 /// @}
 
@@ -148,6 +174,23 @@ struct add_const<schema<VARTYPES...>> {
 /// Convenience alias for @c add_const<schema<VARTYPES...>>::type
 template <typename... VARTYPES>
 using add_const_t = typename add_const<VARTYPES...>::type;
+
+/// Technical base type for @c remove_cv<schema<VARTYPES...>>
+template <typename T>
+struct remove_cv;
+
+/// Remove constness and volatility from all variable types in a schema
+///
+/// @tparam ...VARTYPES The variable types in the schema
+///
+template <typename... VARTYPES>
+struct remove_cv<schema<VARTYPES...>> {
+    using type = schema<typename type::details::remove_cv<VARTYPES>::type...>;
+};
+
+/// Convenience alias for @c remove_cv<schema<VARTYPES...>>::type
+template <typename... VARTYPES>
+using remove_cv_t = typename remove_cv<VARTYPES...>::type;
 
 /// @}
 

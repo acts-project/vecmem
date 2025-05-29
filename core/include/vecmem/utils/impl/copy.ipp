@@ -67,10 +67,10 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     const vecmem::data::vector_view<TYPE>& data, memory_resource& resource,
     type::copy_type cptype) const {
 
-    // Set up the result buffer.
+    // Set up the result buffer. No need to call setup(...) on it, as the buffer
+    // is not resizable.
     data::vector_buffer<std::remove_cv_t<TYPE>> result(get_size(data),
                                                        resource);
-    setup(result)->wait();
 
     // Copy the payload of the vector. Explicitly waiting for the copy to finish
     // before returning the buffer.
@@ -224,11 +224,13 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 
     // Create the result buffer object.
     data::jagged_vector_buffer<std::remove_cv_t<TYPE>> result(
-        data, resource, host_access_resource);
+        data::get_capacities(data), resource, host_access_resource);
     assert(result.size() == data.size());
 
     // Copy the description of the "inner vectors" if necessary.
-    setup(result)->wait();
+    if (host_access_resource != nullptr) {
+        setup(result)->wait();
+    }
 
     // Copy the payload of the inner vectors. Explicitly waiting for the copy to
     // finish before returning the buffer.
@@ -378,6 +380,51 @@ copy::event_type copy::memset(edm::view<edm::schema<VARTYPES...>> data,
 
     // Return a new event.
     return create_event();
+}
+
+template <typename... VARTYPES>
+edm::buffer<edm::details::remove_cv_t<edm::schema<VARTYPES...>>> copy::to(
+    const edm::view<edm::schema<VARTYPES...>>& data, memory_resource& resource,
+    [[maybe_unused]] memory_resource* host_access_resource,
+    type::copy_type cptype) const {
+
+    // Create the result buffer object.
+    const data::buffer_type btype =
+        ((data.size().ptr() != nullptr) ? data::buffer_type::resizable
+                                        : data::buffer_type::fixed_size);
+    edm::buffer<edm::details::remove_cv_t<edm::schema<VARTYPES...>>> result;
+    if constexpr (edm::details::has_jagged_vector<
+                      edm::schema<VARTYPES...>>::value) {
+        // Set up a buffer that has (a) jagged vector(s).
+        result = {edm::get_capacities(data), resource, host_access_resource,
+                  btype};
+        // The idea here is that since we are going to copy data into the newly
+        // created buffer, the only thing that setup(...) needs to do is to set
+        // up "the layout" in non-host-accessible memory. (Zeroing the size
+        // variable(s) is not needed.) When doing a device-to-host copy, copying
+        // "the layout" is not actually needed. Worse yet, the copy object is
+        // not capable of memsetting the size variable(s). Since the device
+        // specific copy object cannot memset host memory.
+        //
+        // Long story short, the entire setup is skipped in the absence of a
+        // host-accessible memory resource.
+        if (host_access_resource != nullptr) {
+            setup(result)->wait();
+        }
+    } else {
+        // Set up a buffer absent of jagged vectors.
+        result = {data.capacity(), resource, btype};
+        // In the absence of jagged vectors there is no "layout" to copy. And
+        // since the size of the buffer will be set during the copy correctly,
+        // there is nothing else that setup(...) would need to do. So no need
+        // to call it here.
+    }
+
+    // Perform the copy.
+    operator()(data, result, cptype)->wait();
+
+    // Return the buffer.
+    return result;
 }
 
 template <typename... VARTYPES>
