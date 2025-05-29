@@ -72,11 +72,13 @@ TEST_F(core_edm_buffer_test, construct) {
     // Test the creation of fixed sized and resizable "jagged buffers".
     vecmem::edm::buffer<jagged_schema> buffer3{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
+    EXPECT_EQ(vecmem::edm::get_capacities(buffer3), CAPACITIES);
     const vecmem::vector<unsigned int> vecmem_capacities({10, 100, 1000},
                                                          &m_resource);
     vecmem::edm::buffer<jagged_schema> buffer4{
         vecmem_capacities, m_resource, nullptr,
         vecmem::data::buffer_type::resizable};
+    EXPECT_EQ(vecmem::edm::get_capacities(buffer4), CAPACITIES);
 }
 
 TEST_F(core_edm_buffer_test, get_data) {
