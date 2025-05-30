@@ -351,9 +351,10 @@ TEST_P(copy_tests, fixed_jagged_vector_buffer) {
     main_copy().setup(device_buffer)->wait();
     vecmem::data::jagged_vector_buffer<int> host_buffer1(
         reference_data, host_mr(), nullptr,
-        vecmem::data::buffer_type::fixed_size),
-        host_buffer2(reference_data, host_mr(), nullptr,
-                     vecmem::data::buffer_type::fixed_size);
+        vecmem::data::buffer_type::fixed_size);
+    vecmem::data::jagged_vector_buffer<int> host_buffer2(
+        reference_data, host_mr(), nullptr,
+        vecmem::data::buffer_type::fixed_size);
     host_copy().setup(host_buffer1)->wait();
     host_copy().setup(host_buffer2)->wait();
 
@@ -364,11 +365,15 @@ TEST_P(copy_tests, fixed_jagged_vector_buffer) {
         ->wait();
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
+    auto host_buffer3 = main_copy().to(device_buffer, host_mr(), nullptr,
+                                       vecmem::copy::type::device_to_host);
 
     // Check the results.
     vecmem::jagged_device_vector<const int> reference_vector(reference_data);
     vecmem::jagged_device_vector<const int> copy_vector(host_buffer2);
+    vecmem::jagged_device_vector<const int> copy_vector2(host_buffer3);
     check_equal(reference_vector, copy_vector);
+    check_equal(reference_vector, copy_vector2);
 }
 
 /// Test for copying jagged, resizable vector buffers
@@ -377,16 +382,22 @@ TEST_P(copy_tests, resizable_jagged_vector_buffer) {
     // Create a view of the reference data.
     const auto reference_data = vecmem::get_data(jagged_cref());
 
-    // Create non-resizable device and host buffers, with the "exact sizes".
+    // Create resizable device and host buffers, with (on the device) larger
+    // than necessary sizes.
+    auto capacities = vecmem::data::get_capacities(reference_data);
+    for (auto& capacity : capacities) {
+        capacity += 10u;  // Make them larger than needed.
+    }
     vecmem::data::jagged_vector_buffer<int> device_buffer(
-        reference_data, main_mr(), host_mr_ptr(),
+        capacities, main_mr(), host_mr_ptr(),
         vecmem::data::buffer_type::resizable);
     main_copy().setup(device_buffer)->wait();
     vecmem::data::jagged_vector_buffer<int> host_buffer1(
         reference_data, host_mr(), nullptr,
-        vecmem::data::buffer_type::resizable),
-        host_buffer2(reference_data, host_mr(), nullptr,
-                     vecmem::data::buffer_type::resizable);
+        vecmem::data::buffer_type::resizable);
+    vecmem::data::jagged_vector_buffer<int> host_buffer2(
+        reference_data, host_mr(), nullptr,
+        vecmem::data::buffer_type::resizable);
     host_copy().setup(host_buffer1)->wait();
     host_copy().setup(host_buffer2)->wait();
 
@@ -397,11 +408,18 @@ TEST_P(copy_tests, resizable_jagged_vector_buffer) {
         ->wait();
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
+    auto host_buffer3 = main_copy().to(device_buffer, host_mr(), nullptr,
+                                       vecmem::copy::type::device_to_host);
+    EXPECT_EQ(vecmem::data::get_capacities(host_buffer3), capacities);
+    EXPECT_EQ(host_copy().get_sizes(host_buffer3),
+              vecmem::data::get_capacities(reference_data));
 
     // Check the results.
     vecmem::jagged_device_vector<const int> reference_vector(reference_data);
     vecmem::jagged_device_vector<const int> copy_vector(host_buffer2);
+    vecmem::jagged_device_vector<const int> copy_vector2(host_buffer3);
     check_equal(reference_vector, copy_vector);
+    check_equal(reference_vector, copy_vector2);
 }
 
 /// Test(s) for copying jagged, mismatched sized vector buffers

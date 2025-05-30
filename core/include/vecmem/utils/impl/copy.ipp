@@ -223,8 +223,12 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
     memory_resource* host_access_resource, type::copy_type cptype) const {
 
     // Create the result buffer object.
+    const data::buffer_type btype =
+        (((data.capacity() > 0u) && (data.host_ptr()[0].size_ptr() != nullptr))
+             ? data::buffer_type::resizable
+             : data::buffer_type::fixed_size);
     data::jagged_vector_buffer<std::remove_cv_t<TYPE>> result(
-        data::get_capacities(data), resource, host_access_resource);
+        data::get_capacities(data), resource, host_access_resource, btype);
     assert(result.size() == data.size());
 
     // Copy the description of the "inner vectors" if necessary.
