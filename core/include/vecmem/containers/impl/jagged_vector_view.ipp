@@ -8,6 +8,9 @@
 
 #pragma once
 
+// System include(s).
+#include <algorithm>
+
 namespace vecmem {
 namespace data {
 
@@ -102,6 +105,17 @@ template <typename T>
 VECMEM_HOST_AND_DEVICE auto jagged_vector_view<T>::host_ptr() const -> pointer {
 
     return m_host_ptr;
+}
+
+template <typename T>
+VECMEM_HOST std::vector<typename vector_view<T>::size_type> get_capacities(
+    const jagged_vector_view<T>& data) {
+
+    std::vector<typename vector_view<T>::size_type> result(data.size());
+    std::transform(data.host_ptr(), data.host_ptr() + data.size(),
+                   result.begin(),
+                   [](const auto& vv) { return vv.capacity(); });
+    return result;
 }
 
 }  // namespace data

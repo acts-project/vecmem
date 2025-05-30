@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -17,6 +17,7 @@
 
 // System include(s).
 #include <type_traits>
+#include <vector>
 
 namespace vecmem {
 
@@ -188,6 +189,19 @@ protected:
     memory_view_type m_host_layout;
 
 };  // class view
+
+/// Helper function to get the capacities of the jagged vectors in a view
+///
+/// The function assumes that all jagged vectors in the view would have the
+/// same capacities.
+///
+/// @tparam VARTYPES The variable types described by the view
+/// @param soa The view to get the capacities from
+/// @return The vector of capacities of the jagged vectors in the view
+///
+template <typename... VARTYPES>
+VECMEM_HOST std::vector<vecmem::data::vector_view<int>::size_type>
+get_capacities(const view<schema<VARTYPES...>>& soa);
 
 }  // namespace edm
 }  // namespace vecmem

@@ -12,6 +12,7 @@
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/edm/buffer.hpp"
 #include "vecmem/edm/details/schema_traits.hpp"
 #include "vecmem/edm/host.hpp"
 #include "vecmem/edm/view.hpp"
@@ -168,6 +169,14 @@ public:
     template <typename... VARTYPES>
     VECMEM_NODISCARD event_type memset(edm::view<edm::schema<VARTYPES...>> data,
                                        int value) const;
+
+    /// Copy a jagged vector to the specified memory resource
+    template <typename... VARTYPES>
+    edm::buffer<edm::details::remove_cv_t<edm::schema<VARTYPES...>>> to(
+        const edm::view<edm::schema<VARTYPES...>>& data,
+        memory_resource& resource,
+        memory_resource* host_access_resource = nullptr,
+        type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views
     template <typename... VARTYPES>

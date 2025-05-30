@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -139,6 +139,71 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::host_layout() const
     -> const memory_view_type& {
 
     return m_host_layout;
+}
+
+namespace details {
+
+template <std::size_t INDEX, typename... VARTYPES>
+struct get_capacities_impl {
+
+    VECMEM_HOST
+    static std::vector<vecmem::data::vector_view<int>::size_type> get(
+        const view<schema<VARTYPES...>>& soa) {
+
+        return get_impl(soa, soa.template get<INDEX>());
+    }
+
+private:
+    template <typename T>
+    VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
+    get_impl(const view<schema<VARTYPES...>>& soa, const T&) {
+
+        return get_capacities_impl<INDEX - 1, VARTYPES...>::get(soa);
+    }
+
+    template <typename T>
+    VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
+    get_impl(const view<schema<VARTYPES...>>&,
+             const vecmem::data::jagged_vector_view<T>& vec) {
+
+        return vecmem::data::get_capacities(vec);
+    }
+
+};  // struct get_capacities_impl
+
+template <typename... VARTYPES>
+struct get_capacities_impl<0u, VARTYPES...> {
+
+    VECMEM_HOST
+    static std::vector<vecmem::data::vector_view<int>::size_type> get(
+        const view<schema<VARTYPES...>>& soa) {
+
+        // If we got this far, this *must* be a jagged vector.
+        static_assert(
+            type::details::is_jagged_vector<
+                tuple_element_t<0u, tuple<VARTYPES...>>>::value,
+            "The first variable in the schema must be a jagged vector");
+
+        // Get the capacities with the helper function available for jagged
+        // vectors.
+        return vecmem::data::get_capacities(soa.template get<0>());
+    }
+
+};  // struct get_capacities_impl
+
+}  // namespace details
+
+template <typename... VARTYPES>
+VECMEM_HOST std::vector<vecmem::data::vector_view<int>::size_type>
+get_capacities(const view<schema<VARTYPES...>>& soa) {
+
+    // Make sure that there's a jagged vector in here.
+    static_assert(
+        details::has_jagged_vector<schema<VARTYPES...>>::value,
+        "Function can only be used on containers with jagged vectors");
+
+    return details::get_capacities_impl<sizeof...(VARTYPES) - 1,
+                                        VARTYPES...>::get(soa);
 }
 
 }  // namespace edm

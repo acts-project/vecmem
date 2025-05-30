@@ -16,6 +16,7 @@
 // System include(s).
 #include <cstddef>
 #include <type_traits>
+#include <vector>
 
 namespace vecmem {
 namespace data {
@@ -148,6 +149,17 @@ private:
     pointer m_host_ptr;
 
 };  // struct jagged_vector_view
+
+/// Get the capacities of the inner vectors of a jagged vector
+///
+/// @tparam The type held by the jagged vector
+///
+/// @param data The jagged vector to get the capacities from
+/// @return The vector of capacities of the inner vectors
+///
+template <typename T>
+VECMEM_HOST std::vector<typename vector_view<T>::size_type> get_capacities(
+    const jagged_vector_view<T>& data);
 
 }  // namespace data
 }  // namespace vecmem

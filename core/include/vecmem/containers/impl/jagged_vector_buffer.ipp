@@ -20,17 +20,6 @@
 
 namespace {
 
-/// Helper conversion function
-template <typename TYPE>
-std::vector<std::size_t> get_sizes(
-    const vecmem::data::jagged_vector_view<TYPE>& jvv) {
-
-    std::vector<std::size_t> result(jvv.size());
-    std::transform(jvv.host_ptr(), jvv.host_ptr() + jvv.size(), result.begin(),
-                   [](const auto& vv) { return vv.size(); });
-    return result;
-}
-
 /// Function allocating memory for @c vecmem::data::jagged_vector_buffer
 template <typename TYPE>
 vecmem::unique_alloc_ptr<
@@ -65,8 +54,8 @@ template <typename OTHERTYPE,
 jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     const jagged_vector_view<OTHERTYPE>& other, memory_resource& resource,
     memory_resource* host_access_resource, buffer_type type)
-    : jagged_vector_buffer(::get_sizes(other), resource, host_access_resource,
-                           type) {}
+    : jagged_vector_buffer(get_capacities(other), resource,
+                           host_access_resource, type) {}
 
 template <typename TYPE>
 template <typename SIZE_TYPE, typename SIZE_ALLOC,
