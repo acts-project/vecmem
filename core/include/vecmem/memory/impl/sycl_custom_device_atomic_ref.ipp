@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022-2024 CERN for the benefit of the ACTS project
+ * (c) 2022-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -137,7 +137,7 @@ auto custom_device_atomic_ref<T, address>::fetch_add(value_type data,
 
 template <typename T, device_address_space address>
 auto custom_device_atomic_ref<T, address>::fetch_sub(value_type data,
-                                                     memory_order order) const
+                                                     memory_order) const
     -> value_type {
 
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_sub, m_ptr, data);
