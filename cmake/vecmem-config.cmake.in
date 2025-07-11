@@ -34,11 +34,16 @@ if( TARGET vecmem::sycl )
 else()
    set( vecmem_SYCL_LIBRARY vecmem::sycl-NOTFOUND )
 endif()
+if( TARGET vecmem::vitis )
+    set( vecmem_VITIS_LIBRARY vecmem::vitis )
+else()
+    set( vecmem_VITIS_LIBRARY vecmem::vitis-NOTFOUND )
+endif()
 
 # If the user asked for the CUDA/HIP/SYCL components explicitly, make
 # sure that they would exist in the installation.
 set( vecmem_REQUIRED_LIBS vecmem_CORE_LIBRARY )
-foreach( comp "CUDA" "HIP" "SYCL" )
+foreach( comp "CUDA" "HIP" "SYCL" "VITIS" )
    if( "${vecmem_FIND_COMPONENTS}" MATCHES "${comp}" )
       list( APPEND vecmem_REQUIRED_LIBS vecmem_${comp}_LIBRARY )
    endif()

@@ -45,6 +45,9 @@ endif()
 if( VECMEM_BUILD_SYCL_LIBRARY )
    add_subdirectory( sycl )
 endif()
+if( VECMEM_BUILD_VITIS_LIBRARY )
+   add_subdirectory( vitis )
+endif()
 
 # Set up the test(s).
 if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
@@ -61,6 +64,7 @@ endif()
 include( vecmem-packaging )
 
 # Set up Doxygen documentation creation for the project.
+# TODO: maybe add vitis to this
 find_package( Doxygen )
 if( DOXYGEN_FOUND )
    set( DOXYGEN_JAVADOC_AUTOBRIEF TRUE )

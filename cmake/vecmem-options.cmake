@@ -40,6 +40,9 @@ vecmem_lib_option( HIP "Build the vecmem::hip library" )
 # Flag specifying whether SYCL support should be built.
 vecmem_lib_option( SYCL "Build the vecmem::sycl library" )
 
+# Flag specifying whether SYCL support should be built.
+vecmem_lib_option( VITIS "Build the vecmem::sycl library" )
+
 # Use folders for organizing targets in IDEs.
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
