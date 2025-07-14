@@ -29,7 +29,7 @@ device_memory_resource::device_memory_resource(int device)
 
 device_memory_resource::~device_memory_resource() = default;
 
-void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
+void * device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
 
     if (bytes == 0) {
         return nullptr;

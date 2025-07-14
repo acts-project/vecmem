@@ -21,6 +21,7 @@
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
 #define CL_HPP_ENABLE_PROGRAM_CONSTRUCTION_FROM_ARRAY_COMPATIBILITY 1
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+#define OCL_TARGET_OPENCL_VERSION 120
 
 // OCL_CHECK doesn't work if call has templatized function call
 #define OCL_CHECK(error, call)                                                                   \
@@ -98,26 +99,5 @@ bool is_emulation();
 
 VECMEM_VITIS_EXPORT
 bool is_hw_emulation();
-
-VECMEM_VITIS_EXPORT
-bool is_xpr_device(const char* device_name);
-class P2P {
-   public:
-    static decltype(&xclGetMemObjectFd) getMemObjectFd;
-    static decltype(&xclGetMemObjectFromFd) getMemObjectFromFd;
-    static void init(const cl_platform_id& platform) {
-        void* bar = clGetExtensionFunctionAddressForPlatform(platform, "xclGetMemObjectFd");
-        getMemObjectFd = (decltype(&xclGetMemObjectFd))bar;
-        bar = clGetExtensionFunctionAddressForPlatform(platform, "xclGetMemObjectFromFd");
-        getMemObjectFromFd = (decltype(&xclGetMemObjectFromFd))bar;
-    }
-};
-class Ext {
-   public:
-    static decltype(&xclGetComputeUnitInfo) getComputeUnitInfo;
-    static void init(const cl_platform_id& platform) {
-        void* bar = clGetExtensionFunctionAddressForPlatform(platform, "xclGetComputeUnitInfo");
-        getComputeUnitInfo = (decltype(&xclGetComputeUnitInfo))bar;
-    }
-};
 }
+

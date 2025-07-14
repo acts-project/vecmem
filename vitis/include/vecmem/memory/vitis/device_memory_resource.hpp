@@ -15,6 +15,8 @@
 #include <CL/cl.h>
 
 #include <typeinfo>
+// TODO: Find a better way to handle the opencl version
+#define CL_TARGET_OPENCL_VERSION 120
 #include "vecmem/utils/xcl2.hpp"
 
 /// @brief Namespace holding types that work on/with CUDA
@@ -30,8 +32,12 @@ namespace vecmem::vitis {
 class device_memory_resource final : public memory_resource {
 
 public:
-    VECMEM_VITIS_EXPORT
-    device_memory_resource(int state = 0);
+    VECMEM_VITIS_EXPORT device_memory_resource(
+        cl_context c,
+        cl_device_id d,
+        cl_kernel k,
+        cl_mem_flags flags = CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE
+    );
 //    /// Destructor
     VECMEM_VITIS_EXPORT
     ~device_memory_resource();
@@ -54,8 +60,12 @@ private:
 
     /// @}
 //
-//    /// CUDA device identifier to use for the (de-)allocations
-    const int state;
+//    /// The OpenCL context for the device
+    const cl_context context;
+    const cl_device_id device_id;
+    const cl_kernel kernel;
+    const cl_mem_flags flags;
+    int argc = 0;
 
 };  // class device_memory_resource
 
