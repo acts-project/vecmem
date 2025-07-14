@@ -16,11 +16,7 @@
 
 namespace vecmem::vitis {
 
-device_memory_resource::device_memory_resource(
-        cl_context c, 
-        cl_device_id d, 
-        cl_kernel k,
-        cl_mem_flags f) : context(c), device_id(d), kernel(k), flags(f) {
+device_memory_resource::device_memory_resource(xrt::bo bo) : buffer_object(bo) {
     std::cout << "Constructing device memory resource for device" << std::endl;
 }
 
@@ -31,15 +27,14 @@ void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
     if (bytes == 0) {
         return nullptr;
     }
-    cl_int err;
-    // allocate memory on host device
-    printf("Vitis: allocating %ld bytes", bytes);
-//    OCL_CHECK(err, cl_mem buffer = clCreateBuffer(context, flags,
-//                                      bytes, nullptr, &err));
-//    OCL_CHECK(err, err = clSetKernelArg(kernel, argc++, sizeof(cl_mem), &buffer));
+    // Allocate the memory.
+    if (curr_ptr + bytes > buffer_object.size()) {
+        VECMEM_DEBUG_MSG(1, "WARNING: Not enough memory in the buffer object");
+        return nullptr;
+    }
 
-    printf("Vitis: allocated %ld bytes at %p", bytes);
-    return buffer;
+    curr_ptr += bytes;
+    return buffer_object.address() + curr_ptr;
 }
 
 void device_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
@@ -48,7 +43,7 @@ void device_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
         return;
     }
 
-    VECMEM_DEBUG_MSG(1, "WARNING: Memory deallocation is not implemented yet");
+    VECMEM_DEBUG_MSG(1, "WARNING: Memory deallocation is not supported");
 //    VECMEM_DEBUG_MSG(2, "De-allocating memory at %p on device %i", p, m_device);
 }
 
@@ -57,13 +52,8 @@ bool device_memory_resource::do_is_equal(
     const device_memory_resource *c;
     c = dynamic_cast<const device_memory_resource *>(&other);
 
-    /*
-     * The equality check here is ever so slightly more difficult. Not only
-     * does the other object need to be a device memory resource, it must
-     * also target the same device.
-     */
-    return c != nullptr && c->context == context &&
-           c->device_id == device_id;
+    return c != nullptr && c->buffer_object ==
+        buffer_object;
 }
 } // namespace vecmem::vitis
 

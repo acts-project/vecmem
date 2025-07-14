@@ -12,7 +12,7 @@
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/vecmem_vitis_export.hpp"
 
-#include <CL/cl.h>
+#include "xrt/xrt_bo.h"
 
 #include <typeinfo>
 // TODO: Find a better way to handle the opencl version
@@ -32,12 +32,7 @@ namespace vecmem::vitis {
 class device_memory_resource final : public memory_resource {
 
 public:
-    VECMEM_VITIS_EXPORT device_memory_resource(
-        cl_context c,
-        cl_device_id d,
-        cl_kernel k,
-        cl_mem_flags flags = CL_MEM_USE_HOST_PTR | CL_MEM_READ_WRITE
-    );
+    VECMEM_VITIS_EXPORT device_memory_resource(xrt::bo bo);
 //    /// Destructor
     VECMEM_VITIS_EXPORT
     ~device_memory_resource();
@@ -60,12 +55,8 @@ private:
 
     /// @}
 //
-//    /// The OpenCL context for the device
-    const cl_context context;
-    const cl_device_id device_id;
-    const cl_kernel kernel;
-    const cl_mem_flags flags;
-    int argc = 0;
+    const xrt::bo buffer_object;
+    std::size_t curr_ptr = 0;
 
 };  // class device_memory_resource
 
