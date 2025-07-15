@@ -51,6 +51,7 @@ vecmem_add_library(vecmem_vitis vitis
 target_link_libraries( vecmem_vitis
    PUBLIC vecmem::core
    OpenCL
+   ${XRT_LIBS}
    # PRIVATE CUDA::cudart 
    )
 
