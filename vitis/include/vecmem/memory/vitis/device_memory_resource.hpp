@@ -15,9 +15,6 @@
 #include "xrt/xrt_bo.h"
 
 #include <typeinfo>
-// TODO: Find a better way to handle the opencl version
-#define CL_TARGET_OPENCL_VERSION 120
-#include "vecmem/utils/xcl2.hpp"
 
 /// @brief Namespace holding types that work on/with CUDA
 namespace vecmem::vitis {
@@ -32,7 +29,7 @@ namespace vecmem::vitis {
 class device_memory_resource final : public memory_resource {
 
 public:
-    VECMEM_VITIS_EXPORT device_memory_resource(xrt::bo bo);
+    VECMEM_VITIS_EXPORT device_memory_resource(uint8_t* buffer, std::size_t size);
 //    /// Destructor
     VECMEM_VITIS_EXPORT
     ~device_memory_resource();
@@ -55,8 +52,9 @@ private:
 
     /// @}
 //
-    const xrt::bo buffer_object;
-    std::size_t curr_ptr = 0;
+    std::size_t curr_ptr = 2;
+    const uint8_t* buffer;
+    const std::size_t size ;
 
 };  // class device_memory_resource
 

@@ -11,13 +11,16 @@
 #include "vecmem/utils/copy.hpp"
 #include "vecmem/vecmem_vitis_export.hpp"
 
-#include <CL/cl.hpp>
-#include <CL/cl_ext_xilinx.h>
-
 namespace vecmem::vitis {
 
 /// Specialisation of @c vecmem::copy for Vitis
 class VECMEM_VITIS_EXPORT copy : public vecmem::copy {
+public:
+    VECMEM_VITIS_EXPORT copy(uint8_t* buffer);
+//    /// Destructor
+    VECMEM_VITIS_EXPORT
+    ~copy();
+
 
 protected:
     /// Perform a memory copy using CUDA
@@ -26,6 +29,8 @@ protected:
     /// Fill a memory area using CUDA
     virtual void do_memset(std::size_t size, void* ptr,
                            int value) const override final;
+
+    uint8_t* buffer;
 
 };  // class copy
 

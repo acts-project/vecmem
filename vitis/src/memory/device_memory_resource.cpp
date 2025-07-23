@@ -13,10 +13,11 @@
 #include "vecmem/utils/debug.hpp"
 
 #include <iostream>
+#include <memory>
 
 namespace vecmem::vitis {
 
-device_memory_resource::device_memory_resource(xrt::bo bo) : buffer_object(bo) {
+device_memory_resource::device_memory_resource(uint8_t* b, std::size_t s): buffer(b), size(s) {
     std::cout << "Constructing device memory resource for device" << std::endl;
 }
 
@@ -28,13 +29,15 @@ void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
         return nullptr;
     }
     // Allocate the memory.
-    if (curr_ptr + bytes > buffer_object.size()) {
+    if (curr_ptr + bytes > size) {
         VECMEM_DEBUG_MSG(1, "WARNING: Not enough memory in the buffer object");
         return nullptr;
     }
 
+    void* old_ptr = reinterpret_cast<void*>(curr_ptr);
+
     curr_ptr += bytes;
-    return buffer_object.address() + curr_ptr;
+    return old_ptr;
 }
 
 void device_memory_resource::do_deallocate(void *p, std::size_t, std::size_t) {
@@ -52,8 +55,7 @@ bool device_memory_resource::do_is_equal(
     const device_memory_resource *c;
     c = dynamic_cast<const device_memory_resource *>(&other);
 
-    return c != nullptr && c->buffer_object ==
-        buffer_object;
+    return c != nullptr && c->buffer == buffer;
 }
 } // namespace vecmem::vitis
 
