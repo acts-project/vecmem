@@ -147,7 +147,7 @@ public:
     VECMEM_HOST_AND_DEVICE void assign(InputIt other_begin, InputIt other_end) {
 
         // This can only be done on a resizable vector.
-        assert(m_size != nullptr);
+        assert(is_resizable);
 
         // Remove all previous elements.
         clear();
@@ -155,9 +155,8 @@ public:
         // Create copies of all of the elements one-by-one. It's very
         // inefficient, but we can't make any assumptions about the type of the
         // input iterator received by this function.
-        device_atomic_ref<size_type> asize(*m_size);
         for (InputIt itr = other_begin; itr != other_end; ++itr) {
-            construct(asize.fetch_add(1), *itr);
+            construct(m_size++, *itr);
         }
     }
 
@@ -263,9 +262,12 @@ private:
     /// Size of the array that this object looks at
     size_type m_capacity;
     /// Current size of the vector
-    size_pointer m_size;
+    size_type m_size;
+
     /// Pointer to the start of the array
     pointer m_ptr;
+
+    bool is_resizable;
 
 };  // class device_vector
 

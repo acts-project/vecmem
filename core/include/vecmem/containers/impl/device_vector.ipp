@@ -7,22 +7,33 @@
 #pragma once
 
 // Local include(s).
+#include <endian.h>
 #include "vecmem/utils/debug.hpp"
 
 // System include(s).
 #include <cassert>
+#include <cwctype>
 
 namespace vecmem {
 
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
     const data::vector_view<value_type>& data)
-    : m_capacity(data.capacity()), m_size(data.size_ptr()), m_ptr(data.ptr()) {
+    : m_capacity(data.capacity()), m_size(0), m_ptr(data.ptr()) {
+
+    // Copy the size of the vector if given
+    if (data.size_ptr() != nullptr) {
+        m_size = *data.size_ptr();
+        is_resizable = true;
+    } else {
+        m_size = m_capacity;
+        is_resizable = false;
+    }
 
     VECMEM_DEBUG_MSG(5,
                      "Created vecmem::device_vector with capacity %u and "
-                     "size pointer %p from pointer %p",
-                     m_capacity, static_cast<const void*>(m_size),
+                     "size %u from pointer %p",
+                     m_capacity, m_size,
                      static_cast<const void*>(m_ptr));
 }
 
@@ -31,12 +42,20 @@ template <typename OTHERTYPE,
           std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value, bool> >
 VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
     const data::vector_view<OTHERTYPE>& data)
-    : m_capacity(data.capacity()), m_size(data.size_ptr()), m_ptr(data.ptr()) {
+    : m_capacity(data.capacity()), m_size(0), m_ptr(data.ptr()) {
 
+    // Copy the size of the vector if given
+    if (data.size_ptr() != nullptr) {
+        m_size = *data.size_ptr();
+        is_resizable = true;
+    } else {
+        m_size = m_capacity;
+        is_resizable = false;
+    }
     VECMEM_DEBUG_MSG(5,
                      "Created vecmem::device_vector with capacity %u and "
-                     "size pointer %p from pointer %p",
-                     m_capacity, static_cast<const void*>(m_size),
+                     "size %u from pointer %p",
+                     m_capacity, m_size,
                      static_cast<const void*>(m_ptr));
 }
 
@@ -45,12 +64,13 @@ VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
     const device_vector& parent)
     : m_capacity(parent.m_capacity),
       m_size(parent.m_size),
-      m_ptr(parent.m_ptr) {
+      m_ptr(parent.m_ptr),
+      is_resizable(parent.is_resizable) {
 
     VECMEM_DEBUG_MSG(5,
                      "Created vecmem::device_vector with capacity %u and "
-                     "size pointer %p from pointer %p",
-                     m_capacity, static_cast<const void*>(m_size),
+                     "size %u from pointer %p",
+                     m_capacity, m_size,
                      static_cast<const void*>(m_ptr));
 }
 
@@ -67,6 +87,7 @@ VECMEM_HOST_AND_DEVICE device_vector<TYPE>& device_vector<TYPE>::operator=(
     m_capacity = rhs.m_capacity;
     m_size = rhs.m_size;
     m_ptr = rhs.m_ptr;
+    is_resizable = rhs.is_resizable;
 
     // Return a reference to this object.
     return *this;
@@ -169,14 +190,13 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::assign(size_type count,
                                                         const_reference value) {
 
     // This can only be done on a sufficiently large, resizable vector.
-    assert(m_size != nullptr);
+    assert(is_resizable);
     assert(m_capacity >= count);
 
     // Remove all previous elements.
     clear();
     // Set the assigned size of the vector.
-    device_atomic_ref<size_type> asize(*m_size);
-    asize.store(count);
+    m_size = count;
 
     // Create the required number of identical elements.
     for (size_type i = 0; i < count; ++i) {
@@ -190,12 +210,11 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::emplace_back(Args&&... args)
     -> reference {
 
     // This can only be done on a resizable vector.
-    assert(m_size != nullptr);
+    assert(is_resizable);
 
     // Increment the size of the vector at first. So that we would "claim" the
     // index from other threads.
-    device_atomic_ref<size_type> asize(*m_size);
-    const size_type index = asize.fetch_add(1);
+    const size_type index = m_size++;
     assert(index < m_capacity);
 
     // Instantiate the new value.
@@ -210,12 +229,11 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::push_back(
     const_reference value) -> size_type {
 
     // This can only be done on a resizable vector.
-    assert(m_size != nullptr);
+    assert(is_resizable);
 
     // Increment the size of the vector at first. So that we would "claim" the
     // index from other threads.
-    device_atomic_ref<size_type> asize(*m_size);
-    const size_type index = asize.fetch_add(1);
+    size_type index = m_size++;
     assert(index < m_capacity);
 
     // Instantiate the new value.
@@ -229,11 +247,10 @@ template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::pop_back() -> size_type {
 
     // This can only be done on a resizable vector.
-    assert(m_size != nullptr);
+    assert(is_resizable);
 
     // Decrement the size of the vector, and remember this new size.
-    device_atomic_ref<size_type> asize(*m_size);
-    const size_type new_size = asize.fetch_sub(1) - 1;
+    const size_type new_size = --m_size;
 
     // Remove the last element.
     destruct(new_size);
@@ -246,17 +263,15 @@ template <typename TYPE>
 VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::clear() {
 
     // This can only be done on a resizable vector.
-    assert(m_size != nullptr);
+    assert(is_resizable);
 
     // Destruct all of the elements that the vector has "at the moment".
-    device_atomic_ref<size_type> asize(*m_size);
-    const size_type current_size = asize.load();
+    const size_type current_size = m_size;
     for (size_type i = 0; i < current_size; ++i) {
         destruct(i);
     }
 
-    // Set the vector to be empty now.
-    asize.store(0);
+    m_size = 0;
 }
 
 template <typename TYPE>
@@ -270,11 +285,10 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize(size_type new_size,
                                                         const_reference value) {
 
     // This can only be done on a resizable vector.
-    assert(m_size != nullptr);
+    assert(is_resizable);
 
     // Get the current size of the vector.
-    device_atomic_ref<size_type> asize(*m_size);
-    const size_type current_size = asize.load();
+    const size_type current_size = m_size;
 
     // Check if anything needs to be done.
     if (new_size == current_size) {
@@ -296,7 +310,7 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::resize(size_type new_size,
     }
 
     // Set the new size for the vector.
-    asize.store(new_size);
+    m_size = new_size;
 }
 
 template <typename TYPE>
@@ -386,18 +400,7 @@ VECMEM_HOST_AND_DEVICE bool device_vector<TYPE>::empty() const {
 
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::size() const -> size_type {
-
-    if (m_size == nullptr) {
-        return m_capacity;
-    } else {
-        // For the host, CUDA and HIP it would be possible to use the type
-        // atomic<const size_type> here, and avoid any const-casting. But with
-        // SYCL we must pass a non-const pointer to the sycl::atomic object
-        // that performs the load operation. And for that we need a non-const
-        // pointer...
-        device_atomic_ref<size_type> asize(*(const_cast<size_type*>(m_size)));
-        return asize.load();
-    }
+    return m_size;
 }
 
 template <typename TYPE>
