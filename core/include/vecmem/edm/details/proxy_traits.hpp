@@ -474,7 +474,8 @@ private:
 /// @param src Source tuple to copy from
 ///
 template <typename T>
-void proxy_tuple_copy(tuple<T>& dst, const tuple<T>& src) {
+VECMEM_HOST_AND_DEVICE void proxy_tuple_copy(tuple<T>& dst,
+                                             const tuple<T>& src) {
     dst.m_head = src.m_head;
 }
 
@@ -488,7 +489,8 @@ void proxy_tuple_copy(tuple<T>& dst, const tuple<T>& src) {
 ///
 template <typename T, typename... Ts,
           std::enable_if_t<(sizeof...(Ts) > 0), bool> = true>
-void proxy_tuple_copy(tuple<T, Ts...>& dst, const tuple<T, Ts...>& src) {
+VECMEM_HOST_AND_DEVICE void proxy_tuple_copy(tuple<T, Ts...>& dst,
+                                             const tuple<T, Ts...>& src) {
     dst.m_head = src.m_head;
     proxy_tuple_copy(dst.m_tail, src.m_tail);
 }
