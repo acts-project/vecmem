@@ -66,6 +66,10 @@ public:
                              details::proxy_type::standalone>>;
 
     /// @name Constructors and assignment operators
+    ///
+    /// Note that copy and move constructors and assignment operators get
+    /// generated automatically. They don't need to be implemented explicitly.
+    ///
     /// @{
 
     /// Constructor with a mandatory memory resource
@@ -80,6 +84,9 @@ public:
     /// Get the size of the container
     VECMEM_HOST
     size_type size() const;
+    /// Get the (minimum) capacity of the container
+    VECMEM_HOST
+    size_type capacity() const;
     /// Resize the container
     VECMEM_HOST
     void resize(size_type size);

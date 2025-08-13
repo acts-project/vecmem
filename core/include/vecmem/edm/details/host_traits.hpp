@@ -15,6 +15,8 @@
 #include "vecmem/memory/memory_resource.hpp"
 
 // System include(s).
+#include <algorithm>
+#include <limits>
 #include <stdexcept>
 #include <tuple>
 #include <type_traits>
@@ -122,6 +124,41 @@ std::size_t get_host_size(
         return get_host_size<VARTYPES...>(data, std::index_sequence<Is...>{},
                                           var_size,
                                           size_known || var_size_known);
+    }
+}
+
+/// Recursive function getting the capacity of a host container
+///
+/// Note that before calling this function, there is a check that at least one
+/// of the variables is a (jagged) vector type. So the index sequence must
+/// always contain at least a single element when this function is first called.
+///
+template <typename... VARTYPES, std::size_t INDEX, std::size_t... Is>
+std::size_t get_host_capacity(
+    const std::tuple<typename host_type<VARTYPES>::type...>& data,
+    std::index_sequence<INDEX, Is...>,
+    std::size_t capacity = std::numeric_limits<std::size_t>::max(),
+    bool capacity_known = false) {
+
+    // Get the capacity of this variable.
+    if constexpr (type::details::is_vector<typename std::tuple_element<
+                      INDEX, std::tuple<VARTYPES...>>::type>::value) {
+        // It's not guaranteed that the capacities of all of the (jagged)
+        // vectors would be the same. So we take the minimum capacity of all
+        // of them.
+        capacity = std::min(std::get<INDEX>(data).capacity(), capacity);
+        capacity_known = true;
+    }
+    // Terminate, or continue.
+    if constexpr (sizeof...(Is) == 0) {
+        if (!capacity_known) {
+            throw std::length_error(
+                "Could not determine the capacity of the host container?!?");
+        }
+        return capacity;
+    } else {
+        return get_host_capacity<VARTYPES...>(
+            data, std::index_sequence<Is...>{}, capacity, capacity_known);
     }
 }
 
