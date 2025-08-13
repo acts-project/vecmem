@@ -25,7 +25,8 @@ VECMEM_HOST host<schema<VARTYPES...>, INTERFACE>::host(
       m_resource{resource} {}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST std::size_t host<schema<VARTYPES...>, INTERFACE>::size() const {
+VECMEM_HOST auto host<schema<VARTYPES...>, INTERFACE>::size() const
+    -> size_type {
 
     // Make sure that there are some (jagged) vector types in the container.
     static_assert(
@@ -52,8 +53,7 @@ VECMEM_HOST auto host<schema<VARTYPES...>, INTERFACE>::capacity() const
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::resize(
-    std::size_t size) {
+VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::resize(size_type size) {
 
     // Make sure that there are some (jagged) vector types in the container.
     static_assert(
@@ -66,8 +66,7 @@ VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::resize(
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::reserve(
-    std::size_t size) {
+VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::reserve(size_type size) {
 
     // Make sure that there are some (jagged) vector types in the container.
     static_assert(
