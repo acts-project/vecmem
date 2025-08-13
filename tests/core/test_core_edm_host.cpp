@@ -87,6 +87,24 @@ TEST_F(core_edm_host_test, construct_assign) {
     compare(host1, host3);
 }
 
+TEST_F(core_edm_host_test, size_capacity) {
+
+    // Construct the object to be tested.
+    host_type host = create();
+
+    // Check its starting size and capacity.
+    EXPECT_EQ(host.size(), 5);
+    EXPECT_GE(host.capacity(), 5);
+
+    // Reserve a number of elements, and add one.
+    host.reserve(10);
+    host.push_back({6, 7.f, {8., 9.}});
+
+    // Check the resulting size and capacity.
+    EXPECT_EQ(host.size(), 6);
+    EXPECT_GE(host.capacity(), 10);
+}
+
 TEST_F(core_edm_host_test, get_data) {
 
     // Construct a host container.
