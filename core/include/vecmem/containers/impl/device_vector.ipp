@@ -18,7 +18,7 @@ namespace vecmem {
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
     const data::vector_view<value_type>& data)
-    : m_capacity(data.capacity()), m_size(0), m_start_index(reinterpret_cast<size_t>(data.ptr())) {
+    : m_capacity(data.capacity()), m_size(0), m_start_index(reinterpret_cast<size_type>(data.ptr())) {
 
     // Copy the size of the vector if given
     if (data.size_ptr() != nullptr) {
@@ -41,7 +41,7 @@ template <typename OTHERTYPE,
           std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value, bool> >
 VECMEM_HOST_AND_DEVICE device_vector<TYPE>::device_vector(
     const data::vector_view<OTHERTYPE>& data)
-    : m_capacity(data.capacity()), m_size(0), m_start_index(reinterpret_cast<size_t>(data.ptr())) {
+    : m_capacity(data.capacity()), m_size(0), m_start_index(reinterpret_cast<size_type>(data.ptr())) {
 
     // Copy the size of the vector if given
     if (data.size_ptr() != nullptr) {
@@ -100,8 +100,8 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::at(size_type pos)
     assert(pos < size());
 
     // Return a reference to the vector element.
-    pointer m_ptr = get_pointer();
-    return m_ptr[pos];
+    size_type index = get_index(pos);
+    return (reference) memory_buffer[index];
 }
 
 template <typename TYPE>
@@ -112,8 +112,8 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::at(size_type pos) const
     assert(pos < size());
 
     // Return a reference to the vector element.
-    pointer m_ptr = get_pointer();
-    return m_ptr[pos];
+    size_type index = get_index(pos);
+    return (reference) memory_buffer[index];
 }
 
 template <typename TYPE>
@@ -121,8 +121,8 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::operator[](size_type pos)
     -> reference {
 
     // Return a reference to the vector element.
-    pointer m_ptr = get_pointer();
-    return m_ptr[pos];
+    size_type index = get_index(pos);
+    return (reference) memory_buffer[index];
 }
 
 template <typename TYPE>
@@ -130,8 +130,8 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::operator[](size_type pos) const
     -> const_reference {
 
     // Return a reference to the vector element.
-    pointer m_ptr = get_pointer();
-    return m_ptr[pos];
+    size_type index = get_index(pos);
+    return (reference) memory_buffer[index];
 }
 
 template <typename TYPE>
@@ -141,8 +141,8 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::front() -> reference {
     assert(size() > 0);
 
     // Return a reference to the first element of the vector.
-    pointer m_ptr = get_pointer();
-    return m_ptr[0];
+    size_type index = get_index(0);
+    return (reference) memory_buffer[index];
 }
 
 template <typename TYPE>
@@ -153,8 +153,8 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::front() const
     assert(size() > 0);
 
     // Return a reference to the first element of the vector.
-    pointer m_ptr = get_pointer();
-    return m_ptr[0];
+    size_type index = get_index(0);
+    return (reference) memory_buffer[index];
 }
 
 template <typename TYPE>
@@ -164,8 +164,8 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::back() -> reference {
     assert(size() > 0);
 
     // Return a reference to the last element of the vector.
-    pointer m_ptr = get_pointer();
-    return m_ptr[size() - 1];
+    size_type index = get_index(size() - 1);
+    return (reference) memory_buffer[index];
 }
 
 template <typename TYPE>
@@ -176,22 +176,20 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::back() const
     assert(size() > 0);
 
     // Return a reference to the last element of the vector.
-    pointer m_ptr = get_pointer();
-    return m_ptr[size() - 1];
+    size_type index = get_index(size() - 1);
+    return (reference) &memory_buffer[index];
 }
 
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::data() -> pointer {
 
-    pointer m_ptr = get_pointer();
-    return m_ptr;
+    return (pointer) memory_buffer[m_start_index];
 }
 
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::data() const -> const_pointer {
 
-    pointer m_ptr = get_pointer();
-    return m_ptr;
+    return (pointer) &memory_buffer[m_start_index];
 }
 
 template <typename TYPE>
@@ -451,6 +449,11 @@ VECMEM_HOST_AND_DEVICE void device_vector<TYPE>::destruct(size_type pos) {
     pointer m_ptr = get_pointer();
     pointer ptr = m_ptr + pos;
     ptr->~value_type();
+}
+
+template <typename TYPE>
+typename vecmem::device_vector<TYPE>::size_type vecmem::device_vector<TYPE>::get_index(size_type pos) const {
+    return m_start_index + pos * sizeof(value_type);
 }
 
 template <typename TYPE>

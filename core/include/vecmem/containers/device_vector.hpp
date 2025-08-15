@@ -262,6 +262,7 @@ private:
     VECMEM_HOST_AND_DEVICE
     void destruct(size_type pos);
 
+    size_type get_index(size_type pos) const; 
     pointer get_pointer() const; 
     /// Size of the array that this object looks at
     size_type m_capacity;
