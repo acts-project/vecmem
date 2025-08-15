@@ -16,8 +16,11 @@
 // System include(s).
 #include <cstddef>
 #include <type_traits>
+#include <cstdint>
 
 namespace vecmem {
+
+static uint8_t * memory_buffer = nullptr;
 
 // Forward declaration(s).
 namespace edm {
@@ -60,7 +63,7 @@ public:
     /// Constant value reference type
     typedef const value_type& const_reference;
     /// Value pointer type
-    typedef value_type* pointer;
+    typedef value_type * pointer;
     /// Constant value pointer type
     typedef const value_type* const_pointer;
 
@@ -259,13 +262,14 @@ private:
     VECMEM_HOST_AND_DEVICE
     void destruct(size_type pos);
 
+    pointer get_pointer() const; 
     /// Size of the array that this object looks at
     size_type m_capacity;
     /// Current size of the vector
     size_type m_size;
 
     /// Pointer to the start of the array
-    pointer m_ptr;
+    size_type m_start_index;
 
     bool is_resizable;
 
