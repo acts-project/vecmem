@@ -49,6 +49,12 @@ public:
     /// @name Constructors and assignment operators
     /// @{
 
+    /// Default constructor (only for standalone proxies)
+    template <details::proxy_type OPTYPE = proxy_type,
+              std::enable_if_t<OPTYPE == details::proxy_type::standalone,
+                               bool> = true>
+    VECMEM_HOST_AND_DEVICE proxy();
+
     /// Constructor of a non-const proxy on top of a parent container
     ///
     /// @tparam PARENT The type of the parent container

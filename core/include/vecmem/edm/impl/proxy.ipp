@@ -11,6 +11,14 @@ namespace edm {
 
 template <typename... VARTYPES, details::proxy_domain PDOMAIN,
           details::proxy_access PACCESS, details::proxy_type PTYPE>
+template <details::proxy_type OPTYPE,
+          std::enable_if_t<OPTYPE == details::proxy_type::standalone, bool>>
+VECMEM_HOST_AND_DEVICE
+proxy<schema<VARTYPES...>, PDOMAIN, PACCESS, PTYPE>::proxy()
+    : m_data() {}
+
+template <typename... VARTYPES, details::proxy_domain PDOMAIN,
+          details::proxy_access PACCESS, details::proxy_type PTYPE>
 template <typename PARENT>
 VECMEM_HOST_AND_DEVICE proxy<schema<VARTYPES...>, PDOMAIN, PACCESS,
                              PTYPE>::proxy(PARENT& parent,
