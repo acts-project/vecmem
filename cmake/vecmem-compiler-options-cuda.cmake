@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2025 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -17,7 +17,11 @@ find_package( CUDAToolkit REQUIRED )
 set( CMAKE_CUDA_STANDARD 14 CACHE STRING "The (CUDA) C++ standard to use" )
 
 # Set the architecture to build code for.
-set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
+set( CMAKE_CUDA_ARCHITECTURES_DEFAULT "52" )
+if( "${CUDAToolkit_VERSION}" VERSION_GREATER_EQUAL "12" )
+   set( CMAKE_CUDA_ARCHITECTURES_DEFAULT "75" )
+endif()
+set( CMAKE_CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES_DEFAULT}" CACHE STRING
    "CUDA architectures to build device code for" )
 
 # Link against the dynamic CUDA runtime library by default.
