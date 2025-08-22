@@ -288,8 +288,7 @@ TEST_F(core_edm_host_test, push_back_simple) {
     // Set up a simple type, without any jagged vectors.
     simple_host_type host{m_resource};
 
-    // Add a couple of elements to it. Since simple_interface has an explicit
-    // constructor, the formalism here is fairly simple.
+    // Add a couple of elements to it.
     host.push_back({1, 2.f});
     host.push_back({2, 3.f});
 
@@ -299,6 +298,12 @@ TEST_F(core_edm_host_test, push_back_simple) {
     EXPECT_EQ(host.at(1).scalar(), 2);
     EXPECT_FLOAT_EQ(host.at(0).vector(), 2.f);
     EXPECT_FLOAT_EQ(host.at(1).vector(), 3.f);
+
+    // Add one default element.
+    host.push_back({});
+    EXPECT_EQ(host.size(), 3);
+    // Note that at this point host.scalar() will be in a sort of undefined
+    // state. It should be 0, but I'm not convinced that this is guaranteed.
 }
 
 TEST_F(core_edm_host_test, push_back_jagged) {
@@ -306,9 +311,7 @@ TEST_F(core_edm_host_test, push_back_jagged) {
     // Create an empty host container.
     host_type host{m_resource};
 
-    // Add a couple of elements to it. Since interface has no constructor of
-    // its own, because with jagged vectors that's not so easy to do, one needs
-    // to use double braces in the following expression.
+    // Add a couple of elements to it.
     host.push_back({1, 2.f, vecmem::vector<double>{3., 4., 5.}});
     host.push_back({2, 3.f, vecmem::vector<double>{4., 5., 6.}});
 
@@ -352,4 +355,10 @@ TEST_F(core_edm_host_test, push_back_jagged) {
                              ref_proxy.jagged_vector().at(j));
         }
     }
+
+    // Add one default element.
+    host.push_back({});
+    EXPECT_EQ(host.size(), 3);
+    // The same as before, host.scalar() will be in a sort of undefined state at
+    // this point.
 }
