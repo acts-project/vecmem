@@ -19,8 +19,8 @@
 #include <cstdint>
 
 namespace vecmem {
-
-static uint8_t * memory_buffer = nullptr;
+constexpr std::uint64_t MEMORY_BUFFER_SIZE = 1024 * 1024 * 4;
+static uint8_t memory_buffer[MEMORY_BUFFER_SIZE];
 
 // Forward declaration(s).
 namespace edm {
@@ -49,7 +49,7 @@ public:
     /// Type of the array elements
     typedef TYPE value_type;
     /// Size type for the array
-    typedef unsigned int size_type;
+    typedef long long unsigned int size_type;
     /// Pointer difference type
     typedef std::ptrdiff_t difference_type;
 
