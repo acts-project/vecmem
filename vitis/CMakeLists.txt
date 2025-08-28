@@ -15,7 +15,7 @@ vecmem_add_library(vecmem_vitis vitis
    # Memory resources.
    "include/vecmem/memory/vitis/device_memory_resource.hpp"
    "src/memory/device_memory_resource.cpp"
-   "src/memory/host_memory_resource.cpp"
+   #   "src/memory/host_memory_resource.cpp"
    #   "include/vecmem/memory/vitis/managed_memory_resource.hpp"
    #   "src/memory/managed_memory_resource.cpp"
    # Utilities.
