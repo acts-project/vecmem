@@ -12,19 +12,18 @@
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/vecmem_vitis_export.hpp"
 
-#include "xrt/xrt_bo.h"
-
 #include <typeinfo>
 
-/// @brief Namespace holding types that work on/with CUDA
+/// @brief Namespace holding types that work on/with Vitis
 namespace vecmem::vitis {
 
 /**
- * @brief Memory resource that wraps direct allocations on a CUDA device.
+ * @brief Memory resource that wraps memory allocation to a local buffer
  *
  * This is an allocator-type memory resource (that is to say, it only
- * allocates, it does not try to manage memory in a smart way) that works
- * for CUDA device memory. Each instance is bound to a specific device.
+ * allocates, it does not try to manage memory in a smart way) that 
+ * wraps a given buffer and allocates memory in the buffer.
+ * Deallocation is not supported.
  */
 class device_memory_resource final : public memory_resource {
 
@@ -58,4 +57,4 @@ private:
 
 };  // class device_memory_resource
 
-}  // namespace vecmem::cuda
+}  // namespace vecmem::vitis

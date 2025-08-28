@@ -23,7 +23,7 @@ public:
 
 
 protected:
-    /// Perform a memory copy using CUDA
+    /// Perform a memory copy from buffer-to-buffer
     virtual void do_copy(std::size_t size, const void* from, void* to,
                          type::copy_type cptype) const override final;
     /// Fill a memory area using CUDA

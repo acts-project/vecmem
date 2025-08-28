@@ -10,27 +10,15 @@ cmake_minimum_required( VERSION 3.17 )
 # Project include(s).
 include( vecmem-compiler-options-cpp )
 
-# External dependency/dependencies.
-find_package(OpenCL REQUIRED)
-include_directories(${OpenCL_INCLUDE_DIRS})
-
-set(XILINX_XRT $ENV{XILINX_XRT})
-include_directories(${XILINX_XRT}/include)
-link_directories(${XILINX_XRT}/lib)
-set(XRT_LIBS xrt_coreutil)
-
 # Set up the build of the VecMem Vitis library.
 vecmem_add_library(vecmem_vitis vitis
    # Memory resources.
    "include/vecmem/memory/vitis/device_memory_resource.hpp"
    "src/memory/device_memory_resource.cpp"
-   "include/vecmem/memory/vitis/host_memory_resource.hpp"
    "src/memory/host_memory_resource.cpp"
    #   "include/vecmem/memory/vitis/managed_memory_resource.hpp"
    #   "src/memory/managed_memory_resource.cpp"
    # Utilities.
-   "include/vecmem/utils/xcl2.hpp"
-   "src/utils/xcl2.cpp"
    "include/vecmem/utils/vitis/copy.hpp"
    "src/utils/vitis/copy.cpp"
    #   "include/vecmem/utils/vitis/async_copy.hpp"
@@ -50,9 +38,6 @@ vecmem_add_library(vecmem_vitis vitis
    )
 target_link_libraries( vecmem_vitis
    PUBLIC vecmem::core
-   OpenCL
-   ${XRT_LIBS}
-   # PRIVATE CUDA::cudart 
    )
 
 # Hide the library's symbols by default.
