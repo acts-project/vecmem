@@ -66,19 +66,54 @@ TEST_F(core_edm_buffer_test, construct) {
     // Test the creation of fixed sized and resizable "simple buffers".
     vecmem::edm::buffer<simple_schema> buffer1{
         CAPACITY, m_resource, vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(buffer1)->wait();
+    EXPECT_EQ(buffer1.capacity(), CAPACITY);
+    EXPECT_EQ(m_copy.get_size(buffer1), CAPACITY);
     vecmem::edm::buffer<simple_schema> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
+    m_copy.setup(buffer2)->wait();
+    EXPECT_EQ(buffer2.capacity(), CAPACITY);
+    EXPECT_EQ(m_copy.get_size(buffer2), 0u);
+
+    vecmem::edm::buffer<simple_schema> buffer3{
+        0u, m_resource, vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(buffer3)->wait();
+    EXPECT_EQ(buffer3.capacity(), 0u);
+    EXPECT_EQ(m_copy.get_size(buffer3), 0u);
+    vecmem::edm::buffer<simple_schema> buffer4{
+        0u, m_resource, vecmem::data::buffer_type::resizable};
+    m_copy.setup(buffer4)->wait();
+    EXPECT_EQ(buffer4.capacity(), 0u);
+    EXPECT_EQ(m_copy.get_size(buffer4), 0u);
 
     // Test the creation of fixed sized and resizable "jagged buffers".
-    vecmem::edm::buffer<jagged_schema> buffer3{
+    vecmem::edm::buffer<jagged_schema> buffer5{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
-    EXPECT_EQ(vecmem::edm::get_capacities(buffer3), CAPACITIES);
+    m_copy.setup(buffer5)->wait();
+    EXPECT_EQ(buffer5.capacity(), CAPACITIES.size());
+    EXPECT_EQ(vecmem::edm::get_capacities(buffer5), CAPACITIES);
+    EXPECT_EQ(m_copy.get_size(buffer5), CAPACITIES.size());
+    EXPECT_EQ(m_copy.get_sizes(buffer5), CAPACITIES);
     const vecmem::vector<unsigned int> vecmem_capacities({10, 100, 1000},
                                                          &m_resource);
-    vecmem::edm::buffer<jagged_schema> buffer4{
+    vecmem::edm::buffer<jagged_schema> buffer6{
         vecmem_capacities, m_resource, nullptr,
         vecmem::data::buffer_type::resizable};
-    EXPECT_EQ(vecmem::edm::get_capacities(buffer4), CAPACITIES);
+    m_copy.setup(buffer6)->wait();
+    EXPECT_EQ(buffer6.capacity(), CAPACITIES.size());
+    EXPECT_EQ(vecmem::edm::get_capacities(buffer6), CAPACITIES);
+    EXPECT_EQ(m_copy.get_size(buffer6), CAPACITIES.size());
+    EXPECT_EQ(m_copy.get_sizes(buffer6), std::vector<unsigned int>({0, 0, 0}));
+
+    vecmem::edm::buffer<jagged_schema> buffer7{
+        std::vector<unsigned int>(), m_resource, nullptr,
+        vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(buffer7)->wait();
+    EXPECT_EQ(buffer7.capacity(), 0u);
+    EXPECT_EQ(vecmem::edm::get_capacities(buffer7),
+              std::vector<unsigned int>());
+    EXPECT_EQ(m_copy.get_size(buffer7), 0u);
+    EXPECT_EQ(m_copy.get_sizes(buffer7), std::vector<unsigned int>());
 }
 
 TEST_F(core_edm_buffer_test, get_data) {
