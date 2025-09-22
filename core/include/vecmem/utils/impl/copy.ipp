@@ -341,11 +341,6 @@ copy::event_type copy::set_sizes(
 template <typename SCHEMA>
 copy::event_type copy::setup(edm::view<SCHEMA> data) const {
 
-    // For empty containers nothing needs to be done.
-    if (data.capacity() == 0) {
-        return vecmem::copy::create_event();
-    }
-
     // Copy the data layout to the device, if needed.
     if (data.layout().ptr() != data.host_layout().ptr()) {
         assert(data.layout().capacity() > 0u);
