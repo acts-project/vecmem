@@ -1,12 +1,12 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2025 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
-project( vecmem VERSION 1.21.0 LANGUAGES CXX )
+project( vecmem VERSION 1.22.0 LANGUAGES CXX )
 
 # Standard CMake include(s).
 include( GNUInstallDirs )
