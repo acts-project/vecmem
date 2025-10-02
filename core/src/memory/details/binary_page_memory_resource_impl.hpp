@@ -87,6 +87,15 @@ struct binary_page_memory_resource_impl {
         std::size_t total_pages() const;
 
         /**
+         * @brief Get the used and total held memory of the superpage.
+         *
+         * This method returns two numbers, the first being the total size of
+         * occupied pages, while the second is the total memory held by the
+         * superpage.
+         */
+        std::pair<std::size_t, std::size_t> get_memory_usage();
+
+        /**
          * @brief Size (log_2) of the entire allocation represented by this
          * superpage.
          */
@@ -249,6 +258,11 @@ struct binary_page_memory_resource_impl {
          */
         std::size_t get_index();
 
+        /**
+         * @brief Compute the total occupied space in this page.
+         */
+        std::size_t get_occupied_size();
+
     private:
         std::reference_wrapper<superpage> m_superpage;
         std::size_t m_page;
@@ -282,6 +296,15 @@ struct binary_page_memory_resource_impl {
      * of memory.
      */
     void allocate_upstream(std::size_t);
+
+    /**
+     * @brief Get the used and total held memory of the allocator.
+     *
+     * This method returns two numbers, the first being the total size of
+     * occupied pages, while the second is the total memory held by the
+     * allocator.
+     */
+    std::pair<std::size_t, std::size_t> get_memory_usage();
 
     memory_resource &m_upstream;
     std::vector<superpage> m_superpages;
