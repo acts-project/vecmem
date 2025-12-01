@@ -118,10 +118,17 @@ jobs:
             NOTES: HIP C++14
             RUN_TESTS: false
           - NAME: "HIP"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_rocm:47"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_rocm:51"
             CONTAINER_NAME: "Ubuntu 20.04"
             CXX_STANDARD: "17"
             OPTIONS:
+            NOTES:
+            RUN_TESTS: false
+          - NAME: "HIP"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_rocm:51"
+            CONTAINER_NAME: "Ubuntu 20.04"
+            CXX_STANDARD: "20"
+            OPTIONS: -DCMAKE_HIP_STANDARD=20
             NOTES:
             RUN_TESTS: false
           - NAME: "SYCL"
