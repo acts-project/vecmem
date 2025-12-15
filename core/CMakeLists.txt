@@ -155,6 +155,9 @@ vecmem_add_library( vecmem_core core
    "src/memory/synchronized_memory_resource.cpp"
    "include/vecmem/memory/synchronized_memory_resource.hpp"
    # Utilities.
+   "include/vecmem/utils/abstract_event.hpp"
+   "include/vecmem/utils/async_value.hpp"
+   "include/vecmem/utils/impl/async_value.ipp"
    "include/vecmem/utils/copy.hpp"
    "include/vecmem/utils/impl/copy.ipp"
    "src/utils/copy.cpp"

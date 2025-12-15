@@ -12,12 +12,14 @@
 #include "vecmem/containers/data/jagged_vector_view.hpp"
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/containers/vector.hpp"
 #include "vecmem/edm/buffer.hpp"
 #include "vecmem/edm/details/schema_traits.hpp"
 #include "vecmem/edm/host.hpp"
 #include "vecmem/edm/view.hpp"
 #include "vecmem/memory/memory_resource.hpp"
 #include "vecmem/utils/abstract_event.hpp"
+#include "vecmem/utils/async_value.hpp"
 #include "vecmem/utils/attributes.hpp"
 #include "vecmem/vecmem_core_export.hpp"
 
@@ -109,6 +111,13 @@ public:
     typename data::vector_view<TYPE>::size_type get_size(
         const data::vector_view<TYPE>& data) const;
 
+    /// Helper function for getting the size of a resizable 1D buffer
+    /// asynchonously
+    template <typename TYPE>
+    async_value<unique_alloc_ptr<typename data::vector_view<TYPE>::size_type>>
+    get_size(const data::vector_view<TYPE>& data,
+             memory_resource& pinnedHostMr) const;
+
     /// @}
 
     /// @name Jagged vector data handling functions
@@ -156,6 +165,13 @@ public:
         const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
         data::jagged_vector_view<TYPE> data) const;
 
+    /// Helper function for getting the sizes of a resizable jagged vector
+    /// asynchronously
+    template <typename TYPE>
+    async_value<vector<typename data::vector_view<TYPE>::size_type>> get_sizes(
+        const data::jagged_vector_view<TYPE>& data,
+        memory_resource& pinnedHostMr) const;
+
     /// @}
 
     /// @name SoA container handling functions
@@ -199,10 +215,23 @@ public:
     typename edm::view<edm::schema<VARTYPES...>>::size_type get_size(
         const edm::view<edm::schema<VARTYPES...>>& data) const;
 
+    /// Get the (outer) size of a (resizable) SoA container asynchronously
+    template <typename... VARTYPES>
+    async_value<unique_alloc_ptr<
+        typename edm::view<edm::schema<VARTYPES...>>::size_type>>
+    get_size(const edm::view<edm::schema<VARTYPES...>>& data,
+             memory_resource& pinnedHostMr) const;
+
     /// Get the (inner) size of a (resizable) SoA container
     template <typename... VARTYPES>
     std::vector<data::vector_view<int>::size_type> get_sizes(
         const edm::view<edm::schema<VARTYPES...>>& data) const;
+
+    /// Get the (inner) size of a (resizable) SoA container asynchronously
+    template <typename... VARTYPES>
+    async_value<vector<data::vector_view<int>::size_type>> get_sizes(
+        const edm::view<edm::schema<VARTYPES...>>& data,
+        memory_resource& pinnedHostMr) const;
 
     /// @}
 
@@ -238,10 +267,6 @@ private:
         const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
         const data::vector_view<std::add_const_t<TYPE>>* from,
         data::vector_view<TYPE>* to, type::copy_type cptype) const;
-    /// Helper function for getting the sizes of a jagged vector/buffer
-    template <typename TYPE>
-    std::vector<typename data::vector_view<TYPE>::size_type> get_sizes_impl(
-        const data::vector_view<TYPE>* data, std::size_t size) const;
     /// Check if a vector of views occupy a contiguous block of memory
     template <typename TYPE>
     static bool is_contiguous(const data::vector_view<TYPE>* data,
@@ -273,6 +298,11 @@ private:
     template <std::size_t INDEX, typename... VARTYPES>
     std::vector<data::vector_view<int>::size_type> get_sizes_impl(
         const edm::view<edm::schema<VARTYPES...>>& from) const;
+    /// Implementation for the asynchronous variadic @c get_sizes function
+    template <std::size_t INDEX, typename... VARTYPES>
+    async_value<vector<data::vector_view<int>::size_type>> get_sizes_impl(
+        const edm::view<edm::schema<VARTYPES...>>& from,
+        memory_resource& pinnedHostMr) const;
 
 };  // class copy
 
