@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2024 CERN for the benefit of the ACTS project
+ * (c) 2024-2025 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -175,6 +175,9 @@ TEST_P(copy_tests, fixed_vector_buffer) {
         ->wait();
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
+    EXPECT_EQ(size, main_copy().get_size(device_buffer));
+    EXPECT_EQ(size, *(main_copy().get_size(device_buffer, host_mr()).get()));
+    EXPECT_EQ(size, host_copy().get_size(host_buffer2));
 
     // Check the results.
     vecmem::device_vector<const int> reference_vector(vecmem::get_data(cref()));
@@ -207,6 +210,9 @@ TEST_P(copy_tests, resizable_vector_buffer) {
         ->wait();
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
+    EXPECT_EQ(size, main_copy().get_size(device_buffer));
+    EXPECT_EQ(size, *(main_copy().get_size(device_buffer, host_mr()).get()));
+    EXPECT_EQ(size, host_copy().get_size(host_buffer2));
 
     // Check the results.
     vecmem::device_vector<const int> reference_vector(vecmem::get_data(cref()));
@@ -343,6 +349,15 @@ TEST_P(copy_tests, fixed_jagged_vector_buffer) {
 
     // Create a view of the reference data.
     const auto reference_data = vecmem::get_data(jagged_cref());
+    std::vector<vecmem::data::vector_view<int>::size_type> sizes(
+        jagged_cref().size());
+    vecmem::vector<vecmem::data::vector_view<int>::size_type> pinned_sizes(
+        jagged_cref().size(), &(host_mr()));
+    for (std::size_t i = 0; i < jagged_cref().size(); ++i) {
+        sizes[i] = static_cast<vecmem::data::vector_view<int>::size_type>(
+            jagged_cref()[i].size());
+        pinned_sizes[i] = sizes[i];
+    }
 
     // Create non-resizable device and host buffers, with the "exact sizes".
     vecmem::data::jagged_vector_buffer<int> device_buffer(
@@ -367,6 +382,11 @@ TEST_P(copy_tests, fixed_jagged_vector_buffer) {
         ->wait();
     auto host_buffer3 = main_copy().to(device_buffer, host_mr(), nullptr,
                                        vecmem::copy::type::device_to_host);
+    EXPECT_EQ(host_copy().get_sizes(host_buffer2), sizes);
+    EXPECT_EQ(host_copy().get_sizes(host_buffer3), sizes);
+    EXPECT_EQ(main_copy().get_sizes(device_buffer), sizes);
+    EXPECT_EQ(main_copy().get_sizes(device_buffer, host_mr()).get(),
+              pinned_sizes);
 
     // Check the results.
     vecmem::jagged_device_vector<const int> reference_vector(reference_data);
@@ -381,6 +401,15 @@ TEST_P(copy_tests, resizable_jagged_vector_buffer) {
 
     // Create a view of the reference data.
     const auto reference_data = vecmem::get_data(jagged_cref());
+    std::vector<vecmem::data::vector_view<int>::size_type> sizes(
+        jagged_cref().size());
+    vecmem::vector<vecmem::data::vector_view<int>::size_type> pinned_sizes(
+        jagged_cref().size(), &(host_mr()));
+    for (std::size_t i = 0; i < jagged_cref().size(); ++i) {
+        sizes[i] = static_cast<vecmem::data::vector_view<int>::size_type>(
+            jagged_cref()[i].size());
+        pinned_sizes[i] = sizes[i];
+    }
 
     // Create resizable device and host buffers, with (on the device) larger
     // than necessary sizes.
@@ -413,6 +442,10 @@ TEST_P(copy_tests, resizable_jagged_vector_buffer) {
     EXPECT_EQ(vecmem::data::get_capacities(host_buffer3), capacities);
     EXPECT_EQ(host_copy().get_sizes(host_buffer3),
               vecmem::data::get_capacities(reference_data));
+    EXPECT_EQ(host_copy().get_sizes(host_buffer2), sizes);
+    EXPECT_EQ(main_copy().get_sizes(device_buffer), sizes);
+    EXPECT_EQ(main_copy().get_sizes(device_buffer, host_mr()).get(),
+              pinned_sizes);
 
     // Check the results.
     vecmem::jagged_device_vector<const int> reference_vector(reference_data);

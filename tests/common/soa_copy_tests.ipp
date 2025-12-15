@@ -59,8 +59,12 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct() {
     // Check the size of the device buffer.
     EXPECT_EQ(device_buffer.size().ptr(), nullptr);
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
+    EXPECT_EQ(input.size(),
+              *(main_copy().get_size(device_buffer, host_mr()).get()));
     EXPECT_EQ(device_buffer2.size().ptr(), nullptr);
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer2));
+    EXPECT_EQ(input.size(),
+              *(main_copy().get_size(device_buffer2, host_mr()).get()));
 
     // Exercise the get_sizes(...) function, if there is a jagged vector in the
     // container.
@@ -70,10 +74,14 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct() {
                   main_copy().get_sizes(device_buffer));
         EXPECT_EQ(vecmem::edm::get_capacities(device_buffer),
                   main_copy().get_sizes(device_buffer));
+        EXPECT_EQ(host_copy().get_sizes(input_data, host_mr()).get(),
+                  main_copy().get_sizes(device_buffer, host_mr()).get());
         EXPECT_EQ(host_copy().get_sizes(input_data),
                   main_copy().get_sizes(device_buffer2));
         EXPECT_EQ(vecmem::edm::get_capacities(device_buffer2),
                   main_copy().get_sizes(device_buffer2));
+        EXPECT_EQ(host_copy().get_sizes(input_data, host_mr()).get(),
+                  main_copy().get_sizes(device_buffer2, host_mr()).get());
     }
 
     // Create the target host container.
@@ -181,6 +189,8 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host() {
 
     // Check the size of the device buffer.
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
+    EXPECT_EQ(input.size(),
+              *(main_copy().get_size(device_buffer, host_mr()).get()));
 
     // Exercise the get_sizes(...) function, if there is a jagged vector in the
     // container.
@@ -188,6 +198,8 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host() {
                       typename CONTAINER::schema_type>::value) {
         EXPECT_EQ(host_copy().get_sizes(input_data),
                   main_copy().get_sizes(device_buffer));
+        EXPECT_EQ(host_copy().get_sizes(input_data, host_mr()).get(),
+                  main_copy().get_sizes(device_buffer, host_mr()).get());
     }
 
     // Make a copy on the device, and test its results.
@@ -195,11 +207,13 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host() {
                                          vecmem::copy::type::device_to_device);
     EXPECT_NE(device_buffer2.size().ptr(), nullptr);
     EXPECT_EQ(main_copy().get_size(device_buffer),
-              main_copy().get_size(device_buffer2));
+              *(main_copy().get_size(device_buffer2, host_mr()).get()));
     if constexpr (vecmem::edm::details::has_jagged_vector<
                       typename CONTAINER::schema_type>::value) {
         EXPECT_EQ(main_copy().get_sizes(device_buffer),
                   main_copy().get_sizes(device_buffer2));
+        EXPECT_EQ(main_copy().get_sizes(device_buffer, host_mr()).get(),
+                  main_copy().get_sizes(device_buffer2, host_mr()).get());
         EXPECT_EQ(vecmem::edm::get_capacities(device_buffer),
                   vecmem::edm::get_capacities(device_buffer2));
     }
