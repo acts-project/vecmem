@@ -176,7 +176,7 @@ TEST_P(copy_tests, fixed_vector_buffer) {
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
     EXPECT_EQ(size, main_copy().get_size(device_buffer));
-    EXPECT_EQ(size, *(main_copy().get_size(device_buffer, host_mr()).get()));
+    EXPECT_EQ(size, main_copy().get_size(device_buffer, host_mr()).get());
     EXPECT_EQ(size, host_copy().get_size(host_buffer2));
 
     // Check the results.
@@ -211,7 +211,7 @@ TEST_P(copy_tests, resizable_vector_buffer) {
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
     EXPECT_EQ(size, main_copy().get_size(device_buffer));
-    EXPECT_EQ(size, *(main_copy().get_size(device_buffer, host_mr()).get()));
+    EXPECT_EQ(size, main_copy().get_size(device_buffer, host_mr()).get());
     EXPECT_EQ(size, host_copy().get_size(host_buffer2));
 
     // Check the results.

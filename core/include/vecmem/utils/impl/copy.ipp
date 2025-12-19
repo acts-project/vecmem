@@ -142,9 +142,8 @@ typename data::vector_view<TYPE>::size_type copy::get_size(
 }
 
 template <typename TYPE>
-async_value<unique_alloc_ptr<typename data::vector_view<TYPE>::size_type>>
-copy::get_size(const data::vector_view<TYPE>& data,
-               memory_resource& pinnedHostMr) const {
+async_size<typename data::vector_view<TYPE>::size_type> copy::get_size(
+    const data::vector_view<TYPE>& data, memory_resource& pinnedHostMr) const {
 
     // Helper result value type.
     using value_type = typename data::vector_view<TYPE>::size_type;
@@ -395,9 +394,9 @@ copy::event_type copy::set_sizes(
 }
 
 template <typename TYPE>
-async_value<vector<typename data::vector_view<TYPE>::size_type>>
-copy::get_sizes(const data::jagged_vector_view<TYPE>& data,
-                memory_resource& pinnedHostMr) const {
+async_sizes<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
+    const data::jagged_vector_view<TYPE>& data,
+    memory_resource& pinnedHostMr) const {
 
     // Try to get the "resizable sizes" first.
     for (std::size_t i = 0; i < data.size(); ++i) {
@@ -422,8 +421,7 @@ copy::get_sizes(const data::jagged_vector_view<TYPE>& data,
 
     // If we're still here, then the buffer is not resizable. So let's just
     // collect the capacity of each of the inner vectors.
-    vector<typename data::vector_view<TYPE>::size_type> result(
-        data.size(), 0, std::pmr::new_delete_resource());
+    vector<typename data::vector_view<TYPE>::size_type> result(data.size(), 0);
     for (std::size_t i = 0; i < data.size(); ++i) {
         result[i] = data.host_ptr()[i].capacity();
     }
@@ -628,8 +626,7 @@ typename edm::view<edm::schema<VARTYPES...>>::size_type copy::get_size(
 }
 
 template <typename... VARTYPES>
-async_value<
-    unique_alloc_ptr<typename edm::view<edm::schema<VARTYPES...>>::size_type>>
+async_size<typename edm::view<edm::schema<VARTYPES...>>::size_type>
 copy::get_size(const edm::view<edm::schema<VARTYPES...>>& data,
                memory_resource& pinnedHostMr) const {
 
@@ -686,7 +683,7 @@ std::vector<data::vector_view<int>::size_type> copy::get_sizes(
 }
 
 template <typename... VARTYPES>
-async_value<vector<data::vector_view<int>::size_type>> copy::get_sizes(
+async_sizes<data::vector_view<int>::size_type> copy::get_sizes(
     const edm::view<edm::schema<VARTYPES...>>& data,
     memory_resource& pinnedHostMr) const {
 
@@ -1131,7 +1128,7 @@ std::vector<data::vector_view<int>::size_type> copy::get_sizes_impl(
 }
 
 template <std::size_t INDEX, typename... VARTYPES>
-async_value<vector<data::vector_view<int>::size_type>> copy::get_sizes_impl(
+async_sizes<data::vector_view<int>::size_type> copy::get_sizes_impl(
     const edm::view<edm::schema<VARTYPES...>>& view,
     memory_resource& pinnedHostMr) const {
 
