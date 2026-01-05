@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -11,7 +11,7 @@
 #include "vecmem/containers/details/resize_jagged_vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
 #include "vecmem/edm/details/schema_traits.hpp"
-#include "vecmem/memory/host_memory_resource.hpp"
+#include "vecmem/memory/get_default_resource.hpp"
 #include "vecmem/utils/debug.hpp"
 #include "vecmem/utils/type_traits.hpp"
 
@@ -151,8 +151,7 @@ async_size<typename data::vector_view<TYPE>::size_type> copy::get_size(
     // Handle the case when the view/buffer is not resizable.
     if (data.size_ptr() == nullptr) {
         // Create the result value, in "default" memory.
-        auto value =
-            make_unique_alloc<value_type>(*(std::pmr::new_delete_resource()));
+        auto value = make_unique_alloc<value_type>(*(get_default_resource()));
         *value = data.capacity();
         return {std::move(value), vecmem::copy::create_event()};
     }
@@ -639,8 +638,7 @@ copy::get_size(const edm::view<edm::schema<VARTYPES...>>& data,
     if constexpr (std::disjunction_v<
                       edm::type::details::is_jagged_vector<VARTYPES>...>) {
         // Create the result value, in "default" memory.
-        auto value =
-            make_unique_alloc<value_type>(*(std::pmr::new_delete_resource()));
+        auto value = make_unique_alloc<value_type>(*(get_default_resource()));
         *value = data.capacity();
         return {std::move(value), vecmem::copy::create_event()};
     } else {
@@ -648,8 +646,8 @@ copy::get_size(const edm::view<edm::schema<VARTYPES...>>& data,
         // too smart, and giving a warning about unreachable code...
         if (data.size().ptr() == nullptr) {
             // Create the result value, in "default" memory.
-            auto value = make_unique_alloc<value_type>(
-                *(std::pmr::new_delete_resource()));
+            auto value =
+                make_unique_alloc<value_type>(*(get_default_resource()));
             *value = data.capacity();
             return {std::move(value), vecmem::copy::create_event()};
         }
