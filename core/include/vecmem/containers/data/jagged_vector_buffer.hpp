@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -100,6 +100,14 @@ public:
 
     /// Move assignment
     jagged_vector_buffer& operator=(jagged_vector_buffer&&) noexcept = default;
+
+    /// Get the main (device-accessible) memory resource used by this buffer
+    ///
+    /// May return a null pointer if the buffer is empty.
+    ///
+    memory_resource* resource() const;
+    /// Get the optional, host-accessible memory resource used by this buffer
+    memory_resource* host_resource() const;
 
 private:
     /// Data object for the @c vecmem::data::vector_view array

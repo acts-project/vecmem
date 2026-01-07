@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -118,6 +118,31 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
         }
         ptrdiff += capacities[i];
     }
+}
+
+template <typename TYPE>
+memory_resource* jagged_vector_buffer<TYPE>::resource() const {
+
+    // If we allocated any "main" memory, the return value is simple.
+    if (m_inner_memory) {
+        return m_inner_memory.get_deleter().resource();
+    }
+
+    // Handle the case when we
+    //  - use a shared/managed memory resource;
+    //  - create a buffer that has all empty inner vectors.
+    if ((this->capacity() != 0) && (!m_outer_memory)) {
+        return m_outer_host_memory.get_deleter().resource();
+    }
+
+    // If we are still here, use whatever is in the outer memory deleter.
+    return m_outer_memory.get_deleter().resource();
+}
+
+template <typename TYPE>
+memory_resource* jagged_vector_buffer<TYPE>::host_resource() const {
+
+    return m_outer_host_memory.get_deleter().resource();
 }
 
 }  // namespace data

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -91,12 +91,21 @@ TEST_F(hip_jagged_containers_test, set_in_kernel) {
     vecmem::jagged_vector<int> output(&m_mem);
     output = m_vec;  // Just to have it be set up with the correct sizes...
     auto output_data_host = vecmem::get_data(output);
+    EXPECT_EQ(output_data_host.resource(), &m_mem);
+    ASSERT_NE(output_data_host.resource(), nullptr);
+    EXPECT_TRUE(output_data_host.resource()->is_equal(m_mem));
 
     // Create the output data on the device.
     vecmem::hip::device_memory_resource device_resource;
     vecmem::data::jagged_vector_buffer<int> output_data_device(
         output_data_host, device_resource, &m_mem);
     copy.setup(output_data_device)->wait();
+    EXPECT_EQ(output_data_device.resource(), &device_resource);
+    ASSERT_NE(output_data_device.resource(), nullptr);
+    EXPECT_TRUE(output_data_device.resource()->is_equal(device_resource));
+    EXPECT_EQ(output_data_device.host_resource(), &m_mem);
+    ASSERT_NE(output_data_device.host_resource(), nullptr);
+    EXPECT_TRUE(output_data_device.host_resource()->is_equal(m_mem));
 
     // Run the linear transformation.
     linearTransform(copy.to(vecmem::get_data(m_constants), device_resource,
@@ -226,6 +235,12 @@ TEST_F(hip_jagged_containers_test, zero_capacity) {
         {0, 1, 200, 1, 100, 2}, m_mem, nullptr,
         vecmem::data::buffer_type::resizable);
     copy.setup(managed_data)->wait();
+    EXPECT_EQ(managed_data.resource(), &m_mem);
+    ASSERT_NE(managed_data.resource(), nullptr);
+    EXPECT_TRUE(managed_data.resource()->is_equal(m_mem));
+    EXPECT_EQ(managed_data.host_resource(), &m_mem);
+    ASSERT_NE(managed_data.host_resource(), nullptr);
+    EXPECT_TRUE(managed_data.host_resource()->is_equal(m_mem));
 
     // Run the vector filling.
     fillTransform(managed_data);
@@ -276,6 +291,8 @@ TEST_F(hip_jagged_containers_test, empty) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         {}, device_resource, &m_mem, vecmem::data::buffer_type::resizable);
     copy.setup(output_data)->wait();
+    EXPECT_EQ(output_data.resource(), nullptr);
+    EXPECT_EQ(output_data.host_resource(), nullptr);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
@@ -296,6 +313,8 @@ TEST_F(hip_jagged_containers_test, empty_fixed) {
     vecmem::data::jagged_vector_buffer<int> output_data(
         {}, device_resource, &m_mem, vecmem::data::buffer_type::fixed_size);
     copy.setup(output_data)->wait();
+    EXPECT_EQ(output_data.resource(), nullptr);
+    EXPECT_EQ(output_data.host_resource(), nullptr);
 
     // Copy the filtered output back into a "host object".
     vecmem::jagged_vector<int> output(&m_mem);
@@ -317,6 +336,12 @@ TEST_F(hip_jagged_containers_test, sizeless) {
         std::vector<std::size_t>(3, 0), device_resource, &m_mem,
         vecmem::data::buffer_type::resizable);
     copy.setup(output_data)->wait();
+    EXPECT_EQ(output_data.resource(), &device_resource);
+    ASSERT_NE(output_data.resource(), nullptr);
+    EXPECT_TRUE(output_data.resource()->is_equal(device_resource));
+    EXPECT_EQ(output_data.host_resource(), &m_mem);
+    ASSERT_NE(output_data.host_resource(), nullptr);
+    EXPECT_TRUE(output_data.host_resource()->is_equal(m_mem));
 
     // Run the vector filling.
     fillTransform(output_data);
@@ -344,6 +369,12 @@ TEST_F(hip_jagged_containers_test, sizeless_fixed) {
         std::vector<std::size_t>(3, 0), device_resource, &m_mem,
         vecmem::data::buffer_type::fixed_size);
     copy.setup(output_data)->wait();
+    EXPECT_EQ(output_data.resource(), &device_resource);
+    ASSERT_NE(output_data.resource(), nullptr);
+    EXPECT_TRUE(output_data.resource()->is_equal(device_resource));
+    EXPECT_EQ(output_data.host_resource(), &m_mem);
+    ASSERT_NE(output_data.host_resource(), nullptr);
+    EXPECT_TRUE(output_data.host_resource()->is_equal(m_mem));
 
     // Run the vector filling.
     fillTransform(output_data);
