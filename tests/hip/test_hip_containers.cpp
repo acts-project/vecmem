@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -62,6 +62,10 @@ TEST_F(hip_containers_test, device_memory) {
     vecmem::hip::device_memory_resource device_resource;
     vecmem::hip::host_memory_resource host_resource;
 
+    // Create/test an empty buffer.
+    vecmem::data::vector_buffer<int> empty_buffer(0, device_resource);
+    EXPECT_EQ(empty_buffer.resource(), nullptr);
+
     // Create input/output vectors on the host.
     vecmem::vector<int> inputvec({1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
                                  &host_resource);
@@ -74,6 +78,9 @@ TEST_F(hip_containers_test, device_memory) {
         static_cast<vecmem::data::vector_buffer<int>::size_type>(
             outputvec.size()),
         device_resource);
+    EXPECT_EQ(outputvecdevice.resource(), &device_resource);
+    ASSERT_NE(outputvecdevice.resource(), nullptr);
+    EXPECT_TRUE(outputvecdevice.resource()->is_equal(device_resource));
 
     // Create the array that is used in the linear transformation.
     vecmem::array<int, 2> constants(host_resource);
