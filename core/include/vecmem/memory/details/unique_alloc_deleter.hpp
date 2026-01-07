@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -118,6 +118,12 @@ public:
             m_mr->deallocate(p, m_size);
         }
     }
+
+    /// Get the memory resource used by this deleter
+    ///
+    /// May return a null pointer.
+    ///
+    memory_resource* resource() const { return m_mr; }
 
 private:
     memory_resource* m_mr;

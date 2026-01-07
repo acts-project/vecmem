@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -28,13 +28,22 @@ protected:
 TEST_F(CoreUniqueAllocPtrTest, EmptyPointer) {
     vecmem::unique_alloc_ptr<int> ptr;
 
+    EXPECT_EQ(ptr.get_deleter().resource(), nullptr);
     ASSERT_EQ(ptr, nullptr);
 }
 
 TEST_F(CoreUniqueAllocPtrTest, NullPointer) {
     vecmem::unique_alloc_ptr<int> ptr = nullptr;
 
+    EXPECT_EQ(ptr.get_deleter().resource(), nullptr);
     ASSERT_EQ(ptr, nullptr);
+}
+
+TEST_F(CoreUniqueAllocPtrTest, MemoryResource) {
+
+    auto ptr = vecmem::make_unique_alloc<int>(mr);
+    EXPECT_EQ(ptr.get_deleter().resource(), &mr);
+    EXPECT_TRUE(ptr.get_deleter().resource()->is_equal(mr));
 }
 
 TEST_F(CoreUniqueAllocPtrTest, AllocSingle) {
