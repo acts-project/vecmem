@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -74,6 +74,10 @@ TEST_F(core_edm_buffer_test, construct) {
     m_copy.setup(buffer2)->wait();
     EXPECT_EQ(buffer2.capacity(), CAPACITY);
     EXPECT_EQ(m_copy.get_size(buffer2), 0u);
+    EXPECT_EQ(buffer1.host_resource(), nullptr);
+    EXPECT_EQ(buffer1.resource(), &m_resource);
+    ASSERT_NE(buffer1.resource(), nullptr);
+    EXPECT_TRUE(buffer1.resource()->is_equal(m_resource));
 
     vecmem::edm::buffer<simple_schema> buffer3{
         0u, m_resource, vecmem::data::buffer_type::fixed_size};
@@ -91,6 +95,10 @@ TEST_F(core_edm_buffer_test, construct) {
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
     m_copy.setup(buffer5)->wait();
     EXPECT_EQ(buffer5.capacity(), CAPACITIES.size());
+    EXPECT_EQ(buffer5.host_resource(), nullptr);
+    EXPECT_EQ(buffer5.resource(), &m_resource);
+    ASSERT_NE(buffer5.resource(), nullptr);
+    EXPECT_TRUE(buffer5.resource()->is_equal(m_resource));
     EXPECT_EQ(vecmem::edm::get_capacities(buffer5), CAPACITIES);
     EXPECT_EQ(m_copy.get_size(buffer5), CAPACITIES.size());
     EXPECT_EQ(m_copy.get_sizes(buffer5), CAPACITIES);

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -223,6 +223,16 @@ public:
         const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
         memory_resource& mr, memory_resource* host_mr = nullptr,
         vecmem::data::buffer_type type = vecmem::data::buffer_type::fixed_size);
+
+    /// Get the main (device-accessible) memory resource used by this buffer
+    ///
+    /// May return a null pointer if the buffer is empty.
+    ///
+    VECMEM_HOST
+    memory_resource* resource() const;
+    /// Get the optional, host-accessible memory resource used by this buffer
+    VECMEM_HOST
+    memory_resource* host_resource() const;
 
 private:
     /// Set up a fixed sized buffer

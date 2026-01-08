@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -73,6 +73,10 @@ void make_buffer(simple_soa_container::buffer& buffer, memory_resource& main_mr,
         default:
             throw std::runtime_error("Unsupported buffer type");
     }
+    EXPECT_EQ(buffer.resource(), &main_mr);
+    ASSERT_NE(buffer.resource(), nullptr);
+    EXPECT_TRUE(buffer.resource()->is_equal(main_mr));
+    EXPECT_EQ(buffer.host_resource(), nullptr);
 }
 
 }  // namespace vecmem::testing
