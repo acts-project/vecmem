@@ -48,6 +48,13 @@ public:
     ///
     const_reference get() const;
 
+    /// Access the async/future value without waiting for completion
+    /// Completion must be ensured by the user
+    ///
+    /// @return Reference to the value
+    ///
+    const_reference unsafe_get() const;
+
     /// @name Function(s) implemented from @c vecmem::abstract_event
     /// @{
 
