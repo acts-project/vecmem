@@ -9,6 +9,7 @@
 
 // VecMem include(s).
 #include "vecmem/utils/copy.hpp"
+#include "vecmem/utils/cuda/event_pool.hpp"
 #include "vecmem/utils/cuda/stream_wrapper.hpp"
 #include "vecmem/vecmem_cuda_export.hpp"
 
@@ -48,6 +49,8 @@ private:
 
     /// The stream that the copies are performed on
     stream_wrapper m_stream;
+
+    event_pool m_pool;
 
 };  // class async_copy
 

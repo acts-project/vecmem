@@ -36,7 +36,9 @@ vecmem_add_library( vecmem_cuda cuda
    "src/utils/select_device.hpp"
    "src/utils/select_device.cpp"
    "include/vecmem/utils/cuda/stream_wrapper.hpp"
-   "src/utils/stream_wrapper.cpp" )
+   "src/utils/stream_wrapper.cpp"
+   "src/utils/cuda_pooled_event.cpp"
+   "src/utils/event_pool.cpp" )
 target_link_libraries( vecmem_cuda
    PUBLIC vecmem::core
    PRIVATE CUDA::cudart )

@@ -10,6 +10,7 @@
 #include "vecmem/utils/cuda/async_copy.hpp"
 
 #include "../cuda_error_handling.hpp"
+#include "../cuda_pooled_event.hpp"
 #include "../cuda_wrappers.hpp"
 #include "vecmem/utils/debug.hpp"
 
@@ -156,13 +157,14 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 
 async_copy::event_type async_copy::create_event() const {
 
-    // Create a CUDA event.
-    cudaEvent_t cudaEvent = nullptr;
-    VECMEM_CUDA_ERROR_CHECK(cudaEventCreate(&cudaEvent));
+    async_copy::event_type event = m_pool.create_event();
 
-    // Create a smart pointer around it to make memory management a little
-    // safer.
-    auto event = std::make_unique<::cuda_event>(cudaEvent);
+    auto pe = dynamic_cast<cuda_pooled_event*>(event.get());
+
+    assert(pe != nullptr);
+
+    // Get a CUDA event.
+    cudaEvent_t cudaEvent = pe->get_event();
 
     // Record it into the copy object's CUDA stream.
     VECMEM_CUDA_ERROR_CHECK(
