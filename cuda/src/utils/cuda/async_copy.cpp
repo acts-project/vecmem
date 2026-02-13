@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -11,6 +11,7 @@
 
 #include "../cuda_error_handling.hpp"
 #include "../cuda_wrappers.hpp"
+#include "../event_pool.hpp"
 #include "vecmem/utils/debug.hpp"
 
 // CUDA include(s).
@@ -20,6 +21,7 @@
 #include <array>
 #include <cassert>
 #include <exception>
+#include <functional>
 #include <string>
 
 namespace {
@@ -28,13 +30,15 @@ namespace {
 struct cuda_event : public vecmem::abstract_event {
 
     /// Constructor with the created event.
-    explicit cuda_event(cudaEvent_t event) : m_event(event) {
+    explicit cuda_event(vecmem::cuda::details::event_pool& pool)
+        : m_event(pool.create()), m_pool(pool) {
         assert(m_event != nullptr);
     }
     /// Copy constructor
     cuda_event(const cuda_event&) = delete;
     /// Move constructor
-    cuda_event(cuda_event&& parent) noexcept : m_event(parent.m_event) {
+    cuda_event(cuda_event&& parent) noexcept
+        : m_event(parent.m_event), m_pool(parent.m_pool) {
         parent.m_event = nullptr;
     }
     /// Destructor
@@ -56,7 +60,9 @@ struct cuda_event : public vecmem::abstract_event {
     /// Move assignment
     cuda_event& operator=(cuda_event&& rhs) noexcept {
         if (this != &rhs) {
+            cuda_event::ignore();
             m_event = rhs.m_event;
+            m_pool = rhs.m_pool;
             rhs.m_event = nullptr;
         }
         return *this;
@@ -76,12 +82,14 @@ struct cuda_event : public vecmem::abstract_event {
         if (m_event == nullptr) {
             return;
         }
-        VECMEM_CUDA_ERROR_CHECK(cudaEventDestroy(m_event));
+        m_pool.get().free(m_event);
         m_event = nullptr;
     }
 
     /// The CUDA event wrapped by this struct
     cudaEvent_t m_event;
+    /// The event pool that this event came from
+    std::reference_wrapper<vecmem::cuda::details::event_pool> m_pool;
 
 };  // struct cuda_event
 
@@ -102,9 +110,26 @@ static const std::array<std::string, copy::type::count> copy_type_printer = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};
 
-async_copy::async_copy(const stream_wrapper& stream) : m_stream(stream) {}
+struct async_copy::impl {
+
+    /// Convenience constructor
+    impl(cudaStream_t stream) : m_stream(stream), m_event_pool() {}
+
+    /// The stream that the copies are performed on
+    cudaStream_t m_stream;
+    /// Internal event pool
+    details::event_pool m_event_pool;
+
+};  // struct async_copy::impl
+
+async_copy::async_copy(const stream_wrapper& stream)
+    : m_impl{std::make_unique<impl>(details::get_stream(stream))} {}
+
+async_copy::async_copy(async_copy&&) noexcept = default;
 
 async_copy::~async_copy() noexcept = default;
+
+async_copy& async_copy::operator=(async_copy&&) noexcept = default;
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                          type::copy_type cptype) const {
@@ -124,7 +149,7 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
     // Perform the copy.
     VECMEM_CUDA_ERROR_CHECK(cudaMemcpyAsync(to_ptr, from_ptr, size,
                                             copy_type_translator[cptype],
-                                            details::get_stream(m_stream)));
+                                            m_impl->m_stream));
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(1,
@@ -146,7 +171,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 
     // Perform the operation.
     VECMEM_CUDA_ERROR_CHECK(
-        cudaMemsetAsync(ptr, value, size, details::get_stream(m_stream)));
+        cudaMemsetAsync(ptr, value, size, m_impl->m_stream));
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(
@@ -156,17 +181,11 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 
 async_copy::event_type async_copy::create_event() const {
 
-    // Create a CUDA event.
-    cudaEvent_t cudaEvent = nullptr;
-    VECMEM_CUDA_ERROR_CHECK(cudaEventCreate(&cudaEvent));
+    // Create a vecmem specific event object.
+    auto event = std::make_unique<::cuda_event>(m_impl->m_event_pool);
 
-    // Create a smart pointer around it to make memory management a little
-    // safer.
-    auto event = std::make_unique<::cuda_event>(cudaEvent);
-
-    // Record it into the copy object's CUDA stream.
-    VECMEM_CUDA_ERROR_CHECK(
-        cudaEventRecord(cudaEvent, details::get_stream(m_stream)));
+    // Record the CUDA event into the copy object's CUDA stream.
+    VECMEM_CUDA_ERROR_CHECK(cudaEventRecord(event->m_event, m_impl->m_stream));
 
     // Return the smart pointer.
     return event;
