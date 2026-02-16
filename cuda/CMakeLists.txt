@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -31,6 +31,8 @@ vecmem_add_library( vecmem_cuda cuda
    "src/utils/cuda_error_handling.cpp"
    "src/utils/cuda_wrappers.hpp"
    "src/utils/cuda_wrappers.cpp"
+   "src/utils/event_pool.hpp"
+   "src/utils/event_pool.cpp"
    "src/utils/get_device_name.hpp"
    "src/utils/get_device_name.cpp"
    "src/utils/select_device.hpp"

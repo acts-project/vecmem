@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2025 CERN for the benefit of the ACTS project
+ * (c) 2025-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -9,6 +9,7 @@
 // VecMem include(s).
 #include "vecmem/utils/hip/async_copy.hpp"
 
+#include "../event_pool.hpp"
 #include "../get_stream.hpp"
 #include "../hip_error_handling.hpp"
 #include "vecmem/utils/debug.hpp"
@@ -28,13 +29,15 @@ namespace {
 struct hip_event : public vecmem::abstract_event {
 
     /// Constructor with the created event.
-    explicit hip_event(hipEvent_t event) : m_event(event) {
+    explicit hip_event(vecmem::hip::details::event_pool& pool)
+        : m_event(pool.create()), m_pool(pool) {
         assert(m_event != nullptr);
     }
     /// Copy constructor
     hip_event(const hip_event&) = delete;
     /// Move constructor
-    hip_event(hip_event&& parent) noexcept : m_event(parent.m_event) {
+    hip_event(hip_event&& parent) noexcept
+        : m_event(parent.m_event), m_pool(parent.m_pool) {
         parent.m_event = nullptr;
     }
     /// Destructor
@@ -56,7 +59,9 @@ struct hip_event : public vecmem::abstract_event {
     /// Move assignment
     hip_event& operator=(hip_event&& rhs) noexcept {
         if (this != &rhs) {
+            hip_event::ignore();
             m_event = rhs.m_event;
+            m_pool = rhs.m_pool;
             rhs.m_event = nullptr;
         }
         return *this;
@@ -76,12 +81,14 @@ struct hip_event : public vecmem::abstract_event {
         if (m_event == nullptr) {
             return;
         }
-        VECMEM_HIP_ERROR_CHECK(hipEventDestroy(m_event));
+        m_pool.get().free(m_event);
         m_event = nullptr;
     }
 
     /// The HIP event wrapped by this struct
     hipEvent_t m_event;
+    /// The event pool that this event came from
+    std::reference_wrapper<vecmem::hip::details::event_pool> m_pool;
 
 };  // struct hip_event
 
@@ -102,9 +109,26 @@ static const std::array<std::string, copy::type::count> copy_type_printer = {
     "host to device", "device to host", "host to host", "device to device",
     "unknown"};
 
-async_copy::async_copy(const stream_wrapper& stream) : m_stream(stream) {}
+struct async_copy::impl {
+
+    /// Convenience constructor
+    impl(hipStream_t stream) : m_stream(stream), m_event_pool() {}
+
+    /// The stream that the copies are performed on
+    hipStream_t m_stream;
+    /// Internal event pool
+    details::event_pool m_event_pool;
+
+};  // struct async_copy::impl
+
+async_copy::async_copy(const stream_wrapper& stream)
+    : m_impl{std::make_unique<impl>(details::get_stream(stream))} {}
+
+async_copy::async_copy(async_copy&&) noexcept = default;
 
 async_copy::~async_copy() noexcept = default;
+
+async_copy& async_copy::operator=(async_copy&&) noexcept = default;
 
 void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                          type::copy_type cptype) const {
@@ -124,7 +148,7 @@ void async_copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
     // Perform the copy.
     VECMEM_HIP_ERROR_CHECK(hipMemcpyAsync(to_ptr, from_ptr, size,
                                           copy_type_translator[cptype],
-                                          details::get_stream(m_stream)));
+                                          m_impl->m_stream));
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(1,
@@ -145,8 +169,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
     assert(ptr != nullptr);
 
     // Perform the operation.
-    VECMEM_HIP_ERROR_CHECK(
-        hipMemsetAsync(ptr, value, size, details::get_stream(m_stream)));
+    VECMEM_HIP_ERROR_CHECK(hipMemsetAsync(ptr, value, size, m_impl->m_stream));
 
     // Let the user know what happened.
     VECMEM_DEBUG_MSG(
@@ -156,17 +179,11 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
 
 async_copy::event_type async_copy::create_event() const {
 
-    // Create a HIP event.
-    hipEvent_t hipEvent = nullptr;
-    VECMEM_HIP_ERROR_CHECK(hipEventCreate(&hipEvent));
-
-    // Create a smart pointer around it to make memory management a little
-    // safer.
-    auto event = std::make_unique<::hip_event>(hipEvent);
+    // Create a vecmem specific event object.
+    auto event = std::make_unique<::hip_event>(m_impl->m_event_pool);
 
     // Record it into the copy object's HIP stream.
-    VECMEM_HIP_ERROR_CHECK(
-        hipEventRecord(hipEvent, details::get_stream(m_stream)));
+    VECMEM_HIP_ERROR_CHECK(hipEventRecord(event->m_event, m_impl->m_stream));
 
     // Return the smart pointer.
     return event;

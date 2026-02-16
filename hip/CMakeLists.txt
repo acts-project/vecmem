@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2025 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -26,6 +26,8 @@ vecmem_add_library( vecmem_hip hip
    "src/utils/hip/async_copy.cpp"
    "include/vecmem/utils/hip/stream_wrapper.hpp"
    "src/utils/stream_wrapper.cpp"
+   "src/utils/event_pool.hpp"
+   "src/utils/event_pool.cpp"
    "src/utils/get_device_name.hpp"
    "src/utils/get_device_name.cpp"
    "src/utils/get_device.hpp"
