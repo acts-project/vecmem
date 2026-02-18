@@ -33,7 +33,9 @@ vecmem_add_test( hip
 # Add UBSAN for the tests, if it's available.
 include( CheckCXXCompilerFlag )
 check_cxx_compiler_flag( "-fsanitize=undefined" VECMEM_HAVE_UBSAN )
-if( VECMEM_HAVE_UBSAN AND VECMEM_TEST_UBSAN )
+include( CheckLinkerFlag )
+check_linker_flag( HIP "-fsanitize=undefined" VECMEM_HAVE_HIP_UBSAN )
+if( VECMEM_HAVE_UBSAN AND VECMEM_TEST_UBSAN AND VECMEM_HAVE_HIP_UBSAN )
    target_compile_options( vecmem_test_hip PRIVATE
       $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=undefined> )
    target_link_options( vecmem_test_hip PRIVATE "-fsanitize=undefined" )
