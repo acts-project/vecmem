@@ -21,7 +21,6 @@ include( "${vecmem_CMAKE_DIR}/vecmem-config-targets.cmake" )
 # Add the project's CMake directories to CMAKE_MODULE_PATH.
 list( APPEND CMAKE_MODULE_PATH
    "${vecmem_CMAKE_DIR}"
-   "${vecmem_CMAKE_DIR}/hip"
    "${vecmem_CMAKE_DIR}/sycl" )
 
 # Set up additional variables, based on the imported targets. These are mostly

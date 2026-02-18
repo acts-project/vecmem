@@ -1,8 +1,11 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
+
+# CMake's built-in HIP support requires at lease version 3.21.
+cmake_minimum_required( VERSION 3.21 )
 
 # Enable HIP as a language.
 enable_language( HIP )
