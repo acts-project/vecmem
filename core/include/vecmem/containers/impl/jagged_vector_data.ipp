@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -63,6 +63,12 @@ jagged_vector_data<T>::jagged_vector_data(size_type size, memory_resource& mem)
          */
         new (base_type::host_ptr() + i) vector_view<T>();
     }
+}
+
+template <typename T>
+memory_resource* jagged_vector_data<T>::resource() const {
+
+    return m_memory.get_deleter().resource();
 }
 
 }  // namespace data

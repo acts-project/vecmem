@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -96,6 +96,12 @@ void make_buffer(jagged_soa_container::buffer& buffer, memory_resource& main_mr,
         default:
             throw std::runtime_error("Unknown buffer type received");
     }
+    EXPECT_EQ(buffer.resource(), &main_mr);
+    ASSERT_NE(buffer.resource(), nullptr);
+    EXPECT_TRUE(buffer.resource()->is_equal(main_mr));
+    EXPECT_EQ(buffer.host_resource(), &host_mr);
+    ASSERT_NE(buffer.host_resource(), nullptr);
+    EXPECT_TRUE(buffer.host_resource()->is_equal(host_mr));
 }
 
 }  // namespace vecmem::testing

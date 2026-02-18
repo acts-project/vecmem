@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -78,6 +78,19 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(
         default:
             throw std::invalid_argument("Unknown buffer type");
     }
+}
+
+template <typename... VARTYPES>
+VECMEM_HOST memory_resource* buffer<schema<VARTYPES...>>::resource() const {
+
+    return m_memory.get_deleter().resource();
+}
+
+template <typename... VARTYPES>
+VECMEM_HOST memory_resource* buffer<schema<VARTYPES...>>::host_resource()
+    const {
+
+    return m_host_memory.get_deleter().resource();
 }
 
 template <typename... VARTYPES>

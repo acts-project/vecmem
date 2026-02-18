@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -44,6 +44,12 @@ vector_buffer<TYPE>::vector_buffer(size_type capacity,
 
     // Set up the base object.
     base_type::operator=(base_type{capacity, size, ptr});
+}
+
+template <typename TYPE>
+memory_resource* vector_buffer<TYPE>::resource() const {
+
+    return m_memory.get_deleter().resource();
 }
 
 }  // namespace data
