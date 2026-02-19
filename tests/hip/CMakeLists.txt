@@ -1,8 +1,11 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
+
+# CMake's built-in HIP support requires at lease version 3.21.
+cmake_minimum_required( VERSION 3.21 )
 
 # Enable HIP as a language.
 enable_language( HIP )
@@ -30,7 +33,9 @@ vecmem_add_test( hip
 # Add UBSAN for the tests, if it's available.
 include( CheckCXXCompilerFlag )
 check_cxx_compiler_flag( "-fsanitize=undefined" VECMEM_HAVE_UBSAN )
-if( VECMEM_HAVE_UBSAN AND VECMEM_TEST_UBSAN )
+include( CheckLinkerFlag )
+check_linker_flag( HIP "-fsanitize=undefined" VECMEM_HAVE_HIP_UBSAN )
+if( VECMEM_HAVE_UBSAN AND VECMEM_TEST_UBSAN AND VECMEM_HAVE_HIP_UBSAN )
    target_compile_options( vecmem_test_hip PRIVATE
       $<$<COMPILE_LANGUAGE:CXX>:-fsanitize=undefined> )
    target_link_options( vecmem_test_hip PRIVATE "-fsanitize=undefined" )

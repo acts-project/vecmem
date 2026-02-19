@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -48,7 +48,8 @@ add_library( vecmem_testing_common STATIC
 target_link_libraries( vecmem_testing_common
    PUBLIC vecmem::core GTest::gtest )
 set_target_properties( vecmem_testing_common PROPERTIES
-      FOLDER "vecmem/tests" )
+   FOLDER "vecmem/tests"
+   POSITION_INDEPENDENT_CODE TRUE )
 
 # Include the library specific tests.
 add_subdirectory( core )

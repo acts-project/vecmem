@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -15,7 +15,6 @@ mark_as_advanced( VECMEM_LANGUAGE_DIR )
 # Teach CMake about VecMem's custom language files.
 list( INSERT CMAKE_MODULE_PATH 0
    "${VECMEM_LANGUAGE_DIR}"
-   "${VECMEM_LANGUAGE_DIR}/hip"
    "${VECMEM_LANGUAGE_DIR}/sycl" )
 
 # Code mimicking CMake's CheckLanguage.cmake module. But making sure that the
@@ -26,9 +25,8 @@ macro( vecmem_check_language lang )
    # don't look for it again. Also ignore anything but the HIP "language".
    if( NOT DEFINED CMAKE_${lang}_COMPILER )
 
-      # Handle the HIP and SYCL cases.
-      if( ( "${lang}" STREQUAL "HIP" ) OR
-          ( "${lang}" STREQUAL "SYCL" ) )
+      # Handle the SYCL case.
+      if( "${lang}" STREQUAL "SYCL" )
 
          # Greet the user.
          set( _desc "Looking for a ${lang} compiler" )
