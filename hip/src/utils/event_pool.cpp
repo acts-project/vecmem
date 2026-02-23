@@ -41,7 +41,8 @@ event_pool::event_pool(std::size_t size) : m_pool(size), m_used_events(0) {
 
     // Create the (initial) events in the pool.
     for (hipEvent_t& e : m_pool) {
-        VECMEM_HIP_ERROR_CHECK(hipEventCreate(&e));
+        VECMEM_HIP_ERROR_CHECK(
+            hipEventCreateWithFlags(&e, hipEventDisableTiming));
     }
 }
 
@@ -61,7 +62,8 @@ hipEvent_t event_pool::create() {
     // Create a new event if we don't have any available in the pool.
     if (m_pool.size() <= m_used_events) {
         hipEvent_t e;
-        VECMEM_HIP_ERROR_CHECK(hipEventCreate(&e));
+        VECMEM_HIP_ERROR_CHECK(
+            hipEventCreateWithFlags(&e, hipEventDisableTiming));
         m_pool.push_back(e);
     }
 
