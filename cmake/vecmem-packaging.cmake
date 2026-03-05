@@ -1,11 +1,8 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
-
-# CMake include(s).
-include( CPack )
 
 # Export the configuration of the project.
 include( CMakePackageConfigHelpers )
@@ -34,9 +31,16 @@ install( FILES
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-sycl-code-compiles.cmake"
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-sycl-source-compiles.cmake"
    DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
-install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/hip"
-                   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sycl"
+install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sycl"
    DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
+
+# On Windows use the ZIP package generator by default.
+if( WIN32 )
+   set( CPACK_GENERATOR "ZIP" CACHE STRING "Package generator to use" )
+endif()
 
 # Clean up.
 unset( CMAKE_INSTALL_CMAKEDIR )
+
+# CMake include(s).
+include( CPack )
