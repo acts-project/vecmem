@@ -4,9 +4,6 @@
 #
 # Mozilla Public License Version 2.0
 
-# CMake include(s).
-include( CPack )
-
 # Export the configuration of the project.
 include( CMakePackageConfigHelpers )
 install( EXPORT vecmem-exports
@@ -37,5 +34,13 @@ install( FILES
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sycl"
    DESTINATION "${CMAKE_INSTALL_CMAKEDIR}" )
 
+# On Windows use the ZIP package generator by default.
+if( WIN32 )
+   set( CPACK_GENERATOR "ZIP" CACHE STRING "Package generator to use" )
+endif()
+
 # Clean up.
 unset( CMAKE_INSTALL_CMAKEDIR )
+
+# CMake include(s).
+include( CPack )
