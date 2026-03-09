@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -70,7 +70,7 @@ void compare(const jagged_soa_container::const_view& lhs,
 #if __cplusplus >= 201700L
 
 /// Fill a host container with some dummy data
-void fill(jagged_soa_container::host& obj);
+void fill(jagged_soa_container::host& obj, bool uneven = false);
 
 /// Create a buffer for the tests
 void make_buffer(jagged_soa_container::buffer& buffer, memory_resource& main_mr,

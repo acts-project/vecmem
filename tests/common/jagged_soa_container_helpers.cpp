@@ -22,7 +22,7 @@ namespace vecmem::testing {
 /// The "outer size" of the created containers and buffers.
 static const unsigned int SIZE = 10;
 
-void fill(jagged_soa_container::host& obj) {
+void fill(jagged_soa_container::host& obj, bool uneven) {
 
     obj.resize(SIZE);
     obj.count() = 55;
@@ -30,7 +30,11 @@ void fill(jagged_soa_container::host& obj) {
     for (std::size_t i = 0; i < obj.size(); ++i) {
         obj.measurement()[i] = 1.0f * static_cast<float>(i);
         obj.index()[i] = static_cast<int>(i);
-        obj.measurements()[i].resize(5 + i);
+        if (uneven) {
+            obj.measurements()[i].resize(i + (i % 2 ? 3 : 7));
+        } else {
+            obj.measurements()[i].resize(5 + i);
+        }
         for (std::size_t j = 0; j < obj.measurements()[i].size(); ++j) {
             obj.measurements()[i][j] = 1.0f * static_cast<float>(i + j);
         }
