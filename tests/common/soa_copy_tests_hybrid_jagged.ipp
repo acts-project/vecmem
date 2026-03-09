@@ -37,17 +37,9 @@ TEST_P(soa_copy_tests_hybrid_jagged, host_to_resizable_device_to_host) {
     // Create the "input" host container.
     vecmem::testing::jagged_soa_container::host input{host_mr()};
 
-    // Fill it with some data.
-    vecmem::testing::fill(input);
-
-    // Make one of its jagged vectors differently sized.
-    for (std::size_t i = 0; i < input.size(); ++i) {
-        if (i % 2 == 0) {
-            input.measurements()[i].resize(input.measurements()[i].size() + 3);
-        } else {
-            input.measurements()[i].resize(input.measurements()[i].size() - 2);
-        }
-    }
+    // Fill it with some (uneven) data.
+    constexpr bool UNEVEN = true;
+    vecmem::testing::fill(input, UNEVEN);
 
     // Create a resizable device buffer that would be able to hold this
     // data.
