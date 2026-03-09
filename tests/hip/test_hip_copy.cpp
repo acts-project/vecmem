@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2024-2025 CERN for the benefit of the ACTS project
+ * (c) 2024-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -8,6 +8,7 @@
 // Test include(s).
 #include "../common/copy_tests.hpp"
 #include "../common/soa_copy_tests.hpp"
+#include "../common/soa_copy_tests_hybrid_jagged.hpp"
 
 // VecMem include(s).
 #include "vecmem/memory/hip/device_memory_resource.hpp"
@@ -89,3 +90,5 @@ INSTANTIATE_TEST_SUITE_P(hip_soa_copy_tests_simple, soa_copy_tests_simple,
                          hip_copy_configs);
 INSTANTIATE_TEST_SUITE_P(hip_soa_copy_tests_jagged, soa_copy_tests_jagged,
                          hip_copy_configs);
+INSTANTIATE_TEST_SUITE_P(hip_soa_copy_tests_hybrid_jagged,
+                         soa_copy_tests_hybrid_jagged, hip_copy_configs);
