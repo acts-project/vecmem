@@ -76,6 +76,19 @@ struct hip_event : public vecmem::abstract_event {
         hip_event::ignore();
     }
 
+    /// Check the underlying HIP event without blocking
+    bool is_ready() const override {
+        if (m_event == nullptr) {
+            return true;
+        }
+        const auto status = hipEventQuery(m_event);
+        if (status == hipErrorNotReady) {
+            return false;
+        }
+        VECMEM_HIP_ERROR_CHECK(status);
+        return true;
+    }
+
     /// Ignore the underlying HIP event
     void ignore() override {
         if (m_event == nullptr) {

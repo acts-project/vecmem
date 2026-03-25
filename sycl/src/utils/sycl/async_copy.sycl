@@ -47,6 +47,21 @@ struct sycl_event : public vecmem::abstract_event {
         sycl_event::ignore();
     }
 
+    /// Check the underlying SYCL event without blocking
+    bool is_ready() const override {
+        if (m_events.empty()) {
+            return true;
+        }
+        for (const ::sycl::event& event : m_events) {
+            const auto status =
+                event.get_info<::sycl::info::event::command_execution_status>();
+            if (status != ::sycl::info::event_command_status::complete) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// Ignore the underlying SYCL event
     void ignore() override { m_events.clear(); }
 
