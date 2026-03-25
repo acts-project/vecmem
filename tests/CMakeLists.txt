@@ -43,6 +43,8 @@ add_library( vecmem_testing_common STATIC
    "common/jagged_soa_container_helpers.cpp"
    "common/soa_copy_tests.hpp"
    "common/soa_copy_tests.ipp"
+   "common/soa_copy_tests_hybrid_jagged.hpp"
+   "common/soa_copy_tests_hybrid_jagged.ipp"
    "common/soa_device_tests.hpp"
    "common/soa_device_tests.ipp" )
 target_link_libraries( vecmem_testing_common

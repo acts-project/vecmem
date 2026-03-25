@@ -163,10 +163,19 @@ private:
 
     template <typename T>
     VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
-    get_impl(const view<schema<VARTYPES...>>&,
+    get_impl(const view<schema<VARTYPES...>>& soa,
              const vecmem::data::jagged_vector_view<T>& vec) {
 
-        return vecmem::data::get_capacities(vec);
+        auto this_size = vecmem::data::get_capacities(vec);
+        auto other_size = get_capacities_impl<INDEX - 1, VARTYPES...>::get(soa);
+        assert(this_size.size() == other_size.size());
+        std::vector<vecmem::data::vector_view<int>::size_type> result(
+            soa.capacity());
+        assert(result.size() == this_size.size());
+        for (std::size_t i = 0; i < result.size(); ++i) {
+            result[i] = std::max(this_size[i], other_size[i]);
+        }
+        return result;
     }
 
 };  // struct get_capacities_impl
@@ -178,17 +187,25 @@ struct get_capacities_impl<0u, VARTYPES...> {
     static std::vector<vecmem::data::vector_view<int>::size_type> get(
         const view<schema<VARTYPES...>>& soa) {
 
-        // If we got this far, this *must* be a jagged vector.
-        static_assert(
-            type::details::is_jagged_vector<
-                tuple_element_t<0u, tuple<VARTYPES...>>>::value,
-            "The first variable in the schema must be a jagged vector");
-
-        // Get the capacities with the helper function available for jagged
-        // vectors.
-        return vecmem::data::get_capacities(soa.template get<0>());
+        return get_impl(soa, soa.template get<0u>());
     }
 
+private:
+    template <typename T>
+    VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
+    get_impl(const view<schema<VARTYPES...>>& soa, const T&) {
+
+        return std::vector<vecmem::data::vector_view<int>::size_type>(
+            soa.capacity(), 0);
+    }
+
+    template <typename T>
+    VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
+    get_impl(const view<schema<VARTYPES...>>&,
+             const vecmem::data::jagged_vector_view<T>& vec) {
+
+        return vecmem::data::get_capacities(vec);
+    }
 };  // struct get_capacities_impl
 
 }  // namespace details
