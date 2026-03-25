@@ -48,7 +48,7 @@ namespace vecmem {
 namespace cuda {
 namespace details {
 
-event_pool::event_pool(std::size_t size) : m_pool(), m_used_events(0) {
+event_pool::event_pool(std::size_t size) {
     // Create the (initial) events in the pool.
     m_pool.reserve(size);
     for (std::size_t i = 0; i < size; ++i) {
