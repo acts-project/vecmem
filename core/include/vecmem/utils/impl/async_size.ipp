@@ -36,6 +36,12 @@ void async_size<SIZE_TYPE>::wait() {
 }
 
 template <typename SIZE_TYPE>
+bool async_size<SIZE_TYPE>::is_ready() const {
+
+    return m_event->is_ready();
+}
+
+template <typename SIZE_TYPE>
 void async_size<SIZE_TYPE>::ignore() {
 
     m_event->ignore();

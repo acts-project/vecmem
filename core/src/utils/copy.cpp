@@ -20,6 +20,7 @@ struct noop_event final : public vecmem::abstract_event {
     void wait() override {
         // No-op
     }
+    bool is_ready() const override { return true; }  // always ready
     void ignore() override {
         // No-op
     }

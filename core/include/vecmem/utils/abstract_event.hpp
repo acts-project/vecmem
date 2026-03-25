@@ -27,6 +27,9 @@ struct abstract_event {
     /// complete
     virtual void wait() = 0;
 
+    /// Function checking whether the event is complete without blocking.
+    virtual bool is_ready() const = 0;
+
     /// Function telling the object not to wait for the underlying event
     virtual void ignore() = 0;
 

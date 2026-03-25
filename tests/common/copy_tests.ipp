@@ -636,3 +636,19 @@ TEST_P(copy_tests, memset) {
         }
     }
 }
+
+/// Test event completion query
+TEST_P(copy_tests, event_is_ready) {
+
+    // Create a small device buffer and set it up.
+    vecmem::data::vector_buffer<int> device_buffer(16, main_mr());
+    auto event = main_copy().setup(device_buffer);
+    ASSERT_NE(event, nullptr);
+
+    // Readiness query must be callable at any time.
+    EXPECT_NO_THROW(std::ignore = event->is_ready());
+
+    // Waiting must always make the event ready.
+    EXPECT_NO_THROW(event->wait());
+    EXPECT_TRUE(event->is_ready());
+}

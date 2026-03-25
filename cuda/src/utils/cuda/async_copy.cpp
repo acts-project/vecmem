@@ -77,6 +77,19 @@ struct cuda_event : public vecmem::abstract_event {
         cuda_event::ignore();
     }
 
+    /// Check the underlying CUDA event without blocking
+    bool is_ready() const override {
+        if (m_event == nullptr) {
+            return true;
+        }
+        const auto status = cudaEventQuery(m_event);
+        if (status == cudaErrorNotReady) {
+            return false;
+        }
+        VECMEM_CUDA_ERROR_CHECK(status);
+        return true;
+    }
+
     /// Ignore the underlying CUDA event
     void ignore() override {
         if (m_event == nullptr) {
