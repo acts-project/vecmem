@@ -34,11 +34,13 @@
 #include <stdexcept>
 
 namespace {
-void create_event(hipEvent_t& event) {
+hipEvent_t create_event() {
+    hipEvent_t event;
     // Disable collecting timing information since the event is used only for
     // synchronization.
     VECMEM_HIP_ERROR_CHECK(
         hipEventCreateWithFlags(&event, hipEventDisableTiming));
+    return event;
 }
 }  // namespace
 
@@ -46,11 +48,11 @@ namespace vecmem {
 namespace hip {
 namespace details {
 
-event_pool::event_pool(std::size_t size) : m_pool(size), m_used_events(0) {
-
+event_pool::event_pool(std::size_t size) : m_pool(), m_used_events(0) {
     // Create the (initial) events in the pool.
-    for (hipEvent_t& e : m_pool) {
-        ::create_event(e);
+    m_pool.reserve(size);
+    for (std::size_t i = 0; i < size; ++i) {
+        m_pool.push_back(::create_event());
     }
 }
 
@@ -69,9 +71,7 @@ hipEvent_t event_pool::create() {
 
     // Create a new event if we don't have any available in the pool.
     if (m_pool.size() <= m_used_events) {
-        hipEvent_t e;
-        ::create_event(e);
-        m_pool.push_back(e);
+        m_pool.push_back(::create_event());
     }
 
     // Return an (unused) event from the pool.

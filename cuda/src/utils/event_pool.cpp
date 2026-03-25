@@ -34,11 +34,13 @@
 #include <stdexcept>
 
 namespace {
-void create_event(cudaEvent_t& event) {
+cudaEvent_t create_event() {
+    cudaEvent_t event;
     // Disable collecting timing information since the event is used only for
     // synchronization.
     VECMEM_CUDA_ERROR_CHECK(
         cudaEventCreateWithFlags(&event, cudaEventDisableTiming));
+    return event;
 }
 }  // namespace
 
@@ -46,11 +48,11 @@ namespace vecmem {
 namespace cuda {
 namespace details {
 
-event_pool::event_pool(std::size_t size) : m_pool(size), m_used_events(0) {
-
+event_pool::event_pool(std::size_t size) : m_pool(), m_used_events(0) {
     // Create the (initial) events in the pool.
-    for (cudaEvent_t& e : m_pool) {
-        ::create_event(e);
+    m_pool.reserve(size);
+    for (std::size_t i = 0; i < size; ++i) {
+        m_pool.push_back(::create_event());
     }
 }
 
@@ -69,9 +71,7 @@ cudaEvent_t event_pool::create() {
 
     // Create a new event if we don't have any available in the pool.
     if (m_pool.size() <= m_used_events) {
-        cudaEvent_t e;
-        ::create_event(e);
-        m_pool.push_back(e);
+        m_pool.push_back(::create_event());
     }
 
     // Return an (unused) event from the pool.
