@@ -44,7 +44,7 @@ private:
     /// The pool of events
     std::vector<cudaEvent_t> m_pool;
     /// The number of currently used events
-    std::size_t m_used_events;
+    std::size_t m_used_events = 0;
 
 };  // class event_pool
 
