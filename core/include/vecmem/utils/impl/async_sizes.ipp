@@ -7,6 +7,9 @@
  */
 #pragma once
 
+// System includes.
+#include <cassert>
+
 namespace vecmem {
 
 template <typename SIZE_TYPE>
@@ -25,6 +28,7 @@ template <typename SIZE_TYPE>
 auto async_sizes<SIZE_TYPE>::unsafe_get() const -> const_reference {
 
     // Access the value assuming the event is complete
+    assert(m_event->is_ready());
     m_event->ignore();
     return m_sizes;
 }
