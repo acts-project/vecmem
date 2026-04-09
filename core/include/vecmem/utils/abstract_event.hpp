@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022-2025 CERN for the benefit of the ACTS project
+ * (c) 2022-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -26,6 +26,9 @@ struct abstract_event {
     /// Function that would block the current thread until the event is
     /// complete
     virtual void wait() = 0;
+
+    /// Function checking whether the event is complete without blocking.
+    virtual bool is_ready() const = 0;
 
     /// Function telling the object not to wait for the underlying event
     virtual void ignore() = 0;

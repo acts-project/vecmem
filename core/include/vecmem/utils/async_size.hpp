@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2025 CERN for the benefit of the ACTS project
+ * (c) 2025-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -48,12 +48,25 @@ public:
     ///
     const_reference get() const;
 
+    /// Access the async/future value without waiting for completion
+    /// Completion must be ensured by the user
+    ///
+    /// @return Reference to the value
+    ///
+    const_reference unsafe_get() const;
+
     /// @name Function(s) implemented from @c vecmem::abstract_event
     /// @{
 
     /// Function that would block the current thread until the event is
     /// complete
     void wait() override;
+
+    /// Function checking whether the event is complete without blocking
+    ///
+    /// @return true if the event is complete, false otherwise
+    ///
+    bool is_ready() const override;
 
     /// Function telling the object not to wait for the underlying event
     void ignore() override;

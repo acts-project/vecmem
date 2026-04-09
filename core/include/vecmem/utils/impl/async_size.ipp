@@ -1,11 +1,14 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2025 CERN for the benefit of the ACTS project
+ * (c) 2025-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 #pragma once
+
+// System includes.
+#include <cassert>
 
 namespace vecmem {
 
@@ -22,9 +25,24 @@ auto async_size<SIZE_TYPE>::get() const -> const_reference {
 }
 
 template <typename SIZE_TYPE>
+auto async_size<SIZE_TYPE>::unsafe_get() const -> const_reference {
+
+    // Access the value assuming the event is complete
+    assert(m_event->is_ready());
+    m_event->ignore();
+    return (*m_size);
+}
+
+template <typename SIZE_TYPE>
 void async_size<SIZE_TYPE>::wait() {
 
     m_event->wait();
+}
+
+template <typename SIZE_TYPE>
+bool async_size<SIZE_TYPE>::is_ready() const {
+
+    return m_event->is_ready();
 }
 
 template <typename SIZE_TYPE>

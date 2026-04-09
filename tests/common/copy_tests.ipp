@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2024-2025 CERN for the benefit of the ACTS project
+ * (c) 2024-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -12,6 +12,9 @@
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
+
+// System include(s).
+#include <thread>
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
@@ -635,4 +638,30 @@ TEST_P(copy_tests, memset) {
             EXPECT_EQ(std::get<2>(value), 0.);
         }
     }
+}
+
+/// Test event completion query
+TEST_P(copy_tests, event_query) {
+
+    // Create a small device buffer and set it up.
+    const auto expected_size = 16;
+    auto device_buffer =
+        vecmem::data::vector_buffer<int>(expected_size, main_mr());
+    auto event = main_copy().setup(device_buffer);
+    ASSERT_NE(event, nullptr);
+
+    // Readiness query must be callable at any time.
+    EXPECT_NO_THROW(std::ignore = event->is_ready());
+
+    // Waiting must always make the event ready.
+    EXPECT_NO_THROW(event->wait());
+    EXPECT_TRUE(event->is_ready());
+
+    // Obtain a value from async_size without waiting.
+    auto size = main_copy().get_size(device_buffer, host_mr());
+    while (!size.is_ready()) {
+        std::this_thread::yield();
+    }
+    EXPECT_EQ(expected_size, size.unsafe_get());
+    EXPECT_EQ(expected_size, size.get());
 }
