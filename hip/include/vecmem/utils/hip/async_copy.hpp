@@ -33,9 +33,23 @@ namespace vecmem::hip {
 class async_copy : public vecmem::copy {
 
 public:
-    /// Constructor with the stream to operate on
+    /// Constructor with the HIP stream to operate on
+    ///
+    /// @param stream The HIP stream to perform the copies in
+    ///
     VECMEM_HIP_EXPORT
     async_copy(const stream_wrapper& stream);
+    /// Constructor with a stream and flags to create HIP events with
+    ///
+    /// For details on the flags, see the documentation
+    /// of @c hipEventCreateWithFlags(...) on:
+    /// https://rocm.docs.amd.com/projects/HIP/en/develop/doxygen/html/group___event.html
+    ///
+    /// @param stream The HIP stream to perform the copies in
+    /// @param event_flags Flag(s) to create internal HIP events with
+    ///
+    VECMEM_HIP_EXPORT
+    async_copy(const stream_wrapper& stream, unsigned int event_flags);
     /// Move constructor
     VECMEM_HIP_EXPORT
     async_copy(async_copy&&) noexcept;

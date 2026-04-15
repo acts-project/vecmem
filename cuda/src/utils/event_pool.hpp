@@ -32,6 +32,9 @@ class event_pool {
 public:
     /// Constructor with the number of events to initially allocate
     explicit event_pool(std::size_t size = 8u);
+    /// Constructor with flags to create CUDA events with and the number of
+    /// events to initially allocate
+    event_pool(unsigned int event_flags, std::size_t size = 8u);
     /// Destructor
     ~event_pool();
 
@@ -41,6 +44,11 @@ public:
     void free(cudaEvent_t event);
 
 private:
+    /// Initialize the internal state of the pool
+    void initialize(std::size_t size);
+
+    /// Flags to create CUDA events with
+    unsigned int m_event_flags = cudaEventDisableTiming;
     /// The pool of events
     std::vector<cudaEvent_t> m_pool;
     /// The number of currently used events

@@ -34,12 +34,11 @@
 #include <stdexcept>
 
 namespace {
-hipEvent_t create_event() {
+hipEvent_t create_event(unsigned int flags) {
     hipEvent_t event;
     // Disable collecting timing information since the event is used only for
     // synchronization.
-    VECMEM_HIP_ERROR_CHECK(
-        hipEventCreateWithFlags(&event, hipEventDisableTiming));
+    VECMEM_HIP_ERROR_CHECK(hipEventCreateWithFlags(&event, flags));
     return event;
 }
 }  // namespace
@@ -49,11 +48,14 @@ namespace hip {
 namespace details {
 
 event_pool::event_pool(std::size_t size) {
-    // Create the (initial) events in the pool.
-    m_pool.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
-        m_pool.push_back(::create_event());
-    }
+
+    initialize(size);
+}
+
+event_pool::event_pool(unsigned int event_flags, std::size_t size)
+    : m_event_flags(event_flags) {
+
+    initialize(size);
 }
 
 event_pool::~event_pool() {
@@ -71,7 +73,7 @@ hipEvent_t event_pool::create() {
 
     // Create a new event if we don't have any available in the pool.
     if (m_pool.size() <= m_used_events) {
-        m_pool.push_back(::create_event());
+        m_pool.push_back(::create_event(m_event_flags));
     }
 
     // Return an (unused) event from the pool.
@@ -94,6 +96,15 @@ void event_pool::free(hipEvent_t event) {
     // Put this event back at the end of the pool. So that the element pointed
     // at by m_used_events would always be available for use.
     std::swap(*it, m_pool[--m_used_events]);
+}
+
+void event_pool::initialize(std::size_t size) {
+    // Create the (initial) events in the pool.
+    assert(m_pool.size() == 0);
+    m_pool.reserve(size);
+    for (std::size_t i = 0; i < size; ++i) {
+        m_pool.push_back(::create_event(m_event_flags));
+    }
 }
 
 }  // namespace details

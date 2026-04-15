@@ -33,9 +33,23 @@ namespace vecmem::cuda {
 class async_copy : public vecmem::copy {
 
 public:
-    /// Constructor with the stream to operate on
+    /// Constructor with the CUDA stream to operate on
+    ///
+    /// @param stream The CUDA stream to perform the copies in
+    ///
     VECMEM_CUDA_EXPORT
     explicit async_copy(const stream_wrapper& stream);
+    /// Constructor with a stream and flags to create CUDA events with
+    ///
+    /// For details on the flags, see the documentation
+    /// of @c cudaEventCreateWithFlags(...) on:
+    /// https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html
+    ///
+    /// @param stream The CUDA stream to perform the copies in
+    /// @param event_flags Flag(s) to create internal CUDA events with
+    ///
+    VECMEM_CUDA_EXPORT
+    async_copy(const stream_wrapper& stream, unsigned int event_flags);
     /// Move constructor
     VECMEM_CUDA_EXPORT
     async_copy(async_copy&&) noexcept;

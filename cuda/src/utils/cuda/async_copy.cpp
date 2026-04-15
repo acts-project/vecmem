@@ -125,8 +125,11 @@ static const std::array<std::string, copy::type::count> copy_type_printer = {
 
 struct async_copy::impl {
 
-    /// Convenience constructor
+    /// Constructor with just a stream
     impl(cudaStream_t stream) : m_stream(stream), m_event_pool() {}
+    /// Constructor with a stream and flags to create CUDA events with
+    impl(cudaStream_t stream, unsigned int event_flags)
+        : m_stream(stream), m_event_pool(event_flags) {}
 
     /// The stream that the copies are performed on
     cudaStream_t m_stream;
@@ -137,6 +140,10 @@ struct async_copy::impl {
 
 async_copy::async_copy(const stream_wrapper& stream)
     : m_impl{std::make_unique<impl>(details::get_stream(stream))} {}
+
+async_copy::async_copy(const stream_wrapper& stream, unsigned int event_flags)
+    : m_impl{std::make_unique<impl>(details::get_stream(stream), event_flags)} {
+}
 
 async_copy::async_copy(async_copy&&) noexcept = default;
 

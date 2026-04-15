@@ -32,6 +32,9 @@ class event_pool {
 public:
     /// Constructor with the number of events to initially allocate
     explicit event_pool(std::size_t size = 8u);
+    /// Constructor with flags to create HIP events with and the number of
+    /// events to initially allocate
+    event_pool(unsigned int event_flags, std::size_t size = 8u);
     /// Destructor
     ~event_pool();
 
@@ -41,6 +44,11 @@ public:
     void free(hipEvent_t event);
 
 private:
+    /// Initialize the internal state of the pool
+    void initialize(std::size_t size);
+
+    /// Flags to create HIP events with
+    unsigned int m_event_flags = hipEventDisableTiming;
     /// The pool of events
     std::vector<hipEvent_t> m_pool;
     /// The number of currently used events
