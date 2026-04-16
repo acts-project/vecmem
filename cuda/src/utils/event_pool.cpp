@@ -35,9 +35,8 @@
 
 namespace {
 cudaEvent_t create_event(unsigned int flags) {
+    // "Safely" create a CUDA event with the specified flags.
     cudaEvent_t event;
-    // Disable collecting timing information since the event is used only for
-    // synchronization.
     VECMEM_CUDA_ERROR_CHECK(cudaEventCreateWithFlags(&event, flags));
     return event;
 }

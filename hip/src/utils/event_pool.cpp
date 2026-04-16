@@ -35,9 +35,8 @@
 
 namespace {
 hipEvent_t create_event(unsigned int flags) {
+    // "Safely" create a HIP event with the specified flags.
     hipEvent_t event;
-    // Disable collecting timing information since the event is used only for
-    // synchronization.
     VECMEM_HIP_ERROR_CHECK(hipEventCreateWithFlags(&event, flags));
     return event;
 }
