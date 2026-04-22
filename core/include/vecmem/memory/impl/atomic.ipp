@@ -194,7 +194,9 @@ VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_max(value_type data)
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_max, m_ptr, data);
 #else
     const value_type result = *m_ptr;
-    *m_ptr = std::max(*m_ptr, data);
+    if (*m_ptr < data) {
+        *m_ptr = data;
+    }
     return result;
 #endif
 }
@@ -210,7 +212,9 @@ VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_min(value_type data)
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_min, m_ptr, data);
 #else
     const value_type result = *m_ptr;
-    *m_ptr = std::min(*m_ptr, data);
+    if (*m_ptr > data) {
+        *m_ptr = data;
+    }
     return result;
 #endif
 }

@@ -120,6 +120,14 @@ public:
     VECMEM_HOST
     value_type fetch_xor(value_type data,
                          memory_order order = memory_order::seq_cst) const;
+    /// Replace the current value with the specified value MAX-d to it
+    VECMEM_HOST
+    value_type fetch_max(value_type data,
+                         memory_order order = memory_order::seq_cst) const;
+    /// Replace the current value with the specified value MIN-d to it
+    VECMEM_HOST
+    value_type fetch_min(value_type data,
+                         memory_order order = memory_order::seq_cst) const;
 
     /// @}
 
