@@ -145,5 +145,19 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_xor(
     return atomicXor(m_ptr, data);
 }
 
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_max(
+    value_type data, memory_order) const -> value_type {
+
+    return atomicMax(m_ptr, data);
+}
+
+template <typename T, device_address_space address>
+VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::fetch_min(
+    value_type data, memory_order) const -> value_type {
+
+    return atomicMin(m_ptr, data);
+}
+
 }  // namespace cuda
 }  // namespace vecmem

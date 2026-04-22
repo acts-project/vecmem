@@ -104,3 +104,23 @@ TEST(core_device_atomic_test, atomic_fetch_xor) {
     ASSERT_EQ(a.fetch_xor(0b0000), 0b1001);
     ASSERT_EQ(a.load(), 0b1001);
 }
+
+TEST(core_device_atomic_test, atomic_fetch_max) {
+    int i = 0;
+    vecmem::device_atomic_ref<int> a(i);
+    ASSERT_EQ(a.load(), 0);
+    ASSERT_EQ(a.fetch_max(5), 0);
+    ASSERT_EQ(a.load(), 5);
+    ASSERT_EQ(a.fetch_max(3), 5);
+    ASSERT_EQ(a.load(), 5);
+}
+
+TEST(core_device_atomic_test, atomic_fetch_min) {
+    int i = 0;
+    vecmem::device_atomic_ref<int> a(i);
+    ASSERT_EQ(a.load(), 0);
+    ASSERT_EQ(a.fetch_min(-5), 0);
+    ASSERT_EQ(a.load(), -5);
+    ASSERT_EQ(a.fetch_min(3), -5);
+    ASSERT_EQ(a.load(), -5);
+}

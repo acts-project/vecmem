@@ -141,6 +141,12 @@ public:
     /// Replace the current value with the specified value XOR-d to it
     VECMEM_HOST_AND_DEVICE
     value_type fetch_xor(value_type data);
+    /// Replace the current value with the specified value MAX-d to it
+    VECMEM_HOST_AND_DEVICE
+    value_type fetch_max(value_type data);
+    /// Replace the current value with the specified value MIN-d to it
+    VECMEM_HOST_AND_DEVICE
+    value_type fetch_min(value_type data);
 
     /// @}
 

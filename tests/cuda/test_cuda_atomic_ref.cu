@@ -167,3 +167,29 @@ __global__ void atomic_ref_fetch_xor_kernel(bool* out, int* i) {
 
 CUDA_TEST(core_device_atomic_test, atomic_fetch_xor,
           atomic_ref_fetch_xor_kernel);
+
+__global__ void atomic_ref_fetch_max_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    CUDA_ASSERT_EQ(out, a.load(), 0);
+    CUDA_ASSERT_EQ(out, a.fetch_max(5), 0);
+    CUDA_ASSERT_EQ(out, a.load(), 5);
+    CUDA_ASSERT_EQ(out, a.fetch_max(3), 5);
+    CUDA_ASSERT_EQ(out, a.load(), 5);
+}
+
+CUDA_TEST(core_device_atomic_test, atomic_fetch_max,
+          atomic_ref_fetch_max_kernel);
+
+__global__ void atomic_ref_fetch_min_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    CUDA_ASSERT_EQ(out, a.load(), 0);
+    CUDA_ASSERT_EQ(out, a.fetch_min(-5), 0);
+    CUDA_ASSERT_EQ(out, a.load(), -5);
+    CUDA_ASSERT_EQ(out, a.fetch_min(3), -5);
+    CUDA_ASSERT_EQ(out, a.load(), -5);
+}
+
+CUDA_TEST(core_device_atomic_test, atomic_fetch_min,
+          atomic_ref_fetch_min_kernel);
