@@ -152,6 +152,7 @@ template <typename T, device_address_space address>
 VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_max(
     value_type data, memory_order order) const -> value_type {
 
+    value_type tmp = *m_ptr;
     while (tmp < data && !compare_exchange_strong(tmp, data, order))
         ;
     return tmp;
