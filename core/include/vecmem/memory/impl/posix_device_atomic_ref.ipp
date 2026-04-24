@@ -151,27 +151,29 @@ VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_xor(
 template <typename T, device_address_space address>
 VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_max(
     value_type data, memory_order order) const -> value_type {
-    #if defined(__has_builtin) && __has_builtin(__atomic_fetch_max)
-    return __atomic_fetch_max(m_ptr, data, details::memorder_to_posix_builtin(order));
-    #else
+#if defined(__has_builtin) && __has_builtin(__atomic_fetch_max)
+    return __atomic_fetch_max(m_ptr, data,
+                              details::memorder_to_posix_builtin(order));
+#else
     value_type tmp = *m_ptr;
     while (tmp < data && !compare_exchange_strong(tmp, data, order))
         ;
     return tmp;
-    #endif
+#endif
 }
 
 template <typename T, device_address_space address>
 VECMEM_HOST auto posix_device_atomic_ref<T, address>::fetch_min(
     value_type data, memory_order order) const -> value_type {
-    #if defined(__has_builtin) && __has_builtin(__atomic_fetch_min)
-    return __atomic_fetch_min(m_ptr, data, details::memorder_to_posix_builtin(order));
-    #else
+#if defined(__has_builtin) && __has_builtin(__atomic_fetch_min)
+    return __atomic_fetch_min(m_ptr, data,
+                              details::memorder_to_posix_builtin(order));
+#else
     value_type tmp = *m_ptr;
     while (tmp > data && !compare_exchange_strong(tmp, data, order))
         ;
     return tmp;
-    #endif
+#endif
 }
 
 }  // namespace vecmem
