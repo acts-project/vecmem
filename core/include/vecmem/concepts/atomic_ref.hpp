@@ -47,10 +47,6 @@ concept atomic_ref = requires {
         ->std::same_as<typename T::value_type>;
         { r.fetch_xor(v, o) }
         ->std::same_as<typename T::value_type>;
-        { r.fetch_max(v, o) }
-        ->std::same_as<typename T::value_type>;
-        { r.fetch_min(v, o) }
-        ->std::same_as<typename T::value_type>;
     };
 
     requires requires(const T& r, typename T::value_type& e,

@@ -106,6 +106,7 @@ TEST(core_device_atomic_test, atomic_fetch_xor) {
 }
 
 TEST(core_device_atomic_test, atomic_fetch_max) {
+#ifdef __cpp_lib_atomic_min_max
     int i = 0;
     vecmem::device_atomic_ref<int> a(i);
     ASSERT_EQ(a.load(), 0);
@@ -113,9 +114,13 @@ TEST(core_device_atomic_test, atomic_fetch_max) {
     ASSERT_EQ(a.load(), 5);
     ASSERT_EQ(a.fetch_max(3), 5);
     ASSERT_EQ(a.load(), 5);
+#else
+    GTEST_SKIP() << "atomic_fetch_max not supported";
+#endif
 }
 
 TEST(core_device_atomic_test, atomic_fetch_min) {
+#ifdef __cpp_lib_atomic_min_max
     int i = 0;
     vecmem::device_atomic_ref<int> a(i);
     ASSERT_EQ(a.load(), 0);
@@ -123,4 +128,7 @@ TEST(core_device_atomic_test, atomic_fetch_min) {
     ASSERT_EQ(a.load(), -5);
     ASSERT_EQ(a.fetch_min(3), -5);
     ASSERT_EQ(a.load(), -5);
+#else
+    GTEST_SKIP() << "atomic_fetch_min not supported";
+#endif
 }
