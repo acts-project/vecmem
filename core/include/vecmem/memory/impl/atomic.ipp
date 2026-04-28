@@ -183,40 +183,4 @@ VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_xor(value_type data)
 #endif
 }
 
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_max(value_type data)
-    -> value_type {
-
-#if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
-    return atomicMax(m_ptr, data);
-#elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
-    return __VECMEM_SYCL_ATOMIC_CALL1(fetch_max, m_ptr, data);
-#else
-    const value_type result = *m_ptr;
-    if (*m_ptr < data) {
-        *m_ptr = data;
-    }
-    return result;
-#endif
-}
-
-template <typename T>
-VECMEM_HOST_AND_DEVICE auto atomic<T>::fetch_min(value_type data)
-    -> value_type {
-
-#if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
-    (!defined(SYCL_LANGUAGE_VERSION))
-    return atomicMin(m_ptr, data);
-#elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
-    return __VECMEM_SYCL_ATOMIC_CALL1(fetch_min, m_ptr, data);
-#else
-    const value_type result = *m_ptr;
-    if (*m_ptr > data) {
-        *m_ptr = data;
-    }
-    return result;
-#endif
-}
-
 }  // namespace vecmem
