@@ -71,11 +71,11 @@ using device_atomic_ref = hip::device_atomic_ref<T, address>;
 
 }  // namespace vecmem
 
-#elif defined(__cpp_lib_atomic_ref)
+#elif defined(__cpp_lib_atomic_ref) && defined(__cpp_lib_atomic_min_max)
 
 namespace vecmem {
 
-/// Use @c std::atomic_ref in host code with C++20
+/// Use @c std::atomic_ref in host code with C++26
 template <typename T, device_address_space = device_address_space::global>
 using device_atomic_ref = std::atomic_ref<T>;
 
@@ -92,6 +92,16 @@ namespace vecmem {
 template <typename T,
           device_address_space address = device_address_space::global>
 using device_atomic_ref = posix_device_atomic_ref<T, address>;
+
+}  // namespace vecmem
+
+#elif defined(__cpp_lib_atomic_ref)
+
+namespace vecmem {
+
+/// Use @c std::atomic_ref in host code with C++20 and C++23
+template <typename T, device_address_space = device_address_space::global>
+using device_atomic_ref = std::atomic_ref<T>;
 
 }  // namespace vecmem
 
