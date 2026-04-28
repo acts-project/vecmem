@@ -1,0 +1,197 @@
+/* VecMem project, part of the ACTS project (R&D line)
+ *
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
+ *
+ * Mozilla Public License Version 2.0
+ */
+
+// Local includes
+#include "vecmem/memory/device_atomic_ref.hpp"
+
+// SYCL include(s).
+#include <sycl/sycl.hpp>
+
+// GoogleTest include(s).
+#include <gtest/gtest.h>
+
+#define SYCL_ASSERT_TRUE(o, v) \
+    do {                       \
+        *o &= (!!(v));         \
+    } while (0)
+#define SYCL_ASSERT_FALSE(o, v) \
+    do {                        \
+        *o &= (!(v));           \
+    } while (0)
+#define SYCL_ASSERT_EQ(o, i, j) \
+    do {                        \
+        *o &= ((i) == (j));     \
+    } while (0)
+
+#define SYCL_TEST(s, n, k)                                                  \
+    TEST(s, n) {                                                            \
+        ::sycl::queue queue;                                                \
+        bool* b = ::sycl::malloc_device<bool>(1, queue);                    \
+        int* i = ::sycl::malloc_device<int>(1, queue);                      \
+        bool out;                                                           \
+        queue.memset(b, 1, sizeof(bool)).wait();                            \
+        queue.submit([&](::sycl::handler& h) {                              \
+            h.single_task<class n>( [=]() { k(b, i); });                    \
+        }).wait_and_throw();                                                \
+        queue.memcpy(&out, b, sizeof(bool)).wait_and_throw();               \
+        ASSERT_TRUE(out);                                                   \
+        ::sycl::free(b, queue);                                             \
+        ::sycl::free(i, queue);                                             \
+    }
+
+inline void atomic_ref_operator_equals_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    a = 5;
+    SYCL_ASSERT_EQ(out, a.load(), 5);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_operator_equals,
+          atomic_ref_operator_equals_kernel);
+
+inline void atomic_ref_load_kernel(bool* out, int* i) {
+    *i = 17;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 17);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_load, atomic_ref_load_kernel);
+
+inline void atomic_ref_compare_exchange_strong_kernel(bool* out, int* i) {
+    *i = 0;
+    int zero = 0, five = 5;
+    vecmem::device_atomic_ref<int> a(*i);
+    // This passes, as i == 0, zero == 0. This will set zero = i = 0 and i = 5;
+    SYCL_ASSERT_TRUE(out, a.compare_exchange_strong(zero, 5));
+    SYCL_ASSERT_EQ(out, zero, 0);
+    // This fails, as i == 5, zero == 0. This will set zero = i = 5;
+    SYCL_ASSERT_FALSE(out, a.compare_exchange_strong(zero, 5));
+    SYCL_ASSERT_EQ(out, zero, 5);
+    // This succeeds, as i == 5, five == 5. This will set five = i = 5 and i =
+    // 0;
+    SYCL_ASSERT_TRUE(out, a.compare_exchange_strong(five, 0));
+    SYCL_ASSERT_EQ(out, five, 5);
+    // This fails, as i == 0, five == 5. This will set five = i = 0;
+    SYCL_ASSERT_FALSE(out, a.compare_exchange_strong(five, 0));
+    SYCL_ASSERT_EQ(out, five, 0);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_compare_exchange_strong,
+          atomic_ref_compare_exchange_strong_kernel);
+
+inline void atomic_ref_store_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0);
+    a.store(5);
+    SYCL_ASSERT_EQ(out, a.load(), 5);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_store, atomic_ref_store_kernel);
+
+inline void atomic_ref_exchange_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0);
+    SYCL_ASSERT_EQ(out, a.exchange(5), 0);
+    SYCL_ASSERT_EQ(out, a.load(), 5);
+    SYCL_ASSERT_EQ(out, a.exchange(3), 5);
+    SYCL_ASSERT_EQ(out, a.load(), 3);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_exchange, atomic_ref_exchange_kernel);
+
+inline void atomic_ref_fetch_add_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0);
+    SYCL_ASSERT_EQ(out, a.fetch_add(5), 0);
+    SYCL_ASSERT_EQ(out, a.load(), 5);
+    SYCL_ASSERT_EQ(out, a.fetch_add(3), 5);
+    SYCL_ASSERT_EQ(out, a.load(), 8);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_add,
+          atomic_ref_fetch_add_kernel);
+
+inline void atomic_ref_fetch_sub_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0);
+    SYCL_ASSERT_EQ(out, a.fetch_sub(5), 0);
+    SYCL_ASSERT_EQ(out, a.load(), -5);
+    SYCL_ASSERT_EQ(out, a.fetch_sub(3), -5);
+    SYCL_ASSERT_EQ(out, a.load(), -8);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_sub,
+          atomic_ref_fetch_sub_kernel);
+
+inline void atomic_ref_fetch_and_kernel(bool* out, int* i) {
+    *i = 0b0101;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0b0101);
+    SYCL_ASSERT_EQ(out, a.fetch_and(0b1100), 0b0101);
+    SYCL_ASSERT_EQ(out, a.load(), 0b0100);
+    SYCL_ASSERT_EQ(out, a.fetch_and(0b0000), 0b0100);
+    SYCL_ASSERT_EQ(out, a.load(), 0b0000);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_and,
+          atomic_ref_fetch_and_kernel);
+
+inline void atomic_ref_fetch_or_kernel(bool* out, int* i) {
+    *i = 0b0101;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0b0101);
+    SYCL_ASSERT_EQ(out, a.fetch_or(0b1100), 0b0101);
+    SYCL_ASSERT_EQ(out, a.load(), 0b1101);
+    SYCL_ASSERT_EQ(out, a.fetch_or(0b0000), 0b1101);
+    SYCL_ASSERT_EQ(out, a.load(), 0b1101);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_or,
+          atomic_ref_fetch_or_kernel);
+
+inline void atomic_ref_fetch_xor_kernel(bool* out, int* i) {
+    *i = 0b0101;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0b0101);
+    SYCL_ASSERT_EQ(out, a.fetch_xor(0b1100), 0b0101);
+    SYCL_ASSERT_EQ(out, a.load(), 0b1001);
+    SYCL_ASSERT_EQ(out, a.fetch_xor(0b0000), 0b1001);
+    SYCL_ASSERT_EQ(out, a.load(), 0b1001);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_xor,
+          atomic_ref_fetch_xor_kernel);
+
+inline void atomic_ref_fetch_max_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0);
+    SYCL_ASSERT_EQ(out, a.fetch_max(5), 0);
+    SYCL_ASSERT_EQ(out, a.load(), 5);
+    SYCL_ASSERT_EQ(out, a.fetch_max(3), 5);
+    SYCL_ASSERT_EQ(out, a.load(), 5);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_max,
+          atomic_ref_fetch_max_kernel);
+
+inline void atomic_ref_fetch_min_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    SYCL_ASSERT_EQ(out, a.load(), 0);
+    SYCL_ASSERT_EQ(out, a.fetch_min(-5), 0);
+    SYCL_ASSERT_EQ(out, a.load(), -5);
+    SYCL_ASSERT_EQ(out, a.fetch_min(3), -5);
+    SYCL_ASSERT_EQ(out, a.load(), -5);
+}
+
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_min,
+          atomic_ref_fetch_min_kernel);
