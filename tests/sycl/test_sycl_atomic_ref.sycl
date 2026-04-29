@@ -27,20 +27,22 @@
         *o &= ((i) == (j));     \
     } while (0)
 
-#define SYCL_TEST(s, n, k)                                                  \
-    TEST(s, n) {                                                            \
-        ::sycl::queue queue;                                                \
-        bool* b = ::sycl::malloc_device<bool>(1, queue);                    \
-        int* i = ::sycl::malloc_device<int>(1, queue);                      \
-        bool out;                                                           \
-        queue.memset(b, 1, sizeof(bool)).wait();                            \
-        queue.submit([&](::sycl::handler& h) {                              \
-            h.single_task<class n>( [=]() { k(b, i); });                    \
-        }).wait_and_throw();                                                \
-        queue.memcpy(&out, b, sizeof(bool)).wait_and_throw();               \
-        ASSERT_TRUE(out);                                                   \
-        ::sycl::free(b, queue);                                             \
-        ::sycl::free(i, queue);                                             \
+#define SYCL_TEST(s, n, k)                                    \
+    TEST(s, n) {                                              \
+        ::sycl::queue queue;                                  \
+        bool* b = ::sycl::malloc_device<bool>(1, queue);      \
+        int* i = ::sycl::malloc_device<int>(1, queue);        \
+        bool out;                                             \
+        queue.memset(b, 1, sizeof(bool)).wait();              \
+        queue                                                 \
+            .submit([&](::sycl::handler& h) {                 \
+                h.single_task<class n>([=]() { k(b, i); });   \
+            })                                                \
+            .wait_and_throw();                                \
+        queue.memcpy(&out, b, sizeof(bool)).wait_and_throw(); \
+        ASSERT_TRUE(out);                                     \
+        ::sycl::free(b, queue);                               \
+        ::sycl::free(i, queue);                               \
     }
 
 inline void atomic_ref_operator_equals_kernel(bool* out, int* i) {
@@ -154,8 +156,7 @@ inline void atomic_ref_fetch_or_kernel(bool* out, int* i) {
     SYCL_ASSERT_EQ(out, a.load(), 0b1101);
 }
 
-SYCL_TEST(sycl_device_atomic_test, atomic_fetch_or,
-          atomic_ref_fetch_or_kernel);
+SYCL_TEST(sycl_device_atomic_test, atomic_fetch_or, atomic_ref_fetch_or_kernel);
 
 inline void atomic_ref_fetch_xor_kernel(bool* out, int* i) {
     *i = 0b0101;

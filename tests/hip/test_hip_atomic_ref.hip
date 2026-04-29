@@ -16,31 +16,31 @@
 #include <gtest/gtest.h>
 
 #define HIP_ASSERT_TRUE(o, v) \
-    do {                       \
-        *out &= (!!v);         \
+    do {                      \
+        *out &= (!!v);        \
     } while (0)
 #define HIP_ASSERT_FALSE(o, v) \
-    do {                        \
-        *out &= (!v);           \
+    do {                       \
+        *out &= (!v);          \
     } while (0)
 #define HIP_ASSERT_EQ(o, i, j) \
-    do {                        \
-        *out &= (i == j);       \
+    do {                       \
+        *out &= (i == j);      \
     } while (0)
 
-#define HIP_TEST(s, n, k)                                              \
-    TEST(s, n) {                                                        \
-        bool *b, out;                                                   \
-        int* i;                                                         \
+#define HIP_TEST(s, n, k)                                             \
+    TEST(s, n) {                                                      \
+        bool *b, out;                                                 \
+        int* i;                                                       \
         VECMEM_HIP_ERROR_CHECK(hipMalloc(&b, sizeof(bool)));          \
         VECMEM_HIP_ERROR_CHECK(hipMalloc(&i, sizeof(int)));           \
         VECMEM_HIP_ERROR_CHECK(hipMemset(b, 1, sizeof(bool)));        \
-        k<<<1, 1>>>(b, i);                                              \
+        k<<<1, 1>>>(b, i);                                            \
         VECMEM_HIP_ERROR_CHECK(hipGetLastError());                    \
         VECMEM_HIP_ERROR_CHECK(hipDeviceSynchronize());               \
-        VECMEM_HIP_ERROR_CHECK(                                        \
+        VECMEM_HIP_ERROR_CHECK(                                       \
             hipMemcpy(&out, b, sizeof(bool), hipMemcpyDeviceToHost)); \
-        ASSERT_TRUE(out);                                               \
+        ASSERT_TRUE(out);                                             \
         VECMEM_HIP_ERROR_CHECK(hipFree(b));                           \
         VECMEM_HIP_ERROR_CHECK(hipFree(i));                           \
     }
@@ -53,7 +53,7 @@ __global__ void atomic_ref_operator_equals_kernel(bool* out, int* i) {
 }
 
 HIP_TEST(hip_device_atomic_test, atomic_operator_equals,
-          atomic_ref_operator_equals_kernel);
+         atomic_ref_operator_equals_kernel);
 
 __global__ void atomic_ref_load_kernel(bool* out, int* i) {
     *i = 17;
@@ -83,7 +83,7 @@ __global__ void atomic_ref_compare_exchange_strong_kernel(bool* out, int* i) {
 }
 
 HIP_TEST(hip_device_atomic_test, atomic_compare_exchange_strong,
-          atomic_ref_compare_exchange_strong_kernel);
+         atomic_ref_compare_exchange_strong_kernel);
 
 __global__ void atomic_ref_store_kernel(bool* out, int* i) {
     *i = 0;
@@ -117,8 +117,7 @@ __global__ void atomic_ref_fetch_add_kernel(bool* out, int* i) {
     HIP_ASSERT_EQ(out, a.load(), 8);
 }
 
-HIP_TEST(hip_device_atomic_test, atomic_fetch_add,
-          atomic_ref_fetch_add_kernel);
+HIP_TEST(hip_device_atomic_test, atomic_fetch_add, atomic_ref_fetch_add_kernel);
 
 __global__ void atomic_ref_fetch_sub_kernel(bool* out, int* i) {
     *i = 0;
@@ -130,8 +129,7 @@ __global__ void atomic_ref_fetch_sub_kernel(bool* out, int* i) {
     HIP_ASSERT_EQ(out, a.load(), -8);
 }
 
-HIP_TEST(hip_device_atomic_test, atomic_fetch_sub,
-          atomic_ref_fetch_sub_kernel);
+HIP_TEST(hip_device_atomic_test, atomic_fetch_sub, atomic_ref_fetch_sub_kernel);
 
 __global__ void atomic_ref_fetch_and_kernel(bool* out, int* i) {
     *i = 0b0101;
@@ -143,8 +141,7 @@ __global__ void atomic_ref_fetch_and_kernel(bool* out, int* i) {
     HIP_ASSERT_EQ(out, a.load(), 0b0000);
 }
 
-HIP_TEST(hip_device_atomic_test, atomic_fetch_and,
-          atomic_ref_fetch_and_kernel);
+HIP_TEST(hip_device_atomic_test, atomic_fetch_and, atomic_ref_fetch_and_kernel);
 
 __global__ void atomic_ref_fetch_or_kernel(bool* out, int* i) {
     *i = 0b0101;
@@ -168,8 +165,7 @@ __global__ void atomic_ref_fetch_xor_kernel(bool* out, int* i) {
     HIP_ASSERT_EQ(out, a.load(), 0b1001);
 }
 
-HIP_TEST(hip_device_atomic_test, atomic_fetch_xor,
-          atomic_ref_fetch_xor_kernel);
+HIP_TEST(hip_device_atomic_test, atomic_fetch_xor, atomic_ref_fetch_xor_kernel);
 
 __global__ void atomic_ref_fetch_max_kernel(bool* out, int* i) {
     *i = 0;
@@ -181,8 +177,7 @@ __global__ void atomic_ref_fetch_max_kernel(bool* out, int* i) {
     HIP_ASSERT_EQ(out, a.load(), 5);
 }
 
-HIP_TEST(hip_device_atomic_test, atomic_fetch_max,
-          atomic_ref_fetch_max_kernel);
+HIP_TEST(hip_device_atomic_test, atomic_fetch_max, atomic_ref_fetch_max_kernel);
 
 __global__ void atomic_ref_fetch_min_kernel(bool* out, int* i) {
     *i = 0;
@@ -194,5 +189,4 @@ __global__ void atomic_ref_fetch_min_kernel(bool* out, int* i) {
     HIP_ASSERT_EQ(out, a.load(), -5);
 }
 
-HIP_TEST(hip_device_atomic_test, atomic_fetch_min,
-          atomic_ref_fetch_min_kernel);
+HIP_TEST(hip_device_atomic_test, atomic_fetch_min, atomic_ref_fetch_min_kernel);
