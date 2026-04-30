@@ -90,7 +90,7 @@ __global__ void atomic_ref_store_kernel(bool* out, int* i) {
     CUDA_ASSERT_EQ(out, a.load(), 5);
 }
 
-CUDA_TEST(core_device_atomic_test, atomic_store, atomic_ref_store_kernel);
+CUDA_TEST(cuda_device_atomic_test, atomic_store, atomic_ref_store_kernel);
 
 __global__ void atomic_ref_exchange_kernel(bool* out, int* i) {
     *i = 0;
@@ -102,7 +102,7 @@ __global__ void atomic_ref_exchange_kernel(bool* out, int* i) {
     CUDA_ASSERT_EQ(out, a.load(), 3);
 }
 
-CUDA_TEST(core_device_atomic_test, atomic_exchange, atomic_ref_exchange_kernel);
+CUDA_TEST(cuda_device_atomic_test, atomic_exchange, atomic_ref_exchange_kernel);
 
 __global__ void atomic_ref_fetch_add_kernel(bool* out, int* i) {
     *i = 0;
@@ -114,7 +114,7 @@ __global__ void atomic_ref_fetch_add_kernel(bool* out, int* i) {
     CUDA_ASSERT_EQ(out, a.load(), 8);
 }
 
-CUDA_TEST(core_device_atomic_test, atomic_fetch_add,
+CUDA_TEST(cuda_device_atomic_test, atomic_fetch_add,
           atomic_ref_fetch_add_kernel);
 
 __global__ void atomic_ref_fetch_sub_kernel(bool* out, int* i) {
@@ -127,7 +127,7 @@ __global__ void atomic_ref_fetch_sub_kernel(bool* out, int* i) {
     CUDA_ASSERT_EQ(out, a.load(), -8);
 }
 
-CUDA_TEST(core_device_atomic_test, atomic_fetch_sub,
+CUDA_TEST(cuda_device_atomic_test, atomic_fetch_sub,
           atomic_ref_fetch_sub_kernel);
 
 __global__ void atomic_ref_fetch_and_kernel(bool* out, int* i) {
@@ -140,7 +140,7 @@ __global__ void atomic_ref_fetch_and_kernel(bool* out, int* i) {
     CUDA_ASSERT_EQ(out, a.load(), 0b0000);
 }
 
-CUDA_TEST(core_device_atomic_test, atomic_fetch_and,
+CUDA_TEST(cuda_device_atomic_test, atomic_fetch_and,
           atomic_ref_fetch_and_kernel);
 
 __global__ void atomic_ref_fetch_or_kernel(bool* out, int* i) {
@@ -153,7 +153,7 @@ __global__ void atomic_ref_fetch_or_kernel(bool* out, int* i) {
     CUDA_ASSERT_EQ(out, a.load(), 0b1101);
 }
 
-CUDA_TEST(core_device_atomic_test, atomic_fetch_or, atomic_ref_fetch_or_kernel);
+CUDA_TEST(cuda_device_atomic_test, atomic_fetch_or, atomic_ref_fetch_or_kernel);
 
 __global__ void atomic_ref_fetch_xor_kernel(bool* out, int* i) {
     *i = 0b0101;
@@ -165,5 +165,31 @@ __global__ void atomic_ref_fetch_xor_kernel(bool* out, int* i) {
     CUDA_ASSERT_EQ(out, a.load(), 0b1001);
 }
 
-CUDA_TEST(core_device_atomic_test, atomic_fetch_xor,
+CUDA_TEST(cuda_device_atomic_test, atomic_fetch_xor,
           atomic_ref_fetch_xor_kernel);
+
+__global__ void atomic_ref_fetch_max_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    CUDA_ASSERT_EQ(out, a.load(), 0);
+    CUDA_ASSERT_EQ(out, a.fetch_max(5), 0);
+    CUDA_ASSERT_EQ(out, a.load(), 5);
+    CUDA_ASSERT_EQ(out, a.fetch_max(3), 5);
+    CUDA_ASSERT_EQ(out, a.load(), 5);
+}
+
+CUDA_TEST(cuda_device_atomic_test, atomic_fetch_max,
+          atomic_ref_fetch_max_kernel);
+
+__global__ void atomic_ref_fetch_min_kernel(bool* out, int* i) {
+    *i = 0;
+    vecmem::device_atomic_ref<int> a(*i);
+    CUDA_ASSERT_EQ(out, a.load(), 0);
+    CUDA_ASSERT_EQ(out, a.fetch_min(-5), 0);
+    CUDA_ASSERT_EQ(out, a.load(), -5);
+    CUDA_ASSERT_EQ(out, a.fetch_min(3), -5);
+    CUDA_ASSERT_EQ(out, a.load(), -5);
+}
+
+CUDA_TEST(cuda_device_atomic_test, atomic_fetch_min,
+          atomic_ref_fetch_min_kernel);

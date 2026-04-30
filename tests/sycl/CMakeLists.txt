@@ -20,6 +20,7 @@ vecmem_add_test( sycl
    "test_sycl_memory_resources.cpp"
    "test_sycl_containers.sycl" "test_sycl_jagged_containers.sycl"
    "test_sycl_edm.sycl"
+   "test_sycl_atomic_ref.sycl"
    "test_sycl_copy.cpp"
    LINK_LIBRARIES vecmem::core vecmem::sycl GTest::gtest_main
                   vecmem_testing_common )

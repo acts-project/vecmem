@@ -167,6 +167,22 @@ auto custom_device_atomic_ref<T, address>::fetch_xor(value_type data,
     return __VECMEM_SYCL_ATOMIC_CALL1(fetch_xor, m_ptr, data);
 }
 
+template <typename T, device_address_space address>
+auto custom_device_atomic_ref<T, address>::fetch_max(value_type data,
+                                                     memory_order) const
+    -> value_type {
+
+    return __VECMEM_SYCL_ATOMIC_CALL1(fetch_max, m_ptr, data);
+}
+
+template <typename T, device_address_space address>
+auto custom_device_atomic_ref<T, address>::fetch_min(value_type data,
+                                                     memory_order) const
+    -> value_type {
+
+    return __VECMEM_SYCL_ATOMIC_CALL1(fetch_min, m_ptr, data);
+}
+
 #undef __VECMEM_SYCL_ATOMIC_CALL0
 #undef __VECMEM_SYCL_ATOMIC_CALL1
 #undef __VECMEM_SYCL_ATOMIC_CALL2
