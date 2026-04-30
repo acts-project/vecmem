@@ -95,16 +95,6 @@ using device_atomic_ref = posix_device_atomic_ref<T, address>;
 
 }  // namespace vecmem
 
-#elif defined(__cpp_lib_atomic_ref)
-
-namespace vecmem {
-
-/// Use @c std::atomic_ref in host code with C++20 and C++23
-template <typename T, device_address_space = device_address_space::global>
-using device_atomic_ref = std::atomic_ref<T>;
-
-}  // namespace vecmem
-
 #else
 
 // Local include(s).

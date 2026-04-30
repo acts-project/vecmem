@@ -15,6 +15,14 @@
 // GoogleTest include(s).
 #include <gtest/gtest.h>
 
+// Suppress Clang's C++17 attribute-extension warning triggered by GoogleTest's
+// use of [[maybe_unused]] inside the TEST() macro, which expands at the
+// HIP_TEST() call sites below. The HIP test target compiles as C++14, but
+// amdclang++ flags the attribute as a C++17 extension under -pedantic -Werror.
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wc++17-attribute-extensions"
+#endif
+
 #define HIP_ASSERT_TRUE(o, v) \
     do {                      \
         *out &= (!!v);        \
