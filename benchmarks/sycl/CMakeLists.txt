@@ -11,7 +11,8 @@ include( vecmem-compiler-options-sycl )
 # Set up the benchmark(s) for the SYCL library.
 add_executable( vecmem_benchmark_sycl
     "benchmark_sycl.cpp"
-    "benchmark_copy.cpp" )
+    "benchmark_copy.cpp"
+    "benchmark_edm_copy.cpp")
 target_link_libraries( vecmem_benchmark_sycl
     PRIVATE vecmem::sycl vecmem_benchmark_common
             benchmark::benchmark benchmark::benchmark_main
