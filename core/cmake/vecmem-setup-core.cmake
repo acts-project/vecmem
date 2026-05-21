@@ -20,6 +20,14 @@ function( vecmem_setup_core libName )
    # Check if vecmem::posix_device_atomic_ref is usable.
    get_target_property( _coreIncludes "${libName}"
       INTERFACE_INCLUDE_DIRECTORIES )
+
+   get_property( aliasedLibName TARGET "${libName}" PROPERTY ALIASED_TARGET )
+   if( "${aliasedLibName}" STREQUAL "" )
+      set( unaliasedLibName "${libName}" )
+   else()
+      set( unaliasedLibName "${aliasedLibName}" )
+   endif()
+
    set( CMAKE_REQUIRED_INCLUDES ${_coreIncludes} )
    unset( _coreIncludes )
    check_cxx_source_compiles( "
@@ -31,7 +39,7 @@ function( vecmem_setup_core libName )
       }
       " VECMEM_SUPPORT_POSIX_ATOMIC_REF )
    if( VECMEM_SUPPORT_POSIX_ATOMIC_REF )
-      target_compile_definitions( ${libName} INTERFACE
+      target_compile_definitions( ${unaliasedLibName} INTERFACE
          $<BUILD_INTERFACE:VECMEM_SUPPORT_POSIX_ATOMIC_REF> )
    endif()
    unset( CMAKE_REQUIRED_INCLUDES )
@@ -72,15 +80,15 @@ function( vecmem_setup_core libName )
 
       # Set up the appropriate flag based on these checks.
       if( VECMEM_HAVE_SYCL_EXT_ONEAPI_PRINTF )
-         target_compile_definitions( ${libName} INTERFACE
+         target_compile_definitions( ${unaliasedLibName} INTERFACE
             $<BUILD_INTERFACE:VECMEM_SYCL_PRINTF_FUNCTION=::sycl::ext::oneapi::experimental::printf> )
       elseif( VECMEM_HAVE_SYCL_ONEAPI_PRINTF )
-         target_compile_definitions( ${libName} INTERFACE
+         target_compile_definitions( ${unaliasedLibName} INTERFACE
             $<BUILD_INTERFACE:VECMEM_SYCL_PRINTF_FUNCTION=::sycl::ONEAPI::experimental::printf> )
       else()
          message( WARNING "No valid printf function found for SYCL."
             " Enabling debug messages will likely not work in device code." )
-         target_compile_definitions( ${libName} INTERFACE
+         target_compile_definitions( ${unaliasedLibName} INTERFACE
             $<BUILD_INTERFACE:VECMEM_SYCL_PRINTF_FUNCTION=printf>
             $<BUILD_INTERFACE:VECMEM_MSG_ATTRIBUTES=> )
       endif()
@@ -100,7 +108,7 @@ function( vecmem_setup_core libName )
          }
          " VECMEM_HAVE_SYCL_ATOMIC_REF )
       if( VECMEM_HAVE_SYCL_ATOMIC_REF )
-         target_compile_definitions( ${libName} INTERFACE
+         target_compile_definitions( ${unaliasedLibName} INTERFACE
             $<BUILD_INTERFACE:VECMEM_HAVE_SYCL_ATOMIC_REF> )
       endif()
 
