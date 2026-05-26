@@ -27,6 +27,7 @@ install( FILES
 
 # Install the "language helper" files.
 install( FILES
+   "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindHIPToolkit.cmake"
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-language.cmake"
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-sycl-code-compiles.cmake"
    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vecmem-check-sycl-source-compiles.cmake"
