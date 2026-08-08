@@ -7,6 +7,9 @@
  */
 #pragma once
 
+// VecMem include(s).
+#include "vecmem/utils/details/narrow_size.hpp"
+
 // System include(s).
 #include <cassert>
 
@@ -21,7 +24,8 @@ data::jagged_vector_data<TYPE> get_data(jagged_vector<TYPE>& vec,
 
     // Construct the object to be returned.
     data::jagged_vector_data<TYPE> result(
-        size,
+        details::narrow_size<
+            typename data::jagged_vector_data<TYPE>::size_type>(size),
         (resource != nullptr ? *resource : *(vec.get_allocator().resource())));
 
     // Helper local type definition(s).
@@ -50,7 +54,10 @@ data::jagged_vector_data<TYPE> get_data(
     const std::size_t size = vec.size();
 
     // Construct the object to be returned.
-    data::jagged_vector_data<TYPE> result(size, *resource);
+    data::jagged_vector_data<TYPE> result(
+        details::narrow_size<
+            typename data::jagged_vector_data<TYPE>::size_type>(size),
+        *resource);
 
     // Helper local type definition(s).
     typedef typename data::jagged_vector_data<TYPE>::value_type value_type;
@@ -75,7 +82,8 @@ data::jagged_vector_data<const TYPE> get_data(const jagged_vector<TYPE>& vec,
 
     // Construct the object to be returned.
     data::jagged_vector_data<const TYPE> result(
-        size,
+        details::narrow_size<
+            typename data::jagged_vector_data<const TYPE>::size_type>(size),
         (resource != nullptr ? *resource : *(vec.get_allocator().resource())));
 
     // Helper local type definition(s).
@@ -105,7 +113,10 @@ data::jagged_vector_data<const TYPE> get_data(
     const std::size_t size = vec.size();
 
     // Construct the object to be returned.
-    data::jagged_vector_data<const TYPE> result(size, *resource);
+    data::jagged_vector_data<const TYPE> result(
+        details::narrow_size<
+            typename data::jagged_vector_data<const TYPE>::size_type>(size),
+        *resource);
 
     // Helper local type definition(s).
     typedef

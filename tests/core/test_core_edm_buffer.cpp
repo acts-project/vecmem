@@ -15,6 +15,9 @@
 #include <gtest/gtest.h>
 
 // System include(s).
+#include <type_traits>
+
+// System include(s).
 #include <algorithm>
 #include <numeric>
 #include <vector>
@@ -385,7 +388,8 @@ TEST_F(core_edm_buffer_test, device) {
     auto check_fixed_jagged = [&](const auto& v) {
         ASSERT_EQ(v.size(), CAPACITY);
         ASSERT_EQ(v.capacity(), CAPACITY);
-        for (std::size_t i = 0; i < CAPACITY; ++i) {
+        for (typename std::decay_t<decltype(v)>::size_type i = 0; i < CAPACITY;
+             ++i) {
             ASSERT_EQ(v[i].size(), CAPACITIES[i]);
             ASSERT_EQ(v[i].capacity(), CAPACITIES[i]);
         }
@@ -426,7 +430,8 @@ TEST_F(core_edm_buffer_test, device) {
     auto check_resizable_jagged = [&](const auto& v) {
         ASSERT_EQ(v.size(), CAPACITY);
         ASSERT_EQ(v.capacity(), CAPACITY);
-        for (std::size_t i = 0; i < CAPACITY; ++i) {
+        for (typename std::decay_t<decltype(v)>::size_type i = 0; i < CAPACITY;
+             ++i) {
             ASSERT_EQ(v[i].size(), 0u);
             ASSERT_EQ(v[i].capacity(), CAPACITIES[i]);
         }

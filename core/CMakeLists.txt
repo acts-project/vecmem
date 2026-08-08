@@ -172,6 +172,7 @@ vecmem_add_library( vecmem_core core
    "include/vecmem/utils/tuple.hpp"
    "include/vecmem/utils/impl/tuple.ipp"
    "include/vecmem/utils/type_traits.hpp"
+   "include/vecmem/utils/details/narrow_size.hpp"
    "include/vecmem/utils/types.hpp"
    "src/utils/integer_math.hpp" )
 
