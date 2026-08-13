@@ -9,6 +9,8 @@
 // VecMem include(s).
 #include "vecmem/containers/data/jagged_vector_data.hpp"
 #include "vecmem/containers/data/jagged_vector_view.hpp"
+#include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/containers/jagged_vector.hpp"
 #include "vecmem/containers/vector.hpp"
@@ -20,6 +22,7 @@
 
 // System include(s).
 #include <set>
+#include <type_traits>
 
 class core_jagged_vector_view_test : public testing::Test {
 protected:
@@ -143,7 +146,8 @@ TEST_F(core_jagged_vector_view_test, filter) {
 
     // Fill the jagged vector buffer with just the odd elements.
     vecmem::jagged_device_vector device_vec(output_data);
-    for (std::size_t i = 0; i < m_vec.size(); ++i) {
+    using jagged_size_type = decltype(device_vec)::size_type;
+    for (jagged_size_type i = 0; i < device_vec.size(); ++i) {
         for (std::size_t j = 0; j < m_vec.at(i).size(); ++j) {
             if ((m_vec[i][j] % 2) != 0) {
                 device_vec[i].push_back(m_vec[i][j]);
@@ -257,4 +261,32 @@ TEST_F(core_jagged_vector_view_test, sizeless_fixed) {
     EXPECT_EQ(output[0].size(), 0);
     EXPECT_EQ(output[1].size(), 0);
     EXPECT_EQ(output[2].size(), 0);
+}
+
+/// Test that the jagged containers agree with their non-jagged counterparts
+/// on the size type.
+///
+/// This is not merely cosmetic. Device-side resizing increments the size
+/// member atomically, and CUDA, HIP and SYCL only guarantee atomic support
+/// for 32-bit integer types -- not necessarily for @c std::size_t. That is
+/// why @c vecmem::device_vector::size_type is @c unsigned @c int, and the
+/// jagged variants have to match it. See acts-project/vecmem#96.
+TEST_F(core_jagged_vector_view_test, size_type_consistency) {
+
+    static_assert(
+        std::is_same_v<vecmem::jagged_device_vector<int>::size_type,
+                       vecmem::device_vector<int>::size_type>,
+        "vecmem::jagged_device_vector and vecmem::device_vector must use the "
+        "same size type");
+
+    static_assert(
+        std::is_same_v<vecmem::data::jagged_vector_view<int>::size_type,
+                       vecmem::data::vector_view<int>::size_type>,
+        "vecmem::data::jagged_vector_view and vecmem::data::vector_view must "
+        "use the same size type");
+
+    static_assert(std::is_same_v<vecmem::jagged_device_vector<int>::size_type,
+                                 unsigned int>,
+                  "The device-side size type must be a type for which CUDA, "
+                  "HIP and SYCL guarantee atomic operations");
 }

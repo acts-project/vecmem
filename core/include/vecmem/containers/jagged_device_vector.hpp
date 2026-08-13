@@ -53,7 +53,7 @@ public:
     /// Type of the "outer" array elements
     using value_type = device_vector<T>;
     /// Size type for the array
-    using size_type = std::size_t;
+    using size_type = unsigned int;
     /// Pointer difference type
     using difference_type = std::ptrdiff_t;
 

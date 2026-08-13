@@ -6,6 +6,9 @@
  */
 #pragma once
 
+// VecMem include(s).
+#include "vecmem/utils/details/narrow_size.hpp"
+
 // Local include(s).
 #include "vecmem/containers/data/jagged_vector_data.hpp"
 #include "vecmem/edm/details/schema_traits.hpp"
@@ -49,7 +52,9 @@ template <typename TYPE>
 struct data_alloc<type::jagged_vector<TYPE>> {
     static typename data_type<type::jagged_vector<TYPE>>::type make(
         std::size_t size, memory_resource& mr) {
-        return {size, mr};
+        using data_t = typename data_type<type::jagged_vector<TYPE>>::type;
+        return {vecmem::details::narrow_size<typename data_t::size_type>(size),
+                mr};
     }
 };  // struct data_alloc
 

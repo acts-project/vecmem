@@ -9,6 +9,7 @@
 
 // vecmem include(s).
 #include "vecmem/containers/details/aligned_multiple_placement.hpp"
+#include "vecmem/utils/details/narrow_size.hpp"
 
 // System include(s).
 #include <algorithm>
@@ -36,6 +37,7 @@ allocate_jagged_buffer_outer_memory(
             resource, size);
     }
 }
+
 }  // namespace
 
 namespace vecmem {
@@ -66,11 +68,15 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
     const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
     memory_resource& resource, memory_resource* host_access_resource,
     buffer_type type)
-    : base_type(capacities.size(), nullptr),
+    : base_type(vecmem::details::narrow_size<size_type>(capacities.size()),
+                nullptr),
       m_outer_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
-          (host_access_resource == nullptr ? 0 : capacities.size()), resource)),
+          (host_access_resource == nullptr
+               ? 0
+               : vecmem::details::narrow_size<size_type>(capacities.size())),
+          resource)),
       m_outer_host_memory(::allocate_jagged_buffer_outer_memory<TYPE>(
-          capacities.size(),
+          vecmem::details::narrow_size<size_type>(capacities.size()),
           (host_access_resource == nullptr ? resource
                                            : *host_access_resource))) {
 
@@ -99,7 +105,7 @@ jagged_vector_buffer<TYPE>::jagged_vector_buffer(
 
     // Set up the base object.
     base_type::operator=(base_type{
-        capacities.size(),
+        vecmem::details::narrow_size<size_type>(capacities.size()),
         ((host_access_resource != nullptr) ? m_outer_memory.get()
                                            : m_outer_host_memory.get()),
         m_outer_host_memory.get()});

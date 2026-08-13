@@ -50,7 +50,7 @@ class jagged_vector_view {
 
 public:
     /// Size type used in the class
-    using size_type = std::size_t;
+    using size_type = unsigned int;
     /// Value type of the jagged array
     using value_type = vector_view<T>;
     /// Pointer type to the jagged array
