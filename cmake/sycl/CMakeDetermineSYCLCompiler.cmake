@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -38,10 +38,11 @@ if( NOT "$ENV{SYCLCXX}" STREQUAL "" )
          set( CMAKE_SYCL_COMPILER_ID "ComputeCpp" CACHE STRING
             "Identifier for the SYCL compiler in use" )
          set( _syclVersionRegex "([0-9\.]+) Device Compiler" )
-      elseif( "${_syclVersionOutput}" MATCHES "oneAPI" )
+      elseif( ( "${_syclVersionOutput}" MATCHES "oneAPI" ) OR
+              ( "${_syclVersionOutput}" MATCHES "DPC\\\+\\\+" ) )
          set( CMAKE_SYCL_COMPILER_ID "IntelLLVM" CACHE STRING
             "Identifier for the SYCL compiler in use" )
-         set( _syclVersionRegex "DPC\\\+\\\+.*Compiler ([0-9\.]+)" )
+         set( _syclVersionRegex "DPC\\\+\\\+.*[C|c]ompiler ([0-9\.]+)" )
       elseif( "${_syclVersionOutput}" MATCHES "intel/llvm" )
          set( CMAKE_SYCL_COMPILER_ID "IntelLLVM" CACHE STRING
             "Identifier for the SYCL compiler in use" )
