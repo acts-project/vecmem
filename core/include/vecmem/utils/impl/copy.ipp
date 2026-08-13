@@ -194,7 +194,7 @@ copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) const {
                 typename vecmem::data::jagged_vector_buffer<TYPE>::value_type),
         data.host_ptr(), data.ptr(), type::host_to_device);
     VECMEM_DEBUG_MSG(2,
-                     "Prepared a jagged device vector buffer of size %lu "
+                     "Prepared a jagged device vector buffer of size %u "
                      "for use on a device",
                      data.size());
 
