@@ -35,6 +35,9 @@ class device;
 template <typename TYPE>
 class device_vector {
 
+    // Make other specializations of the class a friend of this class.
+    template <typename OTHERTYPE>
+    friend class device_vector;
     // Make @c vecmem::edm::device a friend of this class.
     template <typename T, template <typename> class I>
     friend class edm::device;

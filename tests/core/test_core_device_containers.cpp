@@ -101,12 +101,16 @@ TEST_F(core_device_container_test, construct_copy_assign) {
     EXPECT_TRUE(
         std::is_default_constructible<vecmem::data::jagged_vector_data<int>>());
 
-    auto helper2 = std::is_constructible<vecmem::device_vector<const int>,
-                                         vecmem::device_vector<int>>();
-    EXPECT_TRUE(helper2);
-    auto helper3 = std::is_constructible<vecmem::device_vector<int>,
-                                         vecmem::device_vector<const int>>();
-    EXPECT_FALSE(helper3);
+    helper = std::is_constructible<vecmem::device_vector<const int>,
+                                   vecmem::device_vector<int>>();
+    EXPECT_TRUE(helper);
+    helper = std::is_constructible<vecmem::device_vector<int>,
+                                   vecmem::device_vector<const int>>();
+    EXPECT_FALSE(helper);
+
+    // Try to actually construct a non-const device vector from a const one.
+    vecmem::device_vector<const int> const_device_vector(
+        vecmem::device_vector<int>({}));
 }
 
 /// Test(s) for @c vecmem::data::vector_buffer
