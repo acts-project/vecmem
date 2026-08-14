@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -32,6 +32,10 @@ namespace details {
 ///
 template <typename TYPE>
 class jagged_device_vector_iterator {
+
+    // Make other specializations of the class a friend of this class.
+    template <typename OTHERTYPE>
+    friend class jagged_device_vector_iterator;
 
 public:
     /// @name Types describing the underlying data
@@ -102,10 +106,12 @@ public:
     /// Copy constructor
     VECMEM_HOST_AND_DEVICE
     jagged_device_vector_iterator(const jagged_device_vector_iterator& parent);
-    /// Copy constructor
-    template <typename T>
+    /// Copy constructor from a non-const iterator, for a const iterator
+    template <typename OTHERTYPE,
+              std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value,
+                               bool> = true>
     VECMEM_HOST_AND_DEVICE jagged_device_vector_iterator(
-        const jagged_device_vector_iterator<T>& parent);
+        const jagged_device_vector_iterator<OTHERTYPE>& parent);
 
     /// Copy assignment operator
     VECMEM_HOST_AND_DEVICE
