@@ -25,7 +25,7 @@ jobs:
       matrix:
         PLATFORM:
           - NAME: "CUDA"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:47"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:51"
             OPTIONS:
           - NAME: "SYCL"
             # Note that tags before ":48" do not come with the CodePlay NVIDIA
@@ -85,7 +85,7 @@ jobs:
       matrix:
         PLATFORM:
           - NAME: "CUDA"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:47"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:51"
             CTEST_REGEX: ".*cuda.*"
             DEVICE_SELECTOR:
           - NAME: "SYCL"
@@ -104,8 +104,14 @@ jobs:
       image: ${{ matrix.PLATFORM.CONTAINER }}
       options: --gpus all
 
+    # Give the job a hard limit, so that a hanging test or benchmark would not
+    # occupy the (single) GPU machine indefinitely.
+    timeout-minutes: 30
+
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+      # Pick the GPU for the SYCL jobs. (ci_setup.sh would default to the CPU.)
+      ONEAPI_DEVICE_SELECTOR: ${{ matrix.PLATFORM.DEVICE_SELECTOR }}
 
     defaults:
       run:
@@ -132,13 +138,23 @@ jobs:
         fi
     # Run the unit test(s).
     - name: Test
-      env:
-        DEVICE_SELECTOR: ${{ matrix.PLATFORM.DEVICE_SELECTOR }}
       run: |
         cd build
         source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
-        # ci_setup.sh selects the CPU device for SYCL, override it with the GPU.
-        if [ -n "${DEVICE_SELECTOR}" ]; then
-          export ONEAPI_DEVICE_SELECTOR="${DEVICE_SELECTOR}"
-        fi
         ctest --output-on-failure -R "${{ matrix.PLATFORM.CTEST_REGEX }}"
+    # Run the benchmark(s) on the GPU. The measurement time is cut short on
+    # purpose. The goal here is to exercise the benchmark code on a real device,
+    # not to produce meaningful numbers on a machine shared with other jobs.
+    - name: Benchmark
+      env:
+        PLATFORM_NAME: ${{ matrix.PLATFORM.NAME }}
+      run: |
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${PLATFORM_NAME}
+        BENCHMARK="./build/bin/vecmem_benchmark_$(echo ${PLATFORM_NAME} | tr '[:upper:]' '[:lower:]')"
+        # Make the failure explicit if the executable was renamed, instead of
+        # letting the shell fail with a much less obvious error.
+        if [ ! -x "${BENCHMARK}" ]; then
+           echo "Benchmark executable \"${BENCHMARK}\" not found!"
+           exit 1
+        fi
+        ${BENCHMARK} --benchmark_min_time=0.01

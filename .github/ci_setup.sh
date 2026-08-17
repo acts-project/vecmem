@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2022 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 #
@@ -23,5 +23,6 @@ if [ "${PLATFORM_NAME}" = "SYCL" ]; then
    if [ -f "/opt/intel/oneapi/setvars.sh" ]; then
       source /opt/intel/oneapi/setvars.sh --include-intel-llvm
    fi
-   export ONEAPI_DEVICE_SELECTOR="opencl:cpu"
+   # Default to the CPU device, but let the caller select a different one.
+   export ONEAPI_DEVICE_SELECTOR="${ONEAPI_DEVICE_SELECTOR:-opencl:cpu}"
 fi
