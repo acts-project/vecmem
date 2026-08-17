@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -289,4 +289,42 @@ TEST_F(core_jagged_vector_view_test, size_type_consistency) {
                                  unsigned int>,
                   "The device-side size type must be a type for which CUDA, "
                   "HIP and SYCL guarantee atomic operations");
+}
+
+/// Test that a mutable jagged iterator converts to a constant one.
+///
+/// Every standard container allows assigning an @c iterator to a
+/// @c const_iterator, and @c vecmem::jagged_device_vector declares both. The
+/// conversion is a cross-instantiation one though: it reads the private
+/// member of a *different* instantiation of the iterator template, which is
+/// only legal with a friend declaration. Note that a trait check alone would
+/// not exercise this, since @c std::is_constructible never instantiates the
+/// constructor body. See acts-project/vecmem#348.
+TEST_F(core_jagged_vector_view_test, const_iterator_conversion) {
+
+    using iterator = vecmem::jagged_device_vector<int>::iterator;
+    using const_iterator = vecmem::jagged_device_vector<int>::const_iterator;
+
+    // Adding constness must be allowed, removing it must not be.
+    static_assert(std::is_constructible_v<const_iterator, iterator>,
+                  "A constant iterator must be constructible from a mutable "
+                  "one");
+    static_assert(!std::is_constructible_v<iterator, const_iterator>,
+                  "A mutable iterator must not be constructible from a "
+                  "constant one");
+
+    // Actually perform the conversion, which is what forces the constructor
+    // body to be instantiated.
+    const_iterator citr = m_jag.begin();
+    EXPECT_EQ(citr->size(), m_jag.begin()->size());
+    EXPECT_EQ(citr->at(0), m_jag.begin()->at(0));
+
+    // The same conversion, one level further out, through the reverse
+    // iterators.
+    vecmem::jagged_device_vector<int>::const_reverse_iterator critr =
+        m_jag.rbegin();
+    EXPECT_EQ(critr->size(), m_jag.rbegin()->size());
+
+    // The converted iterator must still compare equal to where it came from.
+    EXPECT_TRUE(citr == const_iterator{m_jag.begin()});
 }

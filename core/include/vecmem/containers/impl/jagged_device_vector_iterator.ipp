@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -58,11 +58,15 @@ jagged_device_vector_iterator<TYPE>::jagged_device_vector_iterator(
     : m_ptr(parent.m_ptr) {}
 
 template <typename TYPE>
-template <typename T>
+template <typename OTHERTYPE,
+          std::enable_if_t<details::is_same_nc<TYPE, OTHERTYPE>::value, bool> >
 VECMEM_HOST_AND_DEVICE
 jagged_device_vector_iterator<TYPE>::jagged_device_vector_iterator(
-    const jagged_device_vector_iterator<T>& parent)
-    : m_ptr(parent.m_ptr) {}
+    const jagged_device_vector_iterator<OTHERTYPE>& parent)
+    // Just like for the constructor taking a vector_view, this looks more
+    // scary than it is. We convert from a non-const type to a constant one
+    // here.
+    : m_ptr{reinterpret_cast<data_pointer>(parent.m_ptr)} {}
 
 template <typename TYPE>
 VECMEM_HOST_AND_DEVICE jagged_device_vector_iterator<TYPE>&
