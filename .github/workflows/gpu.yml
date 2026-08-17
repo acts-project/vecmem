@@ -28,7 +28,9 @@ jobs:
             CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:47"
             OPTIONS:
           - NAME: "SYCL"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda_oneapi:47"
+            # Note that tags before ":48" do not come with the CodePlay NVIDIA
+            # plugin, and can therefore not run SYCL code on an NVIDIA GPU.
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda_oneapi:51"
             OPTIONS: -DVECMEM_BUILD_CUDA_LIBRARY=FALSE
 
     name: "build (${{ matrix.PLATFORM.NAME }})"
@@ -87,7 +89,9 @@ jobs:
             CTEST_REGEX: ".*cuda.*"
             DEVICE_SELECTOR:
           - NAME: "SYCL"
-            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda_oneapi:47"
+            # Note that tags before ":48" do not come with the CodePlay NVIDIA
+            # plugin, and can therefore not run SYCL code on an NVIDIA GPU.
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda_oneapi:51"
             CTEST_REGEX: ".*sycl.*"
             DEVICE_SELECTOR: "cuda:gpu"
 
@@ -122,7 +126,9 @@ jobs:
         source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
         nvidia-smi
         if command -v sycl-ls >/dev/null 2>&1; then
-          sycl-ls
+          # Unset the device selector, to see all the available backends, and
+          # not just the one that the tests would use.
+          env -u ONEAPI_DEVICE_SELECTOR sycl-ls
         fi
     # Run the unit test(s).
     - name: Test
