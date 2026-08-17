@@ -1,0 +1,138 @@
+# VecMem project, part of the ACTS project (R&D line)
+#
+# (c) 2021-2026 CERN for the benefit of the ACTS project
+#
+# Mozilla Public License Version 2.0
+
+# Name for this "action".
+name: GPU Tests
+
+# Perform the builds/tests on every push and pull request.
+on: [ push, pull_request ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  # Build the GPU code on a "regular" runner, and hand the build directory
+  # over to the GPU runner for the actual test execution.
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        PLATFORM:
+          - NAME: "CUDA"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:47"
+            OPTIONS:
+          - NAME: "SYCL"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda_oneapi:47"
+            OPTIONS: -DVECMEM_BUILD_CUDA_LIBRARY=FALSE
+
+    name: "build (${{ matrix.PLATFORM.NAME }})"
+
+    runs-on: ubuntu-latest
+    container: ${{ matrix.PLATFORM.CONTAINER }}
+
+    # Hack to continue using checkout (for now) on the older images.
+    # see: https://github.blog/changelog/2024-03-07-github-actions-all-actions-will-run-on-node20-instead-of-node16-by-default/
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+    # Use BASH as the shell from the image.
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: actions/checkout@v4
+    # Run the CMake configuration.
+    - name: Configure
+      run: |
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
+        cmake \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DVECMEM_BUILD_${{ matrix.PLATFORM.NAME }}_LIBRARY=TRUE \
+          -DVECMEM_BUILD_BENCHMARKING=TRUE \
+          ${{ matrix.PLATFORM.OPTIONS }} \
+          -S ${GITHUB_WORKSPACE} \
+          -B build
+    # Perform the build.
+    - name: Build
+      run: |
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
+        cmake --build build
+    # Pack the build directory into a tarball. (Artifact up-/download does not
+    # preserve file permissions, which the test executables need.)
+    - name: Pack
+      run: tar czf build.tar.gz build
+    - uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ matrix.PLATFORM.NAME }}
+        path: build.tar.gz
+        retention-days: 1
+        compression-level: 0
+
+  # Run the tests needing a GPU on a self-hosted machine with an NVIDIA GPU.
+  test:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        PLATFORM:
+          - NAME: "CUDA"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda:47"
+            CTEST_REGEX: ".*cuda.*"
+            DEVICE_SELECTOR:
+          - NAME: "SYCL"
+            CONTAINER: "ghcr.io/acts-project/ubuntu2004_cuda_oneapi:47"
+            CTEST_REGEX: ".*sycl.*"
+            DEVICE_SELECTOR: "cuda:gpu"
+
+    name: "test (${{ matrix.PLATFORM.NAME }})"
+
+    needs: build
+
+    runs-on: [ gpu-nvidia, self-hosted ]
+    container:
+      image: ${{ matrix.PLATFORM.CONTAINER }}
+      options: --gpus all
+
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # The source tree needs to be in the same place as during the build, since
+    # the CMake/CTest configuration refers to it with absolute paths.
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: build-${{ matrix.PLATFORM.NAME }}
+    - name: Unpack
+      run: tar xzf build.tar.gz
+    # Show what the runner is offering.
+    - name: Device info
+      run: |
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
+        nvidia-smi
+        if command -v sycl-ls >/dev/null 2>&1; then
+          sycl-ls
+        fi
+    # Run the unit test(s).
+    - name: Test
+      env:
+        DEVICE_SELECTOR: ${{ matrix.PLATFORM.DEVICE_SELECTOR }}
+      run: |
+        cd build
+        source ${GITHUB_WORKSPACE}/.github/ci_setup.sh ${{ matrix.PLATFORM.NAME }}
+        # ci_setup.sh selects the CPU device for SYCL, override it with the GPU.
+        if [ -n "${DEVICE_SELECTOR}" ]; then
+          export ONEAPI_DEVICE_SELECTOR="${DEVICE_SELECTOR}"
+        fi
+        ctest --output-on-failure -R "${{ matrix.PLATFORM.CTEST_REGEX }}"
