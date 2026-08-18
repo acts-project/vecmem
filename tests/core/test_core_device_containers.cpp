@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -40,66 +40,77 @@ struct core_device_container_test : public testing::Test {
 TEST_F(core_device_container_test, construct_copy_assign) {
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
-                vecmem::data::jagged_vector_view<const int> >());
+                vecmem::data::jagged_vector_view<const int>>());
     EXPECT_TRUE(std::is_trivially_constructible<
-                vecmem::data::jagged_vector_view<const int> >());
+                vecmem::data::jagged_vector_view<const int>>());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
-                vecmem::data::jagged_vector_view<const int> >());
+                vecmem::data::jagged_vector_view<const int>>());
     EXPECT_TRUE(std::is_trivially_copyable<
-                vecmem::data::jagged_vector_view<const int> >());
+                vecmem::data::jagged_vector_view<const int>>());
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
-                vecmem::data::jagged_vector_view<int> >());
+                vecmem::data::jagged_vector_view<int>>());
     EXPECT_TRUE(std::is_trivially_constructible<
-                vecmem::data::jagged_vector_view<int> >());
+                vecmem::data::jagged_vector_view<int>>());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
-                vecmem::data::jagged_vector_view<int> >());
+                vecmem::data::jagged_vector_view<int>>());
     EXPECT_TRUE(
-        std::is_trivially_copyable<vecmem::data::jagged_vector_view<int> >());
+        std::is_trivially_copyable<vecmem::data::jagged_vector_view<int>>());
 
     bool helper = std::is_assignable<vecmem::data::jagged_vector_view<int>,
-                                     vecmem::data::jagged_vector_view<int> >();
+                                     vecmem::data::jagged_vector_view<int>>();
     EXPECT_TRUE(helper);
     helper = std::is_assignable<vecmem::data::jagged_vector_view<const int>,
-                                vecmem::data::jagged_vector_view<const int> >();
+                                vecmem::data::jagged_vector_view<const int>>();
     EXPECT_TRUE(helper);
     helper = std::is_assignable<vecmem::data::jagged_vector_view<const int>,
-                                vecmem::data::jagged_vector_view<int> >();
+                                vecmem::data::jagged_vector_view<int>>();
     EXPECT_TRUE(helper);
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
-                vecmem::data::vector_view<const int> >());
+                vecmem::data::vector_view<const int>>());
     EXPECT_TRUE(std::is_trivially_constructible<
-                vecmem::data::vector_view<const int> >());
+                vecmem::data::vector_view<const int>>());
     EXPECT_TRUE(std::is_trivially_copy_constructible<
-                vecmem::data::vector_view<const int> >());
+                vecmem::data::vector_view<const int>>());
     EXPECT_TRUE(
-        std::is_trivially_copyable<vecmem::data::vector_view<const int> >());
+        std::is_trivially_copyable<vecmem::data::vector_view<const int>>());
 
     EXPECT_TRUE(std::is_trivially_default_constructible<
-                vecmem::data::vector_view<int> >());
+                vecmem::data::vector_view<int>>());
     EXPECT_TRUE(
-        std::is_trivially_constructible<vecmem::data::vector_view<int> >());
-    EXPECT_TRUE(std::is_trivially_copy_constructible<
-                vecmem::data::vector_view<int> >());
-    EXPECT_TRUE(std::is_trivially_copyable<vecmem::data::vector_view<int> >());
+        std::is_trivially_constructible<vecmem::data::vector_view<int>>());
+    EXPECT_TRUE(
+        std::is_trivially_copy_constructible<vecmem::data::vector_view<int>>());
+    EXPECT_TRUE(std::is_trivially_copyable<vecmem::data::vector_view<int>>());
 
     helper = std::is_assignable<vecmem::data::vector_view<int>,
-                                vecmem::data::vector_view<int> >();
+                                vecmem::data::vector_view<int>>();
     EXPECT_TRUE(helper);
     helper = std::is_assignable<vecmem::data::vector_view<const int>,
-                                vecmem::data::vector_view<const int> >();
+                                vecmem::data::vector_view<const int>>();
     EXPECT_TRUE(helper);
     helper = std::is_assignable<vecmem::data::vector_view<const int>,
-                                vecmem::data::vector_view<int> >();
+                                vecmem::data::vector_view<int>>();
     EXPECT_TRUE(helper);
 
     EXPECT_TRUE(
-        std::is_default_constructible<vecmem::data::vector_buffer<int> >());
+        std::is_default_constructible<vecmem::data::vector_buffer<int>>());
     EXPECT_TRUE(std::is_default_constructible<
-                vecmem::data::jagged_vector_buffer<int> >());
-    EXPECT_TRUE(std::is_default_constructible<
-                vecmem::data::jagged_vector_data<int> >());
+                vecmem::data::jagged_vector_buffer<int>>());
+    EXPECT_TRUE(
+        std::is_default_constructible<vecmem::data::jagged_vector_data<int>>());
+
+    helper = std::is_constructible<vecmem::device_vector<const int>,
+                                   vecmem::device_vector<int>>();
+    EXPECT_TRUE(helper);
+    helper = std::is_constructible<vecmem::device_vector<int>,
+                                   vecmem::device_vector<const int>>();
+    EXPECT_FALSE(helper);
+
+    // Try to actually construct a non-const device vector from a const one.
+    vecmem::device_vector<const int> const_device_vector(
+        vecmem::device_vector<int>({}));
 }
 
 /// Test(s) for @c vecmem::data::vector_buffer
@@ -124,16 +135,16 @@ TEST_F(core_device_container_test, vector_buffer) {
 TEST_F(core_device_container_test, jagged_vector_buffer) {
 
     // Create a dummy jagged vector in regular host memory.
-    std::vector<std::vector<int> > host_vector{{},
-                                               {1, 2, 3, 4, 5},
-                                               {6, 7},
-                                               {8, 9, 10, 11},
-                                               {12, 13, 14, 15, 16, 17, 18},
-                                               {},
-                                               {},
-                                               {19, 20},
-                                               {},
-                                               {21}};
+    std::vector<std::vector<int>> host_vector{{},
+                                              {1, 2, 3, 4, 5},
+                                              {6, 7},
+                                              {8, 9, 10, 11},
+                                              {12, 13, 14, 15, 16, 17, 18},
+                                              {},
+                                              {},
+                                              {19, 20},
+                                              {},
+                                              {21}};
     const std::vector<unsigned int> capacities{0u, 5u, 2u, 4u, 7u,
                                                0u, 0u, 2u, 0u, 1u};
     auto host_data = vecmem::get_data(host_vector, &m_resource);
