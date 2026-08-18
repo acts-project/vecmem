@@ -99,6 +99,10 @@ jobs:
 
     needs: build
 
+    # The GPU runners only exist in the main repository, so these tests would
+    # never get picked up in a fork.
+    if: github.repository == 'acts-project/vecmem'
+
     runs-on: [ gpu-nvidia, self-hosted ]
     container:
       image: ${{ matrix.PLATFORM.CONTAINER }}
