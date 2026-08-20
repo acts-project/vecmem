@@ -12,6 +12,9 @@
 #include "vecmem/utils/tuple.hpp"
 #include "vecmem/utils/types.hpp"
 
+// System include(s).
+#include <type_traits>
+
 namespace vecmem {
 namespace edm {
 
@@ -168,6 +171,17 @@ private:
     tuple_type m_data;
 
 };  // class proxy
+
+#ifdef __cpp_concepts
+namespace concepts {
+/// Concept for a type being of a proxy type
+template <typename T>
+concept proxy =
+    (std::is_same_v<typename T::proxy_domain, details::proxy_domain> &&
+     std::is_same_v<typename T::access_type, details::proxy_access> &&
+     std::is_same_v<typename T::proxy_type, details::proxy_type>);
+}  // namespace concepts
+#endif  // __cpp_concepts
 
 }  // namespace edm
 }  // namespace vecmem
