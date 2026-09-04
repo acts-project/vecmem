@@ -14,7 +14,10 @@ namespace vecmem {
 
 template <typename SIZE_TYPE>
 async_size<SIZE_TYPE>::async_size(storage_type size, event_type event)
-    : m_size{std::move(size)}, m_event{std::move(event)} {}
+    : m_size{std::move(size)}, m_event{std::move(event)} {
+    assert(m_size != nullptr);
+    assert(m_event != nullptr);
+}
 
 template <typename SIZE_TYPE>
 auto async_size<SIZE_TYPE>::get() const -> const_reference {
