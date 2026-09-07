@@ -37,9 +37,8 @@ public:
 
     /// Constructor taking ownership of a size and event
     ///
-    /// @param sizes The vector holding the size variables.
-    /// @param event Event to wait on before accessing the size. Must not be
-    /// nullptr.
+    /// @param sizes The vector holding the size variables
+    /// @param event Event to wait on before accessing the size
     ///
     async_sizes(storage_type&& sizes, event_type event);
 

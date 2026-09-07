@@ -37,9 +37,8 @@ public:
 
     /// Constructor taking ownership of a size and event
     ///
-    /// @param size Pointer to the size variable. Must not be nullptr.
-    /// @param event Event to wait on before accessing the size. Must not be
-    /// nullptr.
+    /// @param size Pointer to the size variable
+    /// @param event Event to wait on before accessing the size
     ///
     async_size(storage_type size, event_type event);
 
