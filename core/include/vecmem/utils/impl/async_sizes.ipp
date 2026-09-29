@@ -20,6 +20,7 @@ template <typename SIZE_TYPE>
 auto async_sizes<SIZE_TYPE>::get() const -> const_reference {
 
     // Wait for the event to complete before accessing the value
+    assert(m_event != nullptr);
     m_event->wait();
     return m_sizes;
 }
@@ -28,6 +29,7 @@ template <typename SIZE_TYPE>
 auto async_sizes<SIZE_TYPE>::unsafe_get() const -> const_reference {
 
     // Access the value assuming the event is complete
+    assert(m_event != nullptr);
     assert(m_event->is_ready());
     m_event->ignore();
     return m_sizes;
@@ -36,18 +38,21 @@ auto async_sizes<SIZE_TYPE>::unsafe_get() const -> const_reference {
 template <typename SIZE_TYPE>
 void async_sizes<SIZE_TYPE>::wait() {
 
+    assert(m_event != nullptr);
     m_event->wait();
 }
 
 template <typename SIZE_TYPE>
 bool async_sizes<SIZE_TYPE>::is_ready() const {
 
+    assert(m_event != nullptr);
     return m_event->is_ready();
 }
 
 template <typename SIZE_TYPE>
 void async_sizes<SIZE_TYPE>::ignore() {
 
+    assert(m_event != nullptr);
     m_event->ignore();
 }
 

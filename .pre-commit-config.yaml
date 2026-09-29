@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v10.0.1
+    rev: 732c27160340466aa1b9baa0e6eaaabfb2fb76f5 # frozen: v10.0.1
     hooks:
       - id: clang-format
         types_or: [file]

@@ -10,12 +10,14 @@
 // HIP include(s).
 #include <hip/hip_runtime.h>
 
-// Set up __VECMEM_THREADFENCE correctly for the vecmem::hip::device_atomic_ref
-// code.
+// Set up the thread fence macros correctly for the
+// vecmem::hip::device_atomic_ref code.
 #ifdef __HIP_DEVICE_COMPILE__
-#define __VECMEM_THREADFENCE __threadfence()
+#define __VECMEM_THREADFENCE_GLOBAL() __threadfence()
+#define __VECMEM_THREADFENCE_LOCAL() __threadfence_block()
 #else
-#define __VECMEM_THREADFENCE
+#define __VECMEM_THREADFENCE_GLOBAL()
+#define __VECMEM_THREADFENCE_LOCAL()
 #endif  // defined(__HIP_DEVICE_COMPILE__)
 
 // Local include(s).

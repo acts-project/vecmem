@@ -33,23 +33,49 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::operator=(
 
 // Only invoke __threadfence() during device code compilation. Without this,
 // nvcc gets upset about calling this **device only** function from a function
-// labeled HOST_AND_DEVICE. Allow an outside source to set the macro, so that
-// vecmem::hip::device_atomic_ref could have its own logic for setting it up
+// labeled HOST_AND_DEVICE. Allow an outside source to set the macros, so that
+// vecmem::hip::device_atomic_ref could have its own logic for setting them up
 // correctly.
-#ifndef __VECMEM_THREADFENCE
+#ifndef __VECMEM_THREADFENCE_GLOBAL
 #ifdef __CUDA_ARCH__
-#define __VECMEM_THREADFENCE __threadfence()
+#define __VECMEM_THREADFENCE_GLOBAL() __threadfence()
 #else
-#define __VECMEM_THREADFENCE
+#define __VECMEM_THREADFENCE_GLOBAL()
 #endif  // defined(__CUDA_ARCH__)
-#endif  // not defined(__VECMEM_THREADFENCE)
+#endif  // not defined(__VECMEM_THREADFENCE_GLOBAL)
+#ifndef __VECMEM_THREADFENCE_LOCAL
+#ifdef __CUDA_ARCH__
+#define __VECMEM_THREADFENCE_LOCAL() __threadfence_block()
+#else
+#define __VECMEM_THREADFENCE_LOCAL()
+#endif  // defined(__CUDA_ARCH__)
+#endif  // not defined(__VECMEM_THREADFENCE_LOCAL)
+
+namespace details {
+template <device_address_space address>
+struct memory_fence_trait {};
+
+template <>
+struct memory_fence_trait<device_address_space::global> {
+    VECMEM_HOST_AND_DEVICE void operator()() const {
+        __VECMEM_THREADFENCE_GLOBAL();
+    }
+};
+
+template <>
+struct memory_fence_trait<device_address_space::local> {
+    VECMEM_HOST_AND_DEVICE void operator()() const {
+        __VECMEM_THREADFENCE_LOCAL();
+    }
+};
+}  // namespace details
 
 template <typename T, device_address_space address>
 VECMEM_HOST_AND_DEVICE void device_atomic_ref<T, address>::store(
     value_type data, memory_order) const {
 
     volatile pointer addr = m_ptr;
-    __VECMEM_THREADFENCE;
+    details::memory_fence_trait<address>{}();
     *addr = data;
 }
 
@@ -58,13 +84,14 @@ VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::load(
     memory_order) const -> value_type {
 
     volatile pointer addr = m_ptr;
-    __VECMEM_THREADFENCE;
+    details::memory_fence_trait<address>{}();
     const value_type value = *addr;
-    __VECMEM_THREADFENCE;
+    details::memory_fence_trait<address>{}();
     return value;
 }
 
-#undef __VECMEM_THREADFENCE
+#undef __VECMEM_THREADFENCE_GLOBAL
+#undef __VECMEM_THREADFENCE_LOCAL
 
 template <typename T, device_address_space address>
 VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::exchange(
