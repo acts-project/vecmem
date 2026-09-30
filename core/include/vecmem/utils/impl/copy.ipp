@@ -26,11 +26,11 @@
 namespace vecmem {
 
 template <typename TYPE>
-copy::event_type copy::setup(data::vector_view<TYPE> data) const {
+void copy::setup(ignore_event_t, data::vector_view<TYPE> data) const {
 
     // Check if anything needs to be done.
     if ((data.size_ptr() == nullptr) || (data.capacity() == 0)) {
-        return vecmem::copy::create_event();
+        return;
     }
 
     // Initialize the "size variable" correctly on the buffer.
@@ -40,23 +40,36 @@ copy::event_type copy::setup(data::vector_view<TYPE> data) const {
                      "Prepared a device vector buffer of capacity %u "
                      "for use on a device (ptr: %p)",
                      data.capacity(), static_cast<void*>(data.size_ptr()));
+}
+
+template <typename TYPE>
+copy::event_type copy::setup(data::vector_view<TYPE> data) const {
+
+    setup(ignore_event, data);
 
     // Return a new event.
     return create_event();
 }
 
 template <typename TYPE>
-copy::event_type copy::memset(data::vector_view<TYPE> data, int value) const {
+void copy::memset(ignore_event_t, data::vector_view<TYPE> data,
+                  int value) const {
 
     // Check if anything needs to be done.
     if (data.capacity() == 0) {
-        return vecmem::copy::create_event();
+        return;
     }
 
     // Call memset with the correct arguments.
     do_memset(data.capacity() * sizeof(TYPE), data.ptr(), value);
     VECMEM_DEBUG_MSG(2, "Set %u vector elements to %i at ptr: %p",
                      data.capacity(), value, static_cast<void*>(data.ptr()));
+}
+
+template <typename TYPE>
+copy::event_type copy::memset(data::vector_view<TYPE> data, int value) const {
+
+    memset(ignore_event, data, value);
 
     // Return a new event.
     return create_event();
@@ -81,22 +94,25 @@ data::vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 }
 
 template <typename TYPE>
+void copy::operator()(
+    ignore_event_t, const data::vector_view<std::add_const_t<TYPE>>& from_view,
+    data::vector_view<TYPE> to_view, type::copy_type cptype) const {
+
+    copy_view_impl(from_view, to_view, cptype);
+}
+
+template <typename TYPE>
 copy::event_type copy::operator()(
     const data::vector_view<std::add_const_t<TYPE>>& from_view,
     data::vector_view<TYPE> to_view, type::copy_type cptype) const {
 
-    // Perform the copy. Depending on whether an actual copy has been set up /
-    // performed, return either "an actual", or just a dummy event.
-    if (copy_view_impl(from_view, to_view, cptype)) {
-        return create_event();
-    } else {
-        return vecmem::copy::create_event();
-    }
+    operator()(ignore_event, from_view, to_view, cptype);
+    return create_event();
 }
 
 template <typename TYPE, typename ALLOC>
-copy::event_type copy::operator()(
-    const data::vector_view<std::add_const_t<TYPE>>& from_view,
+void copy::operator()(
+    ignore_event_t, const data::vector_view<std::add_const_t<TYPE>>& from_view,
     std::vector<TYPE, ALLOC>& to_vec, type::copy_type cptype) const {
 
     // Figure out the size of the buffer.
@@ -105,14 +121,21 @@ copy::event_type copy::operator()(
 
     // If the size is zero, don't do an actual copy.
     if (size == 0u) {
-        return vecmem::copy::create_event();
+        return;
     }
 
     // Make the target vector the correct size.
     to_vec.resize(size);
     // Perform the memory copy.
     do_copy(size * sizeof(TYPE), from_view.ptr(), to_vec.data(), cptype);
+}
 
+template <typename TYPE, typename ALLOC>
+copy::event_type copy::operator()(
+    const data::vector_view<std::add_const_t<TYPE>>& from_view,
+    std::vector<TYPE, ALLOC>& to_vec, type::copy_type cptype) const {
+
+    operator()(ignore_event, from_view, to_vec, cptype);
     // Return a new event.
     return create_event();
 }
@@ -167,11 +190,11 @@ async_size<typename data::vector_view<TYPE>::size_type> copy::get_size(
 }
 
 template <typename TYPE>
-copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) const {
+void copy::setup(ignore_event_t, data::jagged_vector_view<TYPE> data) const {
 
     // Check if anything needs to be done.
     if (data.size() == 0) {
-        return vecmem::copy::create_event();
+        return;
     }
 
     // "Set up" the inner vector descriptors, using the host-accessible data.
@@ -184,7 +207,7 @@ copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) const {
 
     // Check if anything else needs to be done.
     if (data.ptr() == data.host_ptr()) {
-        return create_event();
+        return;
     }
 
     // Copy the description of the inner vectors of the buffer.
@@ -197,14 +220,19 @@ copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) const {
                      "Prepared a jagged device vector buffer of size %u "
                      "for use on a device",
                      data.size());
+}
 
+template <typename TYPE>
+copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) const {
+
+    setup(ignore_event, data);
     // Return a new event.
     return create_event();
 }
 
 template <typename TYPE>
-copy::event_type copy::memset(data::jagged_vector_view<TYPE> data,
-                              int value) const {
+void copy::memset(ignore_event_t, data::jagged_vector_view<TYPE> data,
+                  int value) const {
 
     // Do different things for jagged vectors that are contiguous in memory.
     if (is_contiguous(data.host_ptr(), data.capacity())) {
@@ -223,11 +251,11 @@ copy::event_type copy::memset(data::jagged_vector_view<TYPE> data,
             if ((iv.capacity() != 0u) && (iv.ptr() != nullptr)) {
                 // Call memset with its help.
                 do_memset(total_size * sizeof(TYPE), iv.ptr(), value);
-                return create_event();
+                return;
             }
         }
         // If we are still here, apparently we didn't need to do anything.
-        return vecmem::copy::create_event();
+        return;
     } else {
         // For non-contiguous jagged vectors call memset one-by-one on the
         // inner vectors. Note that we don't use vecmem::copy::memset here,
@@ -237,7 +265,13 @@ copy::event_type copy::memset(data::jagged_vector_view<TYPE> data,
             do_memset(iv.capacity() * sizeof(TYPE), iv.ptr(), value);
         }
     }
+}
 
+template <typename TYPE>
+copy::event_type copy::memset(data::jagged_vector_view<TYPE> data,
+                              int value) const {
+
+    memset(ignore_event, data, value);
     // Return a new event.
     return create_event();
 }
@@ -270,21 +304,26 @@ data::jagged_vector_buffer<std::remove_cv_t<TYPE>> copy::to(
 }
 
 template <typename TYPE>
+void copy::operator()(
+    ignore_event_t,
+    const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
+    data::jagged_vector_view<TYPE> to_view, type::copy_type cptype) const {
+
+    copy_view_impl(from_view, to_view, cptype);
+}
+
+template <typename TYPE>
 copy::event_type copy::operator()(
     const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
     data::jagged_vector_view<TYPE> to_view, type::copy_type cptype) const {
 
-    // Perform the copy. Depending on whether an actual copy has been set up /
-    // performed, return either "an actual", or just a dummy event.
-    if (copy_view_impl(from_view, to_view, cptype)) {
-        return create_event();
-    } else {
-        return vecmem::copy::create_event();
-    }
+    operator()(ignore_event, from_view, to_view, cptype);
+    return create_event();
 }
 
 template <typename TYPE, typename ALLOC1, typename ALLOC2>
-copy::event_type copy::operator()(
+void copy::operator()(
+    ignore_event_t,
     const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
     std::vector<std::vector<TYPE, ALLOC2>, ALLOC1>& to_vec,
     type::copy_type cptype) const {
@@ -300,7 +339,17 @@ copy::event_type copy::operator()(
     }
 
     // Perform the memory copy.
-    return operator()(from_view, vecmem::get_data(to_vec), cptype);
+    operator()(ignore_event, from_view, vecmem::get_data(to_vec), cptype);
+}
+
+template <typename TYPE, typename ALLOC1, typename ALLOC2>
+copy::event_type copy::operator()(
+    const data::jagged_vector_view<std::add_const_t<TYPE>>& from_view,
+    std::vector<std::vector<TYPE, ALLOC2>, ALLOC1>& to_vec,
+    type::copy_type cptype) const {
+
+    operator()(ignore_event, from_view, to_vec, cptype);
+    return create_event();
 }
 
 template <typename TYPE>
@@ -341,13 +390,14 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
 }
 
 template <typename TYPE>
-copy::event_type copy::set_sizes(
+void copy::set_sizes(
+    ignore_event_t,
     const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
     data::jagged_vector_view<TYPE> data) const {
 
     // Finish early if possible.
     if ((sizes.size() == 0) && (data.size() == 0)) {
-        return vecmem::copy::create_event();
+        return;
     }
     // Make sure that the sizes match up.
     if (sizes.size() != data.size()) {
@@ -381,13 +431,20 @@ copy::event_type copy::set_sizes(
     }
     // If no copy is necessary, we're done.
     if (perform_copy == false) {
-        return vecmem::copy::create_event();
+        return;
     }
     // Perform the copy with some internal knowledge of how resizable jagged
     // vector buffers work.
     do_copy(sizeof(typename data::vector_view<TYPE>::size_type) * sizes.size(),
             sizes.data(), data.host_ptr()->size_ptr(), type::unknown);
+}
 
+template <typename TYPE>
+copy::event_type copy::set_sizes(
+    const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+    data::jagged_vector_view<TYPE> data) const {
+
+    set_sizes(ignore_event, sizes, data);
     // Return a new event.
     return create_event();
 }
@@ -428,7 +485,7 @@ async_sizes<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
 }
 
 template <typename SCHEMA>
-copy::event_type copy::setup(edm::view<SCHEMA> data) const {
+void copy::setup(ignore_event_t, edm::view<SCHEMA> data) const {
 
     // Copy the data layout to the device, if needed.
     if (data.layout().ptr() != data.host_layout().ptr()) {
@@ -449,23 +506,34 @@ copy::event_type copy::setup(edm::view<SCHEMA> data) const {
                      data.capacity(), data.layout().size(),
                      static_cast<void*>(data.layout().ptr()),
                      data.size().size(), static_cast<void*>(data.size().ptr()));
+}
 
+template <typename SCHEMA>
+copy::event_type copy::setup(edm::view<SCHEMA> data) const {
+
+    setup(ignore_event, data);
     // Return a new event.
     return create_event();
+}
+
+template <typename... VARTYPES>
+void copy::memset(ignore_event_t, edm::view<edm::schema<VARTYPES...>> data,
+                  int value) const {
+
+    // For buffers, we can do this in one go.
+    if (data.payload().ptr() != nullptr) {
+        memset(ignore_event, data.payload(), value);
+    } else {
+        // Do the operation using the helper function, recursively.
+        memset_impl<0>(data, value);
+    }
 }
 
 template <typename... VARTYPES>
 copy::event_type copy::memset(edm::view<edm::schema<VARTYPES...>> data,
                               int value) const {
 
-    // For buffers, we can do this in one go.
-    if (data.payload().ptr() != nullptr) {
-        memset(data.payload(), value);
-    } else {
-        // Do the operation using the helper function, recursively.
-        memset_impl<0>(data, value);
-    }
-
+    memset(ignore_event, data, value);
     // Return a new event.
     return create_event();
 }
@@ -516,7 +584,8 @@ edm::buffer<edm::details::remove_cv_t<edm::schema<VARTYPES...>>> copy::to(
 }
 
 template <typename... VARTYPES>
-copy::event_type copy::operator()(
+void copy::operator()(
+    ignore_event_t,
     const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
         from_view,
     edm::view<edm::schema<VARTYPES...>> to_view, type::copy_type cptype) const {
@@ -529,7 +598,7 @@ copy::event_type copy::operator()(
 
         // If the "common size" is zero, we're done.
         if (from_view.payload().capacity() == 0) {
-            return vecmem::copy::create_event();
+            return;
         }
 
         // Let the user know what's happening.
@@ -560,19 +629,27 @@ copy::event_type copy::operator()(
             }
         }
 
-        // Create a synchronization event.
-        return create_event();
+        return;
     }
 
     // If not, then do an un-optimized copy, variable-by-variable.
     copy_payload_impl<0>(from_view, to_view, cptype);
+}
 
+template <typename... VARTYPES>
+copy::event_type copy::operator()(
+    const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+        from_view,
+    edm::view<edm::schema<VARTYPES...>> to_view, type::copy_type cptype) const {
+
+    operator()(ignore_event, from_view, to_view, cptype);
     // Return a new event.
     return create_event();
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-copy::event_type copy::operator()(
+void copy::operator()(
+    ignore_event_t,
     const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
         from_view,
     edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
@@ -582,7 +659,18 @@ copy::event_type copy::operator()(
     resize_impl<0>(from_view, to_vec, cptype);
 
     // Perform the memory copy.
-    return operator()(from_view, vecmem::get_data(to_vec), cptype);
+    operator()(ignore_event, from_view, vecmem::get_data(to_vec), cptype);
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+copy::event_type copy::operator()(
+    const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+        from_view,
+    edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
+    type::copy_type cptype) const {
+
+    operator()(ignore_event, from_view, to_vec, cptype);
+    return create_event();
 }
 
 template <typename... VARTYPES>

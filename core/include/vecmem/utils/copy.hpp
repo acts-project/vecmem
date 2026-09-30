@@ -32,6 +32,15 @@
 
 namespace vecmem {
 
+/// Tag type to indicate overloads of functions that do not need to return an
+/// event
+struct ignore_event_t {
+    explicit ignore_event_t() = default;
+};
+/// Constant object of type @c ignore_event_t to use as an argument for
+/// functions that do not need to return an event
+inline constexpr ignore_event_t ignore_event{};
+
 /// Class implementing (synchronous) host <-> device memory copies
 ///
 /// Since most of the logic of explicitly copying the payload of vecmem
@@ -82,10 +91,18 @@ public:
     template <typename TYPE>
     VECMEM_NODISCARD event_type setup(data::vector_view<TYPE> data) const;
 
+    /// Set up the internal state of a vector buffer correctly on a device
+    /// without returning an event
+    template <typename TYPE>
+    void setup(ignore_event_t, data::vector_view<TYPE> data) const;
+
     /// Set all bytes of the vector to some value
     template <typename TYPE>
     VECMEM_NODISCARD event_type memset(data::vector_view<TYPE> data,
                                        int value) const;
+    /// Set all bytes of the vector to some value without returning an event
+    template <typename TYPE>
+    void memset(ignore_event_t, data::vector_view<TYPE> data, int value) const;
 
     /// Copy a 1-dimensional vector to the specified memory resource
     template <typename TYPE>
@@ -100,12 +117,28 @@ public:
                data::vector_view<TYPE> to,
                type::copy_type cptype = type::unknown) const;
 
+    /// Copy a 1-dimensional vector's data between two existing memory blocks
+    /// without returning an event
+    template <typename TYPE>
+    void operator()(ignore_event_t,
+                    const data::vector_view<std::add_const_t<TYPE>>& from,
+                    data::vector_view<TYPE> to,
+                    type::copy_type cptype = type::unknown) const;
+
     /// Copy a 1-dimensional vector's data into a vector object
     template <typename TYPE, typename ALLOC>
     VECMEM_NODISCARD event_type
     operator()(const data::vector_view<std::add_const_t<TYPE>>& from,
                std::vector<TYPE, ALLOC>& to,
                type::copy_type cptype = type::unknown) const;
+
+    /// Copy a 1-dimensional vector's data into a vector object without
+    /// returning an event
+    template <typename TYPE, typename ALLOC>
+    void operator()(ignore_event_t,
+                    const data::vector_view<std::add_const_t<TYPE>>& from,
+                    std::vector<TYPE, ALLOC>& to,
+                    type::copy_type cptype = type::unknown) const;
 
     /// Helper function for getting the size of a resizable 1D buffer
     template <typename TYPE>
@@ -129,10 +162,21 @@ public:
     VECMEM_NODISCARD event_type
     setup(data::jagged_vector_view<TYPE> data) const;
 
+    /// Copy the internal state of a jagged vector buffer to the target device
+    /// without returning an event
+    template <typename TYPE>
+    void setup(ignore_event_t, data::jagged_vector_view<TYPE> data) const;
+
     /// Set all bytes of the jagged vector to some value
     template <typename TYPE>
     VECMEM_NODISCARD event_type memset(data::jagged_vector_view<TYPE> data,
                                        int value) const;
+
+    /// Set all bytes of the jagged vector to some value without returning an
+    /// event
+    template <typename TYPE>
+    void memset(ignore_event_t, data::jagged_vector_view<TYPE> data,
+                int value) const;
 
     /// Copy a jagged vector to the specified memory resource
     template <typename TYPE>
@@ -148,12 +192,30 @@ public:
                data::jagged_vector_view<TYPE> to,
                type::copy_type cptype = type::unknown) const;
 
+    /// Copy a jagged vector's data between two existing allocations without
+    /// returning an event
+    template <typename TYPE>
+    void operator()(
+        ignore_event_t,
+        const data::jagged_vector_view<std::add_const_t<TYPE>>& from,
+        data::jagged_vector_view<TYPE> to,
+        type::copy_type cptype = type::unknown) const;
+
     /// Copy a jagged vector's data into a vector object
     template <typename TYPE, typename ALLOC1, typename ALLOC2>
     VECMEM_NODISCARD event_type
     operator()(const data::jagged_vector_view<std::add_const_t<TYPE>>& from,
                std::vector<std::vector<TYPE, ALLOC2>, ALLOC1>& to,
                type::copy_type cptype = type::unknown) const;
+
+    /// Copy a jagged vector's data into a vector object without returning an
+    /// event
+    template <typename TYPE, typename ALLOC1, typename ALLOC2>
+    void operator()(
+        ignore_event_t,
+        const data::jagged_vector_view<std::add_const_t<TYPE>>& from,
+        std::vector<std::vector<TYPE, ALLOC2>, ALLOC1>& to,
+        type::copy_type cptype = type::unknown) const;
 
     /// Helper function for getting the sizes of a resizable jagged vector
     template <typename TYPE>
@@ -163,6 +225,14 @@ public:
     /// Helper function for setting the sizes of a resizable jagged vector
     template <typename TYPE>
     VECMEM_NODISCARD event_type set_sizes(
+        const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
+        data::jagged_vector_view<TYPE> data) const;
+
+    /// Helper function for setting the sizes of a resizable jagged vector
+    /// without returning an event
+    template <typename TYPE>
+    void set_sizes(
+        ignore_event_t,
         const std::vector<typename data::vector_view<TYPE>::size_type>& sizes,
         data::jagged_vector_view<TYPE> data) const;
 
@@ -182,10 +252,21 @@ public:
     template <typename SCHEMA>
     VECMEM_NODISCARD event_type setup(edm::view<SCHEMA> data) const;
 
+    /// Set up the internal state of a buffer correctly on a device without
+    /// returning an event
+    template <typename SCHEMA>
+    void setup(ignore_event_t, edm::view<SCHEMA> data) const;
+
     /// Set all bytes of the container to some value
     template <typename... VARTYPES>
     VECMEM_NODISCARD event_type memset(edm::view<edm::schema<VARTYPES...>> data,
                                        int value) const;
+
+    /// Set all bytes of the container to some value without returning an
+    /// event
+    template <typename... VARTYPES>
+    void memset(ignore_event_t, edm::view<edm::schema<VARTYPES...>> data,
+                int value) const;
 
     /// Copy a jagged vector to the specified memory resource
     template <typename... VARTYPES>
@@ -203,9 +284,27 @@ public:
         edm::view<edm::schema<VARTYPES...>> to,
         type::copy_type cptype = type::unknown) const;
 
+    /// Copy between two views without returning an event
+    template <typename... VARTYPES>
+    void operator()(
+        ignore_event_t,
+        const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+            from,
+        edm::view<edm::schema<VARTYPES...>> to,
+        type::copy_type cptype = type::unknown) const;
+
     /// Copy from a view, into a host container
     template <typename... VARTYPES, template <typename> class INTERFACE>
     VECMEM_NODISCARD event_type operator()(
+        const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
+            from,
+        edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
+        type::copy_type cptype = type::unknown) const;
+
+    /// Copy from a view into a host container without returning an event
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    void operator()(
+        ignore_event_t,
         const edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>&
             from,
         edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,

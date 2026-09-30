@@ -12,6 +12,7 @@
 #include "vecmem/containers/data/vector_buffer.hpp"
 #include "vecmem/containers/device_vector.hpp"
 #include "vecmem/containers/jagged_device_vector.hpp"
+#include "vecmem/utils/copy.hpp"
 
 // System include(s).
 #include <thread>
@@ -213,6 +214,41 @@ TEST_P(copy_tests, resizable_vector_buffer) {
         ->wait();
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
+    EXPECT_EQ(size, main_copy().get_size(device_buffer));
+    EXPECT_EQ(size, main_copy().get_size(device_buffer, host_mr()).get());
+    EXPECT_EQ(size, host_copy().get_size(host_buffer2));
+
+    // Check the results.
+    vecmem::device_vector<const int> reference_vector(vecmem::get_data(cref()));
+    vecmem::device_vector<const int> copy_vector(host_buffer2);
+    check_equal(reference_vector, copy_vector);
+}
+
+/// Test for ignore_event copy overloads, based on resizable vector buffers
+/// test
+TEST_P(copy_tests, ignore_event_resizable_vector_buffer) {
+
+    // Get the size of the reference vector.
+    using vecmem_size_type = vecmem::device_vector<int>::size_type;
+    const vecmem_size_type size = static_cast<vecmem_size_type>(cref().size());
+
+    // Create resizable device and host buffers, with the "exact sizes".
+    vecmem::data::vector_buffer<int> device_buffer(
+        size, main_mr(), vecmem::data::buffer_type::resizable);
+    main_copy().setup(vecmem::ignore_event, device_buffer);
+    vecmem::data::vector_buffer<int> host_buffer1(
+        size, host_mr(), vecmem::data::buffer_type::resizable),
+        host_buffer2(size, host_mr(), vecmem::data::buffer_type::resizable);
+    host_copy().setup(vecmem::ignore_event, host_buffer1);
+    host_copy().setup(vecmem::ignore_event, host_buffer2);
+
+    // Copy data around.
+    host_copy()(vecmem::ignore_event, vecmem::get_data(cref()), host_buffer1,
+                vecmem::copy::type::host_to_host);
+    main_copy()(vecmem::ignore_event, host_buffer1, device_buffer,
+                vecmem::copy::type::host_to_device);
+    main_copy()(vecmem::ignore_event, device_buffer, host_buffer2,
+                vecmem::copy::type::device_to_host);
     EXPECT_EQ(size, main_copy().get_size(device_buffer));
     EXPECT_EQ(size, main_copy().get_size(device_buffer, host_mr()).get());
     EXPECT_EQ(size, host_copy().get_size(host_buffer2));
@@ -440,6 +476,66 @@ TEST_P(copy_tests, resizable_jagged_vector_buffer) {
         ->wait();
     main_copy()(device_buffer, host_buffer2, vecmem::copy::type::device_to_host)
         ->wait();
+    auto host_buffer3 = main_copy().to(device_buffer, host_mr(), nullptr,
+                                       vecmem::copy::type::device_to_host);
+    EXPECT_EQ(vecmem::data::get_capacities(host_buffer3), capacities);
+    EXPECT_EQ(host_copy().get_sizes(host_buffer3),
+              vecmem::data::get_capacities(reference_data));
+    EXPECT_EQ(host_copy().get_sizes(host_buffer2), sizes);
+    EXPECT_EQ(main_copy().get_sizes(device_buffer), sizes);
+    EXPECT_EQ(main_copy().get_sizes(device_buffer, host_mr()).get(),
+              pinned_sizes);
+
+    // Check the results.
+    vecmem::jagged_device_vector<const int> reference_vector(reference_data);
+    vecmem::jagged_device_vector<const int> copy_vector(host_buffer2);
+    vecmem::jagged_device_vector<const int> copy_vector2(host_buffer3);
+    check_equal(reference_vector, copy_vector);
+    check_equal(reference_vector, copy_vector2);
+}
+
+/// Test for ignore_event copy overloads, based on resizable jagged vector
+/// buffers test
+TEST_P(copy_tests, ignore_event_resizable_jagged_vector_buffer) {
+
+    // Create a view of the reference data.
+    const auto reference_data = vecmem::get_data(jagged_cref());
+    std::vector<vecmem::data::vector_view<int>::size_type> sizes(
+        jagged_cref().size());
+    vecmem::vector<vecmem::data::vector_view<int>::size_type> pinned_sizes(
+        jagged_cref().size(), &(host_mr()));
+    for (std::size_t i = 0; i < jagged_cref().size(); ++i) {
+        sizes[i] = static_cast<vecmem::data::vector_view<int>::size_type>(
+            jagged_cref()[i].size());
+        pinned_sizes[i] = sizes[i];
+    }
+
+    // Create resizable device and host buffers, with (on the device) larger
+    // than necessary sizes.
+    auto capacities = vecmem::data::get_capacities(reference_data);
+    for (auto& capacity : capacities) {
+        capacity += 10u;  // Make them larger than needed.
+    }
+    vecmem::data::jagged_vector_buffer<int> device_buffer(
+        capacities, main_mr(), host_mr_ptr(),
+        vecmem::data::buffer_type::resizable);
+    main_copy().setup(vecmem::ignore_event, device_buffer);
+    vecmem::data::jagged_vector_buffer<int> host_buffer1(
+        reference_data, host_mr(), nullptr,
+        vecmem::data::buffer_type::resizable);
+    vecmem::data::jagged_vector_buffer<int> host_buffer2(
+        reference_data, host_mr(), nullptr,
+        vecmem::data::buffer_type::resizable);
+    host_copy().setup(vecmem::ignore_event, host_buffer1);
+    host_copy().setup(vecmem::ignore_event, host_buffer2);
+
+    // Copy data around.
+    host_copy()(vecmem::ignore_event, reference_data, host_buffer1,
+                vecmem::copy::type::host_to_host);
+    main_copy()(vecmem::ignore_event, host_buffer1, device_buffer,
+                vecmem::copy::type::host_to_device);
+    main_copy()(vecmem::ignore_event, device_buffer, host_buffer2,
+                vecmem::copy::type::device_to_host);
     auto host_buffer3 = main_copy().to(device_buffer, host_mr(), nullptr,
                                        vecmem::copy::type::device_to_host);
     EXPECT_EQ(vecmem::data::get_capacities(host_buffer3), capacities);
