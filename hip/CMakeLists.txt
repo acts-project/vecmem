@@ -19,6 +19,8 @@ vecmem_add_library( vecmem_hip hip
    "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/hip/managed_memory_resource.hpp"
    "src/memory/managed_memory_resource.cpp"
+   "include/vecmem/memory/hip/stream_ordered_memory_resource.hpp"
+   "src/memory/stream_ordered_memory_resource.cpp"
    # Utilities.
    "include/vecmem/utils/hip/copy.hpp"
    "src/utils/hip/copy.cpp"
