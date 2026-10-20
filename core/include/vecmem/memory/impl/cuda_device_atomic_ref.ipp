@@ -74,18 +74,16 @@ template <typename T, device_address_space address>
 VECMEM_HOST_AND_DEVICE void device_atomic_ref<T, address>::store(
     value_type data, memory_order) const {
 
-    volatile pointer addr = m_ptr;
     details::memory_fence_trait<address>{}();
-    *addr = data;
+    *static_cast<volatile value_type *>(m_ptr) = data;
 }
 
 template <typename T, device_address_space address>
 VECMEM_HOST_AND_DEVICE auto device_atomic_ref<T, address>::load(
     memory_order) const -> value_type {
 
-    volatile pointer addr = m_ptr;
     details::memory_fence_trait<address>{}();
-    const value_type value = *addr;
+    const value_type value = *static_cast<volatile const value_type *>(m_ptr);
     details::memory_fence_trait<address>{}();
     return value;
 }
