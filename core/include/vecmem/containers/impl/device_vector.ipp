@@ -293,7 +293,7 @@ VECMEM_HOST_AND_DEVICE auto device_vector<TYPE>::bulk_append_implicit(
 
 #if defined(__cpp_lib_start_lifetime_as) && \
     __cpp_lib_start_lifetime_as >= 202207L
-    std::start_lifetime_as_array<TYPE>(m_ptr[index], n);
+    std::start_lifetime_as_array<TYPE>(m_ptr + index, n);
 #endif
 
     return index;
