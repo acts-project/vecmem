@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2022 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -26,7 +26,9 @@ namespace vecmem {
 /// and not on top of pointers.
 ///
 template <typename T>
-class atomic
+class [
+    [deprecated("vecmem::atomic is deprecated, use vecmem::device_atomic_ref "
+                "instead")]] atomic
     : public ::sycl::atomic_ref<T, ::sycl::memory_order::relaxed,
                                 ::sycl::memory_scope::device,
                                 ::sycl::access::address_space::global_space> {
@@ -36,13 +38,16 @@ public:
     /// @{
 
     /// Type managed by the object
-    typedef T value_type;
+    using value_type = T;
     /// Difference between two objects
-    typedef value_type difference_type;
-    /// Pointer to the value in global memory
-    typedef value_type* pointer;
+    using difference_type = value_type;
+    /// Pointer to the value in global/local memory
+    using pointer = std::add_pointer_t<value_type>;
+    /// Volatile pointer to the value in global/local memory
+    using volatile_pointer =
+        std::add_pointer_t<std::add_volatile_t<value_type>>;
     /// Reference to a value given by the user
-    typedef value_type& reference;
+    using reference = std::add_lvalue_reference_t<value_type>;
 
     /// @}
 
@@ -73,20 +78,25 @@ namespace vecmem {
 /// "regular" operations.
 ///
 template <typename T>
-class atomic {
+class [
+    [deprecated("vecmem::atomic is deprecated, use vecmem::device_atomic_ref "
+                "instead")]] atomic {
 
 public:
     /// @name Type definitions
     /// @{
 
     /// Type managed by the object
-    typedef T value_type;
+    using value_type = T;
     /// Difference between two objects
-    typedef value_type difference_type;
-    /// Pointer to the value in global memory
-    typedef value_type* pointer;
+    using difference_type = value_type;
+    /// Pointer to the value in global/local memory
+    using pointer = std::add_pointer_t<value_type>;
+    /// Volatile pointer to the value in global/local memory
+    using volatile_pointer =
+        std::add_pointer_t<std::add_volatile_t<value_type>>;
     /// Reference to a value given by the user
-    typedef value_type& reference;
+    using reference = std::add_lvalue_reference_t<value_type>;
 
     /// @}
 
