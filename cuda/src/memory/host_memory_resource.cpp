@@ -17,6 +17,7 @@
 
 // System include(s).
 #include <cassert>
+#include <cstdint>
 #include <stdexcept>
 
 namespace vecmem::cuda {
@@ -25,7 +26,8 @@ host_memory_resource::host_memory_resource() = default;
 
 host_memory_resource::~host_memory_resource() = default;
 
-void *host_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
+void *host_memory_resource::do_allocate(std::size_t bytes,
+                                        std::size_t alignment) {
 
     if (bytes == 0) {
         throw std::bad_alloc();
@@ -34,6 +36,14 @@ void *host_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
     // Allocate the memory.
     void *res = nullptr;
     VECMEM_CUDA_ERROR_CHECK(cudaMallocHost(&res, bytes));
+
+    // CUDA cannot be asked for an alignment, so check the one that we got.
+    if (reinterpret_cast<std::uintptr_t>(res) % alignment != 0) {
+        VECMEM_DEBUG_MSG(1, "Allocation at %p is not aligned to %ld bytes", res,
+                         alignment);
+        VECMEM_CUDA_ERROR_CHECK(cudaFreeHost(res));
+        throw std::bad_alloc();
+    }
     VECMEM_DEBUG_MSG(2, "Allocated %ld bytes at %p", bytes, res);
     return res;
 }
