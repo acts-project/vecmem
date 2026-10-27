@@ -335,6 +335,21 @@ public:
 
     /// @}
 
+    /// @name Direct memory manipulation function(s)
+    ///
+    /// Making it possible to "chain" copy objects. Similar to how we can
+    /// construct memory resources.
+    ///
+    /// @{
+
+    /// Perform a "low level" memory copy
+    void typeless_copy(std::size_t size, const void* from, void* to,
+                       type::copy_type cptype) const;
+    /// Perform a "low level" memory filling operation
+    virtual void typeless_memset(std::size_t size, void* ptr, int value) const;
+
+    /// @}
+
 protected:
     /// Perform a "low level" memory copy
     virtual void do_copy(std::size_t size, const void* from, void* to,
