@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -42,13 +42,13 @@ private:
     /// Perform a memory copy using SYCL
     VECMEM_SYCL_EXPORT
     void do_copy(std::size_t size, const void* from, void* to,
-                 type::copy_type cptype) const override;
+                 type::copy_type cptype) const final;
     /// Fill a memory area using SYCL
     VECMEM_SYCL_EXPORT
-    void do_memset(std::size_t size, void* ptr, int value) const override;
+    void do_memset(std::size_t size, void* ptr, int value) const final;
     /// Create an event for synchronization
     VECMEM_SYCL_EXPORT
-    event_type create_event() const override;
+    event_type create_event() const final;
 
     /// Type holding on to internal data for @c vecmem::sycl::async_copy
     struct impl;

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -14,9 +14,9 @@
 namespace vecmem::hip {
 
 /// Specialisation of @c vecmem::copy for HIP
-class VECMEM_HIP_EXPORT copy : public vecmem::copy {
+class VECMEM_HIP_EXPORT copy final : public vecmem::copy {
 
-protected:
+private:
     /// Perform a memory copy using HIP
     void do_copy(std::size_t size, const void* from, void* to,
                  type::copy_type cptype) const final;
