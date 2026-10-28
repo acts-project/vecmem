@@ -191,6 +191,15 @@ TEST_F(sycl_containers_test, atomic_shared_memory) {
     // Create the SYCL queue that we'll be using in the test.
     ::sycl::queue queue;
 
+    // Turn off this test for old(er) oneAPI versions, when not running on a
+    // GPU.
+#if defined(__SYCL_COMPILER_VERSION) && (__SYCL_COMPILER_VERSION < 20260000)
+    if (queue.get_device().get_info<::sycl::info::device::device_type>() !=
+        ::sycl::info::device_type::gpu) {
+        GTEST_SKIP();
+    }
+#endif
+
     // The memory resources.
     vecmem::sycl::shared_memory_resource resource(&queue);
 
@@ -237,6 +246,15 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
     ::sycl::queue queue;
+
+    // Turn off this test for old(er) oneAPI versions, when not running on a
+    // GPU.
+#if defined(__SYCL_COMPILER_VERSION) && (__SYCL_COMPILER_VERSION < 20260000)
+    if (queue.get_device().get_info<::sycl::info::device::device_type>() !=
+        ::sycl::info::device_type::gpu) {
+        GTEST_SKIP();
+    }
+#endif
 
     // The memory resources.
     vecmem::sycl::host_memory_resource host_resource(&queue);
