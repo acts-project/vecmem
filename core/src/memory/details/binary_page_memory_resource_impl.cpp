@@ -15,6 +15,8 @@
 // System include(s).
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -26,12 +28,15 @@ binary_page_memory_resource_impl::binary_page_memory_resource_impl(
     : m_upstream(upstream) {}
 
 void *binary_page_memory_resource_impl::allocate(std::size_t size,
-                                                 std::size_t) {
+                                                 std::size_t align) {
     /*
      * First, we round our allocation request up to a power of two, since
-     * that is what the sizes of all our pages are.
+     * that is what the sizes of all our pages are. The page must also be at
+     * least as large as the requested alignment, because a page is only
+     * guaranteed to be aligned to its own size.
      */
-    std::size_t goal = std::max(min_page_size, round_up(size));
+    std::size_t goal =
+        std::max({min_page_size, round_up(size), round_up(align)});
 
     VECMEM_DEBUG_MSG(3,
                      "Request received to allocate %ld bytes, looking for page "
@@ -41,7 +46,7 @@ void *binary_page_memory_resource_impl::allocate(std::size_t size,
     /*
      * Attempt to find a free page that can fit our allocation goal.
      */
-    std::optional<page_ref> cand = find_free_page(goal);
+    std::optional<page_ref> cand = find_free_page(goal, align);
 
     /*
      * If we don't have a candidate, there is no available page that can fit
@@ -51,9 +56,9 @@ void *binary_page_memory_resource_impl::allocate(std::size_t size,
     if (!cand) {
         VECMEM_DEBUG_MSG(
             5, "No suitable page found, requesting upstream allocation");
-        allocate_upstream(goal);
+        allocate_upstream(goal, align);
 
-        cand = find_free_page(goal);
+        cand = find_free_page(goal, align);
     }
 
     /*
@@ -99,7 +104,7 @@ void *binary_page_memory_resource_impl::allocate(std::size_t size,
 }
 
 void binary_page_memory_resource_impl::deallocate(void *p, std::size_t s,
-                                                  std::size_t) {
+                                                  std::size_t align) {
     VECMEM_DEBUG_MSG(2, "De-allocating memory at %p", p);
 
     /*
@@ -135,9 +140,11 @@ void binary_page_memory_resource_impl::deallocate(void *p, std::size_t s,
      * of the superpage's memory space we arrive at an offset of `diff` bytes.
      * Dividing `diff` by the size of the page in which we will have allocated
      * the memory gives us the offset from the first page of that size, which
-     * allows us to easily find the page we're looking for.
+     * allows us to easily find the page we're looking for. The page size
+     * depends on the alignment in the same way as in `allocate`.
      */
-    std::size_t goal = std::max(sp->get().m_min_page_size, round_up(s));
+    std::size_t goal =
+        std::max({sp->get().m_min_page_size, round_up(s), round_up(align)});
     std::size_t p_min = 0;
     for (; page_ref(sp->get(), p_min).get_size() > goal; p_min = 2 * p_min + 1)
         ;
@@ -178,7 +185,8 @@ void binary_page_memory_resource_impl::deallocate(void *p, std::size_t s,
 }
 
 std::optional<binary_page_memory_resource_impl::page_ref>
-binary_page_memory_resource_impl::find_free_page(std::size_t size) {
+binary_page_memory_resource_impl::find_free_page(std::size_t size,
+                                                 std::size_t align) {
     bool candidate_sp_found;
     std::size_t search_size = size;
 
@@ -199,9 +207,13 @@ binary_page_memory_resource_impl::find_free_page(std::size_t size) {
             /*
              * For each superpage, we check if the total size is enougn to
              * support the page size we're looking for. If not, we will never
-             * find such a page in this superpage.
+             * find such a page in this superpage. We also skip superpages
+             * whose memory is not aligned to the requested alignment,
+             * because none of their pages can be aligned to it either.
              */
-            if (size >= sp.m_min_page_size && search_size <= sp.m_size) {
+            if (size >= sp.m_min_page_size && search_size <= sp.m_size &&
+                reinterpret_cast<std::uintptr_t>(sp.m_memory.get()) % align ==
+                    0) {
                 candidate_sp_found = true;
 
                 /*
@@ -242,28 +254,33 @@ binary_page_memory_resource_impl::find_free_page(std::size_t size) {
     return {};
 }
 
-void binary_page_memory_resource_impl::allocate_upstream(std::size_t size) {
+void binary_page_memory_resource_impl::allocate_upstream(std::size_t size,
+                                                         std::size_t align) {
     /*
      * Add our new page to the list of root pages.
      */
     if (size >= min_superpage_size) {
-        m_superpages.emplace_back(size, m_upstream);
+        m_superpages.emplace_back(size, m_upstream, align);
     } else {
         m_superpages.emplace_back(
             std::min(size + delta_superpage_size, min_superpage_size),
-            m_upstream);
+            m_upstream, align);
     }
 }
 
 binary_page_memory_resource_impl::superpage::superpage(
-    std::size_t size, memory_resource &resource)
+    std::size_t size, memory_resource &resource, std::size_t align)
     : m_size(size),
       m_min_page_size((assert(m_size - delta_superpage_size >= min_page_size),
                        m_size - delta_superpage_size)),
       m_num_pages((2UL << (m_size - m_min_page_size)) - 1),
       m_pages(std::make_unique<page_state[]>(m_num_pages)),
+      // Every page of size 2^k sits at an offset that is a multiple of 2^k
+      // from the start of the superpage, so a page inherits the alignment of
+      // the superpage up to its own size.
       m_memory(make_unique_alloc<std::byte[]>(
-          resource, static_cast<std::size_t>(1UL) << m_size)) {
+          resource, static_cast<std::size_t>(1UL) << m_size,
+          std::align_val_t{std::max(align, alignof(std::max_align_t))})) {
     /*
      * Set all pages as non-extant, except the first one.
      */

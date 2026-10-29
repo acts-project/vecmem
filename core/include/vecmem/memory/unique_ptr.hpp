@@ -8,7 +8,10 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <new>
 #include <type_traits>
 
 #include "vecmem/memory/details/unique_alloc_deleter.hpp"
@@ -69,6 +72,49 @@ template <typename T>
 using unique_alloc_ptr = std::unique_ptr<T, details::unique_alloc_deleter<T>>;
 
 /**
+ * @brief Create a unique object pointer to a newly constructed object, with a
+ * minimum alignment.
+ *
+ * This overload behaves like the one without an alignment argument, but the
+ * memory is aligned to at least @p alignment bytes. The alignment is never
+ * less than the alignment of @c T.
+ *
+ * @tparam T The type to allocate.
+ * @tparam Args The argument types to pass to the constructor.
+ *
+ * @param m The memory resource to use.
+ * @param alignment The minimum alignment of the allocation.
+ * @param a The arguments to pass to the constructor.
+ *
+ * @return A unique object pointer to the newly constructed object.
+ *
+ * @warning The memory resource used by this function must be host-accessible.
+ */
+template <typename T, typename... Args>
+typename std::enable_if_t<!std::is_array_v<T>, unique_obj_ptr<T>>
+make_unique_obj(memory_resource& m, std::align_val_t alignment, Args&&... a) {
+    /*
+     * Calculate the size of the allocation and use the memory resource to
+     * perform an allocation of the requested size.
+     */
+    std::size_t s = sizeof(T);
+    std::size_t align =
+        std::max(static_cast<std::size_t>(alignment), alignof(T));
+    T* p = static_cast<T*>(m.allocate(s, align));
+
+    /*
+     * Perform a placement-new with forwarded arguments to construct the
+     * object.
+     */
+    new (p) T(std::forward<Args>(a)...);
+
+    /*
+     * Create a new unique_ptr, with its own deleter, and return it.
+     */
+    return unique_obj_ptr<T>(p, details::unique_obj_deleter<T>(m, s, align));
+}
+
+/**
  * @brief Create a unique object pointer to a newly constructed object.
  *
  * This is the vecmem analogue to std::make_unique<T>(Args...). That is to say,
@@ -88,23 +134,59 @@ using unique_alloc_ptr = std::unique_ptr<T, details::unique_alloc_deleter<T>>;
 template <typename T, typename... Args>
 typename std::enable_if_t<!std::is_array_v<T>, unique_obj_ptr<T>>
 make_unique_obj(memory_resource& m, Args&&... a) {
+    return make_unique_obj<T>(m, std::align_val_t{alignof(T)},
+                              std::forward<Args>(a)...);
+}
+
+/**
+ * @brief Create a unique object pointer to an array of default-constructed
+ * objects, with a minimum alignment.
+ *
+ * This overload behaves like the one without an alignment argument, but the
+ * memory is aligned to at least @p alignment bytes. The alignment is never
+ * less than the alignment of the element type.
+ *
+ * @tparam T The type to allocate.
+ *
+ * @param m The memory resource to use.
+ * @param n The number of elements to allocate.
+ * @param alignment The minimum alignment of the allocation.
+ *
+ * @return A unique object pointer to the newly constructed array of objects.
+ *
+ * @warning The memory resource used by this function must be host-accessible.
+ */
+template <typename T>
+typename std::enable_if_t<std::is_array_v<T> && std::extent_v<T> == 0,
+                          unique_obj_ptr<T>>
+make_unique_obj(memory_resource& m, std::size_t n, std::align_val_t alignment) {
+    using pointer_t = typename unique_obj_ptr<T>::deleter_type::pointer_t;
+
+    // Handle the case with zero elements.
+    if (n == 0) {
+        return unique_obj_ptr<T>(details::get_nonexistent_pointer<pointer_t>());
+    }
+
     /*
      * Calculate the size of the allocation and use the memory resource to
      * perform an allocation of the requested size.
      */
-    std::size_t s = sizeof(T);
-    T* p = static_cast<T*>(m.allocate(s));
+    std::size_t s = n * sizeof(std::remove_extent_t<T>);
+    std::size_t align = std::max(static_cast<std::size_t>(alignment),
+                                 alignof(std::remove_extent_t<T>));
+    pointer_t p = static_cast<pointer_t>(m.allocate(s, align));
 
     /*
-     * Perform a placement-new with forwarded arguments to construct the
-     * object.
+     * Use placement-new to default-construct each of our elements.
      */
-    new (p) T(std::forward<Args>(a)...);
+    for (std::size_t i = 0; i < n; ++i) {
+        new (&p[i]) std::remove_extent_t<T>();
+    }
 
     /*
      * Create a new unique_ptr, with its own deleter, and return it.
      */
-    return unique_obj_ptr<T>(p, details::unique_obj_deleter<T>(m, s));
+    return unique_obj_ptr<T>(p, details::unique_obj_deleter<T>(m, s, align, n));
 }
 
 /**
@@ -128,31 +210,59 @@ template <typename T>
 typename std::enable_if_t<std::is_array_v<T> && std::extent_v<T> == 0,
                           unique_obj_ptr<T>>
 make_unique_obj(memory_resource& m, std::size_t n) {
-    using pointer_t = typename unique_obj_ptr<T>::deleter_type::pointer_t;
+    return make_unique_obj<T>(
+        m, n, std::align_val_t{alignof(std::remove_extent_t<T>)});
+}
 
-    // Handle the case with zero elements.
-    if (n == 0) {
-        return unique_obj_ptr<T>(details::get_nonexistent_pointer<pointer_t>());
-    }
+/**
+ * @brief Create a unique allocation pointer to a type, with a minimum
+ * alignment.
+ *
+ * This overload behaves like the one without an alignment argument, but the
+ * memory is aligned to at least @p alignment bytes. The alignment is never
+ * less than the alignment of the element type.
+ *
+ * @tparam T The type to allocate.
+ *
+ * @param m The memory resource to use.
+ * @param alignment The minimum alignment of the allocation.
+ *
+ * @return A unique allocation pointer to the newly allocated memory.
+ */
+template <typename T>
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m,
+                                      std::align_val_t alignment) {
+    /*
+     * This method only works on non-array types and bounded array types.
+     */
+    static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
+                  "Allocation pointer type cannot be an unbounded array.");
+
+    /*
+     * Since we cannot (in general) construct objects in the memory we are
+     * about to allocate, we need to make sure that "bare", unallocated memory
+     * is semantically compatible with construction of the requested type.
+     */
+    static_assert(std::is_trivially_constructible_v<std::remove_extent_t<T>>,
+                  "Allocation pointer type must be trivially constructible.");
+
+    using pointer_t =
+        std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
 
     /*
      * Calculate the size of the allocation and use the memory resource to
      * perform an allocation of the requested size.
      */
-    std::size_t s = n * sizeof(std::remove_extent_t<T>);
-    pointer_t p = static_cast<pointer_t>(m.allocate(s));
-
-    /*
-     * Use placement-new to default-construct each of our elements.
-     */
-    for (std::size_t i = 0; i < n; ++i) {
-        new (&p[i]) std::remove_extent_t<T>();
-    }
+    std::size_t s = sizeof(T);
+    std::size_t align = std::max(static_cast<std::size_t>(alignment),
+                                 alignof(std::remove_extent_t<T>));
+    pointer_t p = static_cast<pointer_t>(m.allocate(s, align));
 
     /*
      * Create a new unique_ptr, with its own deleter, and return it.
      */
-    return unique_obj_ptr<T>(p, details::unique_obj_deleter<T>(m, s, 0, n));
+    return unique_alloc_ptr<T>(p,
+                               details::unique_alloc_deleter<T>(m, s, align));
 }
 
 /**
@@ -183,11 +293,37 @@ make_unique_obj(memory_resource& m, std::size_t n) {
  */
 template <typename T>
 unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
+    return make_unique_alloc<T>(
+        m, std::align_val_t{alignof(std::remove_extent_t<T>)});
+}
+
+/**
+ * @brief Create a unique allocation pointer to an array type, with a minimum
+ * alignment.
+ *
+ * This overload behaves like the one without an alignment argument, but the
+ * memory is aligned to at least @p alignment bytes. The alignment is never
+ * less than the alignment of the element type. Use this overload when the
+ * memory of a byte array will hold objects of a different type.
+ *
+ * @tparam T The type to allocate.
+ *
+ * @param m The memory resource to use.
+ * @param n The number of elements to allocate.
+ * @param alignment The minimum alignment of the allocation.
+ *
+ * @return A unique allocation pointer to a newly allocated array.
+ */
+template <typename T>
+unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n,
+                                      std::align_val_t alignment) {
     /*
-     * This method only works on non-array types and bounded array types.
+     * This overload only works for unbounded array types.
      */
-    static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
-                  "Allocation pointer type cannot be an unbounded array.");
+    static_assert(std::is_array_v<T>,
+                  "Allocation pointer type must be an array type.");
+    static_assert(std::extent_v<T> == 0,
+                  "Allocation pointer type must be unbounded.");
 
     /*
      * Since we cannot (in general) construct objects in the memory we are
@@ -200,17 +336,26 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
     using pointer_t =
         std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
 
+    // Handle the case with zero elements.
+    if (n == 0) {
+        return unique_alloc_ptr<T>(
+            details::get_nonexistent_pointer<pointer_t>());
+    }
+
     /*
      * Calculate the size of the allocation and use the memory resource to
      * perform an allocation of the requested size.
      */
-    std::size_t s = sizeof(T);
-    pointer_t p = static_cast<pointer_t>(m.allocate(s));
+    std::size_t s = n * sizeof(std::remove_extent_t<T>);
+    std::size_t align = std::max(static_cast<std::size_t>(alignment),
+                                 alignof(std::remove_extent_t<T>));
+    pointer_t p = static_cast<pointer_t>(m.allocate(s, align));
 
     /*
      * Create a new unique_ptr, with its own deleter, and return it.
      */
-    return unique_alloc_ptr<T>(p, details::unique_alloc_deleter<T>(m, s));
+    return unique_alloc_ptr<T>(p,
+                               details::unique_alloc_deleter<T>(m, s, align));
 }
 
 /**
@@ -242,42 +387,8 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m) {
  */
 template <typename T>
 unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
-    /*
-     * This overload only works for unbounded array types.
-     */
-    static_assert(std::is_array_v<T>,
-                  "Allocation pointer type must be an array type.");
-    static_assert(std::extent_v<T> == 0,
-                  "Allocation pointer type must be unbounded.");
-
-    /*
-     * Since we cannot (in general) construct objects in the memory we are
-     * about to allocate, we need to make sure that "bare", unallocated memory
-     * is semantically compatible with construction of the requested type.
-     */
-    static_assert(std::is_trivially_constructible_v<std::remove_extent_t<T>>,
-                  "Allocation pointer type must be trivially constructible.");
-
-    using pointer_t =
-        std::conditional_t<std::is_array_v<T>, std::decay_t<T>, T*>;
-
-    // Handle the case with zero elements.
-    if (n == 0) {
-        return unique_alloc_ptr<T>(
-            details::get_nonexistent_pointer<pointer_t>());
-    }
-
-    /*
-     * Calculate the size of the allocation and use the memory resource to
-     * perform an allocation of the requested size.
-     */
-    std::size_t s = n * sizeof(std::remove_extent_t<T>);
-    pointer_t p = static_cast<pointer_t>(m.allocate(s));
-
-    /*
-     * Create a new unique_ptr, with its own deleter, and return it.
-     */
-    return unique_alloc_ptr<T>(p, details::unique_alloc_deleter<T>(m, s, 0));
+    return make_unique_alloc<T>(
+        m, n, std::align_val_t{alignof(std::remove_extent_t<T>)});
 }
 
 /**
@@ -319,13 +430,14 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n) {
  * adding implicit object construction.
  */
 template <typename T, typename C>
-unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, const T* f,
-                                      const C& c) {
+typename std::enable_if_t<!(std::is_array_v<T> && std::extent_v<T> == 0),
+                          unique_alloc_ptr<T>>
+make_unique_alloc(memory_resource& m, const T* f, const C& c) {
     /*
-     * This method only works on non-array types and bounded array types.
+     * This method only works on non-array types and bounded array types. This
+     * is enforced through SFINAE, so that a call with an unbounded array type,
+     * a count of 0 and an alignment is not ambiguous with this overload.
      */
-    static_assert(!(std::is_array_v<T> && std::extent_v<T> == 0),
-                  "Allocation pointer type cannot be an ubounded array.");
 
     /*
      * In this case, we are going to immediately copy some (hopefully) live
@@ -344,14 +456,16 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, const T* f,
      * perform an allocation of the requested size.
      */
     std::size_t s = sizeof(T);
-    pointer_t p = static_cast<pointer_t>(m.allocate(s));
+    std::size_t align = alignof(std::remove_extent_t<T>);
+    pointer_t p = static_cast<pointer_t>(m.allocate(s, align));
 
     c(p, f, s);
 
     /*
      * Create a new unique_ptr, with its own deleter, and return it.
      */
-    return unique_alloc_ptr<T>(p, details::unique_alloc_deleter<T>(m, s));
+    return unique_alloc_ptr<T>(p,
+                               details::unique_alloc_deleter<T>(m, s, align));
 }
 
 /**
@@ -427,13 +541,15 @@ unique_alloc_ptr<T> make_unique_alloc(memory_resource& m, std::size_t n,
      * perform an allocation of the requested size.
      */
     std::size_t s = n * sizeof(std::remove_extent_t<T>);
-    pointer_t p = static_cast<pointer_t>(m.allocate(s));
+    std::size_t align = alignof(std::remove_extent_t<T>);
+    pointer_t p = static_cast<pointer_t>(m.allocate(s, align));
 
     c(p, f, s);
 
     /*
      * Create a new unique_ptr, with its own deleter, and return it.
      */
-    return unique_alloc_ptr<T>(p, details::unique_alloc_deleter<T>(m, s, 0));
+    return unique_alloc_ptr<T>(p,
+                               details::unique_alloc_deleter<T>(m, s, align));
 }
 }  // namespace vecmem
