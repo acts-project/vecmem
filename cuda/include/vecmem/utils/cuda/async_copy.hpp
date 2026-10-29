@@ -30,7 +30,7 @@ namespace vecmem::cuda {
 /// Note that the class is not thread-safe. It is up to the user to ensure that
 /// multiple CPU threads don't use it at the same time.
 ///
-class async_copy : public vecmem::copy {
+class async_copy final : public vecmem::copy {
 
 public:
     /// Constructor with the CUDA stream to operate on

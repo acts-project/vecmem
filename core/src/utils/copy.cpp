@@ -29,6 +29,17 @@ struct noop_event final : public vecmem::abstract_event {
 
 namespace vecmem {
 
+void copy::typeless_copy(std::size_t size, const void* from_ptr, void* to_ptr,
+                         type::copy_type cptype) const {
+
+    do_copy(size, from_ptr, to_ptr, cptype);
+}
+
+void copy::typeless_memset(std::size_t size, void* ptr, int value) const {
+
+    do_memset(size, ptr, value);
+}
+
 void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                    type::copy_type) const {
 
