@@ -346,7 +346,7 @@ public:
     void typeless_copy(std::size_t size, const void* from, void* to,
                        type::copy_type cptype) const;
     /// Perform a "low level" memory filling operation
-    virtual void typeless_memset(std::size_t size, void* ptr, int value) const;
+    void typeless_memset(std::size_t size, void* ptr, int value) const;
 
     /// @}
 
