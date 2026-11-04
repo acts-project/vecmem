@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -204,6 +204,32 @@ void host_reserve(std::tuple<typename host_type<VARTYPES>::type...>& data,
     // Terminate, or continue.
     if constexpr (sizeof...(Is) > 0) {
         host_reserve<VARTYPES...>(data, size, std::index_sequence<Is...>{});
+    }
+}
+
+/// Recursive function pushing back a new element to a host vector
+template <typename... VARTYPES, typename ELEMENT_TYPE, std::size_t INDEX,
+          std::size_t... Is>
+void host_push_back(std::tuple<typename host_type<VARTYPES>::type...>& data,
+                    const ELEMENT_TYPE& element,
+                    std::index_sequence<INDEX, Is...>) {
+
+    // Push back this variable.
+    if constexpr (type::details::is_vector_v<typename std::tuple_element<
+                      INDEX, std::tuple<VARTYPES...>>::type>) {
+        std::get<INDEX>(data).push_back(element.template get<INDEX>());
+    }
+    // For scalar types we don't push back to the array, but rather set the
+    // single scalar held by the array. But just for INDEX==0.
+    else if constexpr (type::details::is_scalar_v<typename std::tuple_element<
+                           INDEX, std::tuple<VARTYPES...>>::type>) {
+        assert(std::get<INDEX>(data).size() == 1u);
+        std::get<INDEX>(data)[0u] = element.template get<INDEX>();
+    }
+    // Terminate, or continue.
+    if constexpr (sizeof...(Is) > 0) {
+        host_push_back<VARTYPES...>(data, element,
+                                    std::index_sequence<Is...>{});
     }
 }
 
