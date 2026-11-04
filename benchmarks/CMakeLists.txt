@@ -31,9 +31,17 @@ add_library( vecmem_benchmark_common STATIC
    "common/make_jagged_sizes.hpp"
    "common/make_jagged_sizes.cpp"
    "common/make_jagged_vector.hpp"
-   "common/make_jagged_vector.cpp" )
+   "common/make_jagged_vector.cpp"
+   "common/setup_simple_copy_counters.hpp"
+   "common/setup_simple_copy_counters.cpp"
+   "common/simple_aos_container.hpp"
+   "common/simple_aos_copy_benchmarks.hpp"
+   "common/simple_aos_copy_benchmarks.cpp"
+   "common/simple_soa_container.hpp"
+   "common/simple_soa_copy_benchmarks.hpp"
+   "common/simple_soa_copy_benchmarks.cpp" )
 target_link_libraries( vecmem_benchmark_common
-   PUBLIC vecmem::core )
+   PUBLIC benchmark::benchmark vecmem::core )
 set_target_properties( vecmem_benchmark_common PROPERTIES
    FOLDER "vecmem/benchmarks" )
 
@@ -41,6 +49,9 @@ set_target_properties( vecmem_benchmark_common PROPERTIES
 add_subdirectory(core)
 if(VECMEM_BUILD_CUDA_LIBRARY)
    add_subdirectory(cuda)
+endif()
+if(VECMEM_BUILD_HIP_LIBRARY)
+   add_subdirectory(hip)
 endif()
 if(VECMEM_BUILD_SYCL_LIBRARY)
    add_subdirectory(sycl)
