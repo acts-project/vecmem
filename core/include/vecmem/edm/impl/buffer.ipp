@@ -127,6 +127,9 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
     view_type::m_payload = details::find_payload_view<VARTYPES...>(
         payload_ptrs,
         {details::buffer_alloc<VARTYPES>::payload_size(capacities)...});
+    view_type::m_size = {
+        static_cast<typename view_type::memory_view_type::size_type>(0),
+        nullptr};
 
     // If requested, allocate host memory for the layouts.
     if (host_mr != nullptr) {
