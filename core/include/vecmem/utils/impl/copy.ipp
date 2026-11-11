@@ -48,7 +48,7 @@ copy::event_type copy::setup(data::vector_view<TYPE> data) const {
     setup(ignore_event, data);
 
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE>
@@ -72,7 +72,7 @@ copy::event_type copy::memset(data::vector_view<TYPE> data, int value) const {
     memset(ignore_event, data, value);
 
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE>
@@ -107,7 +107,7 @@ copy::event_type copy::operator()(
     data::vector_view<TYPE> to_view, type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_view, cptype);
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE, typename ALLOC>
@@ -137,7 +137,7 @@ copy::event_type copy::operator()(
 
     operator()(ignore_event, from_view, to_vec, cptype);
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE>
@@ -158,7 +158,7 @@ typename data::vector_view<TYPE>::size_type copy::get_size(
     // Wait for the copy operation to finish. With some backends
     // (khm... SYCL... khm...) copies can be asynchronous even into
     // non-pinned host memory.
-    create_event()->wait();
+    do_create_event()->wait();
 
     // Return what we got.
     return result;
@@ -176,7 +176,7 @@ async_size<typename data::vector_view<TYPE>::size_type> copy::get_size(
         // Create the result value, in "default" memory.
         auto value = make_unique_alloc<value_type>(*(get_default_resource()));
         *value = data.capacity();
-        return {std::move(value), vecmem::copy::create_event()};
+        return {std::move(value), vecmem::copy::do_create_event()};
     }
 
     // Create the result value, in pinned host memory.
@@ -186,7 +186,7 @@ async_size<typename data::vector_view<TYPE>::size_type> copy::get_size(
     do_copy(sizeof(value_type), data.size_ptr(), value.get(), type::unknown);
 
     // Return the appropriate "future" value.
-    return {std::move(value), create_event()};
+    return {std::move(value), do_create_event()};
 }
 
 template <typename TYPE>
@@ -227,7 +227,7 @@ copy::event_type copy::setup(data::jagged_vector_view<TYPE> data) const {
 
     setup(ignore_event, data);
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE>
@@ -273,7 +273,7 @@ copy::event_type copy::memset(data::jagged_vector_view<TYPE> data,
 
     memset(ignore_event, data, value);
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE>
@@ -318,7 +318,7 @@ copy::event_type copy::operator()(
     data::jagged_vector_view<TYPE> to_view, type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_view, cptype);
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE, typename ALLOC1, typename ALLOC2>
@@ -349,7 +349,7 @@ copy::event_type copy::operator()(
     type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_vec, cptype);
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE>
@@ -374,7 +374,7 @@ std::vector<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
             // Wait for the copy operation to finish. With some backends
             // (khm... SYCL... khm...) copies can be asynchronous even into
             // non-pinned host memory.
-            create_event()->wait();
+            do_create_event()->wait();
             // At this point the result vector should have been set up
             // correctly.
             return result;
@@ -446,7 +446,7 @@ copy::event_type copy::set_sizes(
 
     set_sizes(ignore_event, sizes, data);
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename TYPE>
@@ -471,7 +471,7 @@ async_sizes<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
                     data.host_ptr()[i].size_ptr(), result.data() + i,
                     type::unknown);
             // Return the appropriate "future" value.
-            return {std::move(result), create_event()};
+            return {std::move(result), do_create_event()};
         }
     }
 
@@ -481,7 +481,7 @@ async_sizes<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
     for (std::size_t i = 0; i < data.size(); ++i) {
         result[i] = data.host_ptr()[i].capacity();
     }
-    return {std::move(result), vecmem::copy::create_event()};
+    return {std::move(result), vecmem::copy::do_create_event()};
 }
 
 template <typename SCHEMA>
@@ -513,7 +513,7 @@ copy::event_type copy::setup(edm::view<SCHEMA> data) const {
 
     setup(ignore_event, data);
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename... VARTYPES>
@@ -535,7 +535,7 @@ copy::event_type copy::memset(edm::view<edm::schema<VARTYPES...>> data,
 
     memset(ignore_event, data, value);
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename... VARTYPES>
@@ -644,7 +644,7 @@ copy::event_type copy::operator()(
 
     operator()(ignore_event, from_view, to_view, cptype);
     // Return a new event.
-    return create_event();
+    return do_create_event();
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
@@ -670,7 +670,7 @@ copy::event_type copy::operator()(
     type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_vec, cptype);
-    return create_event();
+    return do_create_event();
 }
 
 template <typename... VARTYPES>
@@ -705,7 +705,7 @@ typename edm::view<edm::schema<VARTYPES...>>::size_type copy::get_size(
         // not going to be available outside of this function. And
         // asynchronous SYCL memory copies can happen from variables on the
         // stack as well...
-        create_event()->wait();
+        do_create_event()->wait();
 
         // Return what we got.
         return size;
@@ -728,7 +728,7 @@ copy::get_size(const edm::view<edm::schema<VARTYPES...>>& data,
         // Create the result value, in "default" memory.
         auto value = make_unique_alloc<value_type>(*(get_default_resource()));
         *value = data.capacity();
-        return {std::move(value), vecmem::copy::create_event()};
+        return {std::move(value), vecmem::copy::do_create_event()};
     } else {
         // All the rest is put into an else block, to avoid MSVC trying to be
         // too smart, and giving a warning about unreachable code...
@@ -737,7 +737,7 @@ copy::get_size(const edm::view<edm::schema<VARTYPES...>>& data,
             auto value =
                 make_unique_alloc<value_type>(*(get_default_resource()));
             *value = data.capacity();
-            return {std::move(value), vecmem::copy::create_event()};
+            return {std::move(value), vecmem::copy::do_create_event()};
         }
 
         // A small security check.
@@ -751,7 +751,7 @@ copy::get_size(const edm::view<edm::schema<VARTYPES...>>& data,
                 type::unknown);
 
         // Return the appropriate "future" value.
-        return {std::move(value), create_event()};
+        return {std::move(value), do_create_event()};
     }
 }
 
@@ -823,7 +823,7 @@ bool copy::copy_view_impl(
         // We have to wait for this to finish, since the "size" variable is not
         // going to be available outside of this function. And asynchronous SYCL
         // memory copies can happen from variables on the stack as well...
-        create_event()->wait();
+        do_create_event()->wait();
     }
 
     // Copy the payload.
@@ -1056,7 +1056,7 @@ void copy::resize_impl(
             // not going to be available outside of this function. And
             // asynchronous SYCL memory copies can happen from variables on the
             // stack as well...
-            create_event()->wait();
+            do_create_event()->wait();
         }
         // Resize the target container.
         VECMEM_DEBUG_MSG(4, "Resizing a (non-jagged) container to size %u",
@@ -1141,7 +1141,7 @@ void copy::copy_sizes_impl(
         // We have to wait for this to finish, since the "size" variable is not
         // going to be available outside of this function. And asynchronous SYCL
         // memory copies can happen from variables on the stack as well...
-        create_event()->wait();
+        do_create_event()->wait();
     } else {
         // For the jagged vector case we recursively copy the sizes of every
         // jagged vector variable. The rest of the variables are not resizable
