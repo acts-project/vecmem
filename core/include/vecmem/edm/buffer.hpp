@@ -182,7 +182,7 @@ public:
     using memory_type = unique_alloc_ptr<char[]>;
 
     /// Default constructor
-    buffer() = default;
+    buffer();
     /// Move constructor
     buffer(buffer&&) noexcept = default;
 

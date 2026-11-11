@@ -21,6 +21,9 @@ namespace vecmem {
 namespace edm {
 
 template <typename... VARTYPES>
+VECMEM_HOST buffer<schema<VARTYPES...>>::buffer() : view_type(0u) {}
+
+template <typename... VARTYPES>
 VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(size_type capacity,
                                                 memory_resource& mr,
                                                 vecmem::data::buffer_type type)

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -11,6 +11,9 @@
 
 namespace vecmem {
 namespace edm {
+
+template <typename... VARTYPES>
+VECMEM_HOST edm::data<edm::schema<VARTYPES...>>::data() : view_type(0u) {}
 
 template <typename... VARTYPES>
 VECMEM_HOST edm::data<edm::schema<VARTYPES...>>::data(size_type size,
