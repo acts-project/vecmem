@@ -48,7 +48,7 @@ private:
     void do_memset(std::size_t size, void* ptr, int value) const final;
     /// Create an event for synchronization
     VECMEM_SYCL_EXPORT
-    event_type create_event() const final;
+    event_type do_create_event() const final;
 
     /// Type holding on to internal data for @c vecmem::sycl::async_copy
     struct impl;

@@ -197,7 +197,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
         size, value, ptr);
 }
 
-async_copy::event_type async_copy::create_event() const {
+async_copy::event_type async_copy::do_create_event() const {
 
     // Create a vecmem specific event object.
     auto event = std::make_unique<::hip_event>(m_impl->m_event_pool);

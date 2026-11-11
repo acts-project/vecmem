@@ -71,7 +71,7 @@ private:
     void do_memset(std::size_t size, void* ptr, int value) const final;
     /// Create an event for synchronization
     VECMEM_CUDA_EXPORT
-    event_type create_event() const final;
+    event_type do_create_event() const final;
 
     /// Internal data type for the class
     struct impl;

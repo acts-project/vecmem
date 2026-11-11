@@ -140,7 +140,7 @@ void async_copy::do_memset(std::size_t size, void* ptr, int value) const {
                      ptr);
 }
 
-copy::event_type async_copy::create_event() const {
+copy::event_type async_copy::do_create_event() const {
 
     // Construct an event object out of all of the events collected.
     auto result = std::make_unique<::sycl_event>(m_impl->m_events);
