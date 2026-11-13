@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -254,7 +254,7 @@ TEST_F(core_edm_host_test, proxy_assign) {
     // Make a copy using push_back-s.
     host_type copy1{m_resource};
     for (std::size_t i = 0; i < orig.size(); ++i) {
-        copy1.push_back(orig.at(i));
+        copy1.push_back_proxy(orig.at(i));
     }
     compare(orig, copy1);
 
@@ -336,7 +336,11 @@ TEST_F(core_edm_host_test, push_back_jagged) {
 
     // Add elements to it from the previous container.
     for (std::size_t i = 0; i < host.size(); ++i) {
-        host2.push_back(host.at(i));
+        if (i % 2) {
+            host2.push_back(host.at(i));
+        } else {
+            host2.push_back_proxy(host.at(i));
+        }
     }
 
     // Check that the contents are as expected.

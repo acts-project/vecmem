@@ -16,7 +16,6 @@
 #include "vecmem/containers/jagged_device_vector.hpp"
 #include "vecmem/containers/static_array.hpp"
 #include "vecmem/containers/vector.hpp"
-#include "vecmem/memory/atomic.hpp"
 #include "vecmem/memory/device_atomic_ref.hpp"
 #include "vecmem/memory/sycl/device_memory_resource.hpp"
 #include "vecmem/memory/sycl/host_memory_resource.hpp"
@@ -192,6 +191,15 @@ TEST_F(sycl_containers_test, atomic_shared_memory) {
     // Create the SYCL queue that we'll be using in the test.
     ::sycl::queue queue;
 
+    // Turn off this test for old(er) oneAPI versions, when not running on a
+    // GPU.
+#if defined(__SYCL_COMPILER_VERSION) && (__SYCL_COMPILER_VERSION < 20260000)
+    if (queue.get_device().get_info<::sycl::info::device::device_type>() !=
+        ::sycl::info::device_type::gpu) {
+        GTEST_SKIP();
+    }
+#endif
+
     // The memory resources.
     vecmem::sycl::shared_memory_resource resource(&queue);
 
@@ -217,27 +225,19 @@ TEST_F(sycl_containers_test, atomic_shared_memory) {
                     const std::size_t index = i % buffer.size();
                     int* ptr = buffer.ptr() + index;
 
-                    // Do some simple stuff with it using vecmem::atomic.
-                    vecmem::atomic<int> a(ptr);
+                    // Do some simple stuff with it using vecmem::atomic_ref.
+                    vecmem::device_atomic_ref<int> a(*ptr);
                     a.fetch_add(4);
                     a.fetch_sub(2);
                     a.fetch_and(0x7fffffff);
                     a.fetch_or(0x00000000);
-
-                    // Do the same simple stuff with it using
-                    // vecmem::atomic_ref.
-                    vecmem::device_atomic_ref<int> a2(*ptr);
-                    a2.fetch_add(4);
-                    a2.fetch_sub(2);
-                    a2.fetch_and(0x7fffffff);
-                    a2.fetch_or(0x00000000);
                 });
         })
         .wait_and_throw();
 
     // Check the output.
     for (int value : buffer) {
-        EXPECT_EQ(value, ITERATIONS * 4);
+        EXPECT_EQ(value, ITERATIONS * 2);
     }
 }
 
@@ -246,6 +246,15 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
 
     // Create the SYCL queue that we'll be using in the test.
     ::sycl::queue queue;
+
+    // Turn off this test for old(er) oneAPI versions, when not running on a
+    // GPU.
+#if defined(__SYCL_COMPILER_VERSION) && (__SYCL_COMPILER_VERSION < 20260000)
+    if (queue.get_device().get_info<::sycl::info::device::device_type>() !=
+        ::sycl::info::device_type::gpu) {
+        GTEST_SKIP();
+    }
+#endif
 
     // The memory resources.
     vecmem::sycl::host_memory_resource host_resource(&queue);
@@ -280,20 +289,12 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
                     const std::size_t index = i % buffer.size();
                     int* ptr = buffer.ptr() + index;
 
-                    // Do some simple stuff with it using vecmem::atomic.
-                    vecmem::atomic<int> a(ptr);
+                    // Do some simple stuff with it using vecmem::atomic_ref.
+                    vecmem::device_atomic_ref<int> a(*ptr);
                     a.fetch_add(4);
                     a.fetch_sub(2);
                     a.fetch_and(0x7fffffff);
                     a.fetch_or(0x00000000);
-
-                    // Do the same simple stuff with it using
-                    // vecmem::atomic_ref.
-                    vecmem::device_atomic_ref<int> a2(*ptr);
-                    a2.fetch_add(4);
-                    a2.fetch_sub(2);
-                    a2.fetch_and(0x7fffffff);
-                    a2.fetch_or(0x00000000);
                 });
         })
         .wait_and_throw();
@@ -303,7 +304,7 @@ TEST_F(sycl_containers_test, atomic_device_memory) {
 
     // Check the output.
     for (int value : host_vector) {
-        EXPECT_EQ(value, ITERATIONS * 4);
+        EXPECT_EQ(value, ITERATIONS * 2);
     }
 }
 

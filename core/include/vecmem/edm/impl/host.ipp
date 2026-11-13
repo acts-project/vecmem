@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -87,11 +87,23 @@ VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::push_back(
         std::disjunction_v<type::details::is_vector<VARTYPES>...>,
         "This function requires at least one (jagged) vector variable.");
 
-    // Add a new element to the container.
-    const size_type index = size();
-    resize(index + 1);
-    // Set the new element.
-    at(index) = element;
+    // Push back the new element to the container.
+    details::host_push_back<VARTYPES...>(
+        m_data, element, std::index_sequence_for<VARTYPES...>{});
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST void host<schema<VARTYPES...>, INTERFACE>::push_back_proxy(
+    const const_proxy_type& element) {
+
+    // Make sure that there are some (jagged) vector types in the container.
+    static_assert(
+        std::disjunction_v<type::details::is_vector<VARTYPES>...>,
+        "This function requires at least one (jagged) vector variable.");
+
+    // Push back the new element to the container.
+    details::host_push_back<VARTYPES...>(
+        m_data, element, std::index_sequence_for<VARTYPES...>{});
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>

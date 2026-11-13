@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2022-2024 CERN for the benefit of the ACTS project
+ * (c) 2022-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -38,13 +38,16 @@ public:
     /// @{
 
     /// Type managed by the object
-    typedef T value_type;
+    using value_type = T;
     /// Difference between two objects
-    typedef value_type difference_type;
-    /// Pointer to the value in global memory
-    typedef value_type* pointer;
+    using difference_type = value_type;
+    /// Pointer to the value in global/local memory
+    using pointer = std::add_pointer_t<value_type>;
+    /// Volatile pointer to the value in global/local memory
+    using volatile_pointer =
+        std::add_pointer_t<std::add_volatile_t<value_type>>;
     /// Reference to a value given by the user
-    typedef value_type& reference;
+    using reference = std::add_lvalue_reference_t<value_type>;
 
     /// @}
 

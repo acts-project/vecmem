@@ -41,7 +41,7 @@ VECMEM_HOST_AND_DEVICE void atomic<T>::store(value_type data) {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!defined(SYCL_LANGUAGE_VERSION))
-    volatile pointer addr = m_ptr;
+    volatile_pointer addr = m_ptr;
     __threadfence();
     *addr = data;
 #elif defined(CL_SYCL_LANGUAGE_VERSION) || defined(SYCL_LANGUAGE_VERSION)
@@ -56,7 +56,7 @@ VECMEM_HOST_AND_DEVICE auto atomic<T>::load() const -> value_type {
 
 #if (defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)) && \
     (!defined(SYCL_LANGUAGE_VERSION))
-    volatile pointer addr = m_ptr;
+    volatile_pointer addr = m_ptr;
     __threadfence();
     const value_type value = *addr;
     __threadfence();

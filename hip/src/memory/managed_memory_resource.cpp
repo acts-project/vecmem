@@ -17,6 +17,7 @@
 
 // System include(s).
 #include <cassert>
+#include <cstdint>
 #include <stdexcept>
 
 namespace vecmem::hip {
@@ -25,7 +26,8 @@ managed_memory_resource::managed_memory_resource() = default;
 
 managed_memory_resource::~managed_memory_resource() noexcept = default;
 
-void *managed_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
+void *managed_memory_resource::do_allocate(std::size_t bytes,
+                                           std::size_t alignment) {
 
     if (bytes == 0) {
         throw std::bad_alloc();
@@ -34,6 +36,14 @@ void *managed_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
     // Allocate the memory.
     void *res = nullptr;
     VECMEM_HIP_ERROR_CHECK(hipMallocManaged(&res, bytes));
+
+    // HIP cannot be asked for an alignment, so check the one that we got.
+    if (reinterpret_cast<std::uintptr_t>(res) % alignment != 0) {
+        VECMEM_DEBUG_MSG(1, "Allocation at %p is not aligned to %ld bytes", res,
+                         alignment);
+        VECMEM_HIP_ERROR_CHECK(hipFree(res));
+        throw std::bad_alloc();
+    }
     VECMEM_DEBUG_MSG(2, "Allocated %ld bytes at %p", bytes, res);
     return res;
 }

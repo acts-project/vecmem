@@ -29,6 +29,22 @@ struct noop_event final : public vecmem::abstract_event {
 
 namespace vecmem {
 
+void copy::typeless_copy(std::size_t size, const void* from_ptr, void* to_ptr,
+                         type::copy_type cptype) const {
+
+    do_copy(size, from_ptr, to_ptr, cptype);
+}
+
+void copy::typeless_memset(std::size_t size, void* ptr, int value) const {
+
+    do_memset(size, ptr, value);
+}
+
+copy::event_type copy::create_event() const {
+
+    return do_create_event();
+}
+
 void copy::do_copy(std::size_t size, const void* from_ptr, void* to_ptr,
                    type::copy_type) const {
 
@@ -52,7 +68,7 @@ void copy::do_memset(std::size_t size, void* ptr, int value) const {
                      value, ptr);
 }
 
-copy::event_type copy::create_event() const {
+copy::event_type copy::do_create_event() const {
 
     // Make a no-op event.
     return std::make_unique<noop_event>();

@@ -76,10 +76,10 @@ struct binary_page_memory_resource_impl {
      */
     struct superpage {
         /**
-         * @brief Construct a superpage with a given size and upstream
-         * resource.
+         * @brief Construct a superpage with a given size, upstream
+         * resource, and minimum alignment of its memory.
          */
-        superpage(std::size_t, memory_resource &);
+        superpage(std::size_t, memory_resource &, std::size_t);
 
         /**
          * @brief Return the total number of pages in the superpage.
@@ -270,18 +270,19 @@ struct binary_page_memory_resource_impl {
      * Note that this method might return split pages if both children are
      * free. In that case, the page should first be unsplit. In some cases,
      * the returned page might be (significantly) larger than the request,
-     * and should be split before allocating.
+     * and should be split before allocating. Only superpages whose memory is
+     * aligned to the requested alignment are searched.
      */
-    std::optional<page_ref> find_free_page(std::size_t);
+    std::optional<page_ref> find_free_page(std::size_t, std::size_t);
 
     /**
      * @brief Perform an upstream allocation.
      *
      * This method performs an allocation through the upstream memory
      * resource and immediately creates a page to represent this new chunk
-     * of memory.
+     * of memory. The memory is aligned to at least the requested alignment.
      */
-    void allocate_upstream(std::size_t);
+    void allocate_upstream(std::size_t, std::size_t);
 
     memory_resource &m_upstream;
     std::vector<superpage> m_superpages;

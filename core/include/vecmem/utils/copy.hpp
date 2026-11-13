@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -335,6 +335,23 @@ public:
 
     /// @}
 
+    /// @name Direct memory manipulation function(s)
+    ///
+    /// Making it possible to "chain" copy objects. Similar to how we can
+    /// construct memory resources.
+    ///
+    /// @{
+
+    /// Perform a "low level" memory copy
+    void typeless_copy(std::size_t size, const void* from, void* to,
+                       type::copy_type cptype) const;
+    /// Perform a "low level" memory filling operation
+    void typeless_memset(std::size_t size, void* ptr, int value) const;
+    /// Create an event for synchronization
+    VECMEM_NODISCARD event_type create_event() const;
+
+    /// @}
+
 protected:
     /// Perform a "low level" memory copy
     virtual void do_copy(std::size_t size, const void* from, void* to,
@@ -342,7 +359,7 @@ protected:
     /// Perform a "low level" memory filling operation
     virtual void do_memset(std::size_t size, void* ptr, int value) const;
     /// Create an event for synchronization
-    VECMEM_NODISCARD virtual event_type create_event() const;
+    VECMEM_NODISCARD virtual event_type do_create_event() const;
 
 private:
     /// Implementation for the 1D vector copy operator

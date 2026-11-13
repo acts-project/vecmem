@@ -315,5 +315,6 @@ if( BUILD_TESTING AND VECMEM_BUILD_TESTING )
       RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/include"
       "include/vecmem/*/*.hpp" )
    list( APPEND vecmem_core_public_headers "vecmem/version.hpp" )
+   list( REMOVE_ITEM vecmem_core_public_headers "vecmem/memory/atomic.hpp" )
    vecmem_test_public_headers( vecmem_core ${vecmem_core_public_headers} )
 endif()

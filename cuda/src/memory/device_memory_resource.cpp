@@ -20,6 +20,7 @@
 
 // System include(s).
 #include <cassert>
+#include <cstdint>
 #include <stdexcept>
 
 namespace vecmem::cuda {
@@ -33,7 +34,8 @@ device_memory_resource::device_memory_resource(int device)
 
 device_memory_resource::~device_memory_resource() = default;
 
-void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
+void *device_memory_resource::do_allocate(std::size_t bytes,
+                                          std::size_t alignment) {
 
     if (bytes == 0) {
         throw std::bad_alloc();
@@ -45,6 +47,14 @@ void *device_memory_resource::do_allocate(std::size_t bytes, std::size_t) {
     // Allocate the memory.
     void *res = nullptr;
     VECMEM_CUDA_ERROR_CHECK(cudaMalloc(&res, bytes));
+
+    // CUDA cannot be asked for an alignment, so check the one that we got.
+    if (reinterpret_cast<std::uintptr_t>(res) % alignment != 0) {
+        VECMEM_DEBUG_MSG(1, "Allocation at %p is not aligned to %ld bytes", res,
+                         alignment);
+        VECMEM_CUDA_ERROR_CHECK(cudaFree(res));
+        throw std::bad_alloc();
+    }
     VECMEM_DEBUG_MSG(2, "Allocated %ld bytes at %p on device %i", bytes, res,
                      m_device);
     return res;

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -95,6 +95,8 @@ public:
     void reserve(size_type size);
     /// Add a new element to the container
     VECMEM_HOST void push_back(const object_type& element);
+    /// Add a new element to the container
+    VECMEM_HOST void push_back_proxy(const const_proxy_type& element);
 
     /// Get the vector of a specific variable (non-const)
     template <std::size_t INDEX>

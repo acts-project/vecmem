@@ -1,6 +1,6 @@
 # VecMem project, part of the ACTS project (R&D line)
 #
-# (c) 2021-2024 CERN for the benefit of the ACTS project
+# (c) 2021-2026 CERN for the benefit of the ACTS project
 #
 # Mozilla Public License Version 2.0
 
@@ -10,7 +10,8 @@ include( vecmem-compiler-options-cpp )
 # Set up the benchmark(s) for the core library.
 add_executable( vecmem_benchmark_core
     "benchmark_core.cpp"
-    "benchmark_copy.cpp" )
+    "benchmark_copy.cpp"
+    "benchmark_edm.cpp" )
 
 target_link_libraries(
     vecmem_benchmark_core

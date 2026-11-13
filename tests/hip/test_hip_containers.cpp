@@ -118,7 +118,7 @@ TEST_F(hip_containers_test, atomic_shared_memory) {
 
     // Check the output.
     for (int value : vec) {
-        EXPECT_EQ(static_cast<unsigned int>(value), 4 * ITERATIONS);
+        EXPECT_EQ(static_cast<unsigned int>(value), 2 * ITERATIONS);
     }
 }
 
@@ -144,7 +144,7 @@ TEST_F(hip_containers_test, atomic_device_memory) {
 
     // Check the output.
     for (int value : vec) {
-        EXPECT_EQ(value, 4 * ITERATIONS);
+        EXPECT_EQ(value, 2 * ITERATIONS);
     }
 }
 

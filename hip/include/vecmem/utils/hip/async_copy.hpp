@@ -30,7 +30,7 @@ namespace vecmem::hip {
 /// Note that the class is not thread-safe. It is up to the user to ensure that
 /// multiple CPU threads don't use it at the same time.
 ///
-class async_copy : public vecmem::copy {
+class async_copy final : public vecmem::copy {
 
 public:
     /// Constructor with the HIP stream to operate on
@@ -71,7 +71,7 @@ private:
     void do_memset(std::size_t size, void* ptr, int value) const final;
     /// Create an event for synchronization
     VECMEM_HIP_EXPORT
-    event_type create_event() const final;
+    event_type do_create_event() const final;
 
     /// Internal data type for the class
     struct impl;

@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -14,9 +14,9 @@
 namespace vecmem::cuda {
 
 /// Specialisation of @c vecmem::copy for CUDA
-class VECMEM_CUDA_EXPORT copy : public vecmem::copy {
+class VECMEM_CUDA_EXPORT copy final : public vecmem::copy {
 
-protected:
+private:
     /// Perform a memory copy using CUDA
     void do_copy(std::size_t size, const void* from, void* to,
                  type::copy_type cptype) const final;
