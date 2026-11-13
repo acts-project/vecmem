@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2025 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -10,6 +10,8 @@
 
 // Local include(s).
 #include "vecmem/containers/data/vector_view.hpp"
+#include "vecmem/containers/details/jagged_device_vector_iterator.hpp"
+#include "vecmem/containers/details/reverse_iterator.hpp"
 #include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
 
@@ -42,20 +44,23 @@ namespace data {
  * an undefined state.
  */
 template <typename T>
-class jagged_vector_view {
+class jagged_vector_view : public vector_view<vector_view<T>> {
 
     /// We cannot use boolean types.
     static_assert(!std::is_same<std::remove_cv_t<T>, bool>::value,
                   "bool is not supported in VecMem containers");
 
 public:
-    /// Size type used in the class
-    using size_type = unsigned int;
-    /// Value type of the jagged array
-    using value_type = vector_view<T>;
-    /// Pointer type to the jagged array
-    using pointer = std::add_pointer_t<value_type>;
+    /// @name Type definitions inherited from @c vecmem::data::vector_view
+    /// @{
 
+    using typename vector_view<vector_view<T>>::size_type;
+    using typename vector_view<vector_view<T>>::pointer;
+
+    /// @}
+
+    // Inherit the base class's constructors.
+    using vector_view<vector_view<T>>::vector_view;
     /**
      * Default constructor
      */
@@ -88,36 +93,6 @@ public:
     VECMEM_HOST_AND_DEVICE jagged_vector_view& operator=(
         const jagged_vector_view<OTHERTYPE>& rhs);
 
-    /// Equality check. Two objects are only equal if they point at the same
-    /// memory.
-    template <
-        typename OTHERTYPE,
-        std::enable_if_t<std::is_same<std::remove_cv_t<T>,
-                                      std::remove_cv_t<OTHERTYPE> >::value,
-                         bool> = true>
-    VECMEM_HOST_AND_DEVICE bool operator==(
-        const jagged_vector_view<OTHERTYPE>& rhs) const;
-
-    /// Inequality check. Simply based on @c operator==.
-    template <
-        typename OTHERTYPE,
-        std::enable_if_t<std::is_same<std::remove_cv_t<T>,
-                                      std::remove_cv_t<OTHERTYPE> >::value,
-                         bool> = true>
-    VECMEM_HOST_AND_DEVICE bool operator!=(
-        const jagged_vector_view<OTHERTYPE>& rhs) const;
-
-    /// Get the "outer" size of the jagged vector
-    VECMEM_HOST_AND_DEVICE
-    size_type size() const;
-    /// Get the maximum capacity of the "outer" vector
-    VECMEM_HOST_AND_DEVICE
-    size_type capacity() const;
-
-    /// Get a pointer to the vector elements
-    VECMEM_HOST_AND_DEVICE
-    pointer ptr() const;
-
     /// Access the host accessible array describing the inner vectors
     ///
     /// This may or may not return the same pointer as @c ptr(). If the
@@ -134,17 +109,6 @@ public:
     pointer host_ptr() const;
 
 private:
-    /**
-     * The number of rows in this jagged vector.
-     */
-    size_type m_size;
-
-    /**
-     * The internal state of this jagged vector, which is heap-allocated by
-     * the given memory manager.
-     */
-    pointer m_ptr;
-
     /// Host-accessible pointer to the inner vector array
     pointer m_host_ptr;
 
