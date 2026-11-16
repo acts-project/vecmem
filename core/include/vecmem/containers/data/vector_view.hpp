@@ -8,6 +8,7 @@
 
 // Local include(s).
 #include "vecmem/containers/details/reverse_iterator.hpp"
+#include "vecmem/containers/details/vector_view_traits.hpp"
 #include "vecmem/memory/device_atomic_ref.hpp"
 #include "vecmem/utils/type_traits.hpp"
 #include "vecmem/utils/types.hpp"
@@ -57,7 +58,7 @@ public:
 
     /// Pointer type to the size of the array
     using size_pointer =
-        std::conditional_t<std::is_const<TYPE>::value,
+        std::conditional_t<details::is_const<TYPE>::value,
                            std::add_pointer_t<std::add_const_t<size_type>>,
                            std::add_pointer_t<size_type>>;
 
@@ -65,11 +66,11 @@ public:
     using reference = std::add_lvalue_reference_t<value_type>;
     /// Constant value reference type
     using const_reference =
-        std::add_lvalue_reference_t<std::add_const_t<value_type>>;
+        std::add_lvalue_reference_t<details::add_const_t<value_type>>;
     /// Value pointer type
     using pointer = std::add_pointer_t<value_type>;
     /// Constant value pointer type
-    using const_pointer = std::add_pointer_t<std::add_const_t<value_type>>;
+    using const_pointer = std::add_pointer_t<details::add_const_t<value_type>>;
 
     /// Forward iterator type
     using iterator = pointer;
@@ -129,18 +130,20 @@ public:
 
     /// Equality check. Two objects are only equal if they point at the same
     /// memory.
-    template <typename OTHERTYPE,
-              std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
-                                            std::remove_cv_t<OTHERTYPE>>::value,
-                               bool> = true>
+    template <
+        typename OTHERTYPE,
+        std::enable_if_t<std::is_same<details::remove_cv_t<TYPE>,
+                                      details::remove_cv_t<OTHERTYPE>>::value,
+                         bool> = true>
     VECMEM_HOST_AND_DEVICE bool operator==(
         const vector_view<OTHERTYPE>& rhs) const;
 
     /// Inequality check. Simply based on @c operator==.
-    template <typename OTHERTYPE,
-              std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
-                                            std::remove_cv_t<OTHERTYPE>>::value,
-                               bool> = true>
+    template <
+        typename OTHERTYPE,
+        std::enable_if_t<std::is_same<details::remove_cv_t<TYPE>,
+                                      details::remove_cv_t<OTHERTYPE>>::value,
+                         bool> = true>
     VECMEM_HOST_AND_DEVICE bool operator!=(
         const vector_view<OTHERTYPE>& rhs) const;
 
@@ -378,45 +381,6 @@ private:
 
 }  // namespace data
 }  // namespace vecmem
-
-namespace std {
-
-/// @name Type trait specialization(s) for @c vecmem::data::vector_view
-/// @{
-
-template <typename TYPE>
-struct add_const<vecmem::data::vector_view<TYPE>> {
-    using type = const vecmem::data::vector_view<std::add_const_t<TYPE>>;
-};
-
-template <typename TYPE>
-struct add_const<const vecmem::data::vector_view<TYPE>> {
-    using type = const vecmem::data::vector_view<std::add_const_t<TYPE>>;
-};
-
-template <typename TYPE>
-struct remove_const<vecmem::data::vector_view<TYPE>> {
-    using type = vecmem::data::vector_view<std::remove_const_t<TYPE>>;
-};
-
-template <typename TYPE>
-struct remove_const<const vecmem::data::vector_view<TYPE>> {
-    using type = vecmem::data::vector_view<std::remove_const_t<TYPE>>;
-};
-
-template <typename TYPE>
-struct remove_cv<vecmem::data::vector_view<TYPE>> {
-    using type = vecmem::data::vector_view<std::remove_cv_t<TYPE>>;
-};
-
-template <typename TYPE>
-struct remove_cv<const vecmem::data::vector_view<TYPE>> {
-    using type = vecmem::data::vector_view<std::remove_cv_t<TYPE>>;
-};
-
-/// @}
-
-}  // namespace std
 
 // Include the implementation.
 #include "vecmem/containers/impl/vector_view.ipp"

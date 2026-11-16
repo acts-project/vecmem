@@ -50,8 +50,8 @@ VECMEM_HOST_AND_DEVICE vector_view<TYPE>& vector_view<TYPE>::operator=(
 
 template <typename TYPE>
 template <typename OTHERTYPE,
-          std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
-                                        std::remove_cv_t<OTHERTYPE>>::value,
+          std::enable_if_t<std::is_same<details::remove_cv_t<TYPE>,
+                                        details::remove_cv_t<OTHERTYPE>>::value,
                            bool>>
 VECMEM_HOST_AND_DEVICE bool vector_view<TYPE>::operator==(
     const vector_view<OTHERTYPE>& rhs) const {
@@ -63,8 +63,8 @@ VECMEM_HOST_AND_DEVICE bool vector_view<TYPE>::operator==(
 
 template <typename TYPE>
 template <typename OTHERTYPE,
-          std::enable_if_t<std::is_same<std::remove_cv_t<TYPE>,
-                                        std::remove_cv_t<OTHERTYPE>>::value,
+          std::enable_if_t<std::is_same<details::remove_cv_t<TYPE>,
+                                        details::remove_cv_t<OTHERTYPE>>::value,
                            bool>>
 VECMEM_HOST_AND_DEVICE bool vector_view<TYPE>::operator!=(
     const vector_view<OTHERTYPE>& rhs) const {

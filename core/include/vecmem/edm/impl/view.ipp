@@ -86,7 +86,7 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::capacity() const
 template <typename... VARTYPES>
 template <std::size_t INDEX>
 VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::get()
-    -> tuple_element_t<INDEX, tuple_type>& {
+    -> std::add_lvalue_reference_t<tuple_element_t<INDEX, tuple_type>> {
 
     return vecmem::get<INDEX>(m_views);
 }
@@ -94,7 +94,7 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::get()
 template <typename... VARTYPES>
 template <std::size_t INDEX>
 VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::get() const
-    -> const tuple_element_t<INDEX, tuple_type>& {
+    -> vecmem::details::add_const_t<tuple_element_t<INDEX, tuple_type>> {
 
     return vecmem::get<INDEX>(m_views);
 }

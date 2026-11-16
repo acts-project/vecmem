@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2024 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -153,5 +153,40 @@ using is_implicit_lifetime = std::true_type;
 template <class TYPE>
 constexpr bool is_implicit_lifetime_v = is_implicit_lifetime<TYPE>::value;
 /// @}
+
+/// @name "Constness" trait(s), mimicking the ones coming from @c std::
+/// @{
+
+template <typename TYPE>
+struct is_const {
+    static constexpr bool value = std::is_const<TYPE>::value;
+};
+
+template <typename TYPE>
+struct add_const {
+    using type = std::add_const_t<TYPE>;
+};
+
+template <typename T>
+using add_const_t = typename add_const<T>::type;
+
+template <typename TYPE>
+struct remove_const {
+    using type = std::remove_const_t<TYPE>;
+};
+
+template <typename T>
+using remove_const_t = typename remove_const<T>::type;
+
+template <typename TYPE>
+struct remove_cv {
+    using type = std::remove_cv_t<TYPE>;
+};
+
+template <typename T>
+using remove_cv_t = typename remove_cv<T>::type;
+
+/// @}
+
 }  // namespace details
 }  // namespace vecmem
