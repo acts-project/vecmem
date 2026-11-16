@@ -1,7 +1,7 @@
 /*
  * VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -29,28 +29,26 @@ __global__ void linearTransformKernel(
 
     // Create the helper containers.
     const vecmem::device_array<const int, 2> constantarray(constants);
-    const vecmem::jagged_device_vector<const int> inputvec(input);
-    vecmem::jagged_device_vector<int> outputvec(output);
 
     // A little sanity check.
-    assert(inputvec.at(i).size() == outputvec.at(i).size());
+    assert(input.at(i).size() == output.at(i).size());
 
     // Perform the requested linear transformation on all elements of a given
     // "internal vector".
-    for (std::size_t j = 0; j < inputvec[i].size(); ++j) {
-        outputvec[i][j] = inputvec[i][j] * constantarray[0] + constantarray[1];
+    for (std::size_t j = 0; j < input[i].size(); ++j) {
+        output[i][j] = input[i][j] * constantarray[0] + constantarray[1];
     }
     __syncthreads();
 
     // Now exercise the jagged vector iterators in a bit of an elaborate
     // operation.
-    for (auto itr1 = outputvec.rbegin(); itr1 != outputvec.rend(); ++itr1) {
-        if ((outputvec[i].size() > 0) && (itr1->size() > 1)) {
+    for (auto itr1 = output.rbegin(); itr1 != output.rend(); ++itr1) {
+        if ((output[i].size() > 0) && (itr1->size() > 1)) {
             // Iterate over all inner vectors, skipping the first elements.
             // Since those are being updated at the same time, by other threads.
             for (auto itr2 = itr1->rbegin(); itr2 != (itr1->rend() - 1);
                  ++itr2) {
-                outputvec[i].front() += *itr2;
+                output[i].front() += *itr2;
             }
         }
     }

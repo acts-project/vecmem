@@ -134,11 +134,14 @@ public:
 
     /// Get the view of a specific variable (non-const)
     template <std::size_t INDEX>
-    VECMEM_HOST_AND_DEVICE tuple_element_t<INDEX, tuple_type>& get();
+    VECMEM_HOST_AND_DEVICE
+        std::add_lvalue_reference_t<tuple_element_t<INDEX, tuple_type>>
+        get();
     /// Get the view of a specific variable (const)
     template <std::size_t INDEX>
-    VECMEM_HOST_AND_DEVICE const tuple_element_t<INDEX, tuple_type>& get()
-        const;
+    VECMEM_HOST_AND_DEVICE
+        vecmem::details::add_const_t<tuple_element_t<INDEX, tuple_type>>
+        get() const;
 
     /// @}
 
