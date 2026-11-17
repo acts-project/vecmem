@@ -588,11 +588,13 @@ copy::to(const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data,
     return result;
 }
 
-template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE1,
+          template <typename> class INTERFACE2>
 copy::event_type copy::operator()(
     const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-                    INTERFACE>& from_view,
-    edm::view<edm::schema<VARTYPES...>, INTERFACE> to_view,
+                    INTERFACE1>
+        from_view,
+    edm::view<edm::schema<VARTYPES...>, INTERFACE2> to_view,
     type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_view, cptype);
@@ -600,12 +602,14 @@ copy::event_type copy::operator()(
     return do_create_event();
 }
 
-template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE1,
+          template <typename> class INTERFACE2>
 void copy::operator()(
     ignore_event_t,
     const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-                    INTERFACE>& from_view,
-    edm::view<edm::schema<VARTYPES...>, INTERFACE> to_view,
+                    INTERFACE1>
+        from_view,
+    edm::view<edm::schema<VARTYPES...>, INTERFACE2> to_view,
     type::copy_type cptype) const {
 
     // First, handle the simple case, when both views have a contiguous memory
@@ -654,23 +658,27 @@ void copy::operator()(
     copy_payload_impl<0>(from_view, to_view, cptype);
 }
 
-template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE1,
+          template <typename> class INTERFACE2>
 copy::event_type copy::operator()(
     const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-                    INTERFACE>& from_view,
-    edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
+                    INTERFACE1>
+        from_view,
+    edm::host<edm::schema<VARTYPES...>, INTERFACE2>& to_vec,
     type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_vec, cptype);
     return do_create_event();
 }
 
-template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE1,
+          template <typename> class INTERFACE2>
 void copy::operator()(
     ignore_event_t,
     const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-                    INTERFACE>& from_view,
-    edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
+                    INTERFACE1>
+        from_view,
+    edm::host<edm::schema<VARTYPES...>, INTERFACE2>& to_vec,
     type::copy_type cptype) const {
 
     // Resize the output object to the correct size(s).

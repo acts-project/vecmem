@@ -76,7 +76,7 @@ public:
             /// The number of copy types, useful for technical reasons
             count = 5
         };  // enum copy_type
-    };      // struct type
+    };  // struct type
 
     /// Event type used by the copy class
     using event_type = std::unique_ptr<abstract_event>;
@@ -287,41 +287,49 @@ public:
        type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views
-    template <typename... VARTYPES, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE1,
+              template <typename> class INTERFACE2>
     VECMEM_NODISCARD event_type
     operator()(const edm::view<
                    edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-                   INTERFACE>& from,
-               edm::view<edm::schema<VARTYPES...>, INTERFACE> to,
+                   INTERFACE1>
+                   from,
+               edm::view<edm::schema<VARTYPES...>, INTERFACE2> to,
                type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views without returning an event
-    template <typename... VARTYPES, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE1,
+              template <typename> class INTERFACE2>
     void operator()(
         ignore_event_t,
         const edm::view<
             edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-            INTERFACE>& from,
-        edm::view<edm::schema<VARTYPES...>, INTERFACE> to,
+            INTERFACE1>
+            from,
+        edm::view<edm::schema<VARTYPES...>, INTERFACE2> to,
         type::copy_type cptype = type::unknown) const;
 
     /// Copy from a view, into a host container
-    template <typename... VARTYPES, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE1,
+              template <typename> class INTERFACE2>
     VECMEM_NODISCARD event_type
     operator()(const edm::view<
                    edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-                   INTERFACE>& from,
-               edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
+                   INTERFACE1>
+                   from,
+               edm::host<edm::schema<VARTYPES...>, INTERFACE2>& to,
                type::copy_type cptype = type::unknown) const;
 
     /// Copy from a view into a host container without returning an event
-    template <typename... VARTYPES, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE1,
+              template <typename> class INTERFACE2>
     void operator()(
         ignore_event_t,
         const edm::view<
             edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
-            INTERFACE>& from,
-        edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
+            INTERFACE1>
+            from,
+        edm::host<edm::schema<VARTYPES...>, INTERFACE2>& to,
         type::copy_type cptype = type::unknown) const;
 
     /// Get the (outer) size of a (resizable) SoA container
