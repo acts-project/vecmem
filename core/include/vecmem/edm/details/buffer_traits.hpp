@@ -226,14 +226,16 @@ VECMEM_HOST constexpr void* find_last_pointer(
 }
 
 /// Function creating a view for the layout of a buffer.
-template <typename... TYPES>
-VECMEM_HOST constexpr typename view<schema<TYPES...>>::memory_view_type
-find_layout_view(
-    const std::tuple<typename view_type<TYPES>::layout_ptr...>& layouts,
-    const std::array<std::size_t, sizeof...(TYPES)>& sizes) {
+template <template <typename> class INTERFACE, typename... TYPES>
+VECMEM_HOST constexpr
+    typename view<schema<TYPES...>, INTERFACE>::memory_view_type
+    find_layout_view(
+        const std::tuple<typename view_type<TYPES>::layout_ptr...>& layouts,
+        const std::array<std::size_t, sizeof...(TYPES)>& sizes) {
 
     // The result type.
-    using result_type = typename view<schema<TYPES...>>::memory_view_type;
+    using result_type =
+        typename view<schema<TYPES...>, INTERFACE>::memory_view_type;
 
     // Find the first non-zero pointer.
     auto ptr = static_cast<typename result_type::pointer>(
@@ -247,14 +249,16 @@ find_layout_view(
 }
 
 /// Function creating a view of the payload of a buffer
-template <typename... TYPES>
-VECMEM_HOST constexpr typename view<schema<TYPES...>>::memory_view_type
-find_payload_view(
-    const std::tuple<typename view_type<TYPES>::payload_ptr...>& payloads,
-    const std::array<std::size_t, sizeof...(TYPES)>& sizes) {
+template <template <typename> class INTERFACE, typename... TYPES>
+VECMEM_HOST constexpr
+    typename view<schema<TYPES...>, INTERFACE>::memory_view_type
+    find_payload_view(
+        const std::tuple<typename view_type<TYPES>::payload_ptr...>& payloads,
+        const std::array<std::size_t, sizeof...(TYPES)>& sizes) {
 
     // The result type.
-    using result_type = typename view<schema<TYPES...>>::memory_view_type;
+    using result_type =
+        typename view<schema<TYPES...>, INTERFACE>::memory_view_type;
 
     // Find the first non-zero pointer.
     auto ptr = static_cast<typename result_type::pointer>(

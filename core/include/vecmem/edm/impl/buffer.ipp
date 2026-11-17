@@ -20,13 +20,12 @@
 namespace vecmem {
 namespace edm {
 
-template <typename... VARTYPES>
-VECMEM_HOST buffer<schema<VARTYPES...>>::buffer() : view_type(0u) {}
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer() : view_type(0u) {}
 
-template <typename... VARTYPES>
-VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(size_type capacity,
-                                                memory_resource& mr,
-                                                vecmem::data::buffer_type type)
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer(
+    size_type capacity, memory_resource& mr, vecmem::data::buffer_type type)
     : view_type(capacity) {
 
     // Make sure that this constructor is not used for a container that has
@@ -51,12 +50,12 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(size_type capacity,
     }
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <
     typename SIZE_TYPE, typename SIZE_ALLOC,
     std::enable_if_t<
         std::is_integral_v<SIZE_TYPE> && std::is_unsigned_v<SIZE_TYPE>, bool>>
-VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(
+VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer(
     const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
     memory_resource& main_mr, memory_resource* host_mr,
     vecmem::data::buffer_type type)
@@ -83,22 +82,42 @@ VECMEM_HOST buffer<schema<VARTYPES...>>::buffer(
     }
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST memory_resource* buffer<schema<VARTYPES...>>::resource() const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST memory_resource* buffer<schema<VARTYPES...>, INTERFACE>::resource()
+    const {
 
     return m_memory.get_deleter().resource();
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST memory_resource* buffer<schema<VARTYPES...>>::host_resource()
-    const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST memory_resource*
+buffer<schema<VARTYPES...>, INTERFACE>::host_resource() const {
 
     return m_host_memory.get_deleter().resource();
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
+auto buffer<schema<VARTYPES...>, INTERFACE>::get_view()
+    -> interface_type<view<schema_type, interface_type>> {
+
+    interface_type<view<schema_type, interface_type>> result;
+    result = *this;
+    return result;
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+auto buffer<schema<VARTYPES...>, INTERFACE>::get_view() const
+    -> interface_type<view<details::add_const_t<schema_type>, interface_type>> {
+
+    interface_type<view<details::add_const_t<schema_type>, interface_type>>
+        result;
+    result = *this;
+    return result;
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <typename SIZE_TYPE, typename SIZE_ALLOC, std::size_t... INDICES>
-VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
+VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_fixed(
     const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities, memory_resource& mr,
     memory_resource* host_mr, std::index_sequence<INDICES...>) {
 
@@ -124,10 +143,10 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
             details::buffer_alloc<VARTYPES>::payload_size(capacities)...);
 
     // Set the base class's memory views.
-    view_type::m_layout = details::find_layout_view<VARTYPES...>(
+    view_type::m_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
         layout_ptrs,
         {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
-    view_type::m_payload = details::find_payload_view<VARTYPES...>(
+    view_type::m_payload = details::find_payload_view<INTERFACE, VARTYPES...>(
         payload_ptrs,
         {details::buffer_alloc<VARTYPES>::payload_size(capacities)...});
     view_type::m_size = {
@@ -145,9 +164,10 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
                 details::buffer_alloc<VARTYPES>::layout_size(capacities)...);
 
         // Set the base class's memory view.
-        view_type::m_host_layout = details::find_layout_view<VARTYPES...>(
-            host_layout_ptrs,
-            {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
+        view_type::m_host_layout =
+            details::find_layout_view<INTERFACE, VARTYPES...>(
+                host_layout_ptrs,
+                {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
     } else {
         // The layout is apparently host accessible.
         view_type::m_host_layout = view_type::m_layout;
@@ -160,9 +180,9 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_fixed(
             std::index_sequence_for<VARTYPES...>{});
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <typename SIZE_TYPE, typename SIZE_ALLOC, std::size_t... INDICES>
-VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_resizable(
+VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_resizable(
     const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities, memory_resource& mr,
     memory_resource* host_mr, std::index_sequence<INDICES...>) {
 
@@ -235,10 +255,10 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_resizable(
     }
 
     // Set the base class's memory views.
-    view_type::m_layout = details::find_layout_view<VARTYPES...>(
+    view_type::m_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
         layout_ptrs,
         {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
-    view_type::m_payload = details::find_payload_view<VARTYPES...>(
+    view_type::m_payload = details::find_payload_view<INTERFACE, VARTYPES...>(
         payload_ptrs,
         {details::buffer_alloc<VARTYPES>::payload_size(capacities)...});
 
@@ -253,9 +273,10 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_resizable(
                 details::buffer_alloc<VARTYPES>::layout_size(capacities)...);
 
         // Set the base class's memory view.
-        view_type::m_host_layout = details::find_layout_view<VARTYPES...>(
-            host_layout_ptrs,
-            {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
+        view_type::m_host_layout =
+            details::find_layout_view<INTERFACE, VARTYPES...>(
+                host_layout_ptrs,
+                {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
     } else {
         // The layout is apparently host accessible.
         view_type::m_host_layout = view_type::m_layout;
@@ -270,18 +291,19 @@ VECMEM_HOST void buffer<schema<VARTYPES...>>::setup_resizable(
 
 }  // namespace edm
 
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::schema<VARTYPES...>> get_data(
-    edm::buffer<edm::schema<VARTYPES...>>& buffer) {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<edm::view<edm::schema<VARTYPES...>, INTERFACE>> get_data(
+    edm::buffer<edm::schema<VARTYPES...>, INTERFACE>& buffer) {
 
-    return buffer;
+    return buffer.get_view();
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>
-get_data(const edm::buffer<edm::schema<VARTYPES...>>& buffer) {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<
+    edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
+get_data(const edm::buffer<edm::schema<VARTYPES...>, INTERFACE>& buffer) {
 
-    return buffer;
+    return buffer.get_view();
 }
 
 }  // namespace vecmem

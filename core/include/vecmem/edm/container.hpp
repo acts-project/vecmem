@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -43,12 +43,12 @@ struct container {
     using host = interface_type<vecmem::edm::host<schema_type, interface_type>>;
 
     /// (Non-const) Data type
-    using data = vecmem::edm::data<schema_type>;
+    using data = vecmem::edm::data<schema_type, interface_type>;
     /// (Const) Data type
-    using const_data = vecmem::edm::data<const_schema_type>;
+    using const_data = vecmem::edm::data<const_schema_type, interface_type>;
 
     /// Buffer type
-    using buffer = vecmem::edm::buffer<schema_type>;
+    using buffer = vecmem::edm::buffer<schema_type, interface_type>;
 #endif  // __cplusplus >= 201700L
 
     /// (Non-const) Device container type
@@ -59,9 +59,10 @@ struct container {
         interface_type<vecmem::edm::device<const_schema_type, interface_type>>;
 
     /// (Non-const) View type
-    using view = vecmem::edm::view<schema_type>;
+    using view = interface_type<vecmem::edm::view<schema_type, interface_type>>;
     /// (Const) view type
-    using const_view = vecmem::edm::view<const_schema_type>;
+    using const_view =
+        interface_type<vecmem::edm::view<const_schema_type, interface_type>>;
 
 };  // struct container
 

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2024 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -30,8 +30,8 @@ TEST(core_edm_device_test, construct) {
                             vecmem::edm::type::jagged_vector<double>>;
     using const_schema = vecmem::edm::details::add_const_t<schema>;
 
-    vecmem::edm::view<schema> view1{};
-    vecmem::edm::view<const_schema> view2{};
+    vecmem::edm::view<schema, interface> view1{};
+    vecmem::edm::view<const_schema, interface> view2{};
 
     vecmem::edm::device<schema, interface> device1{view1};
     vecmem::edm::device<const_schema, interface> device2{view1};
@@ -47,8 +47,9 @@ TEST(core_edm_device_test, members) {
                                        vecmem::edm::type::vector<float>>;
     using const_schema = vecmem::edm::details::add_const_t<schema>;
 
-    vecmem::edm::view<schema> view{2};  // 2 is the size of the vector variable,
-                                        // not the number of variables
+    vecmem::edm::view<schema, interface> view{
+        2};  // 2 is the size of the vector variable,
+             // not the number of variables
     view.get<0>() = &value1;
     view.get<1>() = {static_cast<unsigned int>(value2.size()), value2.data()};
 

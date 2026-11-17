@@ -12,12 +12,13 @@
 namespace vecmem {
 namespace edm {
 
-template <typename... VARTYPES>
-VECMEM_HOST edm::data<edm::schema<VARTYPES...>>::data() : view_type(0u) {}
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST edm::data<edm::schema<VARTYPES...>, INTERFACE>::data()
+    : view_type(0u) {}
 
-template <typename... VARTYPES>
-VECMEM_HOST edm::data<edm::schema<VARTYPES...>>::data(size_type size,
-                                                      memory_resource& resource)
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST edm::data<edm::schema<VARTYPES...>, INTERFACE>::data(
+    size_type size, memory_resource& resource)
     : view_type(size),
       m_data{std::make_tuple(
           details::data_alloc<VARTYPES>::make(size, resource)...)} {
@@ -27,34 +28,54 @@ VECMEM_HOST edm::data<edm::schema<VARTYPES...>>::data(size_type size,
         view_type::m_views, m_data, std::index_sequence_for<VARTYPES...>());
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST auto edm::data<edm::schema<VARTYPES...>>::variables()
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::variables()
     -> tuple_type& {
 
     return m_data;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST auto edm::data<edm::schema<VARTYPES...>>::variables() const
-    -> const tuple_type& {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::variables()
+    const -> const tuple_type& {
 
     return m_data;
 }
 
-}  // namespace edm
+template <typename... VARTYPES, template <typename> class INTERFACE>
+auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::get_view()
+    -> interface_type<view<schema_type, interface_type>> {
 
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::schema<VARTYPES...>>& get_data(
-    edm::data<edm::schema<VARTYPES...>>& data) {
-
-    return data;
+    interface_type<view<schema_type, interface_type>> result;
+    result = *this;
+    return result;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>
-get_data(const edm::data<edm::schema<VARTYPES...>>& data) {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::get_view() const
+    -> interface_type<view<details::add_const_t<schema_type>, interface_type>> {
 
-    return data;
+    interface_type<view<details::add_const_t<schema_type>, interface_type>>
+        result;
+    result = *this;
+    return result;
+}
+
+}  // namespace edm
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<edm::view<edm::schema<VARTYPES...>, INTERFACE>> get_data(
+    edm::data<edm::schema<VARTYPES...>, INTERFACE>& data) {
+
+    return data.get_view();
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<
+    edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
+get_data(const edm::data<edm::schema<VARTYPES...>, INTERFACE>& data) {
+
+    return data.get_view();
 }
 
 }  // namespace vecmem

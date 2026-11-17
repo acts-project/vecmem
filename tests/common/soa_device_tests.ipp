@@ -38,7 +38,9 @@ void soa_device_tests_base<CONTAINER>::modify_managed(
     }
 
     // Run a kernel that executes the modify function on the second container.
-    if ((*device_modify)(vecmem::get_data(container2)) == false) {
+    auto data2 = vecmem::get_data(container2);
+    auto view2 = vecmem::get_data(data2);
+    if ((*device_modify)(view2) == false) {
         GTEST_SKIP();
     }
 
@@ -82,7 +84,7 @@ void soa_device_tests_base<CONTAINER>::modify_device(
     }
 
     // Run a kernel that executes the modify function on the device buffer.
-    if ((*device_modify)(buffer) == false) {
+    if ((*device_modify)(vecmem::get_data(buffer)) == false) {
         GTEST_SKIP();
     }
 
@@ -124,7 +126,7 @@ void soa_device_tests_base<CONTAINER>::fill_device(
     copy.setup(buffer2)->wait();
 
     // Run a kernel that fills the buffer.
-    if ((*device_fill)(buffer2) == false) {
+    if ((*device_fill)(vecmem::get_data(buffer2)) == false) {
         GTEST_SKIP();
     }
 

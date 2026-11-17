@@ -178,7 +178,7 @@ private:
 /// @return A (non-const) data object describing the host container
 ///
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST edm::data<edm::schema<VARTYPES...>> get_data(
+VECMEM_HOST INTERFACE<edm::data<edm::schema<VARTYPES...>, INTERFACE>> get_data(
     edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
     memory_resource* resource = nullptr);
 
@@ -190,7 +190,8 @@ VECMEM_HOST edm::data<edm::schema<VARTYPES...>> get_data(
 /// @return A (const) data object describing the host container
 ///
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>
+VECMEM_HOST INTERFACE<
+    edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
 get_data(const edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
          memory_resource* resource = nullptr);
 

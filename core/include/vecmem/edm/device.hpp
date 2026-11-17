@@ -42,15 +42,16 @@ class device<schema<VARTYPES...>, INTERFACE> {
 public:
     /// The schema describing the device-accessible variables
     using schema_type = schema<VARTYPES...>;
-    /// Size type used for the container
-    using size_type = typename view<schema_type>::size_type;
-    /// Pointer type to the size of the container
-    using size_pointer = typename view<schema_type>::size_pointer;
-    /// The tuple type holding all of the the individual "device objects"
-    using tuple_type = tuple<typename details::device_type<VARTYPES>::type...>;
     /// The type of the interface used for the proxy objects
     template <typename T>
     using interface_type = INTERFACE<T>;
+    /// Size type used for the container
+    using size_type = typename view<schema_type, interface_type>::size_type;
+    /// Pointer type to the size of the container
+    using size_pointer =
+        typename view<schema_type, interface_type>::size_pointer;
+    /// The tuple type holding all of the the individual "device objects"
+    using tuple_type = tuple<typename details::device_type<VARTYPES>::type...>;
     /// The type of the (non-const) proxy objects for the container elements
     using proxy_type =
         interface_type<proxy<schema_type, details::proxy_domain::device,
@@ -71,7 +72,7 @@ public:
 
     /// Constructor from an approptiate view
     VECMEM_HOST_AND_DEVICE
-    explicit device(const view<schema_type>& view);
+    explicit device(const view<schema_type, interface_type>& view);
 
     /// @}
 
