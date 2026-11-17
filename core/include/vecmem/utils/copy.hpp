@@ -76,7 +76,7 @@ public:
             /// The number of copy types, useful for technical reasons
             count = 5
         };  // enum copy_type
-    };  // struct type
+    };      // struct type
 
     /// Event type used by the copy class
     using event_type = std::unique_ptr<abstract_event>;
