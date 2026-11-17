@@ -51,9 +51,14 @@ public:
     template <typename T>
     using interface_type = INTERFACE<T>;
     /// Base view type
-    using view_type = view<schema_type, interface_type>;
+    using base_type = view<schema_type, interface_type>;
+    /// Non-const view type
+    using view_type = interface_type<view<schema_type, interface_type>>;
+    /// Constant view type
+    using const_view_type =
+        interface_type<view<details::add_const_t<schema_type>, interface_type>>;
     /// Size type used for the container
-    using size_type = typename view_type::size_type;
+    using size_type = typename base_type::size_type;
     /// The tuple type holding all of the data objects for the individual
     /// variables
     using tuple_type =
@@ -92,9 +97,10 @@ public:
 
     /// @}
 
-    interface_type<view<schema_type, interface_type>> get_view();
-    interface_type<view<details::add_const_t<schema_type>, interface_type>>
-    get_view() const;
+    /// Get a non-const view for this data object
+    VECMEM_HOST view_type get_view();
+    /// Get a constant view for this data object
+    VECMEM_HOST const_view_type get_view() const;
 
 private:
     /// Variable holding data for the jagged vector variables

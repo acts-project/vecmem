@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -115,10 +115,6 @@ public:
     view& operator=(const view&) = default;
     /// Move assignment operator
     view& operator=(view&&) noexcept = default;
-
-    /// Constructor from a derived type
-    // VECMEM_HOST_AND_DEVICE
-    // view(const interface_type<view>& parent);
 
     /// Assignment operator from a (possibly/slightly) different view
     ///

@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -36,11 +36,6 @@ VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>, INTERFACE>::view(
       m_payload{other.payload()},
       m_layout{other.layout()},
       m_host_layout{other.host_layout()} {}
-
-// template <typename... VARTYPES, template <typename> class INTERFACE>
-// VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>, INTERFACE>::view(
-//     const interface_type<view>& parent)
-//     : view(static_cast<const view&>(parent)) {}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 template <typename... OTHERTYPES, typename>

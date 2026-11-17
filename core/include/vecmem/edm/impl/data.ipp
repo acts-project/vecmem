@@ -14,18 +14,18 @@ namespace edm {
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST edm::data<edm::schema<VARTYPES...>, INTERFACE>::data()
-    : view_type(0u) {}
+    : base_type(0u) {}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST edm::data<edm::schema<VARTYPES...>, INTERFACE>::data(
     size_type size, memory_resource& resource)
-    : view_type(size),
+    : base_type(size),
       m_data{std::make_tuple(
           details::data_alloc<VARTYPES>::make(size, resource)...)} {
 
     // Set up the views for the jagged vector variables correctly.
     details::data_view_assign<VARTYPES...>(
-        view_type::m_views, m_data, std::index_sequence_for<VARTYPES...>());
+        base_type::m_views, m_data, std::index_sequence_for<VARTYPES...>());
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
@@ -43,20 +43,18 @@ VECMEM_HOST auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::variables()
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::get_view()
-    -> interface_type<view<schema_type, interface_type>> {
+auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::get_view() -> view_type {
 
-    interface_type<view<schema_type, interface_type>> result;
+    view_type result;
     result = *this;
     return result;
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::get_view() const
-    -> interface_type<view<details::add_const_t<schema_type>, interface_type>> {
+    -> const_view_type {
 
-    interface_type<view<details::add_const_t<schema_type>, interface_type>>
-        result;
+    const_view_type result;
     result = *this;
     return result;
 }
