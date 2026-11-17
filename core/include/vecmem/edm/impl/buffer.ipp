@@ -21,12 +21,13 @@ namespace vecmem {
 namespace edm {
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer() : base_type(0u) {}
+VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer()
+    : view<schema<VARTYPES...>, INTERFACE>(0u) {}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer(
     size_type capacity, memory_resource& mr, vecmem::data::buffer_type type)
-    : base_type(capacity) {
+    : view<schema<VARTYPES...>, INTERFACE>(capacity) {
 
     // Make sure that this constructor is not used for a container that has
     // jagged vectors in it.
@@ -59,7 +60,8 @@ VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer(
     const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
     memory_resource& main_mr, memory_resource* host_mr,
     vecmem::data::buffer_type type)
-    : base_type(static_cast<size_type>(capacities.size())) {
+    : view<schema<VARTYPES...>, INTERFACE>(
+          static_cast<size_type>(capacities.size())) {
 
     // Make sure that this constructor is only used for a container that has
     // jagged vectors in it.
@@ -97,18 +99,20 @@ buffer<schema<VARTYPES...>, INTERFACE>::host_resource() const {
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-auto buffer<schema<VARTYPES...>, INTERFACE>::get_view() -> view_type {
+INTERFACE<view<schema<VARTYPES...>, INTERFACE>>
+buffer<schema<VARTYPES...>, INTERFACE>::get_view() {
 
-    view_type result;
+    INTERFACE<view<schema<VARTYPES...>, INTERFACE>> result;
     result = *this;
     return result;
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-auto buffer<schema<VARTYPES...>, INTERFACE>::get_view() const
-    -> const_view_type {
+INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
+buffer<schema<VARTYPES...>, INTERFACE>::get_view() const {
 
-    const_view_type result;
+    INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
+        result;
     result = *this;
     return result;
 }
@@ -141,13 +145,13 @@ VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_fixed(
             details::buffer_alloc<VARTYPES>::payload_size(capacities)...);
 
     // Set the base class's memory views.
-    base_type::m_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
+    this->m_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
         layout_ptrs,
         {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
-    base_type::m_payload = details::find_payload_view<INTERFACE, VARTYPES...>(
+    this->m_payload = details::find_payload_view<INTERFACE, VARTYPES...>(
         payload_ptrs,
         {details::buffer_alloc<VARTYPES>::payload_size(capacities)...});
-    base_type::m_size = {
+    this->m_size = {
         static_cast<typename base_type::memory_view_type::size_type>(0),
         nullptr};
 
@@ -162,17 +166,16 @@ VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_fixed(
                 details::buffer_alloc<VARTYPES>::layout_size(capacities)...);
 
         // Set the base class's memory view.
-        base_type::m_host_layout =
-            details::find_layout_view<INTERFACE, VARTYPES...>(
-                host_layout_ptrs,
-                {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
+        this->m_host_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
+            host_layout_ptrs,
+            {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
     } else {
         // The layout is apparently host accessible.
-        base_type::m_host_layout = base_type::m_layout;
+        this->m_host_layout = this->m_layout;
     }
 
     // Initialize the views from all the raw pointers.
-    base_type::m_views =
+    this->m_views =
         details::make_buffer_views<SIZE_TYPE, SIZE_ALLOC, VARTYPES...>(
             capacities, layout_ptrs, host_layout_ptrs, payload_ptrs,
             std::index_sequence_for<VARTYPES...>{});
@@ -222,7 +225,7 @@ VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_resizable(
                 details::buffer_alloc<VARTYPES>::layout_size(capacities)...,
                 details::buffer_alloc<VARTYPES>::payload_size(capacities)...);
         // Point the base class at the size array.
-        base_type::m_size = {
+        this->m_size = {
             static_cast<typename base_type::memory_view_type::size_type>(
                 (details::buffer_alloc<VARTYPES>::layout_size(capacities) +
                  ...) *
@@ -243,7 +246,7 @@ VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_resizable(
                 details::buffer_alloc<VARTYPES>::layout_size(capacities)...,
                 details::buffer_alloc<VARTYPES>::payload_size(capacities)...);
         // Point the base class at the size variable.
-        base_type::m_size = {
+        this->m_size = {
             static_cast<typename base_type::memory_view_type::size_type>(
                 sizeof(typename base_type::size_type)),
             reinterpret_cast<typename base_type::memory_view_type::pointer>(
@@ -253,10 +256,10 @@ VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_resizable(
     }
 
     // Set the base class's memory views.
-    base_type::m_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
+    this->m_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
         layout_ptrs,
         {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
-    base_type::m_payload = details::find_payload_view<INTERFACE, VARTYPES...>(
+    this->m_payload = details::find_payload_view<INTERFACE, VARTYPES...>(
         payload_ptrs,
         {details::buffer_alloc<VARTYPES>::payload_size(capacities)...});
 
@@ -271,17 +274,16 @@ VECMEM_HOST void buffer<schema<VARTYPES...>, INTERFACE>::setup_resizable(
                 details::buffer_alloc<VARTYPES>::layout_size(capacities)...);
 
         // Set the base class's memory view.
-        base_type::m_host_layout =
-            details::find_layout_view<INTERFACE, VARTYPES...>(
-                host_layout_ptrs,
-                {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
+        this->m_host_layout = details::find_layout_view<INTERFACE, VARTYPES...>(
+            host_layout_ptrs,
+            {details::buffer_alloc<VARTYPES>::layout_size(capacities)...});
     } else {
         // The layout is apparently host accessible.
-        base_type::m_host_layout = base_type::m_layout;
+        this->m_host_layout = this->m_layout;
     }
 
     // Initialize the views from all the raw pointers.
-    base_type::m_views =
+    this->m_views =
         details::make_buffer_views<SIZE_TYPE, SIZE_ALLOC, VARTYPES...>(
             capacities, sizes_ptrs, layout_ptrs, host_layout_ptrs, payload_ptrs,
             std::index_sequence_for<VARTYPES...>{});

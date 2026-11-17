@@ -181,11 +181,6 @@ public:
     using interface_type = INTERFACE<T>;
     /// Base view type
     using base_type = view<schema_type, interface_type>;
-    /// Non-const view type
-    using view_type = interface_type<view<schema_type, interface_type>>;
-    /// Constant view type
-    using const_view_type =
-        interface_type<view<details::add_const_t<schema_type>, interface_type>>;
     /// Size type used for the container
     using size_type = typename base_type::size_type;
     /// Type holding on to the memory managed by this object
@@ -245,9 +240,11 @@ public:
     memory_resource* host_resource() const;
 
     /// Get a non-const view for this buffer
-    VECMEM_HOST view_type get_view();
+    VECMEM_HOST INTERFACE<view<schema<VARTYPES...>, INTERFACE>> get_view();
     /// Get a constant view for this buffer
-    VECMEM_HOST const_view_type get_view() const;
+    VECMEM_HOST
+    INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
+    get_view() const;
 
 private:
     /// Set up a fixed sized buffer

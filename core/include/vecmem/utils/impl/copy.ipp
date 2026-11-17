@@ -484,8 +484,9 @@ async_sizes<typename data::vector_view<TYPE>::size_type> copy::get_sizes(
     return {std::move(result), vecmem::copy::do_create_event()};
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
-void copy::setup(ignore_event_t, edm::view<SCHEMA, INTERFACE> data) const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+void copy::setup(ignore_event_t,
+                 edm::view<edm::schema<VARTYPES...>, INTERFACE> data) const {
 
     // Copy the data layout to the device, if needed.
     if (data.layout().ptr() != data.host_layout().ptr()) {
@@ -508,16 +509,18 @@ void copy::setup(ignore_event_t, edm::view<SCHEMA, INTERFACE> data) const {
                      data.size().size(), static_cast<void*>(data.size().ptr()));
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
-copy::event_type copy::setup(edm::view<SCHEMA, INTERFACE> data) const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+copy::event_type copy::setup(
+    edm::view<edm::schema<VARTYPES...>, INTERFACE> data) const {
 
     setup(ignore_event, data);
     // Return a new event.
     return do_create_event();
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
-void copy::memset(ignore_event_t, edm::view<SCHEMA, INTERFACE> data,
+template <typename... VARTYPES, template <typename> class INTERFACE>
+void copy::memset(ignore_event_t,
+                  edm::view<edm::schema<VARTYPES...>, INTERFACE> data,
                   int value) const {
 
     // For buffers, we can do this in one go.
@@ -529,27 +532,30 @@ void copy::memset(ignore_event_t, edm::view<SCHEMA, INTERFACE> data,
     }
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
-copy::event_type copy::memset(edm::view<SCHEMA, INTERFACE> data,
-                              int value) const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+copy::event_type copy::memset(
+    edm::view<edm::schema<VARTYPES...>, INTERFACE> data, int value) const {
 
     memset(ignore_event, data, value);
     // Return a new event.
     return do_create_event();
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
-edm::buffer<edm::details::remove_cv_t<SCHEMA>, INTERFACE> copy::to(
-    const edm::view<SCHEMA, INTERFACE>& data, memory_resource& resource,
-    [[maybe_unused]] memory_resource* host_access_resource,
-    type::copy_type cptype) const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+edm::buffer<edm::details::remove_cv_t<edm::schema<VARTYPES...>>, INTERFACE>
+copy::to(const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data,
+         memory_resource& resource,
+         [[maybe_unused]] memory_resource* host_access_resource,
+         type::copy_type cptype) const {
 
     // Create the result buffer object.
     const data::buffer_type btype =
         ((data.size().ptr() != nullptr) ? data::buffer_type::resizable
                                         : data::buffer_type::fixed_size);
-    edm::buffer<edm::details::remove_cv_t<SCHEMA>, INTERFACE> result;
-    if constexpr (edm::details::has_jagged_vector<SCHEMA>::value) {
+    edm::buffer<edm::details::remove_cv_t<edm::schema<VARTYPES...>>, INTERFACE>
+        result;
+    if constexpr (edm::details::has_jagged_vector<
+                      edm::schema<VARTYPES...>>::value) {
         // Set up a buffer that has (a) jagged vector(s).
         result = {edm::get_capacities(data), resource, host_access_resource,
                   btype};
@@ -582,11 +588,25 @@ edm::buffer<edm::details::remove_cv_t<SCHEMA>, INTERFACE> copy::to(
     return result;
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE>
+copy::event_type copy::operator()(
+    const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+                    INTERFACE>& from_view,
+    edm::view<edm::schema<VARTYPES...>, INTERFACE> to_view,
+    type::copy_type cptype) const {
+
+    operator()(ignore_event, from_view, to_view, cptype);
+    // Return a new event.
+    return do_create_event();
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
 void copy::operator()(
     ignore_event_t,
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
-    edm::view<SCHEMA, INTERFACE> to_view, type::copy_type cptype) const {
+    const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+                    INTERFACE>& from_view,
+    edm::view<edm::schema<VARTYPES...>, INTERFACE> to_view,
+    type::copy_type cptype) const {
 
     // First, handle the simple case, when both views have a contiguous memory
     // layout.
@@ -634,21 +654,24 @@ void copy::operator()(
     copy_payload_impl<0>(from_view, to_view, cptype);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 copy::event_type copy::operator()(
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
-    edm::view<SCHEMA, INTERFACE> to_view, type::copy_type cptype) const {
+    const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+                    INTERFACE>& from_view,
+    edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
+    type::copy_type cptype) const {
 
-    operator()(ignore_event, from_view, to_view, cptype);
-    // Return a new event.
+    operator()(ignore_event, from_view, to_vec, cptype);
     return do_create_event();
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 void copy::operator()(
     ignore_event_t,
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
-    edm::host<SCHEMA, INTERFACE>& to_vec, type::copy_type cptype) const {
+    const edm::view<edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+                    INTERFACE>& from_view,
+    edm::host<edm::schema<VARTYPES...>, INTERFACE>& to_vec,
+    type::copy_type cptype) const {
 
     // Resize the output object to the correct size(s).
     resize_impl<0>(from_view, to_vec, cptype);
@@ -657,21 +680,14 @@ void copy::operator()(
     operator()(ignore_event, from_view, vecmem::get_data(to_vec), cptype);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
-copy::event_type copy::operator()(
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
-    edm::host<SCHEMA, INTERFACE>& to_vec, type::copy_type cptype) const {
-
-    operator()(ignore_event, from_view, to_vec, cptype);
-    return do_create_event();
-}
-
-template <typename SCHEMA, template <typename> class INTERFACE>
-typename edm::view<SCHEMA, INTERFACE>::size_type copy::get_size(
-    const edm::view<SCHEMA, INTERFACE>& data) const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+typename edm::view<edm::schema<VARTYPES...>, INTERFACE>::size_type
+copy::get_size(
+    const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data) const {
 
     // Helper result value type.
-    using value_type = typename edm::view<SCHEMA, INTERFACE>::size_type;
+    using value_type =
+        typename edm::view<edm::schema<VARTYPES...>, INTERFACE>::size_type;
 
     // Start by taking the capacity of the container.
     value_type size = data.capacity();
@@ -679,7 +695,8 @@ typename edm::view<SCHEMA, INTERFACE>::size_type copy::get_size(
     // If there are jagged vectors in the container and/or the container is not
     // resizable, we're done. It is done in two separate if statements to avoid
     // MSVC trying to be too smart, and giving a warning...
-    if constexpr (edm::details::has_jagged_vector<SCHEMA>::value) {
+    if constexpr (edm::details::has_jagged_vector<
+                      edm::schema<VARTYPES...>>::value) {
         return size;
     } else {
         // All the rest is put into an else block, to avoid MSVC trying to be
@@ -704,18 +721,20 @@ typename edm::view<SCHEMA, INTERFACE>::size_type copy::get_size(
     }
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
-async_size<typename edm::view<SCHEMA, INTERFACE>::size_type> copy::get_size(
-    const edm::view<SCHEMA, INTERFACE>& data,
-    memory_resource& pinnedHostMr) const {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+async_size<typename edm::view<edm::schema<VARTYPES...>, INTERFACE>::size_type>
+copy::get_size(const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data,
+               memory_resource& pinnedHostMr) const {
 
     // Helper result value type.
-    using value_type = typename edm::view<SCHEMA, INTERFACE>::size_type;
+    using value_type =
+        typename edm::view<edm::schema<VARTYPES...>, INTERFACE>::size_type;
 
     // If there are jagged vectors in the container and/or the container is not
     // resizable, we're done. It is done in two separate if statements to avoid
     // MSVC trying to be too smart, and giving a warning...
-    if constexpr (edm::details::has_jagged_vector<SCHEMA>::value) {
+    if constexpr (edm::details::has_jagged_vector<
+                      edm::schema<VARTYPES...>>::value) {
         // Create the result value, in "default" memory.
         auto value = make_unique_alloc<value_type>(*(get_default_resource()));
         *value = data.capacity();
@@ -746,22 +765,22 @@ async_size<typename edm::view<SCHEMA, INTERFACE>::size_type> copy::get_size(
     }
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 std::vector<data::vector_view<int>::size_type> copy::get_sizes(
-    const edm::view<SCHEMA, INTERFACE>& data) const {
+    const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data) const {
 
     // Make sure that there's a jagged vector in here.
     static_assert(
-        edm::details::has_jagged_vector<SCHEMA>::value,
+        edm::details::has_jagged_vector<edm::schema<VARTYPES...>>::value,
         "Function can only be used on containers with jagged vectors");
 
     // Get the sizes using the helper function.
     return get_sizes_impl<0>(data);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 async_sizes<data::vector_view<int>::size_type> copy::get_sizes(
-    const edm::view<SCHEMA, INTERFACE>& data,
+    const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data,
     memory_resource& pinnedHostMr) const {
 
     // Get the sizes using the helper function.

@@ -19,7 +19,7 @@ namespace edm {
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST_AND_DEVICE device<schema<VARTYPES...>, INTERFACE>::device(
-    const view<schema_type, interface_type>& view)
+    const edm::view<schema<VARTYPES...>, INTERFACE>& view)
     : m_capacity{view.capacity()},
       m_size{details::device_size_pointer<vecmem::details::disjunction_v<
           type::details::is_jagged_vector<VARTYPES>...>>::get(view.size())},

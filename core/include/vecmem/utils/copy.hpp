@@ -246,86 +246,105 @@ public:
     /// @}
 
     /// @name SoA container handling functions
+    ///
+    /// Note that we need to "spell out" the variadic template schema
+    /// definitions in these functions for the benefit of some of the
+    /// compilers. Since technically in these public functions the exact
+    /// variadic type specification would not actually be needed. (And with
+    /// some compilers, it's not...)
+    ///
     /// @{
 
     /// Set up the internal state of a buffer correctly on a device
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    VECMEM_NODISCARD event_type setup(edm::view<SCHEMA, INTERFACE> data) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    VECMEM_NODISCARD event_type
+    setup(edm::view<edm::schema<VARTYPES...>, INTERFACE> data) const;
 
     /// Set up the internal state of a buffer correctly on a device without
     /// returning an event
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    void setup(ignore_event_t, edm::view<SCHEMA, INTERFACE> data) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    void setup(ignore_event_t,
+               edm::view<edm::schema<VARTYPES...>, INTERFACE> data) const;
 
     /// Set all bytes of the container to some value
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    VECMEM_NODISCARD event_type memset(edm::view<SCHEMA, INTERFACE> data,
-                                       int value) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    VECMEM_NODISCARD event_type memset(
+        edm::view<edm::schema<VARTYPES...>, INTERFACE> data, int value) const;
 
     /// Set all bytes of the container to some value without returning an
     /// event
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    void memset(ignore_event_t, edm::view<SCHEMA, INTERFACE> data,
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    void memset(ignore_event_t,
+                edm::view<edm::schema<VARTYPES...>, INTERFACE> data,
                 int value) const;
 
     /// Copy a jagged vector to the specified memory resource
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    edm::buffer<edm::details::remove_cv_t<SCHEMA>, INTERFACE> to(
-        const edm::view<SCHEMA, INTERFACE>& data, memory_resource& resource,
-        memory_resource* host_access_resource = nullptr,
-        type::copy_type cptype = type::unknown) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    edm::buffer<edm::details::remove_cv_t<edm::schema<VARTYPES...>>, INTERFACE>
+    to(const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data,
+       memory_resource& resource,
+       memory_resource* host_access_resource = nullptr,
+       type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    VECMEM_NODISCARD event_type operator()(
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
-        edm::view<SCHEMA, INTERFACE> to,
-        type::copy_type cptype = type::unknown) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    VECMEM_NODISCARD event_type
+    operator()(const edm::view<
+                   edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+                   INTERFACE>& from,
+               edm::view<edm::schema<VARTYPES...>, INTERFACE> to,
+               type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views without returning an event
-    template <typename SCHEMA, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE>
     void operator()(
         ignore_event_t,
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
-        edm::view<SCHEMA, INTERFACE> to,
+        const edm::view<
+            edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+            INTERFACE>& from,
+        edm::view<edm::schema<VARTYPES...>, INTERFACE> to,
         type::copy_type cptype = type::unknown) const;
 
     /// Copy from a view, into a host container
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    VECMEM_NODISCARD event_type operator()(
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
-        edm::host<SCHEMA, INTERFACE>& to,
-        type::copy_type cptype = type::unknown) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    VECMEM_NODISCARD event_type
+    operator()(const edm::view<
+                   edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+                   INTERFACE>& from,
+               edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
+               type::copy_type cptype = type::unknown) const;
 
     /// Copy from a view into a host container without returning an event
-    template <typename SCHEMA, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE>
     void operator()(
         ignore_event_t,
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
-        edm::host<SCHEMA, INTERFACE>& to,
+        const edm::view<
+            edm::schema<edm::type::details::add_const_t<VARTYPES>...>,
+            INTERFACE>& from,
+        edm::host<edm::schema<VARTYPES...>, INTERFACE>& to,
         type::copy_type cptype = type::unknown) const;
 
     /// Get the (outer) size of a (resizable) SoA container
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    typename edm::view<SCHEMA, INTERFACE>::size_type get_size(
-        const edm::view<SCHEMA, INTERFACE>& data) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    typename edm::view<edm::schema<VARTYPES...>, INTERFACE>::size_type get_size(
+        const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data) const;
 
     /// Get the (outer) size of a (resizable) SoA container asynchronously
-    template <typename SCHEMA, template <typename> class INTERFACE>
-    VECMEM_NODISCARD
-        async_size<typename edm::view<SCHEMA, INTERFACE>::size_type>
-        get_size(const edm::view<SCHEMA, INTERFACE>& data,
-                 memory_resource& pinnedHostMr) const;
+    template <typename... VARTYPES, template <typename> class INTERFACE>
+    VECMEM_NODISCARD async_size<
+        typename edm::view<edm::schema<VARTYPES...>, INTERFACE>::size_type>
+    get_size(const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data,
+             memory_resource& pinnedHostMr) const;
 
     /// Get the (inner) size of a (resizable) SoA container
-    template <typename SCHEMA, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE>
     std::vector<data::vector_view<int>::size_type> get_sizes(
-        const edm::view<SCHEMA, INTERFACE>& data) const;
+        const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data) const;
 
     /// Get the (inner) size of a (resizable) SoA container asynchronously
-    template <typename SCHEMA, template <typename> class INTERFACE>
+    template <typename... VARTYPES, template <typename> class INTERFACE>
     VECMEM_NODISCARD async_sizes<data::vector_view<int>::size_type> get_sizes(
-        const edm::view<SCHEMA, INTERFACE>& data,
+        const edm::view<edm::schema<VARTYPES...>, INTERFACE>& data,
         memory_resource& pinnedHostMr) const;
 
     /// @}

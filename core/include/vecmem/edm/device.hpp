@@ -72,7 +72,7 @@ public:
 
     /// Constructor from an approptiate view
     VECMEM_HOST_AND_DEVICE
-    explicit device(const view<schema_type, interface_type>& view);
+    explicit device(const edm::view<schema<VARTYPES...>, INTERFACE>& view);
 
     /// @}
 

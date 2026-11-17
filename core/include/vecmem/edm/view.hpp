@@ -84,7 +84,8 @@ public:
     /// @param size Optional pointer to the size of the container
     ///
     VECMEM_HOST_AND_DEVICE
-    view(size_type capacity, const memory_view_type& size = {0u, nullptr});
+    explicit view(size_type capacity,
+                  const memory_view_type& size = {0u, nullptr});
 
     /// Constructor from a (possibly/slightly) different view
     ///
