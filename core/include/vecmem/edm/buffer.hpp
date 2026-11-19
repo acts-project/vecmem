@@ -159,7 +159,7 @@ class buffer;
 ///
 template <typename... VARTYPES, template <typename> class INTERFACE>
 class buffer<schema<VARTYPES...>, INTERFACE>
-    : public view<schema<VARTYPES...>, INTERFACE> {
+    : public INTERFACE<view<schema<VARTYPES...>, INTERFACE>> {
 
     // Make sure that all variable types are supported. It needs to be possible
     // to copy the contents of all variables with simple memory copies, and
@@ -238,13 +238,6 @@ public:
     /// Get the optional, host-accessible memory resource used by this buffer
     VECMEM_HOST
     memory_resource* host_resource() const;
-
-    /// Get a non-const view for this buffer
-    VECMEM_HOST INTERFACE<view<schema<VARTYPES...>, INTERFACE>> get_view();
-    /// Get a constant view for this buffer
-    VECMEM_HOST
-    INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
-    get_view() const;
 
 private:
     /// Set up a fixed sized buffer

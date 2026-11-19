@@ -22,12 +22,12 @@ namespace edm {
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer()
-    : view<schema<VARTYPES...>, INTERFACE>(0u) {}
+    : INTERFACE<view<schema<VARTYPES...>, INTERFACE>>(0u) {}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer(
     size_type capacity, memory_resource& mr, vecmem::data::buffer_type type)
-    : view<schema<VARTYPES...>, INTERFACE>(capacity) {
+    : INTERFACE<view<schema<VARTYPES...>, INTERFACE>>(capacity) {
 
     // Make sure that this constructor is not used for a container that has
     // jagged vectors in it.
@@ -60,7 +60,7 @@ VECMEM_HOST buffer<schema<VARTYPES...>, INTERFACE>::buffer(
     const std::vector<SIZE_TYPE, SIZE_ALLOC>& capacities,
     memory_resource& main_mr, memory_resource* host_mr,
     vecmem::data::buffer_type type)
-    : view<schema<VARTYPES...>, INTERFACE>(
+    : INTERFACE<view<schema<VARTYPES...>, INTERFACE>>(
           static_cast<size_type>(capacities.size())) {
 
     // Make sure that this constructor is only used for a container that has
@@ -96,25 +96,6 @@ VECMEM_HOST memory_resource*
 buffer<schema<VARTYPES...>, INTERFACE>::host_resource() const {
 
     return m_host_memory.get_deleter().resource();
-}
-
-template <typename... VARTYPES, template <typename> class INTERFACE>
-INTERFACE<view<schema<VARTYPES...>, INTERFACE>>
-buffer<schema<VARTYPES...>, INTERFACE>::get_view() {
-
-    INTERFACE<view<schema<VARTYPES...>, INTERFACE>> result;
-    result = *this;
-    return result;
-}
-
-template <typename... VARTYPES, template <typename> class INTERFACE>
-INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
-buffer<schema<VARTYPES...>, INTERFACE>::get_view() const {
-
-    INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
-        result;
-    result = *this;
-    return result;
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
@@ -295,7 +276,7 @@ template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST INTERFACE<edm::view<edm::schema<VARTYPES...>, INTERFACE>> get_data(
     edm::buffer<edm::schema<VARTYPES...>, INTERFACE>& buffer) {
 
-    return buffer.get_view();
+    return buffer;
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
@@ -303,7 +284,7 @@ VECMEM_HOST INTERFACE<
     edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
 get_data(const edm::buffer<edm::schema<VARTYPES...>, INTERFACE>& buffer) {
 
-    return buffer.get_view();
+    return buffer;
 }
 
 }  // namespace vecmem

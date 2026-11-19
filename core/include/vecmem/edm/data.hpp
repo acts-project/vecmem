@@ -42,7 +42,7 @@ class data;
 ///
 template <typename... VARTYPES, template <typename> class INTERFACE>
 class data<schema<VARTYPES...>, INTERFACE>
-    : public view<schema<VARTYPES...>, INTERFACE> {
+    : public INTERFACE<view<schema<VARTYPES...>, INTERFACE>> {
 
 public:
     /// The schema describing the buffer's payload
@@ -91,13 +91,6 @@ public:
     const tuple_type& variables() const;
 
     /// @}
-
-    /// Get a non-const view for this data object
-    VECMEM_HOST INTERFACE<view<schema<VARTYPES...>, INTERFACE>> get_view();
-    /// Get a constant view for this data object
-    VECMEM_HOST
-    INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
-    get_view() const;
 
 private:
     /// Variable holding data for the jagged vector variables

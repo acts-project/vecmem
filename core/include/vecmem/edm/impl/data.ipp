@@ -14,12 +14,12 @@ namespace edm {
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST edm::data<edm::schema<VARTYPES...>, INTERFACE>::data()
-    : view<schema<VARTYPES...>, INTERFACE>(0u) {}
+    : INTERFACE<view<schema<VARTYPES...>, INTERFACE>>(0u) {}
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST edm::data<edm::schema<VARTYPES...>, INTERFACE>::data(
     size_type size, memory_resource& resource)
-    : view<schema<VARTYPES...>, INTERFACE>(size),
+    : INTERFACE<view<schema<VARTYPES...>, INTERFACE>>(size),
       m_data{std::make_tuple(
           details::data_alloc<VARTYPES>::make(size, resource)...)} {
 
@@ -42,32 +42,13 @@ VECMEM_HOST auto edm::data<edm::schema<VARTYPES...>, INTERFACE>::variables()
     return m_data;
 }
 
-template <typename... VARTYPES, template <typename> class INTERFACE>
-INTERFACE<view<schema<VARTYPES...>, INTERFACE>>
-edm::data<edm::schema<VARTYPES...>, INTERFACE>::get_view() {
-
-    INTERFACE<view<schema<VARTYPES...>, INTERFACE>> result;
-    result = *this;
-    return result;
-}
-
-template <typename... VARTYPES, template <typename> class INTERFACE>
-INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
-edm::data<edm::schema<VARTYPES...>, INTERFACE>::get_view() const {
-
-    INTERFACE<view<details::add_const_t<schema<VARTYPES...>>, INTERFACE>>
-        result;
-    result = *this;
-    return result;
-}
-
 }  // namespace edm
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST INTERFACE<edm::view<edm::schema<VARTYPES...>, INTERFACE>> get_data(
     edm::data<edm::schema<VARTYPES...>, INTERFACE>& data) {
 
-    return data.get_view();
+    return data;
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
@@ -75,7 +56,7 @@ VECMEM_HOST INTERFACE<
     edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
 get_data(const edm::data<edm::schema<VARTYPES...>, INTERFACE>& data) {
 
-    return data.get_view();
+    return data;
 }
 
 }  // namespace vecmem
