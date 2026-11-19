@@ -582,23 +582,21 @@ edm::buffer<edm::details::remove_cv_t<SCHEMA>, INTERFACE> copy::to(
     return result;
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
+template <typename SCHEMA, template <typename> class INTERFACE>
 copy::event_type copy::operator()(
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from_view,
-    edm::view<SCHEMA, INTERFACE2> to_view, type::copy_type cptype) const {
+    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
+    edm::view<SCHEMA, INTERFACE> to_view, type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_view, cptype);
     // Return a new event.
     return do_create_event();
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
+template <typename SCHEMA, template <typename> class INTERFACE>
 void copy::operator()(
     ignore_event_t,
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from_view,
-    edm::view<SCHEMA, INTERFACE2> to_view, type::copy_type cptype) const {
+    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
+    edm::view<SCHEMA, INTERFACE> to_view, type::copy_type cptype) const {
 
     // First, handle the simple case, when both views have a contiguous memory
     // layout.
@@ -646,46 +644,42 @@ void copy::operator()(
     copy_payload_impl<0>(from_view, to_view, cptype);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
-copy::event_type copy::operator()(
-    const edm::view<SCHEMA, INTERFACE1>& from_view,
-    edm::view<SCHEMA, INTERFACE2> to_view, type::copy_type cptype) const {
+template <typename SCHEMA, template <typename> class INTERFACE>
+copy::event_type copy::operator()(const edm::view<SCHEMA, INTERFACE>& from_view,
+                                  edm::view<SCHEMA, INTERFACE> to_view,
+                                  type::copy_type cptype) const {
 
     return operator()(
-        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>{from_view},
+        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>{from_view},
         to_view, cptype);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
+template <typename SCHEMA, template <typename> class INTERFACE>
 void copy::operator()(ignore_event_t,
-                      const edm::view<SCHEMA, INTERFACE1>& from_view,
-                      edm::view<SCHEMA, INTERFACE2> to_view,
+                      const edm::view<SCHEMA, INTERFACE>& from_view,
+                      edm::view<SCHEMA, INTERFACE> to_view,
                       type::copy_type cptype) const {
 
     operator()(
         ignore_event,
-        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>{from_view},
+        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>{from_view},
         to_view, cptype);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
+template <typename SCHEMA, template <typename> class INTERFACE>
 copy::event_type copy::operator()(
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from_view,
-    edm::host<SCHEMA, INTERFACE2>& to_vec, type::copy_type cptype) const {
+    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
+    edm::host<SCHEMA, INTERFACE>& to_vec, type::copy_type cptype) const {
 
     operator()(ignore_event, from_view, to_vec, cptype);
     return do_create_event();
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
+template <typename SCHEMA, template <typename> class INTERFACE>
 void copy::operator()(
     ignore_event_t,
-    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from_view,
-    edm::host<SCHEMA, INTERFACE2>& to_vec, type::copy_type cptype) const {
+    const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from_view,
+    edm::host<SCHEMA, INTERFACE>& to_vec, type::copy_type cptype) const {
 
     // Resize the output object to the correct size(s).
     resize_impl<0>(from_view, to_vec, cptype);
@@ -694,27 +688,25 @@ void copy::operator()(
     operator()(ignore_event, from_view, vecmem::get_data(to_vec), cptype);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
-copy::event_type copy::operator()(
-    const edm::view<SCHEMA, INTERFACE1>& from_view,
-    edm::host<SCHEMA, INTERFACE2>& to_vec, type::copy_type cptype) const {
+template <typename SCHEMA, template <typename> class INTERFACE>
+copy::event_type copy::operator()(const edm::view<SCHEMA, INTERFACE>& from_view,
+                                  edm::host<SCHEMA, INTERFACE>& to_vec,
+                                  type::copy_type cptype) const {
 
     return operator()(
-        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>{from_view},
+        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>{from_view},
         to_vec, cptype);
 }
 
-template <typename SCHEMA, template <typename> class INTERFACE1,
-          template <typename> class INTERFACE2>
+template <typename SCHEMA, template <typename> class INTERFACE>
 void copy::operator()(ignore_event_t,
-                      const edm::view<SCHEMA, INTERFACE1>& from_view,
-                      edm::host<SCHEMA, INTERFACE2>& to_vec,
+                      const edm::view<SCHEMA, INTERFACE>& from_view,
+                      edm::host<SCHEMA, INTERFACE>& to_vec,
                       type::copy_type cptype) const {
 
     operator()(
         ignore_event,
-        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>{from_view},
+        edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>{from_view},
         to_vec, cptype);
 }
 

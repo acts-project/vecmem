@@ -286,71 +286,63 @@ public:
         type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views (from const to non-const)
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
+    template <typename SCHEMA, template <typename> class INTERFACE>
     VECMEM_NODISCARD event_type operator()(
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from,
-        edm::view<SCHEMA, INTERFACE2> to,
+        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
+        edm::view<SCHEMA, INTERFACE> to,
         type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views (from const to non-const) without returning an
     /// event
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
+    template <typename SCHEMA, template <typename> class INTERFACE>
     void operator()(
         ignore_event_t,
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from,
-        edm::view<SCHEMA, INTERFACE2> to,
+        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
+        edm::view<SCHEMA, INTERFACE> to,
         type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views (from non-const to non-const)
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
+    template <typename SCHEMA, template <typename> class INTERFACE>
     VECMEM_NODISCARD event_type
-    operator()(const edm::view<SCHEMA, INTERFACE1>& from,
-               edm::view<SCHEMA, INTERFACE2> to,
+    operator()(const edm::view<SCHEMA, INTERFACE>& from,
+               edm::view<SCHEMA, INTERFACE> to,
                type::copy_type cptype = type::unknown) const;
 
     /// Copy between two views (from non-const to non-const) without returning
     /// an event
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
-    void operator()(ignore_event_t, const edm::view<SCHEMA, INTERFACE1>& from,
-                    edm::view<SCHEMA, INTERFACE2> to,
+    template <typename SCHEMA, template <typename> class INTERFACE>
+    void operator()(ignore_event_t, const edm::view<SCHEMA, INTERFACE>& from,
+                    edm::view<SCHEMA, INTERFACE> to,
                     type::copy_type cptype = type::unknown) const;
 
     /// Copy from a (const) view, into a host container
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
+    template <typename SCHEMA, template <typename> class INTERFACE>
     VECMEM_NODISCARD event_type operator()(
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from,
-        edm::host<SCHEMA, INTERFACE2>& to,
+        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
+        edm::host<SCHEMA, INTERFACE>& to,
         type::copy_type cptype = type::unknown) const;
 
     /// Copy from a (const) view into a host container without returning an
     /// event
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
+    template <typename SCHEMA, template <typename> class INTERFACE>
     void operator()(
         ignore_event_t,
-        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE1>& from,
-        edm::host<SCHEMA, INTERFACE2>& to,
+        const edm::view<edm::details::add_const_t<SCHEMA>, INTERFACE>& from,
+        edm::host<SCHEMA, INTERFACE>& to,
         type::copy_type cptype = type::unknown) const;
 
     /// Copy from a (non-const) view, into a host container
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
+    template <typename SCHEMA, template <typename> class INTERFACE>
     VECMEM_NODISCARD event_type
-    operator()(const edm::view<SCHEMA, INTERFACE1>& from,
-               edm::host<SCHEMA, INTERFACE2>& to,
+    operator()(const edm::view<SCHEMA, INTERFACE>& from,
+               edm::host<SCHEMA, INTERFACE>& to,
                type::copy_type cptype = type::unknown) const;
 
     /// Copy from a (non-const) view into a host container without returning an
     /// event
-    template <typename SCHEMA, template <typename> class INTERFACE1,
-              template <typename> class INTERFACE2>
-    void operator()(ignore_event_t, const edm::view<SCHEMA, INTERFACE1>& from,
-                    edm::host<SCHEMA, INTERFACE2>& to,
+    template <typename SCHEMA, template <typename> class INTERFACE>
+    void operator()(ignore_event_t, const edm::view<SCHEMA, INTERFACE>& from,
+                    edm::host<SCHEMA, INTERFACE>& to,
                     type::copy_type cptype = type::unknown) const;
 
     /// Get the (outer) size of a (resizable) SoA container
