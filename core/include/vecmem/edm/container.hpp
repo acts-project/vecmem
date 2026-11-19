@@ -40,29 +40,28 @@ struct container {
 
 #if __cplusplus >= 201700L
     /// Host container type
-    using host = interface_type<vecmem::edm::host<schema_type, interface_type>>;
+    using host = INTERFACE<vecmem::edm::host<schema_type, INTERFACE>>;
 
     /// (Non-const) Data type
-    using data = vecmem::edm::data<schema_type, interface_type>;
+    using data = vecmem::edm::data<schema_type, INTERFACE>;
     /// (Const) Data type
-    using const_data = vecmem::edm::data<const_schema_type, interface_type>;
+    using const_data = vecmem::edm::data<const_schema_type, INTERFACE>;
 
     /// Buffer type
-    using buffer = vecmem::edm::buffer<schema_type, interface_type>;
+    using buffer = vecmem::edm::buffer<schema_type, INTERFACE>;
 #endif  // __cplusplus >= 201700L
 
     /// (Non-const) Device container type
-    using device =
-        interface_type<vecmem::edm::device<schema_type, interface_type>>;
+    using device = INTERFACE<vecmem::edm::device<schema_type, INTERFACE>>;
     /// (Const) Device container type
     using const_device =
-        interface_type<vecmem::edm::device<const_schema_type, interface_type>>;
+        INTERFACE<vecmem::edm::device<const_schema_type, INTERFACE>>;
 
     /// (Non-const) View type
-    using view = interface_type<vecmem::edm::view<schema_type, interface_type>>;
+    using view = INTERFACE<vecmem::edm::view<schema_type, INTERFACE>>;
     /// (Const) view type
     using const_view =
-        interface_type<vecmem::edm::view<const_schema_type, interface_type>>;
+        INTERFACE<vecmem::edm::view<const_schema_type, INTERFACE>>;
 
 };  // struct container
 
