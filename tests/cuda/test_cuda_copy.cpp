@@ -11,6 +11,7 @@
 #include "../common/soa_copy_tests_hybrid_jagged.hpp"
 
 // VecMem include(s).
+#include "vecmem/memory/cuda/async_device_memory_resource.hpp"
 #include "vecmem/memory/cuda/device_memory_resource.hpp"
 #include "vecmem/memory/cuda/host_memory_resource.hpp"
 #include "vecmem/memory/cuda/managed_memory_resource.hpp"
@@ -26,6 +27,7 @@
 #include <tuple>
 
 // Objects used in the test(s).
+static std::unique_ptr<vecmem::cuda::stream_wrapper> cuda_stream;
 static vecmem::cuda::host_memory_resource cuda_host_resource;
 static vecmem::memory_resource* cuda_host_resource_ptr = &cuda_host_resource;
 static vecmem::cuda::device_memory_resource cuda_device_resource;
@@ -34,11 +36,13 @@ static vecmem::memory_resource* cuda_device_resource_ptr =
 static vecmem::cuda::managed_memory_resource cuda_managed_resource;
 static vecmem::memory_resource* cuda_managed_resource_ptr =
     &cuda_managed_resource;
+static std::unique_ptr<vecmem::cuda::async_device_memory_resource>
+    cuda_async_device_resource;
+static vecmem::memory_resource* cuda_async_device_resource_ptr = nullptr;
 static vecmem::copy cuda_host_copy;
 static vecmem::copy* cuda_host_copy_ptr = &cuda_host_copy;
 static vecmem::cuda::copy cuda_device_copy;
 static vecmem::copy* cuda_device_copy_ptr = &cuda_device_copy;
-static std::unique_ptr<vecmem::cuda::stream_wrapper> cuda_stream;
 static std::unique_ptr<vecmem::cuda::async_copy> cuda_async_device_copy;
 static vecmem::copy* cuda_async_device_copy_ptr = nullptr;
 
@@ -48,6 +52,10 @@ public:
     /// Set up the environment
     void SetUp() override {
         cuda_stream = std::make_unique<vecmem::cuda::stream_wrapper>();
+        cuda_async_device_resource =
+            std::make_unique<vecmem::cuda::async_device_memory_resource>(
+                *cuda_stream);
+        cuda_async_device_resource_ptr = cuda_async_device_resource.get();
         cuda_async_device_copy =
             std::make_unique<vecmem::cuda::async_copy>(*cuda_stream);
         cuda_async_device_copy_ptr = cuda_async_device_copy.get();
@@ -55,8 +63,10 @@ public:
     /// Tear down the environment
     void TearDown() override {
         cuda_async_device_copy.reset();
+        cuda_async_device_resource.reset();
         cuda_stream.reset();
         cuda_async_device_copy_ptr = nullptr;
+        cuda_async_device_resource_ptr = nullptr;
     }
 };
 
@@ -74,6 +84,8 @@ static const auto cuda_copy_configs = testing::Values(
              cuda_host_resource_ptr),
     std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
              cuda_device_resource_ptr, cuda_host_resource_ptr),
+    std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
+             cuda_async_device_resource_ptr, cuda_host_resource_ptr),
     std::tie(cuda_device_copy_ptr, cuda_host_copy_ptr,
              cuda_managed_resource_ptr, cuda_host_resource_ptr),
     std::tie(cuda_async_device_copy_ptr, cuda_host_copy_ptr,
