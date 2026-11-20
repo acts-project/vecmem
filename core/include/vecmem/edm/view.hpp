@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -24,8 +24,8 @@ namespace vecmem {
 /// Namespace for the types implementing Struct-of-Array container support
 namespace edm {
 
-/// Technical base type for @c view<schema<VARTYPES...>>
-template <typename T>
+/// Technical base type for @c view<schema<VARTYPES...>,INTERFACE>
+template <typename T, template <typename> class INTERFACE>
 class view;
 
 /// View of a Struct-of-Arrays container
@@ -36,9 +36,10 @@ class view;
 /// container of variables.
 ///
 /// @tparam ...VARTYPES The variable types described by the view
+/// @tparam INTERFACE   The interface to be used for the view
 ///
-template <typename... VARTYPES>
-class view<schema<VARTYPES...>> {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+class view<schema<VARTYPES...>, INTERFACE> {
 
     // Sanity check(s).
     static_assert(sizeof...(VARTYPES) > 0,
@@ -47,6 +48,9 @@ class view<schema<VARTYPES...>> {
 public:
     /// The schema describing the container view
     using schema_type = schema<VARTYPES...>;
+    /// The type of the interface used for the view
+    template <typename T>
+    using interface_type = INTERFACE<T>;
     /// Size type used for the container
     using size_type = details::size_type;
     /// Pointer type to the size of the container
@@ -69,6 +73,10 @@ public:
 
     /// Default constructor
     view() = default;
+    /// Copy constructor
+    view(const view&) = default;
+    /// Move constructor
+    view(view&&) noexcept = default;
 
     /// Constructor with a capacity and size.
     ///
@@ -76,7 +84,8 @@ public:
     /// @param size Optional pointer to the size of the container
     ///
     VECMEM_HOST_AND_DEVICE
-    view(size_type capacity, const memory_view_type& size = {0u, nullptr});
+    explicit view(size_type capacity,
+                  const memory_view_type& size = {0u, nullptr});
 
     /// Constructor from a (possibly/slightly) different view
     ///
@@ -91,7 +100,7 @@ public:
     ///
     template <
         typename... OTHERTYPES,
-        std::enable_if_t<
+        typename = std::enable_if_t<
             vecmem::details::conjunction_v<std::is_constructible<
                 typename details::view_type<VARTYPES>::type,
                 typename details::view_type<OTHERTYPES>::type>...> &&
@@ -99,8 +108,14 @@ public:
                     vecmem::details::negation<std::is_same<
                         typename details::view_type<VARTYPES>::type,
                         typename details::view_type<OTHERTYPES>::type>>...>,
-            bool> = true>
-    VECMEM_HOST_AND_DEVICE view(const view<schema<OTHERTYPES...>>& other);
+            bool>>
+    VECMEM_HOST_AND_DEVICE view(
+        const view<schema<OTHERTYPES...>, INTERFACE>& other);
+
+    /// Copy assignment operator
+    view& operator=(const view&) = default;
+    /// Move assignment operator
+    view& operator=(view&&) noexcept = default;
 
     /// Assignment operator from a (possibly/slightly) different view
     ///
@@ -111,7 +126,7 @@ public:
     ///
     template <
         typename... OTHERTYPES,
-        std::enable_if_t<
+        typename = std::enable_if_t<
             vecmem::details::conjunction_v<std::is_constructible<
                 typename details::view_type<VARTYPES>::type,
                 typename details::view_type<OTHERTYPES>::type>...> &&
@@ -119,9 +134,9 @@ public:
                     vecmem::details::negation<std::is_same<
                         typename details::view_type<VARTYPES>::type,
                         typename details::view_type<OTHERTYPES>::type>>...>,
-            bool> = true>
+            bool>>
     VECMEM_HOST_AND_DEVICE view& operator=(
-        const view<schema<OTHERTYPES...>>& rhs);
+        const view<schema<OTHERTYPES...>, INTERFACE>& rhs);
 
     /// @}
 
@@ -199,9 +214,9 @@ protected:
 /// @param soa The view to get the capacities from
 /// @return The vector of capacities of the jagged vectors in the view
 ///
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST std::vector<vecmem::data::vector_view<int>::size_type>
-get_capacities(const view<schema<VARTYPES...>>& soa);
+get_capacities(const view<schema<VARTYPES...>, INTERFACE>& soa);
 
 }  // namespace edm
 }  // namespace vecmem

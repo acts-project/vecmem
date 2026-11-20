@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -16,8 +16,8 @@
 namespace vecmem {
 namespace edm {
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>>::view(
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>, INTERFACE>::view(
     size_type capacity, const memory_view_type& size)
     : m_capacity(capacity),
       m_views{},
@@ -26,19 +26,10 @@ VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>>::view(
       m_layout{0, nullptr},
       m_host_layout{0, nullptr} {}
 
-template <typename... VARTYPES>
-template <typename... OTHERTYPES,
-          std::enable_if_t<
-              vecmem::details::conjunction_v<std::is_constructible<
-                  typename details::view_type<VARTYPES>::type,
-                  typename details::view_type<OTHERTYPES>::type>...> &&
-                  vecmem::details::disjunction_v<
-                      vecmem::details::negation<std::is_same<
-                          typename details::view_type<VARTYPES>::type,
-                          typename details::view_type<OTHERTYPES>::type>>...>,
-              bool>>
-VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>>::view(
-    const view<schema<OTHERTYPES...>>& other)
+template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename... OTHERTYPES, typename>
+VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>, INTERFACE>::view(
+    const view<schema<OTHERTYPES...>, INTERFACE>& other)
     : m_capacity{other.capacity()},
       m_views{other.variables()},
       m_size{other.size()},
@@ -46,19 +37,10 @@ VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>>::view(
       m_layout{other.layout()},
       m_host_layout{other.host_layout()} {}
 
-template <typename... VARTYPES>
-template <typename... OTHERTYPES,
-          std::enable_if_t<
-              vecmem::details::conjunction_v<std::is_constructible<
-                  typename details::view_type<VARTYPES>::type,
-                  typename details::view_type<OTHERTYPES>::type>...> &&
-                  vecmem::details::disjunction_v<
-                      vecmem::details::negation<std::is_same<
-                          typename details::view_type<VARTYPES>::type,
-                          typename details::view_type<OTHERTYPES>::type>>...>,
-              bool>>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::operator=(
-    const view<schema<OTHERTYPES...>>& rhs) -> view& {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename... OTHERTYPES, typename>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::operator=(
+    const view<schema<OTHERTYPES...>, INTERFACE>& rhs) -> view& {
 
     // Note that self-assignment with this function should never be a thing.
     // So we don't need to check for it in production code.
@@ -76,79 +58,80 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::operator=(
     return *this;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::capacity() const
-    -> size_type {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::capacity()
+    const -> size_type {
 
     return m_capacity;
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::get()
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::get()
     -> tuple_element_t<INDEX, tuple_type>& {
 
     return vecmem::get<INDEX>(m_views);
 }
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::get() const
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::get() const
     -> const tuple_element_t<INDEX, tuple_type>& {
 
     return vecmem::get<INDEX>(m_views);
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::variables()
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::variables()
     -> tuple_type& {
 
     return m_views;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::variables() const
-    -> const tuple_type& {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::variables()
+    const -> const tuple_type& {
 
     return m_views;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::size() const
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::size() const
     -> const memory_view_type& {
 
     return m_size;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::payload() const
-    -> const memory_view_type& {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::payload()
+    const -> const memory_view_type& {
 
     return m_payload;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::layout() const
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::layout() const
     -> const memory_view_type& {
 
     return m_layout;
 }
 
-template <typename... VARTYPES>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>>::host_layout() const
-    -> const memory_view_type& {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::host_layout()
+    const -> const memory_view_type& {
 
     return m_host_layout;
 }
 
 namespace details {
 
-template <std::size_t INDEX, typename... VARTYPES>
+template <std::size_t INDEX, template <typename> class INTERFACE,
+          typename... VARTYPES>
 struct get_capacities_impl {
 
     VECMEM_HOST
     static std::vector<vecmem::data::vector_view<int>::size_type> get(
-        const view<schema<VARTYPES...>>& soa) {
+        const view<schema<VARTYPES...>, INTERFACE>& soa) {
 
         return get_impl(soa, soa.template get<INDEX>());
     }
@@ -156,18 +139,19 @@ struct get_capacities_impl {
 private:
     template <typename T>
     VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
-    get_impl(const view<schema<VARTYPES...>>& soa, const T&) {
+    get_impl(const view<schema<VARTYPES...>, INTERFACE>& soa, const T&) {
 
-        return get_capacities_impl<INDEX - 1, VARTYPES...>::get(soa);
+        return get_capacities_impl<INDEX - 1, INTERFACE, VARTYPES...>::get(soa);
     }
 
     template <typename T>
     VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
-    get_impl(const view<schema<VARTYPES...>>& soa,
+    get_impl(const view<schema<VARTYPES...>, INTERFACE>& soa,
              const vecmem::data::jagged_vector_view<T>& vec) {
 
         auto this_size = vecmem::data::get_capacities(vec);
-        auto other_size = get_capacities_impl<INDEX - 1, VARTYPES...>::get(soa);
+        auto other_size =
+            get_capacities_impl<INDEX - 1, INTERFACE, VARTYPES...>::get(soa);
         assert(this_size.size() == other_size.size());
         std::vector<vecmem::data::vector_view<int>::size_type> result(
             soa.capacity());
@@ -180,12 +164,12 @@ private:
 
 };  // struct get_capacities_impl
 
-template <typename... VARTYPES>
-struct get_capacities_impl<0u, VARTYPES...> {
+template <template <typename> class INTERFACE, typename... VARTYPES>
+struct get_capacities_impl<0u, INTERFACE, VARTYPES...> {
 
     VECMEM_HOST
     static std::vector<vecmem::data::vector_view<int>::size_type> get(
-        const view<schema<VARTYPES...>>& soa) {
+        const view<schema<VARTYPES...>, INTERFACE>& soa) {
 
         return get_impl(soa, soa.template get<0u>());
     }
@@ -193,7 +177,7 @@ struct get_capacities_impl<0u, VARTYPES...> {
 private:
     template <typename T>
     VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
-    get_impl(const view<schema<VARTYPES...>>& soa, const T&) {
+    get_impl(const view<schema<VARTYPES...>, INTERFACE>& soa, const T&) {
 
         return std::vector<vecmem::data::vector_view<int>::size_type>(
             soa.capacity(), 0);
@@ -201,7 +185,7 @@ private:
 
     template <typename T>
     VECMEM_HOST static std::vector<vecmem::data::vector_view<int>::size_type>
-    get_impl(const view<schema<VARTYPES...>>&,
+    get_impl(const view<schema<VARTYPES...>, INTERFACE>&,
              const vecmem::data::jagged_vector_view<T>& vec) {
 
         return vecmem::data::get_capacities(vec);
@@ -210,16 +194,16 @@ private:
 
 }  // namespace details
 
-template <typename... VARTYPES>
+template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST std::vector<vecmem::data::vector_view<int>::size_type>
-get_capacities(const view<schema<VARTYPES...>>& soa) {
+get_capacities(const view<schema<VARTYPES...>, INTERFACE>& soa) {
 
     // Make sure that there's a jagged vector in here.
     static_assert(
         details::has_jagged_vector<schema<VARTYPES...>>::value,
         "Function can only be used on containers with jagged vectors");
 
-    return details::get_capacities_impl<sizeof...(VARTYPES) - 1,
+    return details::get_capacities_impl<sizeof...(VARTYPES) - 1, INTERFACE,
                                         VARTYPES...>::get(soa);
 }
 
