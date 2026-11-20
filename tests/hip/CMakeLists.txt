@@ -20,6 +20,7 @@ find_package( HIPToolkit REQUIRED )
 # Test all of the HIP library's features.
 vecmem_add_test( hip
    "test_hip_memory_resources.cpp"
+   "test_hip_async_device_memory_resource.cpp"
    "test_hip_containers.cpp" "test_hip_jagged_containers.cpp"
    "test_hip_containers_kernels.hpp" "test_hip_containers_kernels.hip"
    "test_hip_edm.cpp"

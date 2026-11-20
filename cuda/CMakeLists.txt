@@ -22,8 +22,8 @@ vecmem_add_library( vecmem_cuda cuda
    "src/memory/host_memory_resource.cpp"
    "include/vecmem/memory/cuda/managed_memory_resource.hpp"
    "src/memory/managed_memory_resource.cpp"
-   "include/vecmem/memory/cuda/stream_ordered_memory_resource.hpp"
-   "src/memory/stream_ordered_memory_resource.cpp"
+   "include/vecmem/memory/cuda/async_device_memory_resource.hpp"
+   "src/memory/async_device_memory_resource.cpp"
    # Utilities.
    "include/vecmem/utils/cuda/copy.hpp"
    "src/utils/cuda/copy.cpp"

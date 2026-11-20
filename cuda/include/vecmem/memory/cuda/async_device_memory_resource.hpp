@@ -21,15 +21,15 @@ namespace vecmem::cuda {
  * This is an allocator-type memory resource that allocates CUDA device
  * memory asynchronously, on a specific CUDA stream.
  */
-class stream_ordered_memory_resource final : public memory_resource {
+class async_device_memory_resource final : public memory_resource {
 
 public:
     /// Constructor, with the stream to use for the (de-)allocations
     VECMEM_CUDA_EXPORT
-    explicit stream_ordered_memory_resource(const stream_wrapper& stream);
+    explicit async_device_memory_resource(const stream_wrapper& stream);
     /// Destructor
     VECMEM_CUDA_EXPORT
-    ~stream_ordered_memory_resource() override;
+    ~async_device_memory_resource() override;
 
 private:
     /// @name Function(s) implementing @c vecmem::memory_resource
@@ -50,6 +50,6 @@ private:
     /// CUDA stream to use for the (de-)allocations
     stream_wrapper m_stream;
 
-};  // class stream_ordered_memory_resource
+};  // class async_device_memory_resource
 
 }  // namespace vecmem::cuda

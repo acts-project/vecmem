@@ -7,10 +7,10 @@
 
 // VecMem include(s).
 #include <vecmem/memory/binary_page_memory_resource.hpp>
+#include <vecmem/memory/cuda/async_device_memory_resource.hpp>
 #include <vecmem/memory/cuda/device_memory_resource.hpp>
 #include <vecmem/memory/cuda/host_memory_resource.hpp>
 #include <vecmem/memory/cuda/managed_memory_resource.hpp>
-#include <vecmem/memory/cuda/stream_ordered_memory_resource.hpp>
 #include <vecmem/utils/cuda/stream_wrapper.hpp>
 
 // Google benchmark include(s).
@@ -114,12 +114,12 @@ BENCHMARK(BenchmarkCudaManagedBinaryPage)
     ->Range(1, 2UL << 31);
 
 static vecmem::cuda::stream_wrapper stream;
-static vecmem::cuda::stream_ordered_memory_resource stream_ordered_mr(stream);
-void BenchmarkCudaStreamOrdered(benchmark::State& state) {
+static vecmem::cuda::async_device_memory_resource async_device_mr(stream);
+void BenchmarkCudaAsyncDevice(benchmark::State& state) {
     const std::size_t size = static_cast<std::size_t>(state.range(0));
     for (auto _ : state) {
-        void* p = stream_ordered_mr.allocate(size);
-        stream_ordered_mr.deallocate(p, size);
+        void* p = async_device_mr.allocate(size);
+        async_device_mr.deallocate(p, size);
     }
 }
-BENCHMARK(BenchmarkCudaStreamOrdered)->RangeMultiplier(2)->Range(1, 2UL << 31);
+BENCHMARK(BenchmarkCudaAsyncDevice)->RangeMultiplier(2)->Range(1, 2UL << 31);

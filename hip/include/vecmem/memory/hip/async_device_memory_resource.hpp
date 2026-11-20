@@ -21,15 +21,15 @@ namespace vecmem::hip {
  * This is an allocator-type memory resource that allocates HIP device
  * memory asynchronously, on a specific HIP stream.
  */
-class stream_ordered_memory_resource final : public memory_resource {
+class async_device_memory_resource final : public memory_resource {
 
 public:
     /// Constructor, with the stream to use for the (de-)allocations
     VECMEM_HIP_EXPORT
-    explicit stream_ordered_memory_resource(const stream_wrapper& stream);
+    explicit async_device_memory_resource(const stream_wrapper& stream);
     /// Destructor
     VECMEM_HIP_EXPORT
-    ~stream_ordered_memory_resource() noexcept override;
+    ~async_device_memory_resource() noexcept override;
 
 private:
     /// @name Function(s) implementing @c vecmem::memory_resource
@@ -50,6 +50,6 @@ private:
     /// HIP stream to use for the (de-)allocations
     stream_wrapper m_stream;
 
-};  // class stream_ordered_memory_resource
+};  // class async_device_memory_resource
 
 }  // namespace vecmem::hip
