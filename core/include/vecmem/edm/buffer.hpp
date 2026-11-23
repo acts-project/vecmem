@@ -23,8 +23,8 @@
 namespace vecmem {
 namespace edm {
 
-/// Technical base type for @c buffer<schema<VARTYPES...>>
-template <typename T>
+/// Technical base type for @c buffer<schema<VARTYPES...>,INTERFACE>
+template <typename T, template <typename> class INTERFACE>
 class buffer;
 
 /// Buffer for a Struct-of-Arrays container
@@ -155,9 +155,11 @@ class buffer;
 /// `vecmem::edm::view::host_layout()`.
 ///
 /// @tparam ...VARTYPES The variable types to store in the buffer
+/// @tparam INTERFACE   The interface to use for the buffer
 ///
-template <typename... VARTYPES>
-class buffer<schema<VARTYPES...>> : public view<schema<VARTYPES...>> {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+class buffer<schema<VARTYPES...>, INTERFACE>
+    : public INTERFACE<view<schema<VARTYPES...>, INTERFACE>> {
 
     // Make sure that all variable types are supported. It needs to be possible
     // to copy the contents of all variables with simple memory copies, and
@@ -174,10 +176,13 @@ class buffer<schema<VARTYPES...>> : public view<schema<VARTYPES...>> {
 public:
     /// The schema describing the buffer's payload
     using schema_type = schema<VARTYPES...>;
+    /// The type of the interface used for the buffer
+    template <typename T>
+    using interface_type = INTERFACE<T>;
     /// Base view type
-    using view_type = view<schema_type>;
+    using base_type = view<schema_type, interface_type>;
     /// Size type used for the container
-    using size_type = typename view_type::size_type;
+    using size_type = typename base_type::size_type;
     /// Type holding on to the memory managed by this object
     using memory_type = unique_alloc_ptr<char[]>;
 
@@ -267,9 +272,9 @@ private:
 /// @param buffer The buffer to get a view for
 /// @return A (possibly non-const) view into for the buffer
 ///
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::schema<VARTYPES...>> get_data(
-    edm::buffer<edm::schema<VARTYPES...>>& buffer);
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<edm::view<edm::schema<VARTYPES...>, INTERFACE>> get_data(
+    edm::buffer<edm::schema<VARTYPES...>, INTERFACE>& buffer);
 
 /// Helper function for getting a (const) view for a buffer
 ///
@@ -277,9 +282,10 @@ VECMEM_HOST edm::view<edm::schema<VARTYPES...>> get_data(
 /// @param buffer The buffer to get a view for
 /// @return A (const) view into for the buffer
 ///
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>
-get_data(const edm::buffer<edm::schema<VARTYPES...>>& buffer);
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<
+    edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
+get_data(const edm::buffer<edm::schema<VARTYPES...>, INTERFACE>& buffer);
 
 }  // namespace vecmem
 

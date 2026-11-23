@@ -133,11 +133,12 @@ TEST_F(core_edm_host_test, get_data) {
     };
 
     // Get a non-const data object for it, and check its contents.
-    vecmem::edm::data<schema> data1 = vecmem::get_data(host1, &m_resource);
+    vecmem::edm::data<schema, interface> data1 =
+        vecmem::get_data(host1, &m_resource);
     compare(data1, host1);
 
     // Get a const data object for it, and check its contents.
-    vecmem::edm::data<const_schema> data2 =
+    vecmem::edm::data<const_schema, interface> data2 =
         [](const vecmem::edm::host<schema, interface>& host) {
             return vecmem::get_data(host);
         }(host1);

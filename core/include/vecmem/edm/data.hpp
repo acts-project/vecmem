@@ -20,8 +20,8 @@
 namespace vecmem {
 namespace edm {
 
-/// Technical base type for @c data<schema<VARTYPES...>>
-template <typename T>
+/// Technical base type for @c data<schema<VARTYPES...>,INTERFACE>
+template <typename T, template <typename> class INTERFACE>
 class data;
 
 /// Data object describing a Struct-of-Arrays container
@@ -38,17 +38,22 @@ class data;
 /// any device function that wants to use data from the host container.
 ///
 /// @tparam ...VARTYPES The variable types to store in the data object
+/// @tparam INTERFACE   The interface to use for the data object
 ///
-template <typename... VARTYPES>
-class data<schema<VARTYPES...>> : public view<schema<VARTYPES...>> {
+template <typename... VARTYPES, template <typename> class INTERFACE>
+class data<schema<VARTYPES...>, INTERFACE>
+    : public INTERFACE<view<schema<VARTYPES...>, INTERFACE>> {
 
 public:
     /// The schema describing the buffer's payload
     using schema_type = schema<VARTYPES...>;
+    /// The type of the interface used for the data object
+    template <typename T>
+    using interface_type = INTERFACE<T>;
     /// Base view type
-    using view_type = view<schema_type>;
+    using base_type = view<schema_type, interface_type>;
     /// Size type used for the container
-    using size_type = typename view_type::size_type;
+    using size_type = typename base_type::size_type;
     /// The tuple type holding all of the data objects for the individual
     /// variables
     using tuple_type =
@@ -98,22 +103,27 @@ private:
 /// Helper function for getting a (possibly non-const) view of a data object
 ///
 /// @tparam ...VARTYPES The variable types describing the container
+/// @tparam INTERFACE   The interface to use for the view
+///
 /// @param data The data object to get a view for
 /// @return A (possibly non-const) view into for the data object
 ///
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::schema<VARTYPES...>>& get_data(
-    edm::data<edm::schema<VARTYPES...>>& data);
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<edm::view<edm::schema<VARTYPES...>, INTERFACE>> get_data(
+    edm::data<edm::schema<VARTYPES...>, INTERFACE>& data);
 
 /// Helper function for getting a (const) view of a data object
 ///
 /// @tparam ...VARTYPES The variable types describing the container
+/// @tparam INTERFACE   The interface to use for the view
+///
 /// @param data The data object to get a view for
 /// @return A (const) view into for the data object
 ///
-template <typename... VARTYPES>
-VECMEM_HOST edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>>
-get_data(const edm::data<edm::schema<VARTYPES...>>& data);
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST INTERFACE<
+    edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
+get_data(const edm::data<edm::schema<VARTYPES...>, INTERFACE>& data);
 
 }  // namespace vecmem
 
