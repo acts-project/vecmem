@@ -65,5 +65,26 @@ struct remove_cv<const vecmem::data::vector_view<TYPE>> {
 
 /// @}
 
+/// @name Trait providing a const reference for @c data::vector_view
+/// @{
+
+template <typename T>
+struct view_const_reference {
+    using type = std::add_lvalue_reference_t<std::add_const_t<T>>;
+};
+
+template <typename T>
+struct view_const_reference<data::vector_view<T>> {
+    // This here is very much on purpose. Since we may return a different view
+    // than what we have in memory, we cannot return a reference. We return
+    // such objects by value instead.
+    using type = vecmem::details::add_const_t<data::vector_view<T>>;
+};
+
+template <typename T>
+using view_const_reference_t = typename view_const_reference<T>::type;
+
+/// @}
+
 }  // namespace details
 }  // namespace vecmem

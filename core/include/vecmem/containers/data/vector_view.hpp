@@ -19,6 +19,12 @@
 
 namespace vecmem {
 
+// Forward declaration(s).
+namespace edm {
+template <typename T, template <typename> class I>
+class view;
+}
+
 /// @brief Namespace holding "data types"
 ///
 /// These are types that either own, or only provide a view of data owned by
@@ -45,6 +51,10 @@ class vector_view {
         !std::is_same<typename std::remove_cv<TYPE>::type, bool>::value,
         "bool is not supported in VecMem containers");
 
+    // Make @c vecmem::edm::view a friend of this class.
+    template <typename T, template <typename> class I>
+    friend class edm::view;
+
 public:
     /// @name Type definitions, mimicking @c std::vector
     /// @{
@@ -65,12 +75,11 @@ public:
     /// Value reference type
     using reference = std::add_lvalue_reference_t<value_type>;
     /// Constant value reference type
-    using const_reference =
-        std::add_lvalue_reference_t<details::add_const_t<value_type>>;
+    using const_reference = details::view_const_reference_t<value_type>;
     /// Value pointer type
     using pointer = std::add_pointer_t<value_type>;
     /// Constant value pointer type
-    using const_pointer = std::add_pointer_t<details::add_const_t<value_type>>;
+    using const_pointer = std::add_pointer_t<std::add_const_t<value_type>>;
 
     /// Forward iterator type
     using iterator = pointer;

@@ -7,6 +7,7 @@
 #pragma once
 
 // Local include(s).
+#include "vecmem/edm/details/device_traits.hpp"
 #include "vecmem/edm/details/schema_traits.hpp"
 #include "vecmem/utils/type_traits.hpp"
 
@@ -32,7 +33,7 @@ VECMEM_HOST_AND_DEVICE view<schema<VARTYPES...>, INTERFACE>::view(
     const view<schema<OTHERTYPES...>, INTERFACE>& other)
     : m_capacity{other.capacity()},
       m_views{other.variables()},
-      m_size{other.size()},
+      m_size{other.view_size()},
       m_payload{other.payload()},
       m_layout{other.layout()},
       m_host_layout{other.host_layout()} {}
@@ -49,7 +50,7 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::operator=(
     // Copy the data from the other view.
     m_capacity = rhs.capacity();
     m_views = rhs.variables();
-    m_size = rhs.size();
+    m_size = rhs.view_size();
     m_payload = rhs.payload();
     m_layout = rhs.layout();
     m_host_layout = rhs.host_layout();
@@ -59,10 +60,66 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::operator=(
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::size() const
+    -> size_type {
+
+    const_size_pointer size_ptr =
+        details::device_size_pointer<vecmem::details::disjunction_v<
+            type::details::is_jagged_vector<VARTYPES>...>>::get(m_size);
+    return (size_ptr == nullptr ? m_capacity : *size_ptr);
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::capacity()
     const -> size_type {
 
     return m_capacity;
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto
+view<schema<VARTYPES...>, INTERFACE>::push_back_default() -> size_type {
+
+    // There must be no jagged vector variables for this to work.
+    static_assert(!vecmem::details::disjunction<
+                      type::details::is_jagged_vector<VARTYPES>...>::value,
+                  "Containers with jagged vector variables cannot be resized!");
+    // There must be at least one vector variable in the container.
+    static_assert(vecmem::details::disjunction<
+                      type::details::is_vector<VARTYPES>...>::value,
+                  "This function requires at least one vector variable.");
+
+    // This can only be done on a resizable container.
+    size_pointer size_ptr =
+        details::device_size_pointer<vecmem::details::disjunction_v<
+            type::details::is_jagged_vector<VARTYPES>...>>::get(m_size);
+    assert(size_ptr != nullptr);
+
+    // Increment the size of the container at first. So that we would "claim"
+    // the index from other threads.
+    device_atomic_ref<size_type> asize(*size_ptr);
+    const size_type index = asize.fetch_add(1u);
+    assert(index < m_capacity);
+
+    // Construct the new elements in all of the vector variables.
+    construct_default(index, std::index_sequence_for<VARTYPES...>{});
+
+    // Return the position of the new variable(s).
+    return index;
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::push_back(
+    const object_type& element) -> size_type {
+
+    // Add a new default element to the container.
+    const size_type index = push_back_default();
+
+    // Set it to the given value.
+    at(index) = element;
+
+    // Return the position of the new variable(s).
+    return index;
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
@@ -82,6 +139,44 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::get() const
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::at(
+    size_type index) -> proxy_type {
+
+    // Make sure that the index is within bounds.
+    assert(index < size());
+
+    // Use the unprotected function.
+    return this->operator[](index);
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::at(
+    size_type index) const -> const_proxy_type {
+
+    // Make sure that the index is within bounds.
+    assert(index < size());
+
+    // Use the unprotected function.
+    return this->operator[](index);
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::operator[](
+    size_type index) -> proxy_type {
+
+    // Create the proxy.
+    return proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::operator[](
+    size_type index) const -> const_proxy_type {
+
+    // Create the proxy.
+    return const_proxy_type{*this, index};
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::variables()
     -> tuple_type& {
 
@@ -96,8 +191,8 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::variables()
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::size() const
-    -> const memory_view_type& {
+VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::view_size()
+    const -> const memory_view_type& {
 
     return m_size;
 }
@@ -121,6 +216,41 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::host_layout()
     const -> const memory_view_type& {
 
     return m_host_layout;
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+template <std::size_t INDEX, std::size_t... Is>
+VECMEM_HOST_AND_DEVICE void
+view<schema<VARTYPES...>, INTERFACE>::construct_default(
+    size_type index, std::index_sequence<INDEX, Is...>) const {
+
+    // Construct the new element in this variable, if it's a vector.
+    construct_vector(index, this->template get<INDEX>());
+    // Continue the recursion.
+    construct_default(index, std::index_sequence<Is...>{});
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+VECMEM_HOST_AND_DEVICE void
+view<schema<VARTYPES...>, INTERFACE>::construct_default(
+    size_type, std::index_sequence<>) const {
+    // The terminal node doesn't need to do anything.
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename T>
+VECMEM_HOST_AND_DEVICE void
+view<schema<VARTYPES...>, INTERFACE>::construct_vector(size_type, T&) const {
+    // Nothing is done for non-vector variables.
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+template <typename T>
+VECMEM_HOST_AND_DEVICE void
+view<schema<VARTYPES...>, INTERFACE>::construct_vector(
+    size_type index, vecmem::data::vector_view<T>& vec) const {
+
+    vec.construct(index, {});
 }
 
 namespace details {

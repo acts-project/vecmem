@@ -149,8 +149,8 @@ TEST_F(core_edm_buffer_test, get_data) {
     // Lambda checking the simple, fixed sized views.
     auto check_simple_fixed = [&](const auto& view) {
         EXPECT_EQ(view.capacity(), CAPACITY);
-        EXPECT_EQ(view.size().size(), 0u);
-        EXPECT_EQ(view.size().ptr(), nullptr);
+        EXPECT_EQ(view.view_size().size(), 0u);
+        EXPECT_EQ(view.view_size().ptr(), nullptr);
         auto check_scalar = [](const auto& v) { EXPECT_NE(v, nullptr); };
         auto check_vector = [&](const auto& v) {
             EXPECT_EQ(v.size(), CAPACITY);
@@ -173,7 +173,7 @@ TEST_F(core_edm_buffer_test, get_data) {
     // Construct a resizable, simple buffer.
     vecmem::edm::buffer<simple_schema, interface> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer2.size(), 0)->wait();
+    m_copy.memset(buffer2.view_size(), 0)->wait();
 
     // Make views of it.
     vecmem::edm::view<simple_schema, interface> view4 =
@@ -186,13 +186,13 @@ TEST_F(core_edm_buffer_test, get_data) {
     // Lambda checking the simple, resizable views.
     auto check_simple_resizable = [&](const auto& view) {
         EXPECT_EQ(view.capacity(), CAPACITY);
-        EXPECT_EQ(view.size().size(), sizeof(unsigned int));
-        EXPECT_NE(view.size().ptr(), nullptr);
+        EXPECT_EQ(view.view_size().size(), sizeof(unsigned int));
+        EXPECT_NE(view.view_size().ptr(), nullptr);
         auto check_scalar = [](const auto& v) { EXPECT_NE(v, nullptr); };
         auto check_vector = [&](const auto& v) {
             EXPECT_EQ(v.size(), 0u);
             EXPECT_EQ(static_cast<const void*>(v.size_ptr()),
-                      static_cast<const void*>(view.size().ptr()));
+                      static_cast<const void*>(view.view_size().ptr()));
             EXPECT_EQ(v.capacity(), CAPACITY);
             EXPECT_NE(v.ptr(), nullptr);
         };
@@ -223,8 +223,8 @@ TEST_F(core_edm_buffer_test, get_data) {
     // Lambda checking the jagged, fixed sized views.
     auto check_jagged_fixed = [&](const auto& view) {
         EXPECT_EQ(view.capacity(), CAPACITY);
-        EXPECT_EQ(view.size().size(), 0u);
-        EXPECT_EQ(view.size().ptr(), nullptr);
+        EXPECT_EQ(view.view_size().size(), 0u);
+        EXPECT_EQ(view.view_size().ptr(), nullptr);
         auto check_scalar = [](const auto& v) { EXPECT_NE(v, nullptr); };
         auto check_vector = [&](const auto& v) {
             EXPECT_EQ(v.size(), CAPACITY);
@@ -259,7 +259,7 @@ TEST_F(core_edm_buffer_test, get_data) {
     // Construct a resizable, jagged buffer.
     vecmem::edm::buffer<jagged_schema, interface> buffer4{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer4.size(), 0)->wait();
+    m_copy.memset(buffer4.view_size(), 0)->wait();
 
     // Make views of it.
     vecmem::edm::view<jagged_schema, interface> view10 =
@@ -274,8 +274,8 @@ TEST_F(core_edm_buffer_test, get_data) {
         EXPECT_EQ(view.capacity(), CAPACITY);
         // There are 2 jagged vectors in the container, which all need 3
         // unsigned integers for their sizes.
-        EXPECT_EQ(view.size().size(), 2 * CAPACITY * sizeof(unsigned int));
-        EXPECT_NE(view.size().ptr(), nullptr);
+        EXPECT_EQ(view.view_size().size(), 2 * CAPACITY * sizeof(unsigned int));
+        EXPECT_NE(view.view_size().ptr(), nullptr);
         auto check_scalar = [](const auto& v) { EXPECT_NE(v, nullptr); };
         auto check_vector = [&](const auto& v) {
             EXPECT_EQ(v.size(), CAPACITY);
@@ -349,7 +349,7 @@ TEST_F(core_edm_buffer_test, device) {
     // Construct a resizable, simple buffer.
     vecmem::edm::buffer<simple_schema, interface> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer2.size(), 0)->wait();
+    m_copy.memset(buffer2.view_size(), 0)->wait();
 
     // Make a device container on top of it.
     vecmem::edm::device<simple_schema, interface> device2{buffer2};
@@ -433,7 +433,7 @@ TEST_F(core_edm_buffer_test, device) {
     // Construct a resizable, jagged buffer.
     vecmem::edm::buffer<jagged_schema, interface> buffer4{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
-    m_copy.memset(buffer4.size(), 0)->wait();
+    m_copy.memset(buffer4.view_size(), 0)->wait();
 
     // Make a device container on top of it.
     vecmem::edm::device<jagged_schema, interface> device4{buffer4};

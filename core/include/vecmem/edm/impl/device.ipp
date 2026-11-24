@@ -1,6 +1,6 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2023-2025 CERN for the benefit of the ACTS project
+ * (c) 2023-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
@@ -22,7 +22,8 @@ VECMEM_HOST_AND_DEVICE device<schema<VARTYPES...>, INTERFACE>::device(
     const edm::view<schema<VARTYPES...>, INTERFACE>& view)
     : m_capacity{view.capacity()},
       m_size{details::device_size_pointer<vecmem::details::disjunction_v<
-          type::details::is_jagged_vector<VARTYPES>...>>::get(view.size())},
+          type::details::is_jagged_vector<VARTYPES>...>>::
+                 get(view.view_size())},
       m_data{view.variables()} {
 
     // Check that all variables have the correct capacities.
