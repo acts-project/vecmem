@@ -1222,8 +1222,8 @@ void copy::copy_payload_impl(
                       INDEX, std::tuple<VARTYPES...>>::type>::value) {
         do_copy(sizeof(typename std::tuple_element<
                        INDEX, std::tuple<VARTYPES...>>::type::type),
-                from_view.template get<INDEX>(), to_view.template get<INDEX>(),
-                cptype);
+                &(from_view.template get<INDEX>()),
+                &(to_view.template get<INDEX>()), cptype);
     } else {
         // But vectors and jagged vectors do.
         copy_view_impl(from_view.template get<INDEX>(),

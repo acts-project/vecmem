@@ -124,18 +124,32 @@ VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::push_back(
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::get()
-    -> std::add_lvalue_reference_t<tuple_element_t<INDEX, tuple_type>> {
+VECMEM_HOST_AND_DEVICE
+    typename details::view_type_at<INDEX, VARTYPES...>::return_type
+    view<schema<VARTYPES...>, INTERFACE>::get() {
 
-    return vecmem::get<INDEX>(m_views);
+    return details::view_get<tuple_element_t<INDEX, tuple<VARTYPES...>>>::get(
+        vecmem::get<INDEX>(m_views));
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
 template <std::size_t INDEX>
-VECMEM_HOST_AND_DEVICE auto view<schema<VARTYPES...>, INTERFACE>::get() const
-    -> vecmem::details::add_const_t<tuple_element_t<INDEX, tuple_type>> {
+VECMEM_HOST_AND_DEVICE
+    typename details::view_type_at<INDEX, VARTYPES...>::const_return_type
+    view<schema<VARTYPES...>, INTERFACE>::get() const {
 
-    return vecmem::get<INDEX>(m_views);
+    return details::view_get<tuple_element_t<INDEX, tuple<VARTYPES...>>>::get(
+        vecmem::get<INDEX>(m_views));
+}
+
+template <typename... VARTYPES, template <typename> class INTERFACE>
+template <std::size_t INDEX>
+VECMEM_HOST_AND_DEVICE void view<schema<VARTYPES...>, INTERFACE>::set(
+    std::add_lvalue_reference_t<std::add_const_t<
+        typename details::view_type_at<INDEX, VARTYPES...>::type>>
+        value) {
+
+    vecmem::get<INDEX>(m_views) = value;
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>

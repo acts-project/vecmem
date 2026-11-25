@@ -158,11 +158,11 @@ TEST_F(core_edm_buffer_test, get_data) {
             EXPECT_EQ(v.capacity(), CAPACITY);
             EXPECT_NE(v.ptr(), nullptr);
         };
-        check_scalar(view.template get<0>());
-        check_vector(view.template get<1>());
-        check_scalar(view.template get<2>());
-        check_vector(view.template get<3>());
-        check_vector(view.template get<4>());
+        check_scalar(vecmem::get<0>(view.variables()));
+        check_vector(vecmem::get<1>(view.variables()));
+        check_scalar(vecmem::get<2>(view.variables()));
+        check_vector(vecmem::get<3>(view.variables()));
+        check_vector(vecmem::get<4>(view.variables()));
     };
 
     // Check the views.
@@ -196,11 +196,11 @@ TEST_F(core_edm_buffer_test, get_data) {
             EXPECT_EQ(v.capacity(), CAPACITY);
             EXPECT_NE(v.ptr(), nullptr);
         };
-        check_scalar(view.template get<0>());
-        check_vector(view.template get<1>());
-        check_scalar(view.template get<2>());
-        check_vector(view.template get<3>());
-        check_vector(view.template get<4>());
+        check_scalar(vecmem::get<0>(view.variables()));
+        check_vector(vecmem::get<1>(view.variables()));
+        check_scalar(vecmem::get<2>(view.variables()));
+        check_vector(vecmem::get<3>(view.variables()));
+        check_vector(vecmem::get<4>(view.variables()));
     };
 
     // Check the views.
@@ -245,10 +245,10 @@ TEST_F(core_edm_buffer_test, get_data) {
                 EXPECT_NE(v.host_ptr()[i].ptr(), nullptr);
             }
         };
-        check_vector(view.template get<0>());
-        check_jagged(view.template get<1>());
-        check_scalar(view.template get<2>());
-        check_jagged(view.template get<3>());
+        check_vector(vecmem::get<0>(view.variables()));
+        check_jagged(vecmem::get<1>(view.variables()));
+        check_scalar(vecmem::get<2>(view.variables()));
+        check_jagged(vecmem::get<3>(view.variables()));
     };
 
     // Check the views.
@@ -297,10 +297,10 @@ TEST_F(core_edm_buffer_test, get_data) {
                 EXPECT_NE(v.host_ptr()[i].ptr(), nullptr);
             }
         };
-        check_vector(view.template get<0>());
-        check_jagged(view.template get<1>());
-        check_scalar(view.template get<2>());
-        check_jagged(view.template get<3>());
+        check_vector(vecmem::get<0>(view.variables()));
+        check_jagged(vecmem::get<1>(view.variables()));
+        check_scalar(vecmem::get<2>(view.variables()));
+        check_jagged(vecmem::get<3>(view.variables()));
     };
 
     // Check the views.

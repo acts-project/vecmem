@@ -174,13 +174,20 @@ public:
     /// Get the view of a specific variable (non-const)
     template <std::size_t INDEX>
     VECMEM_HOST_AND_DEVICE
-        std::add_lvalue_reference_t<tuple_element_t<INDEX, tuple_type>>
+        typename details::view_type_at<INDEX, VARTYPES...>::return_type
         get();
     /// Get the view of a specific variable (const)
     template <std::size_t INDEX>
     VECMEM_HOST_AND_DEVICE
-        vecmem::details::add_const_t<tuple_element_t<INDEX, tuple_type>>
+        typename details::view_type_at<INDEX, VARTYPES...>::const_return_type
         get() const;
+
+    /// Set the view of a specific variable
+    template <std::size_t INDEX>
+    VECMEM_HOST_AND_DEVICE void set(
+        std::add_lvalue_reference_t<std::add_const_t<
+            typename details::view_type_at<INDEX, VARTYPES...>::type>>
+            value);
 
     /// Get a proxy object for a specific variable (non-const)
     ///

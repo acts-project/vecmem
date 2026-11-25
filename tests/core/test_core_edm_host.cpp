@@ -114,7 +114,7 @@ TEST_F(core_edm_host_test, get_data) {
     auto compare = [](const auto& data,
                       const vecmem::edm::host<schema, interface>& host) {
         EXPECT_EQ(data.capacity(), host.size());
-        EXPECT_EQ(data.template get<0>(), &(host.get<0>()));
+        EXPECT_EQ(data.template get<0>(), host.get<0>());
         EXPECT_EQ(data.template get<1>().size(), host.size());
         EXPECT_EQ(data.template get<1>().capacity(), host.size());
         EXPECT_EQ(data.template get<1>().ptr(), host.get<1>().data());

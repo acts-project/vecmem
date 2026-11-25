@@ -50,8 +50,8 @@ TEST(core_edm_device_test, members) {
     vecmem::edm::view<schema, interface> view{
         2};  // 2 is the size of the vector variable,
              // not the number of variables
-    view.get<0>() = &value1;
-    view.get<1>() = {static_cast<unsigned int>(value2.size()), value2.data()};
+    view.set<0>(&value1);
+    view.set<1>({static_cast<unsigned int>(value2.size()), value2.data()});
 
     vecmem::edm::device<schema, interface> device1{view};
     vecmem::edm::device<const_schema, interface> device2{view};
