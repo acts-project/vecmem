@@ -104,7 +104,7 @@ public:
     /// Copy constructor
     vector_view(const vector_view& parent) = default;
     /// Move constructor
-    vector_view(vector_view&& parent) = default;
+    vector_view(vector_view&& parent) noexcept = default;
 
     /// Constructor from a "slightly different" @c vecmem::details::vector_view
     /// object
@@ -122,7 +122,7 @@ public:
     /// Copy assignment operator
     vector_view& operator=(const vector_view& rhs) = default;
     /// Move assignment operator
-    vector_view& operator=(vector_view&& rhs) = default;
+    vector_view& operator=(vector_view&& rhs) noexcept = default;
 
     /// Copy from a "slightly different" @c vecmem::details::vector_view object
     ///
