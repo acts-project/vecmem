@@ -309,6 +309,178 @@ TEST_F(core_edm_buffer_test, get_data) {
     check_jagged_resizable(view12);
 }
 
+TEST_F(core_edm_buffer_test, view) {
+
+    // Construct a fixed sized, simple buffer.
+    vecmem::edm::buffer<simple_schema, interface> buffer1{
+        CAPACITY, m_resource, vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(vecmem::ignore_event, buffer1);
+
+    ASSERT_EQ(buffer1.size(), CAPACITY);
+    ASSERT_EQ(buffer1.capacity(), CAPACITY);
+    auto check_fixed_vector = [&](const auto& v) {
+        ASSERT_EQ(v.size(), CAPACITY);
+        ASSERT_EQ(v.capacity(), CAPACITY);
+    };
+    check_fixed_vector(buffer1.get<1>());
+    check_fixed_vector(buffer1.get<3>());
+    check_fixed_vector(buffer1.get<4>());
+
+    // Fill it in some non-trivial way.
+    buffer1.get<0>() = 1;
+    std::fill(buffer1.get<1>().begin(), buffer1.get<1>().end(), 2.f);
+    buffer1.get<2>() = 3.;
+    std::fill(buffer1.get<3>().begin(), buffer1.get<3>().end(), 4.);
+    std::iota(buffer1.get<4>().begin(), buffer1.get<4>().end(), 5);
+
+    // Check the values. Making sure that there is no overlap between the
+    // variables in the buffer due to some bug.
+    EXPECT_EQ(buffer1.get<0>(), 1);
+    EXPECT_DOUBLE_EQ(buffer1.get<2>(), 3.);
+    std::for_each(buffer1.get<1>().begin(), buffer1.get<1>().end(),
+                  [](const auto& v) { EXPECT_FLOAT_EQ(v, 2.f); });
+    std::for_each(buffer1.get<3>().begin(), buffer1.get<3>().end(),
+                  [](const auto& v) { EXPECT_DOUBLE_EQ(v, 4.); });
+    for (unsigned int i = 0; i < CAPACITY; ++i) {
+        EXPECT_EQ(buffer1.get<4>()[i], static_cast<int>(5 + i));
+    }
+
+    // Construct a resizable, simple buffer.
+    vecmem::edm::buffer<simple_schema, interface> buffer2{
+        CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
+    m_copy.setup(vecmem::ignore_event, buffer2);
+
+    ASSERT_EQ(buffer2.size(), 0u);
+    ASSERT_EQ(buffer2.capacity(), CAPACITY);
+    auto check_resizable_vector = [&](const auto& v) {
+        ASSERT_EQ(v.size(), 0u);
+        ASSERT_EQ(v.capacity(), CAPACITY);
+    };
+    check_resizable_vector(buffer2.get<1>());
+    check_resizable_vector(buffer2.get<3>());
+    check_resizable_vector(buffer2.get<4>());
+
+    // Fill it in some non-trivial way.
+    buffer2.get<0>() = 1;
+    buffer2.get<2>() = 2.;
+    for (unsigned int i = 0; i < 2; ++i) {
+        const unsigned int ii = buffer2.push_back_default();
+        EXPECT_EQ(ii, i);
+        buffer2.get<1>()[ii] = 3.f;
+        buffer2.get<3>()[ii] = 4.;
+        buffer2.get<4>()[ii] = static_cast<int>(5 + i);
+    }
+
+    // Check the values.
+    EXPECT_EQ(buffer2.get<0>(), 1);
+    EXPECT_DOUBLE_EQ(buffer2.get<2>(), 2.);
+    EXPECT_EQ(buffer2.size(), 2u);
+    EXPECT_EQ(buffer2.get<1>().size(), 2u);
+    EXPECT_EQ(buffer2.get<3>().size(), 2u);
+    ASSERT_EQ(buffer2.get<4>().size(), 2u);
+    std::for_each(buffer2.get<1>().begin(), buffer2.get<1>().end(),
+                  [](const auto& v) { EXPECT_FLOAT_EQ(v, 3.f); });
+    std::for_each(buffer2.get<3>().begin(), buffer2.get<3>().end(),
+                  [](const auto& v) { EXPECT_DOUBLE_EQ(v, 4.); });
+    for (unsigned int i = 0; i < 2u; ++i) {
+        EXPECT_EQ(buffer2.get<4>()[i], static_cast<int>(5 + i));
+    }
+
+    // Construct a fixed sized, jagged buffer.
+    vecmem::edm::buffer<jagged_schema, interface> buffer3{
+        CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
+    m_copy.setup(vecmem::ignore_event, buffer3);
+
+    ASSERT_EQ(buffer3.size(), CAPACITY);
+    ASSERT_EQ(buffer3.capacity(), CAPACITY);
+    auto check_fixed_jagged = [&](const auto& v) {
+        ASSERT_EQ(v.size(), CAPACITY);
+        ASSERT_EQ(v.capacity(), CAPACITY);
+        for (typename std::decay_t<decltype(v)>::size_type i = 0; i < CAPACITY;
+             ++i) {
+            ASSERT_EQ(v[i].size(), CAPACITIES[i]);
+            ASSERT_EQ(v[i].capacity(), CAPACITIES[i]);
+        }
+    };
+    check_fixed_vector(buffer3.get<0>());
+    check_fixed_jagged(buffer3.get<1>());
+    check_fixed_jagged(buffer3.get<3>());
+
+    // Fill it in some non-trivial way.
+    std::fill(buffer3.get<0>().begin(), buffer3.get<0>().end(), 1.f);
+    buffer3.get<2>() = 2;
+    for (unsigned int i = 0; i < CAPACITY; ++i) {
+        std::fill(buffer3.get<1>()[i].begin(), buffer3.get<1>()[i].end(), 3.);
+        std::iota(buffer3.get<3>()[i].begin(), buffer3.get<3>()[i].end(), 4);
+    }
+
+    // Check the values.
+    std::for_each(buffer3.get<0>().begin(), buffer3.get<0>().end(),
+                  [](const auto& v) { EXPECT_FLOAT_EQ(v, 1.f); });
+    EXPECT_EQ(buffer3.get<2>(), 2);
+    for (unsigned int i = 0; i < CAPACITY; ++i) {
+        std::for_each(buffer3.get<1>()[i].begin(), buffer3.get<1>()[i].end(),
+                      [](const auto& v) { EXPECT_DOUBLE_EQ(v, 3.); });
+        for (unsigned int j = 0; j < buffer3.get<3>()[i].size(); ++j) {
+            EXPECT_EQ(buffer3.get<3>()[i][j], static_cast<int>(4 + j));
+        }
+    }
+
+    // Construct a resizable, jagged buffer.
+    vecmem::edm::buffer<jagged_schema, interface> buffer4{
+        CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
+    m_copy.setup(vecmem::ignore_event, buffer4);
+
+    ASSERT_EQ(buffer4.size(), CAPACITY);
+    ASSERT_EQ(buffer4.capacity(), CAPACITY);
+    auto check_resizable_jagged = [&](const auto& v) {
+        ASSERT_EQ(v.size(), CAPACITY);
+        ASSERT_EQ(v.capacity(), CAPACITY);
+        for (typename std::decay_t<decltype(v)>::size_type i = 0; i < CAPACITY;
+             ++i) {
+            ASSERT_EQ(v[i].size(), 0u);
+            ASSERT_EQ(v[i].capacity(), CAPACITIES[i]);
+        }
+    };
+    check_fixed_vector(buffer4.get<0>());
+    check_resizable_jagged(buffer4.get<1>());
+    check_resizable_jagged(buffer4.get<3>());
+
+    // Fill it in some non-trivial way.
+    std::fill(buffer4.get<0>().begin(), buffer4.get<0>().end(), 6.f);
+    buffer4.get<2>() = 7;
+    std::for_each(buffer4.get<1>().begin(), buffer4.get<1>().end(),
+                  [&](auto v) {
+                      const unsigned int size = v.capacity() / 2u;
+                      for (unsigned int i = 0; i < size; ++i) {
+                          v.push_back(8. + static_cast<double>(i));
+                      }
+                  });
+    std::for_each(buffer4.get<3>().begin(), buffer4.get<3>().end(),
+                  [&](auto v) {
+                      const unsigned int size = v.capacity() / 2u;
+                      for (unsigned int i = 0; i < size; ++i) {
+                          v.push_back(9 + static_cast<int>(i));
+                      }
+                  });
+
+    // Check the values.
+    std::for_each(buffer4.get<0>().begin(), buffer4.get<0>().end(),
+                  [](const auto& v) { EXPECT_FLOAT_EQ(v, 6.f); });
+    EXPECT_EQ(buffer4.get<2>(), 7);
+    for (unsigned int i = 0; i < CAPACITY; ++i) {
+        EXPECT_EQ(buffer4.get<1>()[i].size(), CAPACITIES[i] / 2u);
+        for (unsigned int j = 0; j < buffer4.get<1>()[i].size(); ++j) {
+            EXPECT_DOUBLE_EQ(buffer4.get<1>()[i][j],
+                             8. + static_cast<double>(j));
+        }
+        EXPECT_EQ(buffer4.get<3>()[i].size(), CAPACITIES[i] / 2u);
+        for (unsigned int j = 0; j < buffer4.get<3>()[i].size(); ++j) {
+            EXPECT_EQ(buffer4.get<3>()[i][j], 9 + static_cast<int>(j));
+        }
+    }
+}
+
 TEST_F(core_edm_buffer_test, device) {
 
     // Construct a fixed sized, simple buffer.
