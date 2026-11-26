@@ -1,15 +1,17 @@
 /* VecMem project, part of the ACTS project (R&D line)
  *
- * (c) 2021-2023 CERN for the benefit of the ACTS project
+ * (c) 2021-2026 CERN for the benefit of the ACTS project
  *
  * Mozilla Public License Version 2.0
  */
 
 // VecMem include(s).
 #include <vecmem/memory/binary_page_memory_resource.hpp>
+#include <vecmem/memory/cuda/async_device_memory_resource.hpp>
 #include <vecmem/memory/cuda/device_memory_resource.hpp>
 #include <vecmem/memory/cuda/host_memory_resource.hpp>
 #include <vecmem/memory/cuda/managed_memory_resource.hpp>
+#include <vecmem/utils/cuda/stream_wrapper.hpp>
 
 // Google benchmark include(s).
 #include <benchmark/benchmark.h>
@@ -110,3 +112,14 @@ void BenchmarkCudaManagedBinaryPage(benchmark::State& state) {
 BENCHMARK(BenchmarkCudaManagedBinaryPage)
     ->RangeMultiplier(2)
     ->Range(1, 2UL << 31);
+
+static vecmem::cuda::stream_wrapper stream;
+static vecmem::cuda::async_device_memory_resource async_device_mr(stream);
+void BenchmarkCudaAsyncDevice(benchmark::State& state) {
+    const std::size_t size = static_cast<std::size_t>(state.range(0));
+    for (auto _ : state) {
+        void* p = async_device_mr.allocate(size);
+        async_device_mr.deallocate(p, size);
+    }
+}
+BENCHMARK(BenchmarkCudaAsyncDevice)->RangeMultiplier(2)->Range(1, 2UL << 31);

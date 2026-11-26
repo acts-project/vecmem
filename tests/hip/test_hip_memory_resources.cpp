@@ -9,27 +9,37 @@
 #include "../common/memory_resource_name_gen.hpp"
 #include "../common/memory_resource_test_basic.hpp"
 #include "../common/memory_resource_test_host_accessible.hpp"
+#include "vecmem/memory/hip/async_device_memory_resource.hpp"
 #include "vecmem/memory/hip/device_memory_resource.hpp"
 #include "vecmem/memory/hip/host_memory_resource.hpp"
 #include "vecmem/memory/hip/managed_memory_resource.hpp"
+#include "vecmem/utils/hip/stream_wrapper.hpp"
+
+// HIP include(s).
+#include <hip/hip_runtime_api.h>
 
 // GoogleTest include(s).
 #include <gtest/gtest.h>
+
+// Non-owning stream, to avoid destroying it after the runtime shut down.
+static vecmem::hip::stream_wrapper stream(hipStreamPerThread);
 
 // Memory resources.
 static vecmem::hip::device_memory_resource device_resource;
 static vecmem::hip::host_memory_resource host_resource;
 static vecmem::hip::managed_memory_resource managed_resource;
+static vecmem::hip::async_device_memory_resource async_device_resource(stream);
 
 // Instantiate the allocation tests on all of the resources.
-INSTANTIATE_TEST_SUITE_P(hip_memory_resource_tests_basic,
-                         memory_resource_test_basic,
-                         testing::Values(&device_resource, &host_resource,
-                                         &managed_resource),
-                         vecmem::testing::memory_resource_name_gen(
-                             {{&device_resource, "device_resource"},
-                              {&host_resource, "host_resource"},
-                              {&managed_resource, "managed_resource"}}));
+INSTANTIATE_TEST_SUITE_P(
+    hip_memory_resource_tests_basic, memory_resource_test_basic,
+    testing::Values(&device_resource, &host_resource, &managed_resource,
+                    &async_device_resource),
+    vecmem::testing::memory_resource_name_gen(
+        {{&device_resource, "device_resource"},
+         {&host_resource, "host_resource"},
+         {&managed_resource, "managed_resource"},
+         {&async_device_resource, "async_device_resource"}}));
 
 // Instantiate the full test suite on the host-accessible memory resources.
 INSTANTIATE_TEST_SUITE_P(hip_host_accessible_memory_resource_tests,
