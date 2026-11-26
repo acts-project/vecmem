@@ -67,12 +67,12 @@ static const unsigned int CAPACITY =
 TEST_F(core_edm_buffer_test, construct) {
 
     // Test the creation of fixed sized and resizable "simple buffers".
-    vecmem::edm::buffer<simple_schema> buffer1{
+    vecmem::edm::buffer<simple_schema, interface> buffer1{
         CAPACITY, m_resource, vecmem::data::buffer_type::fixed_size};
     m_copy.setup(buffer1)->wait();
     EXPECT_EQ(buffer1.capacity(), CAPACITY);
     EXPECT_EQ(m_copy.get_size(buffer1), CAPACITY);
-    vecmem::edm::buffer<simple_schema> buffer2{
+    vecmem::edm::buffer<simple_schema, interface> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
     m_copy.setup(buffer2)->wait();
     EXPECT_EQ(buffer2.capacity(), CAPACITY);
@@ -82,19 +82,19 @@ TEST_F(core_edm_buffer_test, construct) {
     ASSERT_NE(buffer1.resource(), nullptr);
     EXPECT_TRUE(buffer1.resource()->is_equal(m_resource));
 
-    vecmem::edm::buffer<simple_schema> buffer3{
+    vecmem::edm::buffer<simple_schema, interface> buffer3{
         0u, m_resource, vecmem::data::buffer_type::fixed_size};
     m_copy.setup(buffer3)->wait();
     EXPECT_EQ(buffer3.capacity(), 0u);
     EXPECT_EQ(m_copy.get_size(buffer3), 0u);
-    vecmem::edm::buffer<simple_schema> buffer4{
+    vecmem::edm::buffer<simple_schema, interface> buffer4{
         0u, m_resource, vecmem::data::buffer_type::resizable};
     m_copy.setup(buffer4)->wait();
     EXPECT_EQ(buffer4.capacity(), 0u);
     EXPECT_EQ(m_copy.get_size(buffer4), 0u);
 
     // Test the creation of fixed sized and resizable "jagged buffers".
-    vecmem::edm::buffer<jagged_schema> buffer5{
+    vecmem::edm::buffer<jagged_schema, interface> buffer5{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
     m_copy.setup(buffer5)->wait();
     EXPECT_EQ(buffer5.capacity(), CAPACITIES.size());
@@ -107,7 +107,7 @@ TEST_F(core_edm_buffer_test, construct) {
     EXPECT_EQ(m_copy.get_sizes(buffer5), CAPACITIES);
     const vecmem::vector<unsigned int> vecmem_capacities({10, 100, 1000},
                                                          &m_resource);
-    vecmem::edm::buffer<jagged_schema> buffer6{
+    vecmem::edm::buffer<jagged_schema, interface> buffer6{
         vecmem_capacities, m_resource, nullptr,
         vecmem::data::buffer_type::resizable};
     m_copy.setup(buffer6)->wait();
@@ -116,7 +116,7 @@ TEST_F(core_edm_buffer_test, construct) {
     EXPECT_EQ(m_copy.get_size(buffer6), CAPACITIES.size());
     EXPECT_EQ(m_copy.get_sizes(buffer6), std::vector<unsigned int>({0, 0, 0}));
 
-    vecmem::edm::buffer<jagged_schema> buffer7{
+    vecmem::edm::buffer<jagged_schema, interface> buffer7{
         std::vector<unsigned int>(), m_resource, nullptr,
         vecmem::data::buffer_type::fixed_size};
     m_copy.setup(buffer7)->wait();
@@ -135,13 +135,16 @@ TEST_F(core_edm_buffer_test, get_data) {
     };
 
     // Construct a fixed sized, simple buffer.
-    vecmem::edm::buffer<simple_schema> buffer1{
+    vecmem::edm::buffer<simple_schema, interface> buffer1{
         CAPACITY, m_resource, vecmem::data::buffer_type::fixed_size};
 
     // Make views of it.
-    vecmem::edm::view<simple_schema> view1 = vecmem::get_data(buffer1);
-    vecmem::edm::view<simple_const_schema> view2 = vecmem::get_data(buffer1);
-    vecmem::edm::view<simple_const_schema> view3 = create_const_view(buffer1);
+    vecmem::edm::view<simple_schema, interface> view1 =
+        vecmem::get_data(buffer1);
+    vecmem::edm::view<simple_const_schema, interface> view2 =
+        vecmem::get_data(buffer1);
+    vecmem::edm::view<simple_const_schema, interface> view3 =
+        create_const_view(buffer1);
 
     // Lambda checking the simple, fixed sized views.
     auto check_simple_fixed = [&](const auto& view) {
@@ -168,14 +171,17 @@ TEST_F(core_edm_buffer_test, get_data) {
     check_simple_fixed(view3);
 
     // Construct a resizable, simple buffer.
-    vecmem::edm::buffer<simple_schema> buffer2{
+    vecmem::edm::buffer<simple_schema, interface> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
     m_copy.memset(buffer2.size(), 0)->wait();
 
     // Make views of it.
-    vecmem::edm::view<simple_schema> view4 = vecmem::get_data(buffer2);
-    vecmem::edm::view<simple_const_schema> view5 = vecmem::get_data(buffer2);
-    vecmem::edm::view<simple_const_schema> view6 = create_const_view(buffer2);
+    vecmem::edm::view<simple_schema, interface> view4 =
+        vecmem::get_data(buffer2);
+    vecmem::edm::view<simple_const_schema, interface> view5 =
+        vecmem::get_data(buffer2);
+    vecmem::edm::view<simple_const_schema, interface> view6 =
+        create_const_view(buffer2);
 
     // Lambda checking the simple, resizable views.
     auto check_simple_resizable = [&](const auto& view) {
@@ -203,13 +209,16 @@ TEST_F(core_edm_buffer_test, get_data) {
     check_simple_resizable(view6);
 
     // Construct a fixed sized, jagged buffer.
-    vecmem::edm::buffer<jagged_schema> buffer3{
+    vecmem::edm::buffer<jagged_schema, interface> buffer3{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
 
     // Make views of it.
-    vecmem::edm::view<jagged_schema> view7 = vecmem::get_data(buffer3);
-    vecmem::edm::view<jagged_const_schema> view8 = vecmem::get_data(buffer3);
-    vecmem::edm::view<jagged_const_schema> view9 = create_const_view(buffer3);
+    vecmem::edm::view<jagged_schema, interface> view7 =
+        vecmem::get_data(buffer3);
+    vecmem::edm::view<jagged_const_schema, interface> view8 =
+        vecmem::get_data(buffer3);
+    vecmem::edm::view<jagged_const_schema, interface> view9 =
+        create_const_view(buffer3);
 
     // Lambda checking the jagged, fixed sized views.
     auto check_jagged_fixed = [&](const auto& view) {
@@ -248,14 +257,17 @@ TEST_F(core_edm_buffer_test, get_data) {
     check_jagged_fixed(view9);
 
     // Construct a resizable, jagged buffer.
-    vecmem::edm::buffer<jagged_schema> buffer4{
+    vecmem::edm::buffer<jagged_schema, interface> buffer4{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
     m_copy.memset(buffer4.size(), 0)->wait();
 
     // Make views of it.
-    vecmem::edm::view<jagged_schema> view10 = vecmem::get_data(buffer4);
-    vecmem::edm::view<jagged_const_schema> view11 = vecmem::get_data(buffer4);
-    vecmem::edm::view<jagged_const_schema> view12 = create_const_view(buffer4);
+    vecmem::edm::view<jagged_schema, interface> view10 =
+        vecmem::get_data(buffer4);
+    vecmem::edm::view<jagged_const_schema, interface> view11 =
+        vecmem::get_data(buffer4);
+    vecmem::edm::view<jagged_const_schema, interface> view12 =
+        create_const_view(buffer4);
 
     // Lambda checking the jagged, resizable views.
     auto check_jagged_resizable = [&](const auto& view) {
@@ -300,7 +312,7 @@ TEST_F(core_edm_buffer_test, get_data) {
 TEST_F(core_edm_buffer_test, device) {
 
     // Construct a fixed sized, simple buffer.
-    vecmem::edm::buffer<simple_schema> buffer1{
+    vecmem::edm::buffer<simple_schema, interface> buffer1{
         CAPACITY, m_resource, vecmem::data::buffer_type::fixed_size};
 
     // Make a device container on top of it.
@@ -335,7 +347,7 @@ TEST_F(core_edm_buffer_test, device) {
     }
 
     // Construct a resizable, simple buffer.
-    vecmem::edm::buffer<simple_schema> buffer2{
+    vecmem::edm::buffer<simple_schema, interface> buffer2{
         CAPACITY, m_resource, vecmem::data::buffer_type::resizable};
     m_copy.memset(buffer2.size(), 0)->wait();
 
@@ -378,7 +390,7 @@ TEST_F(core_edm_buffer_test, device) {
     }
 
     // Construct a fixed sized, jagged buffer.
-    vecmem::edm::buffer<jagged_schema> buffer3{
+    vecmem::edm::buffer<jagged_schema, interface> buffer3{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
 
     // Make a device container on top of it.
@@ -419,7 +431,7 @@ TEST_F(core_edm_buffer_test, device) {
     }
 
     // Construct a resizable, jagged buffer.
-    vecmem::edm::buffer<jagged_schema> buffer4{
+    vecmem::edm::buffer<jagged_schema, interface> buffer4{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
     m_copy.memset(buffer4.size(), 0)->wait();
 
@@ -478,10 +490,10 @@ TEST_F(core_edm_buffer_test, device) {
 TEST_F(core_edm_buffer_test, proxy) {
 
     // Construct two buffers.
-    vecmem::edm::buffer<jagged_schema> source_buffer{
+    vecmem::edm::buffer<jagged_schema, interface> source_buffer{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::fixed_size};
     m_copy.setup(source_buffer)->wait();
-    vecmem::edm::buffer<jagged_schema> target_buffer{
+    vecmem::edm::buffer<jagged_schema, interface> target_buffer{
         CAPACITIES, m_resource, nullptr, vecmem::data::buffer_type::resizable};
     m_copy.setup(target_buffer)->wait();
 

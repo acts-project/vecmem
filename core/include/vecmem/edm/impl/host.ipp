@@ -207,7 +207,7 @@ VECMEM_HOST memory_resource& host<schema<VARTYPES...>, INTERFACE>::resource()
 /// Helper function terminal node
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST void get_data_impl(edm::host<edm::schema<VARTYPES...>, INTERFACE>&,
-                               edm::data<edm::schema<VARTYPES...>>&,
+                               edm::data<edm::schema<VARTYPES...>, INTERFACE>&,
                                memory_resource&, std::index_sequence<>) {
     // For SonarCloud: The terminal node doesn't need to do anything.
 }
@@ -217,7 +217,7 @@ template <typename... VARTYPES, template <typename> class INTERFACE,
           std::size_t I, std::size_t... Is>
 VECMEM_HOST void get_data_impl(
     edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
-    edm::data<edm::schema<VARTYPES...>>& data, memory_resource& mr,
+    edm::data<edm::schema<VARTYPES...>, INTERFACE>& data, memory_resource& mr,
     std::index_sequence<I, Is...>) {
 
     if constexpr (edm::type::details::is_jagged_vector_v<
@@ -248,12 +248,12 @@ VECMEM_HOST void get_data_impl(
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST edm::data<edm::schema<VARTYPES...>> get_data(
+VECMEM_HOST INTERFACE<edm::data<edm::schema<VARTYPES...>, INTERFACE>> get_data(
     edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
     memory_resource* resource) {
 
     // Create the result object.
-    edm::data<edm::schema<VARTYPES...>> result;
+    INTERFACE<edm::data<edm::schema<VARTYPES...>, INTERFACE>> result;
     // Decide what memory resource to use for setting it up.
     memory_resource& mr = (resource != nullptr ? *resource : host.resource());
     // Set its size, if that's available. Note that if there are no vector
@@ -261,10 +261,10 @@ VECMEM_HOST edm::data<edm::schema<VARTYPES...>> get_data(
     // a memory resource.
     if constexpr (std::disjunction_v<
                       edm::type::details::is_vector<VARTYPES>...>) {
-        result = {static_cast<
-                      typename edm::data<edm::schema<VARTYPES...>>::size_type>(
-                      host.size()),
-                  mr};
+        result = INTERFACE<edm::data<edm::schema<VARTYPES...>, INTERFACE>>{
+            static_cast<typename edm::data<edm::schema<VARTYPES...>,
+                                           INTERFACE>::size_type>(host.size()),
+            mr};
     }
     // Fill it with the helper function.
     get_data_impl<VARTYPES...>(host, result, mr,
@@ -277,7 +277,7 @@ VECMEM_HOST edm::data<edm::schema<VARTYPES...>> get_data(
 template <typename... VARTYPES, template <typename> class INTERFACE>
 VECMEM_HOST void get_data_impl(
     const edm::host<edm::schema<VARTYPES...>, INTERFACE>&,
-    edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>&,
+    edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>&,
     memory_resource&, std::index_sequence<>) {
     // For SonarCloud: The terminal node doesn't need to do anything.
 }
@@ -287,7 +287,8 @@ template <typename... VARTYPES, template <typename> class INTERFACE,
           std::size_t I, std::size_t... Is>
 VECMEM_HOST void get_data_impl(
     const edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
-    edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>& data,
+    edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>&
+        data,
     memory_resource& mr, std::index_sequence<I, Is...>) {
 
     if constexpr (edm::type::details::is_jagged_vector<
@@ -318,12 +319,15 @@ VECMEM_HOST void get_data_impl(
 }
 
 template <typename... VARTYPES, template <typename> class INTERFACE>
-VECMEM_HOST edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>>
+VECMEM_HOST INTERFACE<
+    edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>
 get_data(const edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
          memory_resource* resource) {
 
     // Create the result object.
-    edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>> result;
+    INTERFACE<edm::data<edm::details::add_const_t<edm::schema<VARTYPES...>>,
+                        INTERFACE>>
+        result;
     // Decide what memory resource to use for setting it up.
     memory_resource& mr = (resource != nullptr ? *resource : host.resource());
     // Set its size, if that's available. Note that if there are no vector
@@ -331,10 +335,11 @@ get_data(const edm::host<edm::schema<VARTYPES...>, INTERFACE>& host,
     // a memory resource.
     if constexpr (std::disjunction_v<
                       edm::type::details::is_vector<VARTYPES>...>) {
-        result = {static_cast<
-                      typename edm::view<edm::schema<VARTYPES...>>::size_type>(
-                      host.size()),
-                  mr};
+        result = INTERFACE<edm::data<
+            edm::details::add_const_t<edm::schema<VARTYPES...>>, INTERFACE>>{
+            static_cast<typename edm::view<edm::schema<VARTYPES...>,
+                                           INTERFACE>::size_type>(host.size()),
+            mr};
     }
     // Fill it with the helper function.
     get_data_impl<VARTYPES...>(host, result, mr,
