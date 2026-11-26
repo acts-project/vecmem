@@ -32,18 +32,15 @@ __global__ void linearTransformKernel(
     }
 
     // Create the helper containers.
-    const vecmem::device_array<const int, 2> constantarray1(constants);
-    const vecmem::static_array<int, 2> constantarray2 = {constantarray1[0],
-                                                         constantarray1[1]};
-    auto tuple1 = vecmem::make_tuple(constantarray1[0], constantarray1[1]);
-    auto tuple2 = vecmem::tie(constantarray1, constantarray2);
-    const vecmem::device_vector<const int> inputvec(input);
-    vecmem::device_vector<int> outputvec(output);
+    const vecmem::static_array<int, 2> constantarray2 = {constants[0],
+                                                         constants[1]};
+    auto tuple1 = vecmem::make_tuple(constants[0], constants[1]);
+    auto tuple2 = vecmem::tie(constants, constantarray2);
 
     // Perform the linear transformation.
-    outputvec.at(i) = inputvec.at(i) * constantarray1.at(0) +
-                      vecmem::get<1>(constantarray2) + vecmem::get<0>(tuple1) -
-                      vecmem::get<1>(tuple2)[0];
+    output.at(i) = input.at(i) * constants.at(0) +
+                   vecmem::get<1>(constantarray2) + vecmem::get<0>(tuple1) -
+                   vecmem::get<1>(tuple2)[0];
     return;
 }
 

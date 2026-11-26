@@ -57,11 +57,11 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct() {
                                          vecmem::copy::type::host_to_device);
 
     // Check the size of the device buffer.
-    EXPECT_EQ(device_buffer.size().ptr(), nullptr);
+    EXPECT_EQ(device_buffer.view_size().ptr(), nullptr);
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer));
     EXPECT_EQ(input.size(),
               main_copy().get_size(device_buffer, host_mr()).get());
-    EXPECT_EQ(device_buffer2.size().ptr(), nullptr);
+    EXPECT_EQ(device_buffer2.view_size().ptr(), nullptr);
     EXPECT_EQ(input.size(), main_copy().get_size(device_buffer2));
     EXPECT_EQ(input.size(),
               main_copy().get_size(device_buffer2, host_mr()).get());
@@ -97,7 +97,7 @@ void soa_copy_tests_base<CONTAINER>::host_to_fixed_device_to_host_direct() {
     // Copy the data back to the host, using the "to" function.
     auto target2 = main_copy().to(device_buffer, host_mr(), nullptr,
                                   vecmem::copy::type::device_to_host);
-    EXPECT_EQ(target2.size().ptr(), nullptr);
+    EXPECT_EQ(target2.view_size().ptr(), nullptr);
     EXPECT_EQ(device_buffer.capacity(), target2.capacity());
 
     // Compare the two.
@@ -205,7 +205,7 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host() {
     // Make a copy on the device, and test its results.
     auto device_buffer2 = main_copy().to(device_buffer, main_mr(), &(host_mr()),
                                          vecmem::copy::type::device_to_device);
-    EXPECT_NE(device_buffer2.size().ptr(), nullptr);
+    EXPECT_NE(device_buffer2.view_size().ptr(), nullptr);
     EXPECT_EQ(main_copy().get_size(device_buffer),
               main_copy().get_size(device_buffer2, host_mr()).get());
     if constexpr (vecmem::edm::details::has_jagged_vector<
@@ -231,7 +231,7 @@ void soa_copy_tests_base<CONTAINER>::host_to_resizable_device_to_host() {
     // Copy the data back to the host, using the "to" function.
     auto target2 = main_copy().to(device_buffer, host_mr(), nullptr,
                                   vecmem::copy::type::device_to_host);
-    EXPECT_NE(target2.size().ptr(), nullptr);
+    EXPECT_NE(target2.view_size().ptr(), nullptr);
     EXPECT_EQ(device_buffer.capacity(), target2.capacity());
     EXPECT_EQ(main_copy().get_size(device_buffer),
               host_copy().get_size(target2));

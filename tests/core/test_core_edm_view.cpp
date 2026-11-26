@@ -70,10 +70,10 @@ TEST(core_edm_view_test, members) {
                                           vecmem::edm::type::vector<float>>,
                       interface>
         view{2};
-    view.get<0>() = &value1;
-    view.get<1>() = {static_cast<unsigned int>(value2.size()), value2.data()};
+    view.set<0>(&value1);
+    view.set<1>({static_cast<unsigned int>(value2.size()), value2.data()});
 
-    EXPECT_EQ(view.get<0>(), &value1);
+    EXPECT_EQ(view.get<0>(), value1);
     EXPECT_EQ(view.get<1>().size(), value2.size());
     EXPECT_EQ(view.get<1>().ptr(), value2.data());
 }

@@ -44,7 +44,11 @@ public:
     /// Type of the data object that we have an array of
     typedef data::vector_view<TYPE> data_type;
     /// Pointer to the data object
-    typedef std::add_pointer_t<std::add_const_t<data_type>> data_pointer;
+    ///
+    /// Temporarily declared in such a sloppy manner. Since it will go away
+    /// once we switch to using the view types directly in device code.
+    ///
+    typedef std::add_pointer_t<const data_type> data_pointer;
 
     /// @}
 

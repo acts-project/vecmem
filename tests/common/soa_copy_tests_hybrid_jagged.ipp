@@ -68,7 +68,7 @@ TEST_P(soa_copy_tests_hybrid_jagged, host_to_resizable_device_to_host) {
     // Copy the data back to the host, using the "to" function.
     auto target2 = main_copy().to(device_buffer, host_mr(), nullptr,
                                   vecmem::copy::type::device_to_host);
-    EXPECT_NE(target2.size().ptr(), nullptr);
+    EXPECT_NE(target2.view_size().ptr(), nullptr);
     EXPECT_EQ(device_buffer.capacity(), target2.capacity());
     EXPECT_EQ(main_copy().get_size(device_buffer),
               host_copy().get_size(target2));

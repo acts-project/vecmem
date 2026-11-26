@@ -230,18 +230,17 @@ VECMEM_HOST void get_data_impl(
             ::vecmem::get_data(host.template get<I>(), &mr);
         // Set up the @c vecmem::edm::view object to point at the
         // @c vecmem::data::jagged_vector_data object.
-        data.template get<I>() =
-            ::vecmem::get_data(std::get<I>(data.variables()));
+        data.template set<I>(::vecmem::get_data(std::get<I>(data.variables())));
     } else if constexpr (edm::type::details::is_scalar<
                              typename std::tuple_element<
                                  I, std::tuple<VARTYPES...>>::type>::value) {
         // For scalar variables we just make @c vecmem::edm::view remember
         // a pointer.
-        data.template get<I>() = &(host.template get<I>());
+        data.template set<I>(&(host.template get<I>()));
     } else {
         // For 1D vectors it's enough to make @c vecmem::edm::view have a
         // correct @c vecmem::data::vector_view object.
-        data.template get<I>() = ::vecmem::get_data(host.template get<I>());
+        data.template set<I>(::vecmem::get_data(host.template get<I>()));
     }
     // Continue the recursion.
     get_data_impl(host, data, mr, std::index_sequence<Is...>{});
@@ -301,18 +300,17 @@ VECMEM_HOST void get_data_impl(
             ::vecmem::get_data(host.template get<I>(), &mr);
         // Set up the @c vecmem::edm::view object to point at the
         // @c vecmem::data::jagged_vector_data object.
-        data.template get<I>() =
-            ::vecmem::get_data(std::get<I>(data.variables()));
+        data.template set<I>(::vecmem::get_data(std::get<I>(data.variables())));
     } else if constexpr (edm::type::details::is_scalar<
                              typename std::tuple_element<
                                  I, std::tuple<VARTYPES...>>::type>::value) {
         // For scalar variables we just make @c vecmem::edm::view remember
         // a pointer.
-        data.template get<I>() = &(host.template get<I>());
+        data.template set<I>(&(host.template get<I>()));
     } else {
         // For 1D vectors it's enough to make @c vecmem::edm::view have a
         // correct @c vecmem::data::vector_view object.
-        data.template get<I>() = ::vecmem::get_data(host.template get<I>());
+        data.template set<I>(::vecmem::get_data(host.template get<I>()));
     }
     // Continue the recursion.
     get_data_impl(host, data, mr, std::index_sequence<Is...>{});

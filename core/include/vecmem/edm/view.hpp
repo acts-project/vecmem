@@ -10,6 +10,7 @@
 #include "vecmem/containers/data/vector_view.hpp"
 #include "vecmem/edm/details/types.hpp"
 #include "vecmem/edm/details/view_traits.hpp"
+#include "vecmem/edm/proxy.hpp"
 #include "vecmem/edm/schema.hpp"
 #include "vecmem/utils/tuple.hpp"
 #include "vecmem/utils/type_traits.hpp"
@@ -67,6 +68,20 @@ public:
         vecmem::details::disjunction_v<std::is_const<
             typename details::view_type<VARTYPES>::payload_type>...>,
         details::const_memory_view, details::memory_view>;
+    /// The type of the (non-const) proxy objects for the container elements
+    using proxy_type =
+        interface_type<proxy<schema_type, details::proxy_domain::device,
+                             details::proxy_access::non_constant,
+                             details::proxy_type::reference>>;
+    /// The type of the (const) proxy objects for the container elements
+    using const_proxy_type = interface_type<
+        proxy<schema_type, details::proxy_domain::device,
+              details::proxy_access::constant, details::proxy_type::reference>>;
+    /// Type type of standalone proxy objects for the container
+    using object_type =
+        interface_type<proxy<schema_type, details::proxy_domain::device,
+                             details::proxy_access::non_constant,
+                             details::proxy_type::standalone>>;
 
     /// @name Constructors and assignment operators
     /// @{
@@ -143,17 +158,70 @@ public:
     /// @name Function(s) meant for normal, client use
     /// @{
 
+    /// Get the size of the container
+    VECMEM_HOST_AND_DEVICE
+    size_type size() const;
     /// Get the maximum capacity of the container
     VECMEM_HOST_AND_DEVICE
     size_type capacity() const;
 
+    /// Add one default element to all (vector) variables (thread safe)
+    VECMEM_HOST_AND_DEVICE
+    size_type push_back_default();
+    /// Add one element to all (vector) variables (thread safe)
+    VECMEM_HOST_AND_DEVICE size_type push_back(const object_type& element);
+
     /// Get the view of a specific variable (non-const)
     template <std::size_t INDEX>
-    VECMEM_HOST_AND_DEVICE tuple_element_t<INDEX, tuple_type>& get();
+    VECMEM_HOST_AND_DEVICE
+        typename details::view_type_at<INDEX, VARTYPES...>::return_type
+        get();
     /// Get the view of a specific variable (const)
     template <std::size_t INDEX>
-    VECMEM_HOST_AND_DEVICE const tuple_element_t<INDEX, tuple_type>& get()
-        const;
+    VECMEM_HOST_AND_DEVICE
+        typename details::view_type_at<INDEX, VARTYPES...>::const_return_type
+        get() const;
+
+    /// Set the view of a specific variable
+    template <std::size_t INDEX>
+    VECMEM_HOST_AND_DEVICE void set(
+        std::add_lvalue_reference_t<std::add_const_t<
+            typename details::view_type_at<INDEX, VARTYPES...>::type>>
+            value);
+
+    /// Get a proxy object for a specific variable (non-const)
+    ///
+    /// While also checking that the index is within bounds.
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    proxy_type at(size_type index);
+    /// Get a proxy object for a specific variable (const)
+    ///
+    /// While also checking that the index is within bounds.
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    const_proxy_type at(size_type index) const;
+
+    /// Get a proxy object for a specific variable (non-const)
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    proxy_type operator[](size_type index);
+    /// Get a proxy object for a specific variable (const)
+    ///
+    /// @param index The index of the element to proxy
+    /// @return A proxy object for the element at the given index
+    ///
+    VECMEM_HOST_AND_DEVICE
+    const_proxy_type operator[](size_type index) const;
 
     /// @}
 
@@ -169,7 +237,7 @@ public:
 
     /// View of the memory allocated for the container's size variable(s)
     VECMEM_HOST_AND_DEVICE
-    const memory_view_type& size() const;
+    const memory_view_type& view_size() const;
 
     /// View at the single (device) memory allocation of the container
     VECMEM_HOST_AND_DEVICE
@@ -184,6 +252,23 @@ public:
     const memory_view_type& host_layout() const;
 
     /// @}
+
+private:
+    /// Construct a default element for every vector variable
+    template <std::size_t INDEX, std::size_t... Is>
+    VECMEM_HOST_AND_DEVICE void construct_default(
+        size_type index, std::index_sequence<INDEX, Is...>) const;
+    /// Construct a default element for every vector variable (terminal node)
+    VECMEM_HOST_AND_DEVICE void construct_default(size_type index,
+                                                  std::index_sequence<>) const;
+
+    /// Default, no-op vector element construction helper function
+    template <typename T>
+    VECMEM_HOST_AND_DEVICE void construct_vector(size_type, T&) const;
+    /// Vector element constructor helper function
+    template <typename T>
+    VECMEM_HOST_AND_DEVICE void construct_vector(
+        size_type index, vecmem::data::vector_view<T>& vec) const;
 
 protected:
     /// Maximum capacity of the container

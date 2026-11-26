@@ -50,11 +50,16 @@ TEST(core_edm_device_test, members) {
     vecmem::edm::view<schema, interface> view{
         2};  // 2 is the size of the vector variable,
              // not the number of variables
-    view.get<0>() = &value1;
-    view.get<1>() = {static_cast<unsigned int>(value2.size()), value2.data()};
+    view.set<0>(&value1);
+    view.set<1>({static_cast<unsigned int>(value2.size()), value2.data()});
 
     vecmem::edm::device<schema, interface> device1{view};
     vecmem::edm::device<const_schema, interface> device2{view};
+
+    EXPECT_EQ(view.get<0>(), value1);
+    ASSERT_EQ(view.get<1>().size(), value2.size());
+    EXPECT_EQ(view.get<1>()[0], value2[0]);
+    EXPECT_EQ(view.get<1>()[1], value2[1]);
 
     EXPECT_EQ(device2.get<0>(), value1);
     ASSERT_EQ(device2.get<1>().size(), value2.size());
@@ -68,4 +73,12 @@ TEST(core_edm_device_test, members) {
     EXPECT_EQ(device2.get<0>(), 2);
     EXPECT_EQ(device2.get<1>()[0], 4.0f);
     EXPECT_EQ(device2.get<1>()[1], 5.0f);
+
+    view.get<0>() = 3;
+    view.get<1>()[0] = 5.0f;
+    view.get<1>()[1] = 6.0f;
+
+    EXPECT_EQ(view.get<0>(), 3);
+    EXPECT_EQ(view.get<1>()[0], 5.0f);
+    EXPECT_EQ(view.get<1>()[1], 6.0f);
 }

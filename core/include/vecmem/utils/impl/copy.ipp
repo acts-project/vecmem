@@ -496,16 +496,18 @@ void copy::setup(ignore_event_t, edm::view<SCHEMA, INTERFACE> data) const {
     }
 
     // Initialize the "size variable(s)" correctly on the buffer.
-    if (data.size().ptr() != nullptr) {
-        assert(data.size().capacity() > 0u);
-        do_memset(data.size().capacity() * sizeof(char), data.size().ptr(), 0);
+    if (data.view_size().ptr() != nullptr) {
+        assert(data.view_size().capacity() > 0u);
+        do_memset(data.view_size().capacity() * sizeof(char),
+                  data.view_size().ptr(), 0);
     }
     VECMEM_DEBUG_MSG(3,
                      "Prepared an SoA container of capacity %u "
                      "for use on a device (layout: {%u, %p}, size: {%u, %p})",
                      data.capacity(), data.layout().size(),
                      static_cast<void*>(data.layout().ptr()),
-                     data.size().size(), static_cast<void*>(data.size().ptr()));
+                     data.view_size().size(),
+                     static_cast<void*>(data.view_size().ptr()));
 }
 
 template <typename SCHEMA, template <typename> class INTERFACE>
@@ -546,8 +548,8 @@ edm::buffer<edm::details::remove_cv_t<SCHEMA>, INTERFACE> copy::to(
 
     // Create the result buffer object.
     const data::buffer_type btype =
-        ((data.size().ptr() != nullptr) ? data::buffer_type::resizable
-                                        : data::buffer_type::fixed_size);
+        ((data.view_size().ptr() != nullptr) ? data::buffer_type::resizable
+                                             : data::buffer_type::fixed_size);
     edm::buffer<edm::details::remove_cv_t<SCHEMA>, INTERFACE> result;
     if constexpr (edm::details::has_jagged_vector<SCHEMA>::value) {
         // Set up a buffer that has (a) jagged vector(s).
@@ -617,20 +619,22 @@ void copy::operator()(
         copy_view_impl(from_view.payload(), to_view.payload(), cptype);
 
         // If the target view is resizable, set its size.
-        if (to_view.size().ptr() != nullptr) {
+        if (to_view.view_size().ptr() != nullptr) {
             // If the source is also resizable, the situation should be simple.
-            if (from_view.size().ptr() != nullptr) {
+            if (from_view.view_size().ptr() != nullptr) {
                 // Check that the sizes are the same.
-                if (from_view.size().capacity() != to_view.size().capacity()) {
+                if (from_view.view_size().capacity() !=
+                    to_view.view_size().capacity()) {
                     std::ostringstream msg;
-                    msg << "from_view.size().capacity() ("
-                        << from_view.size().capacity()
-                        << ") != to_view.size().capacity() ("
-                        << to_view.size().capacity() << ")";
+                    msg << "from_view.view_size().capacity() ("
+                        << from_view.view_size().capacity()
+                        << ") != to_view.view_size().capacity() ("
+                        << to_view.view_size().capacity() << ")";
                     throw std::length_error(msg.str());
                 }
                 // Perform a dumb copy.
-                copy_view_impl(from_view.size(), to_view.size(), cptype);
+                copy_view_impl(from_view.view_size(), to_view.view_size(),
+                               cptype);
             } else {
                 // If not, then copy the size(s) recursively.
                 copy_sizes_impl<0>(from_view, to_view, cptype);
@@ -728,15 +732,16 @@ typename edm::view<SCHEMA, INTERFACE>::size_type copy::get_size(
     } else {
         // All the rest is put into an else block, to avoid MSVC trying to be
         // too smart, and giving a warning about unreachable code...
-        if (data.size().ptr() == nullptr) {
+        if (data.view_size().ptr() == nullptr) {
             return size;
         }
 
         // A small security check.
-        assert(data.size().size() == sizeof(value_type));
+        assert(data.view_size().size() == sizeof(value_type));
 
         // Get the exact size of the container.
-        do_copy(sizeof(value_type), data.size().ptr(), &size, type::unknown);
+        do_copy(sizeof(value_type), data.view_size().ptr(), &size,
+                type::unknown);
         // We have to wait for this to finish, since the "size" variable is
         // not going to be available outside of this function. And
         // asynchronous SYCL memory copies can happen from variables on the
@@ -767,7 +772,7 @@ async_size<typename edm::view<SCHEMA, INTERFACE>::size_type> copy::get_size(
     } else {
         // All the rest is put into an else block, to avoid MSVC trying to be
         // too smart, and giving a warning about unreachable code...
-        if (data.size().ptr() == nullptr) {
+        if (data.view_size().ptr() == nullptr) {
             // Create the result value, in "default" memory.
             auto value =
                 make_unique_alloc<value_type>(*(get_default_resource()));
@@ -776,13 +781,13 @@ async_size<typename edm::view<SCHEMA, INTERFACE>::size_type> copy::get_size(
         }
 
         // A small security check.
-        assert(data.size().size() == sizeof(value_type));
+        assert(data.view_size().size() == sizeof(value_type));
 
         // Create the result value, in pinned host memory.
         auto value = make_unique_alloc<value_type>(pinnedHostMr);
 
         // Get the exact size of the container.
-        do_copy(sizeof(value_type), data.size().ptr(), value.get(),
+        do_copy(sizeof(value_type), data.view_size().ptr(), value.get(),
                 type::unknown);
 
         // Return the appropriate "future" value.
@@ -1083,9 +1088,9 @@ void copy::resize_impl(
         typename edm::view<edm::details::add_const_t<edm::schema<VARTYPES...>>,
                            INTERFACE>::size_type size = from_view.capacity();
         // If the container is resizable, take its size.
-        if (from_view.size().ptr() != nullptr) {
+        if (from_view.view_size().ptr() != nullptr) {
             // A small security check.
-            assert(from_view.size().size() ==
+            assert(from_view.view_size().size() ==
                    sizeof(typename edm::view<
                           edm::details::add_const_t<edm::schema<VARTYPES...>>,
                           INTERFACE>::size_type));
@@ -1093,7 +1098,7 @@ void copy::resize_impl(
             do_copy(sizeof(typename edm::view<
                            edm::details::add_const_t<edm::schema<VARTYPES...>>,
                            INTERFACE>::size_type),
-                    from_view.size().ptr(), &size, cptype);
+                    from_view.view_size().ptr(), &size, cptype);
             // We have to wait for this to finish, since the "size" variable is
             // not going to be available outside of this function. And
             // asynchronous SYCL memory copies can happen from variables on the
@@ -1153,8 +1158,8 @@ void copy::copy_sizes_impl(
 
     // This should only be called for a resizable target container, with
     // a non-resizable source container.
-    assert(to_view.size().ptr() != nullptr);
-    assert(from_view.size().ptr() == nullptr);
+    assert(to_view.view_size().ptr() != nullptr);
+    assert(from_view.view_size().ptr() == nullptr);
 
     // First, handle containers with no jagged vectors in them.
     if constexpr (std::disjunction_v<
@@ -1181,7 +1186,7 @@ void copy::copy_sizes_impl(
         do_copy(sizeof(typename edm::view<
                        edm::details::add_const_t<edm::schema<VARTYPES...>>,
                        INTERFACE>::size_type),
-                &size, to_view.size().ptr(), size_cptype);
+                &size, to_view.view_size().ptr(), size_cptype);
         // We have to wait for this to finish, since the "size" variable is not
         // going to be available outside of this function. And asynchronous SYCL
         // memory copies can happen from variables on the stack as well...
@@ -1217,8 +1222,8 @@ void copy::copy_payload_impl(
                       INDEX, std::tuple<VARTYPES...>>::type>::value) {
         do_copy(sizeof(typename std::tuple_element<
                        INDEX, std::tuple<VARTYPES...>>::type::type),
-                from_view.template get<INDEX>(), to_view.template get<INDEX>(),
-                cptype);
+                &(from_view.template get<INDEX>()),
+                &(to_view.template get<INDEX>()), cptype);
     } else {
         // But vectors and jagged vectors do.
         copy_view_impl(from_view.template get<INDEX>(),
